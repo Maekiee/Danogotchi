@@ -1,7 +1,7 @@
 
 import UIKit
 
-class SetNameViewController: UIViewController {
+class SetUserNameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
