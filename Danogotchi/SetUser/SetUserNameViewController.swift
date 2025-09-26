@@ -7,12 +7,15 @@ import SnapKit
 final class SetUserNameViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SetUsernameViewModel()
-    
-//    private let usernameTextField = PrimaryTextField(placeholderText: "닉네임을 입력해주세요")
-    private let usernameTextField: PrimaryTextField = {
-        let tf = PrimaryTextField()
-        tf.placeholder = "닉네임을 입력해주세요"
-        return tf
+
+    // MARK: - UI 선언
+    private let usernameTextField = UnderlineTextField(placeholder: "닉네임")
+    private let confirmButton = PrimaryFillButton(title: "확인")
+    private let validText: UILabel = {
+        let label = UILabel()
+        label.textColor = .systemGray2
+        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        return label
     }()
 
     override func viewDidLoad() {
@@ -27,14 +30,27 @@ final class SetUserNameViewController: BaseViewController {
     override func configHierarchy() {
         [
             usernameTextField,
+            confirmButton,
+            validText
         ].forEach { view.addSubview($0) }
     }
     
     override func configLayout() {
         usernameTextField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(40)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(40)
+        }
+        
+        validText.snp.makeConstraints { make in
+            make.top.equalTo(usernameTextField.snp.bottom).offset(4)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(24)
+        }
+        
+        confirmButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.horizontalEdges.equalToSuperview().inset(24)
+            make.height.equalTo(44)
         }
     }
     
@@ -45,8 +61,18 @@ final class SetUserNameViewController: BaseViewController {
 }
 
 
-// MARK: - RX 로직
+// MARK: - Rx 로직
 extension SetUserNameViewController {
     private func bind() {
+        let input = SetUsernameViewModel.Input(
+            usernameTextField: usernameTextField.tf.rx.text.orEmpty.asObservable(),
+            confirmButtonTapped: confirmButton.rx.tap.asObservable()
+        )
+        let output = viewModel.transform(input: input)
+        
+        output.usernameValidText
+            .drive(validText.rx.text)
+            .disposed(by: disposeBag)
+        
     }
 }

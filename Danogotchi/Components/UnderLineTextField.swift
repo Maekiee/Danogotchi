@@ -1,0 +1,90 @@
+import UIKit
+import SnapKit
+
+final class UnderlineTextField: UIView {
+    private let textField = UITextField()
+    private let underlineView = UIView()
+    
+    // TextField 접근을 위한 프로퍼티
+    var text: String? {
+        get { textField.text }
+        set { textField.text = newValue }
+    }
+    
+    var placeholder: String? {
+        get { textField.placeholder }
+        set { textField.placeholder = newValue }
+    }
+    
+    var isSecureTextEntry: Bool {
+        get { textField.isSecureTextEntry }
+        set { textField.isSecureTextEntry = newValue }
+    }
+    
+    // Delegate 접근
+//    weak var delegate: UITextFieldDelegate? {
+//        get { textField.delegate }
+//        set { textField.delegate = newValue }
+//    }
+    
+    // RxSwift용 textField 접근
+    var tf: UITextField {
+        return textField
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    convenience init(placeholder: String) {
+        self.init(frame: .zero)
+        self.placeholder = placeholder
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupUI() {
+        // TextField 설정
+        textField.borderStyle = .none
+        textField.autocapitalizationType = .none
+        textField.textColor = .label
+        textField.font = .systemFont(ofSize: 20, weight: .semibold)
+        
+        // Underline 설정
+        underlineView.backgroundColor = .systemGray3
+        
+        // 뷰 추가
+        addSubview(textField)
+        addSubview(underlineView)
+        
+        // AutoLayout 설정
+        textField.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.height.equalTo(44)
+        }
+        
+        underlineView.snp.makeConstraints { make in
+            make.top.equalTo(textField.snp.bottom).offset(4)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(2)
+            make.bottom.equalToSuperview()
+        }
+    }
+    
+    // 포커스 상태에 따른 언더라인 색상 변경
+    func setFocused(_ focused: Bool) {
+        UIView.animate(withDuration: 0.2) {
+            self.underlineView.backgroundColor = focused ? .systemGreen : .systemGray3
+        }
+    }
+    
+    // 에러 상태 표시
+    func setError(_ hasError: Bool) {
+        UIView.animate(withDuration: 0.2) {
+            self.underlineView.backgroundColor = hasError ? .systemRed : .systemGray3
+        }
+    }
+}
