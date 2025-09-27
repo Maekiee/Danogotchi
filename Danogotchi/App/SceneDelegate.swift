@@ -21,6 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: scene)
         
         
+        
         if UserInfoManager.shared.username != nil {
             window?.rootViewController = MainTabViewController()
         } else {

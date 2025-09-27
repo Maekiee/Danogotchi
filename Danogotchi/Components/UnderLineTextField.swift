@@ -21,11 +21,10 @@ final class UnderlineTextField: UIView {
         set { textField.isSecureTextEntry = newValue }
     }
     
-    // Delegate 접근
-//    weak var delegate: UITextFieldDelegate? {
-//        get { textField.delegate }
-//        set { textField.delegate = newValue }
-//    }
+    var font: UIFont? {
+        get { textField.font }
+        set { textField.font = newValue }
+    }
     
     // RxSwift용 textField 접근
     var tf: UITextField {
@@ -40,6 +39,12 @@ final class UnderlineTextField: UIView {
     convenience init(placeholder: String) {
         self.init(frame: .zero)
         self.placeholder = placeholder
+    }
+    
+    convenience init(placeholder: String, fontSize: CGFloat, weight: UIFont.Weight) {
+        self.init(frame: .zero)
+        self.placeholder = placeholder
+        self.font = .systemFont(ofSize: fontSize, weight: weight)
     }
     
     required init?(coder: NSCoder) {
@@ -62,16 +67,21 @@ final class UnderlineTextField: UIView {
         
         // AutoLayout 설정
         textField.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(44)
+            make.horizontalEdges.top.equalToSuperview()
+//            make.height.equalTo(44)
         }
         
         underlineView.snp.makeConstraints { make in
             make.top.equalTo(textField.snp.bottom).offset(4)
-            make.leading.trailing.equalToSuperview()
+            make.horizontalEdges.equalToSuperview()
             make.height.equalTo(2)
             make.bottom.equalToSuperview()
         }
+    }
+    
+    // 폰트 설정 메서드
+    func setFont(size: CGFloat, weight: UIFont.Weight) {
+        textField.font = .systemFont(ofSize: size, weight: weight)
     }
     
     // 포커스 상태에 따른 언더라인 색상 변경
