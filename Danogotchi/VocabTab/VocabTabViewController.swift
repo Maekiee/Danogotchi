@@ -55,7 +55,7 @@ extension VocabTabViewController {
         
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = AddWordViewController()
+                let vc = UINavigationController(rootViewController: AddWordViewController())
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)

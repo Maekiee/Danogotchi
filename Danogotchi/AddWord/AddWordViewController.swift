@@ -142,6 +142,13 @@ extension AddWordViewController {
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         
+        showMoreImageButton.rx.tap
+            .bind(with: self) { owner, _ in
+                print("이동하기")
+                let vc = ImageDetailViewController()
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
         output.wordImageUrl
             .drive(with: self) { owner, url in
                 owner.thumbnail.kf.setImage(with: URL(string: url)!)
