@@ -29,6 +29,8 @@ final class AddWordViewController: BaseViewController {
         let view = UIImageView()
         view.backgroundColor = .systemGray4
         view.layer.cornerRadius = 8
+        view.clipsToBounds = true
+        view.contentMode = .scaleAspectFill
         return view
     }()
     private let wordTitleLabel: UILabel = {
