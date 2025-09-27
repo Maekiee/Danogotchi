@@ -55,13 +55,15 @@ extension VocabTabViewController {
         
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = UIViewController()
+                let vc = AddWordViewController()
+                vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
         shoWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
-                print("단어 그룹 보기 모달 시트")
+                let vc = WordBookListViewController()
+                owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
     }
