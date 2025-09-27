@@ -1,8 +1,22 @@
-//
-//  SettingTabViewController.swift
-//  Danogotchi
-//
-//  Created by 박도원 on 9/27/25.
-//
+import UIKit
 
-import Foundation
+final class SettingTabViewController: BaseViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+    }
+    
+    override func configHierarchy() {
+        
+    }
+    
+    override func configLayout() {
+        
+    }
+    
+    override func configView() {
+        
+    }
+
+}

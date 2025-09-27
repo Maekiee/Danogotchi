@@ -14,12 +14,11 @@ final class PrimaryFillButton: UIButton {
         
         self.configurationUpdateHandler = { button in
             
+            // 버튼 활성화 상태 여부
             if button.state == .disabled {
                 button.configuration?.baseBackgroundColor = .lightGray
-            } else if button.isHighlighted {
-                button.configuration?.baseBackgroundColor = .systemGreen
             } else {
-//                button.configuration?.baseBackgroundColor = .systemGreen.withAlphaComponent(0.5)
+                button.configuration?.baseBackgroundColor = .systemGreen
             }
             
             

@@ -11,15 +11,33 @@ final class UserInfoManager: UserInfoProtocol {
     
     private enum Keys {
         static let username = "username"
+        static let userId = "userId"
     }
     
     var username: String? {
         get {
-            return UserDefaults.standard.string(forKey: Keys.username)
+            guard let username = UserDefaults.standard.string(forKey: Keys.username) else { return nil }
+            return username
         }
         
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.username)
         }
+    }
+    
+    var userId: String? {
+        get {
+            guard let userId = UserDefaults.standard.string(forKey: Keys.userId) else { return nil }
+            return userId
+        }
+        
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.userId)
+        }
+    }
+    
+    func removeUserInfo() {
+        UserDefaults.standard.removeObject(forKey: Keys.username)
+        UserDefaults.standard.removeObject(forKey: Keys.userId)
     }
 }

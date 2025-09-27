@@ -1,5 +1,15 @@
 import UIKit
 
+enum Coordinator {
+    static func switchToMainVieWController() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let sceneDelegate = windowScene.delegate as? SceneDelegate else { return }
+        
+        sceneDelegate.changeRootVC(MainTabViewController())
+    }
+}
+
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
@@ -9,8 +19,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene)
-        window?.rootViewController = SetUserNameViewController()
+        
+        
+        if UserInfoManager.shared.username != nil {
+            // MainViewController
+            window?.rootViewController = MainTabViewController()
+        } else {
+            window?.rootViewController = SetUserNameViewController()
+        }
+        
+        
         window?.makeKeyAndVisible()
+    }
+    
+    func changeRootVC(_ vc: UIViewController ) {
+        guard let window = self.window else { return }
+        window.rootViewController = vc
+        UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve) { }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

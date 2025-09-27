@@ -8,7 +8,14 @@ final class SetUserNameViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SetUsernameViewModel()
     
-    // MARK: - UI 선언
+    // MARK: - UI Property
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "단어고치가 부를 이름을 정해주세요"
+        label.textColor = .black
+        label.font = .systemFont(ofSize: 22, weight: .bold)
+        return label
+    }()
     private let usernameTextField = UnderlineTextField(placeholder: "닉네임")
     private let confirmButton = PrimaryFillButton(title: "확인")
     private let validText: UILabel = {
@@ -23,13 +30,13 @@ final class SetUserNameViewController: BaseViewController {
         configHierarchy()
         configLayout()
         configView()
-        setupKeyboardObserver()
         
         bind()
     }
     
     override func configHierarchy() {
         [
+            titleLabel,
             usernameTextField,
             confirmButton,
             validText
@@ -37,8 +44,13 @@ final class SetUserNameViewController: BaseViewController {
     }
     
     override func configLayout() {
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(48)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(24)
+        }
+        
         usernameTextField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(40)
+            make.top.equalTo(titleLabel.snp.bottom).offset(68)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(40)
         }
@@ -56,10 +68,10 @@ final class SetUserNameViewController: BaseViewController {
     }
     
     override func configView() {
-        
+        setupKeyboardObserver()
     }
     
-    // 키보드 업다운
+    // 키보드 업다운 
     private func setupKeyboardObserver() {
         // 버튼 업
         NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
@@ -100,5 +112,8 @@ extension SetUserNameViewController {
             .drive(validText.rx.text)
             .disposed(by: disposeBag)
         
+        output.buttonAbleState
+            .drive(confirmButton.rx.isEnabled)
+            .disposed(by: disposeBag)
     }
 }
