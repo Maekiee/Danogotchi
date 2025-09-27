@@ -6,6 +6,10 @@ class BaseViewController: UIViewController, UIConfigurationLayout {
         view.backgroundColor = .white
     }
     
+    deinit {
+        print("Deinit 해제됨")
+    }
+    
     func configHierarchy() { }
     func configLayout() { }
     func configView() { }
