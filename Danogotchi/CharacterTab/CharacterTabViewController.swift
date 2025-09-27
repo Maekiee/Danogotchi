@@ -5,6 +5,7 @@ import RxCocoa
 
 final class CharacterTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
+    private let viewModel = CharacterTabViewModel()
     
     private let testLabel = UILabel()
     
@@ -26,9 +27,10 @@ final class CharacterTabViewController: BaseViewController {
     }
     
     override func configView() {
+        navigationItem.title = UserInfoManager.shared.username
+        
         testLabel.text = "캐릭터 탭"
         testLabel.textColor = .black
-        
         view.addSubview(testLabel)
         testLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
@@ -39,6 +41,9 @@ final class CharacterTabViewController: BaseViewController {
 // MARK: - Rx로직
 extension CharacterTabViewController {
     private func bind() {
+        let input = CharacterTabViewModel.Input()
+        let output = viewModel.transform(input: input)
+        
         
     }
 }
