@@ -9,8 +9,6 @@ final class AddWordViewController: BaseViewController {
     private let viewModel = AddWordViewModel()
     
     // MARK: UI Property
-    private let dismissButton = IconButton(imageName: "xmark")
-    private let saveButton = TextButton(title: "저장")
     private let showMoreImageButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
@@ -70,8 +68,8 @@ final class AddWordViewController: BaseViewController {
     
     override func configHierarchy() {
         [
-            dismissButton,
-            saveButton,
+//            dismissButton,
+//            saveButton,
             showMoreImageButton,
             thumbnail,
             wordTitleLabel,
@@ -82,18 +80,8 @@ final class AddWordViewController: BaseViewController {
     }
     
     override func configLayout() {
-        dismissButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.leading.equalToSuperview().offset(16)
-        }
-        
-        saveButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.trailing.equalToSuperview().offset(-16)
-        }
-        
         showMoreImageButton.snp.makeConstraints { make in
-            make.top.equalTo(saveButton.snp.bottom).offset(4)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(4)
             make.trailing.equalToSuperview().offset(-16)
         }
         
@@ -125,7 +113,17 @@ final class AddWordViewController: BaseViewController {
     }
     
     override func configView() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
+            target: nil,
+            action: nil)
         
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "저장",
+            style: .plain,
+            target: nil,
+            action: nil)
     }
 }
 
@@ -137,10 +135,17 @@ extension AddWordViewController {
         )
         let output = viewModel.transform(input: input)
         
-        dismissButton.rx.tap
+        navigationItem.leftBarButtonItem!.rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
+        
+        navigationItem.rightBarButtonItem!.rx.tap
+            .bind(with: self) { owner, _ in
+                print("저장")
+            }.disposed(by: disposeBag)
+        
+        
         
         showMoreImageButton.rx.tap
             .bind(with: self) { owner, _ in
