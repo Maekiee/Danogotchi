@@ -1,9 +1,5 @@
 import Foundation
 
-protocol UserInfoProtocol {
-    var username: String? { get set }
-}
-
 final class UserInfoManager: UserInfoProtocol {
     private init() { }
     
@@ -25,6 +21,7 @@ final class UserInfoManager: UserInfoProtocol {
         }
     }
     
+    // 아직 사용 안함
     var userId: String? {
         get {
             guard let userId = UserDefaults.standard.string(forKey: Keys.userId) else { return nil }
@@ -36,6 +33,7 @@ final class UserInfoManager: UserInfoProtocol {
         }
     }
     
+    // 아직 사용 안함
     func removeUserInfo() {
         UserDefaults.standard.removeObject(forKey: Keys.username)
         UserDefaults.standard.removeObject(forKey: Keys.userId)

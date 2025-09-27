@@ -22,7 +22,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         
         if UserInfoManager.shared.username != nil {
-            // MainViewController
             window?.rootViewController = MainTabViewController()
         } else {
             window?.rootViewController = SetUserNameViewController()
