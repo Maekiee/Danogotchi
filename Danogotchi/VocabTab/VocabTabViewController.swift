@@ -41,8 +41,9 @@ final class VocabTabViewController: BaseViewController {
     override func configView() {
         let firstBarButton = UIBarButtonItem(customView: shoWordBookButton)
         let secondBarButton = UIBarButtonItem(customView: addWordButton)
-        
         navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
+        
+        navigationItem.title = "토익 테스트 영단어"
     }
 }
 
@@ -50,6 +51,18 @@ extension VocabTabViewController {
     private func bind() {
         let input = VocabTabViewModel.Input()
         let output = viewModel.transform(input: input)
+        
+        
+        addWordButton.rx.tap
+            .bind(with: self) { owner, _ in
+                let vc = UIViewController()
+                owner.present(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
+        shoWordBookButton.rx.tap
+            .bind(with: self) { owner, _ in
+                print("단어 그룹 보기 모달 시트")
+            }.disposed(by: disposeBag)
         
     }
 }
