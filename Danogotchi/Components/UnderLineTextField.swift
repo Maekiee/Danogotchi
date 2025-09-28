@@ -4,6 +4,7 @@ import SnapKit
 final class UnderlineTextField: UIView {
     private let textField = UITextField()
     private let underlineView = UIView()
+    private let titleLabel = UILabel()
     
     // TextField 접근을 위한 프로퍼티
     var text: String? {
@@ -24,6 +25,25 @@ final class UnderlineTextField: UIView {
     var font: UIFont? {
         get { textField.font }
         set { textField.font = newValue }
+    }
+    
+    var title: String? {
+        get { titleLabel.text }
+        set {
+            titleLabel.text = newValue
+            titleLabel.isHidden = newValue == nil || newValue?.isEmpty == true
+            updateTextFieldConstraints()
+        }
+    }
+    
+    var titleFont: UIFont? {
+        get { titleLabel.font }
+        set { titleLabel.font = newValue }
+    }
+    
+    var titleColor: UIColor? {
+        get { titleLabel.textColor }
+        set { titleLabel.textColor = newValue }
     }
     
     // RxSwift용 textField 접근
@@ -51,6 +71,20 @@ final class UnderlineTextField: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 타이틀과 함께 초기화하는 convenience init 추가
+    convenience init(title: String, placeholder: String) {
+        self.init(frame: .zero)
+        self.title = title
+        self.placeholder = placeholder
+    }
+    
+    convenience init(title: String, placeholder: String, fontSize: CGFloat, weight: UIFont.Weight) {
+        self.init(frame: .zero)
+        self.title = title
+        self.placeholder = placeholder
+        self.font = .systemFont(ofSize: fontSize, weight: weight)
+    }
+    
     private func setupUI() {
         // TextField 설정
         textField.borderStyle = .none
@@ -61,14 +95,28 @@ final class UnderlineTextField: UIView {
         // Underline 설정
         underlineView.backgroundColor = .systemGray3
         
+        // Title Label 설정
+        titleLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        titleLabel.textColor = .secondaryLabel
+        titleLabel.isHidden = true // 기본적으로 숨김
+        
         // 뷰 추가
+        addSubview(titleLabel)
         addSubview(textField)
         addSubview(underlineView)
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.horizontalEdges.equalToSuperview()
+        }
         
         // AutoLayout 설정
         textField.snp.makeConstraints { make in
             make.horizontalEdges.top.equalToSuperview()
-//            make.height.equalTo(44)
+            if titleLabel.isHidden {
+                make.top.equalToSuperview()
+            } else {
+                make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            }
         }
         
         underlineView.snp.makeConstraints { make in
@@ -79,9 +127,26 @@ final class UnderlineTextField: UIView {
         }
     }
     
+    private func updateTextFieldConstraints() {
+        // 타이틀 라벨 표시/숨김에 따라 TextField 제약조건 업데이트
+        textField.snp.remakeConstraints { make in
+            make.horizontalEdges.equalToSuperview()
+            if titleLabel.isHidden {
+                make.top.equalToSuperview()
+            } else {
+                make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            }
+        }
+    }
+    
     // 폰트 설정 메서드
     func setFont(size: CGFloat, weight: UIFont.Weight) {
         textField.font = .systemFont(ofSize: size, weight: weight)
+    }
+    
+    // 타이틀 폰트 설정 메서드
+    func setTitleFont(size: CGFloat, weight: UIFont.Weight) {
+        titleLabel.font = .systemFont(ofSize: size, weight: weight)
     }
     
     // 포커스 상태에 따른 언더라인 색상 변경
@@ -95,6 +160,20 @@ final class UnderlineTextField: UIView {
     func setError(_ hasError: Bool) {
         UIView.animate(withDuration: 0.2) {
             self.underlineView.backgroundColor = hasError ? .systemRed : .systemGray3
+        }
+    }
+    
+    // 타이틀 표시/숨김 메서드
+    func showTitle(_ show: Bool, animated: Bool = true) {
+        if animated {
+            UIView.animate(withDuration: 0.3) {
+                self.titleLabel.isHidden = !show
+                self.updateConstraints()
+                self.layoutIfNeeded()
+            }
+        } else {
+            titleLabel.isHidden = !show
+            updateConstraints()
         }
     }
 }
