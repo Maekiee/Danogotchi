@@ -133,9 +133,14 @@ extension AddWordViewController {
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         
+        
+        
         navigationItem.rightBarButtonItem!.rx.tap
-            .bind(with: self) { owner, _ in
-                let vc = ImageDetailViewController()
+            .withLatestFrom(output.itemSet)
+            .bind(with: self) { owner, item in
+                let (items, text) = item
+                let vm = WordImageListViewModel(imageItems: items, wordText: text)
+                let vc = WordImageListViewController(viewModel: vm)
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
 

@@ -12,10 +12,15 @@ final class AddWordViewModel: BaseViewModel {
     
     struct Output {
         let wordImageUrl: Driver<String>
+        let wordImageItems: PublishRelay<SearchPhotoDTO>
+        let wordText: PublishRelay<String>
+        let itemSet: Observable<(SearchPhotoDTO, String)>
     }
     
     func transform(input: Input) -> Output {
         let wordImageUrl = PublishRelay<String>()
+        let wordImageItems = PublishRelay<SearchPhotoDTO>()
+        let wordText = PublishRelay<String>()
         
         input.wordTextField
             .skip(1)
@@ -23,22 +28,27 @@ final class AddWordViewModel: BaseViewModel {
             .filter{ $0.count >= 2 }
             .distinctUntilChanged()
             .debounce(.seconds(2), scheduler: MainScheduler.instance)
+            .do { text in
+                wordText.accept(text)
+            }
             .flatMap{
                 ApiService.searchPhoto(api: .searchPhoto(word: $0, page: 1), type: SearchPhotoDTO.self)
             }
             .bind(with: self) { owner, responseValue in
                 switch responseValue {
                 case .success(let value):
-                    wordImageUrl.accept( value.results.first!.urls.small)
+                    wordImageItems.accept(value)
+                    wordImageUrl.accept(value.results.first!.urls.small)
                 case .failure(_):
                     print("네트워크 에러")
                 }
             }.disposed(by: disposeBag)
         
-        
-        
         return Output(
-            wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: "")
+            wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
+            wordImageItems: wordImageItems,
+            wordText: wordText,
+            itemSet: Observable.combineLatest(wordImageItems, wordText)
         )
     }
 }
