@@ -18,9 +18,12 @@ final class AddWordViewModel: BaseViewModel {
         let wordImageUrl = PublishRelay<String>()
         
         input.wordTextField
+            .skip(1)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter{ $0.count >= 2 }
+            .distinctUntilChanged()
             .debounce(.seconds(2), scheduler: MainScheduler.instance)
             .flatMap{
-                // 빈 문자열일때 api 호출 안하게 막아됨
                 ApiService.searchPhoto(api: .searchPhoto(word: $0, page: 1), type: SearchPhotoDTO.self)
             }
             .bind(with: self) { owner, responseValue in

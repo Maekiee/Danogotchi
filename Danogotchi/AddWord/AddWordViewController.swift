@@ -9,24 +9,24 @@ final class AddWordViewController: BaseViewController {
     private let viewModel = AddWordViewModel()
     
     // MARK: UI Property
-    private let showMoreImageButton: UIButton = {
-        let button = UIButton()
-        var config = UIButton.Configuration.plain()
-        var textConfig = AttributedString("더 많은 이미지 보기")
-        textConfig.font = .systemFont(ofSize: 13)
-        config.image = UIImage(systemName: "chevron.right")
-        config.imagePadding = 8
-        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 10)
-        config.preferredSymbolConfigurationForImage = symbolConfiguration
-        config.imagePlacement = .trailing
-        config.attributedTitle = textConfig
-        button.configuration = config
-        return button
-    }()
+//    private let showMoreImageButton: UIButton = {
+//        let button = UIButton()
+//        var config = UIButton.Configuration.plain()
+//        var textConfig = AttributedString("더 많은 이미지 보기")
+//        textConfig.font = .systemFont(ofSize: 13)
+//        config.image = UIImage(systemName: "chevron.right")
+//        config.imagePadding = 8
+//        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 10)
+//        config.preferredSymbolConfigurationForImage = symbolConfiguration
+//        config.imagePlacement = .trailing
+//        config.attributedTitle = textConfig
+//        button.configuration = config
+//        return button
+//    }()
     private let thumbnail: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = .systemGray4
-        view.layer.cornerRadius = 8
+        view.layer.cornerRadius = 12
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
         return view
@@ -55,6 +55,7 @@ final class AddWordViewController: BaseViewController {
         tf.font = .systemFont(ofSize: 18, weight: .regular)
         return tf
     }()
+    private let addWordButton = PrimaryFillButton(title: "저장")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,37 +69,37 @@ final class AddWordViewController: BaseViewController {
     
     override func configHierarchy() {
         [
-//            dismissButton,
-//            saveButton,
-            showMoreImageButton,
+//            showMoreImageButton,
             thumbnail,
             wordTitleLabel,
             wordTextField,
             meanTitleLabel,
-            meanTextField
+            meanTextField,
+            addWordButton
         ].forEach { view.addSubview($0) }
     }
     
     override func configLayout() {
-        showMoreImageButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(4)
-            make.trailing.equalToSuperview().offset(-16)
-        }
+        // 사진 상세 화면 버튼
+//        showMoreImageButton.snp.makeConstraints { make in
+//            make.top.equalTo(view.safeAreaLayoutGuide).offset(4)
+//            make.trailing.equalToSuperview().offset(-16)
+//        }
         
         thumbnail.snp.makeConstraints { make in
-            make.top.equalTo(showMoreImageButton.snp.bottom)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             make.horizontalEdges.equalToSuperview().inset(16)
             make.height.equalTo(thumbnail.snp.width).multipliedBy(2.0/3.0)
         }
         
         wordTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(8)
+            make.top.equalTo(thumbnail.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().offset(20)
         }
         
         wordTextField.snp.makeConstraints { make in
             make.top.equalTo(wordTitleLabel.snp.bottom).offset(4)
-            make.horizontalEdges.equalToSuperview().offset(20)
+            make.horizontalEdges.equalToSuperview().inset(20)
         }
         
         meanTitleLabel.snp.makeConstraints { make in
@@ -108,7 +109,13 @@ final class AddWordViewController: BaseViewController {
         
         meanTextField.snp.makeConstraints { make in
             make.top.equalTo(meanTitleLabel.snp.bottom).offset(4)
-            make.horizontalEdges.equalToSuperview().offset(20)
+            make.horizontalEdges.equalToSuperview().inset(20)
+        }
+        
+        addWordButton.snp.makeConstraints { make in
+            make.top.equalTo(meanTextField.snp.bottom).offset(16)
+            make.horizontalEdges.equalToSuperview().inset(20)
+            make.height.equalTo(40)
         }
     }
     
@@ -120,7 +127,7 @@ final class AddWordViewController: BaseViewController {
             action: nil)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "저장",
+            title: "더 많은 사진 보기",
             style: .plain,
             target: nil,
             action: nil)
@@ -134,7 +141,6 @@ extension AddWordViewController {
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable()
         )
         let output = viewModel.transform(input: input)
-        
         navigationItem.leftBarButtonItem!.rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismiss(animated: true)
@@ -142,14 +148,6 @@ extension AddWordViewController {
         
         navigationItem.rightBarButtonItem!.rx.tap
             .bind(with: self) { owner, _ in
-                print("저장")
-            }.disposed(by: disposeBag)
-        
-        
-        
-        showMoreImageButton.rx.tap
-            .bind(with: self) { owner, _ in
-                print("이동하기")
                 let vc = ImageDetailViewController()
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
