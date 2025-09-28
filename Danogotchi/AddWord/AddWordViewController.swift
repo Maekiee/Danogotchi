@@ -123,17 +123,19 @@ final class AddWordViewController: BaseViewController {
 
 extension AddWordViewController {
     private func bind() {
+        let selectedImage = PublishRelay<String>()
+        
         let input = AddWordViewModel.Input(
             wordTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
-            meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable()
+            meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),
+            selectedImage: selectedImage.asObservable()
         )
         let output = viewModel.transform(input: input)
+        
         navigationItem.leftBarButtonItem!.rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
-        
-        
         
         navigationItem.rightBarButtonItem!.rx.tap
             .withLatestFrom(output.itemSet)
@@ -141,6 +143,9 @@ extension AddWordViewController {
                 let (items, text) = item
                 let vm = WordImageListViewModel(imageItems: items, wordText: text)
                 let vc = WordImageListViewController(viewModel: vm)
+                vc.onChangedImage = { selectedUrl in
+                    selectedImage.accept(selectedUrl)
+                }
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
 

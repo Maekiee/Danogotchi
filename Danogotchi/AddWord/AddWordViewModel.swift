@@ -8,6 +8,7 @@ final class AddWordViewModel: BaseViewModel {
     struct Input {
         let wordTextField: Observable<String>
         let meanTextField: Observable<String>
+        let selectedImage: Observable<String>
     }
     
     struct Output {
@@ -43,6 +44,10 @@ final class AddWordViewModel: BaseViewModel {
                     print("네트워크 에러")
                 }
             }.disposed(by: disposeBag)
+        
+        input.selectedImage
+            .bind(to: wordImageUrl)
+            .disposed(by: disposeBag)
         
         return Output(
             wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),

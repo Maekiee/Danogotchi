@@ -8,6 +8,8 @@ final class WordImageListViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordImageListViewModel
     
+    var onChangedImage: ((String) -> Void)?
+    
     init(viewModel: WordImageListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -17,7 +19,6 @@ final class WordImageListViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: UIProperty
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 8
@@ -29,8 +30,6 @@ final class WordImageListViewController: BaseViewController {
         cv.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "ImageCell")
         return cv
     }()
-    
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -82,9 +81,26 @@ extension WordImageListViewController {
                 // 기본 셀 설정 (나중에 커스텀 셀로 교체 예정)
                 cell.backgroundColor = .systemGray5
                 cell.layer.cornerRadius = 8
+                cell.clipsToBounds = true
                 
-                // TODO: 실제 이미지 로딩 로직 추가
-                // 예시: 이미지뷰 추가 및 설정
+                let imageView = UIImageView()
+                imageView.contentMode = .scaleAspectFill
+                imageView.clipsToBounds = true
+                
+                cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                cell.contentView.addSubview(imageView)
+                
+                
+                imageView.snp.makeConstraints { $0.edges.equalToSuperview() }
+                
+                imageView.backgroundColor = .systemBlue
+                imageView.kf.setImage(with: URL(string: item.urls.small)!)
+            }.disposed(by: disposeBag)
+        
+        collectionView.rx.modelSelected(PhotoDTO.self)
+            .bind(with: self) { owner, item in
+                print(item.urls.raw)
+                owner.onChangedImage?(item.urls.small)
             }.disposed(by: disposeBag)
         
         navigationItem.leftBarButtonItem!.rx.tap
