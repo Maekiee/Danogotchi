@@ -18,12 +18,17 @@ final class WordImageListViewModel: BaseViewModel {
     }
     
     struct Output {
-        
+        let imageList: Driver<[PhotoDTO]>
     }
     
     func transform(input: Input) -> Output {
+        let imageItems = BehaviorRelay<[PhotoDTO]>(value: imageItems.results)
         
         
-        return Output()
+        
+        
+        return Output(
+            imageList: imageItems.asDriver(onErrorJustReturn: [])
+        )
     }
 }
