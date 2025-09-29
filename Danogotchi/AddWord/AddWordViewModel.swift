@@ -41,6 +41,7 @@ final class AddWordViewModel: BaseViewModel {
                     wordImageItems.accept(value)
                     wordImageUrl.accept(value.results.first!.urls.small)
                 case .failure(_):
+                    
                     print("네트워크 에러")
                 }
             }.disposed(by: disposeBag)

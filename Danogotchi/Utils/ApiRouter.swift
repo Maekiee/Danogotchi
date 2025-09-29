@@ -3,14 +3,14 @@ import Alamofire
 
 enum ApiRouter {
     case searchPhoto(word: String, page: Int)
-    case wordBook
+    case translate(text: String)
     
     var endPoint: URL {
         switch self {
         case .searchPhoto(word: let word, page: let page):
             URL(string: Secret.unsplashBaseURL + Secret.photoSearchURL + "?query=\(word)&page=\(page)&per_page=20&order_by=relevant")!
-        case .wordBook:
-            URL(string: Secret.unsplashBaseURL + Secret.photoSearchURL)!
+        case .translate(_):
+            URL(string: Secret.deeplBaseUrl + "v2/translate")!
         }
     }
     
@@ -19,6 +19,15 @@ enum ApiRouter {
     }
     
     var parameter: [String: String] {
-        return ["client_id": Secret.unsplashAccessKey]
+        switch self {
+        case .searchPhoto(word: _, page: _):
+            return ["client_id": Secret.unsplashAccessKey]
+        case .translate(text: let text):
+            print(text)
+            return [
+                "text": text,
+                "target_lang":"KO"
+            ]
+        }
     }
 }

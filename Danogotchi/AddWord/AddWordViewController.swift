@@ -148,6 +148,11 @@ extension AddWordViewController {
                 }
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
+        
+        addWordButton.rx.tap
+            .bind(with: self) { owner, _ in
+                ApiService.searcMeaning(api: .translate(text: "desk"), type: TranslatedDTO.self)
+            }.disposed(by: disposeBag)
 
         
         output.wordImageUrl
