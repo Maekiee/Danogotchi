@@ -18,6 +18,18 @@ enum ApiRouter {
         return .get
     }
     
+    var header: HTTPHeaders {
+        switch self {
+        case .searchPhoto:
+            return [:]
+        case .translate(text: let text):
+            return [
+                "Authorization": "DeepL-Auth-Key \(Secret.deeplApiKey)",
+                "Content-Type": "application/json"
+            ]
+        }
+    }
+    
     var parameter: [String: String] {
         switch self {
         case .searchPhoto(word: _, page: _):

@@ -23,7 +23,7 @@ final class AddWordViewModel: BaseViewModel {
         let wordImageItems = PublishRelay<SearchPhotoDTO>()
         let wordText = PublishRelay<String>()
         
-        input.wordTextField
+        let learningWord = input.wordTextField
             .skip(1)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter{ $0.count >= 2 }
@@ -31,7 +31,10 @@ final class AddWordViewModel: BaseViewModel {
             .debounce(.seconds(2), scheduler: MainScheduler.instance)
             .do { text in
                 wordText.accept(text)
-            }
+            }.share()
+        
+        // 이미지 검색
+        learningWord
             .flatMap{
                 ApiService.searchPhoto(api: .searchPhoto(word: $0, page: 1), type: SearchPhotoDTO.self)
             }
@@ -42,6 +45,19 @@ final class AddWordViewModel: BaseViewModel {
                     wordImageUrl.accept(value.results.first!.urls.small)
                 case .failure(_):
                     
+                    print("네트워크 에러")
+                }
+            }.disposed(by: disposeBag)
+        
+        // 번역 검색
+        learningWord
+            .flatMap {
+                ApiService.searcMeaning(api: .translate(text: $0), type: TranslatedDTO.self)
+            }.bind(with: self) { owner, responseValue in
+                switch responseValue {
+                case .success(let value):
+                    print("번역 데이터\(value)")
+                case .failure(_):
                     print("네트워크 에러")
                 }
             }.disposed(by: disposeBag)

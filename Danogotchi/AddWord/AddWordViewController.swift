@@ -151,7 +151,7 @@ extension AddWordViewController {
         
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
-                ApiService.searcMeaning(api: .translate(text: "desk"), type: TranslatedDTO.self)
+                
             }.disposed(by: disposeBag)
 
         
