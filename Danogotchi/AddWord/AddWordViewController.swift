@@ -30,7 +30,7 @@ final class AddWordViewController: BaseViewController {
         let view = UIStackView()
         view.axis = .vertical
         view.spacing = 8
-        [wordBookTitleTextField, wordTextField, meanTextField, addWordButton].forEach {
+        [wordBookTitleTextField, wordTextField, meanTextField].forEach {
             view.addArrangedSubview($0)
         }
         return view
@@ -76,6 +76,7 @@ final class AddWordViewController: BaseViewController {
         [
             thumbnail,
             textFieldStackView,
+            addWordButton
         ].forEach { contentView.addSubview($0) }
     }
     
@@ -102,6 +103,8 @@ final class AddWordViewController: BaseViewController {
         }
         
         addWordButton.snp.makeConstraints { make in
+            make.top.equalTo(textFieldStackView.snp.bottom).offset(16)
+            make.horizontalEdges.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
     }
