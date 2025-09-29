@@ -6,6 +6,7 @@ final class AddWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     
     struct Input {
+        let wordBookTitleTextField: Observable<String>
         let wordTextField: Observable<String>
         let meanTextField: Observable<String>
         let selectedImage: Observable<String>
@@ -15,6 +16,7 @@ final class AddWordViewModel: BaseViewModel {
         let wordImageUrl: Driver<String>
         let itemSet: Observable<(SearchPhotoDTO, String)>
         let translateWord: Driver<String>
+        let isValidSave: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
@@ -22,7 +24,15 @@ final class AddWordViewModel: BaseViewModel {
         let wordImageItems = PublishRelay<SearchPhotoDTO>()
         let wordText = PublishRelay<String>()
         let translateWord = PublishRelay<String>()
+//        let isValidSave = BehaviorRelay<Bool>(value: false)
         
+        
+        // 단어장 이름
+        let wordBookTitle = input.wordBookTitleTextField
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .share()
+        
+        // 단어
         let learningWord = input.wordTextField
             .skip(1)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -32,6 +42,17 @@ final class AddWordViewModel: BaseViewModel {
             .do { text in
                 wordText.accept(text)
             }.share()
+     
+        // 뜻
+        let meanWord = input.meanTextField
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .share()
+        
+        
+        // 이미지
+        input.selectedImage
+            .bind(to: wordImageUrl)
+            .disposed(by: disposeBag)
         
         // 이미지 검색
         learningWord
@@ -62,14 +83,27 @@ final class AddWordViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
         
-        input.selectedImage
-            .bind(to: wordImageUrl)
-            .disposed(by: disposeBag)
+        
+        let isValidSave = Observable.combineLatest(
+            wordBookTitle,
+            learningWord.startWith(""),
+            meanWord.startWith(""),
+            translateWord.startWith(""),
+            wordImageUrl.startWith("")
+        ).map { title, word, mean, translated, image -> Bool in
+            let hasMeaning = !mean.isEmpty || !translated.isEmpty
+            return !title.isEmpty && !word.isEmpty && hasMeaning && !image.isEmpty
+        }
+        
+        
+//        Observable.combineLatest(wordImageUrl, learningWord, wordBookTitle, meanWord, translateWord)
+//        
         
         return Output(
             wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
             itemSet: Observable.combineLatest(wordImageItems, wordText),
-            translateWord: translateWord.asDriver(onErrorJustReturn: "")
+            translateWord: translateWord.asDriver(onErrorJustReturn: ""),
+            isValidSave: isValidSave.asDriver(onErrorJustReturn: false)
         )
     }
 }

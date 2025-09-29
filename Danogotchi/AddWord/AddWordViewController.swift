@@ -129,6 +129,7 @@ extension AddWordViewController {
         let selectedImage = PublishRelay<String>()
         
         let input = AddWordViewModel.Input(
+            wordBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
             wordTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),
             selectedImage: selectedImage.asObservable()
@@ -161,9 +162,15 @@ extension AddWordViewController {
             .drive(meanTextField.rx.placeholder)
             .disposed(by: disposeBag)
         
+        
+        
+        output.isValidSave
+            .drive(addWordButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
-                
+                print("버튼 터치")
             }.disposed(by: disposeBag)
 
         
