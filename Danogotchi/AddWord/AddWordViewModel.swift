@@ -13,15 +13,15 @@ final class AddWordViewModel: BaseViewModel {
     
     struct Output {
         let wordImageUrl: Driver<String>
-        let wordImageItems: PublishRelay<SearchPhotoDTO>
-        let wordText: PublishRelay<String>
         let itemSet: Observable<(SearchPhotoDTO, String)>
+        let translateWord: Driver<String>
     }
     
     func transform(input: Input) -> Output {
         let wordImageUrl = PublishRelay<String>()
         let wordImageItems = PublishRelay<SearchPhotoDTO>()
         let wordText = PublishRelay<String>()
+        let translateWord = PublishRelay<String>()
         
         let learningWord = input.wordTextField
             .skip(1)
@@ -56,7 +56,7 @@ final class AddWordViewModel: BaseViewModel {
             }.bind(with: self) { owner, responseValue in
                 switch responseValue {
                 case .success(let value):
-                    print("번역 데이터\(value)")
+                    translateWord.accept(value.translations.first!.text)
                 case .failure(_):
                     print("네트워크 에러")
                 }
@@ -68,9 +68,8 @@ final class AddWordViewModel: BaseViewModel {
         
         return Output(
             wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
-            wordImageItems: wordImageItems,
-            wordText: wordText,
-            itemSet: Observable.combineLatest(wordImageItems, wordText)
+            itemSet: Observable.combineLatest(wordImageItems, wordText),
+            translateWord: translateWord.asDriver(onErrorJustReturn: "")
         )
     }
 }

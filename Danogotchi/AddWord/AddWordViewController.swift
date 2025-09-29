@@ -149,16 +149,22 @@ extension AddWordViewController {
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
         
+        output.wordImageUrl
+            .drive(with: self) { owner, url in
+                owner.thumbnail.kf.setImage(with: URL(string: url)!)
+            }.disposed(by: disposeBag)
+        
+        output.translateWord
+            .drive(meanTextField.rx.placeholder)
+            .disposed(by: disposeBag)
+        
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
                 
             }.disposed(by: disposeBag)
 
         
-        output.wordImageUrl
-            .drive(with: self) { owner, url in
-                owner.thumbnail.kf.setImage(with: URL(string: url)!)
-            }.disposed(by: disposeBag)
+       
         
     }
 }
