@@ -90,7 +90,14 @@ final class AddWordViewModel: BaseViewModel {
         // 저장 버튼
         input.savedButtonTapped
             .bind(with: self) { owner, _ in
-                
+              // 단어 추가 화면 진입시 이미 단어장에 대한 데이터를 들고 있음
+                // 단어장 타이틀이 빈값인지 체크
+                // 이미지가 있는지 체크
+                // 단어가 있는지 체크
+                // 뜻이 있는지 체크
+                // 모두 있으면 해당 값을 디비에 저장
+                // 저장이 완료 됐으면 단어장 타이틀을 제외한 모든 값 초기화
+                // 저장이 되었다는 토스트 메세지 출력
             }.disposed(by: disposeBag)
         
         // 단어장 유효성 검사

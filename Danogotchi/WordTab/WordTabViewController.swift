@@ -3,9 +3,9 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class VocabTabViewController: BaseViewController {
+final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel = VocabTabViewModel()
+    private let viewModel = WordTabViewModel()
     
     private let addWordButton: UIButton = {
         let button = UIButton(type: .system)
@@ -47,9 +47,9 @@ final class VocabTabViewController: BaseViewController {
     }
 }
 
-extension VocabTabViewController {
+extension WordTabViewController {
     private func bind() {
-        let input = VocabTabViewModel.Input()
+        let input = WordTabViewModel.Input()
         let output = viewModel.transform(input: input)
         
         

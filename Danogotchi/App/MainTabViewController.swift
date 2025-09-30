@@ -11,7 +11,7 @@ final class MainTabViewController: UITabBarController {
 
     private func createTabBarController() {
         let characterVC = CharacterTabViewController()
-        let vocabVC = VocabTabViewController()
+        let vocabVC = WordTabViewController()
         let settingVC = SettingTabViewController()
         
         let firstTabNav = UINavigationController(rootViewController: characterVC)

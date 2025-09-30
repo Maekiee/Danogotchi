@@ -15,6 +15,7 @@
 		7651837A2E844257005EE2F7 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 765183792E844257005EE2F7 /* Kingfisher */; };
 		7651837D2E844260005EE2F7 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 7651837C2E844260005EE2F7 /* Toast */; };
 		76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */; };
+		76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */,
 				76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */,
 				7651837D2E844260005EE2F7 /* Toast in Frameworks */,
 				765183742E844224005EE2F7 /* RxSwift in Frameworks */,
@@ -105,6 +107,7 @@
 				765183792E844257005EE2F7 /* Kingfisher */,
 				7651837C2E844260005EE2F7 /* Toast */,
 				76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */,
+				76D9D2742E8C11F500B8104A /* RealmSwift */,
 			);
 			productName = Danogotchi;
 			productReference = 765182CB2E843A75005EE2F7 /* Danogotchi.app */;
@@ -141,6 +144,7 @@
 				765183782E844257005EE2F7 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				7651837B2E844260005EE2F7 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
 				76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 765182CC2E843A75005EE2F7 /* Products */;
@@ -431,6 +435,14 @@
 				minimumVersion = 8.0.1;
 			};
 		};
+		76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 20.0.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -468,6 +480,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
+		};
+		76D9D2742E8C11F500B8104A /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
