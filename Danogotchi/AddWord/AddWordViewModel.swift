@@ -10,6 +10,7 @@ final class AddWordViewModel: BaseViewModel {
         let wordTextField: Observable<String>
         let meanTextField: Observable<String>
         let selectedImage: Observable<String>
+        let savedButtonTapped: Observable<Void>
     }
     
     struct Output {
@@ -23,9 +24,9 @@ final class AddWordViewModel: BaseViewModel {
         let wordImageUrl = PublishRelay<String>()
         let wordImageItems = PublishRelay<SearchPhotoDTO>()
         let wordText = PublishRelay<String>()
+        let validWord = PublishRelay<String>()
         let translateWord = PublishRelay<String>()
-//        let isValidSave = BehaviorRelay<Bool>(value: false)
-        
+        let isValidSaved = BehaviorRelay<Bool>(value: false)
         
         // 단어장 이름
         let wordBookTitle = input.wordBookTitleTextField
@@ -36,13 +37,17 @@ final class AddWordViewModel: BaseViewModel {
         let learningWord = input.wordTextField
             .skip(1)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .do { text in
+                validWord.accept(text)
+            }
             .filter{ $0.count >= 2 }
             .distinctUntilChanged()
             .debounce(.seconds(2), scheduler: MainScheduler.instance)
             .do { text in
+                print(text)
                 wordText.accept(text)
             }.share()
-     
+        
         // 뜻
         let meanWord = input.meanTextField
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -65,7 +70,6 @@ final class AddWordViewModel: BaseViewModel {
                     wordImageItems.accept(value)
                     wordImageUrl.accept(value.results.first!.urls.small)
                 case .failure(_):
-                    
                     print("네트워크 에러")
                 }
             }.disposed(by: disposeBag)
@@ -83,27 +87,30 @@ final class AddWordViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
         
+        // 저장 버튼
+        input.savedButtonTapped
+            .bind(with: self) { owner, _ in
+                
+            }.disposed(by: disposeBag)
         
-        let isValidSave = Observable.combineLatest(
-            wordBookTitle,
-            learningWord.startWith(""),
-            meanWord.startWith(""),
-            translateWord.startWith(""),
-            wordImageUrl.startWith("")
-        ).map { title, word, mean, translated, image -> Bool in
-            let hasMeaning = !mean.isEmpty || !translated.isEmpty
-            return !title.isEmpty && !word.isEmpty && hasMeaning && !image.isEmpty
-        }
-        
-        
-//        Observable.combineLatest(wordImageUrl, learningWord, wordBookTitle, meanWord, translateWord)
-//        
+        // 단어장 유효성 검사
+        Observable.combineLatest(
+            wordImageUrl.map { !$0.isEmpty },
+            validWord.map { !$0.isEmpty },
+            wordBookTitle.map { !$0.isEmpty },
+            meanWord,
+            translateWord).map { imageValid, wordValid, titleValid, mean, translate in
+                let hasMeaning = !mean.isEmpty || !translate.isEmpty
+                return imageValid && wordValid && titleValid && hasMeaning
+            }.bind(with: self) { owner, isValid in
+                isValidSaved.accept(isValid)
+            }.disposed(by: disposeBag)
         
         return Output(
             wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
             itemSet: Observable.combineLatest(wordImageItems, wordText),
             translateWord: translateWord.asDriver(onErrorJustReturn: ""),
-            isValidSave: isValidSave.asDriver(onErrorJustReturn: false)
+            isValidSave: isValidSaved.asDriver(onErrorJustReturn: false)
         )
     }
 }

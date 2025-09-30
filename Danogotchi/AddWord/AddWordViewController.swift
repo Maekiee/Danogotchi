@@ -99,13 +99,14 @@ final class AddWordViewController: BaseViewController {
         textFieldStackView.snp.makeConstraints { make in
             make.top.equalTo(thumbnail.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(20)
-            make.bottom.lessThanOrEqualToSuperview().offset(-20)
+//            make.bottom.lessThanOrEqualToSuperview().offset(-20)
         }
         
         addWordButton.snp.makeConstraints { make in
             make.top.equalTo(textFieldStackView.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(20)
             make.height.equalTo(40)
+            make.bottom.equalToSuperview().offset(-20)
         }
     }
     
@@ -132,7 +133,8 @@ extension AddWordViewController {
             wordBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
             wordTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),
-            selectedImage: selectedImage.asObservable()
+            selectedImage: selectedImage.asObservable(),
+            savedButtonTapped: addWordButton.rx.tap.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -162,19 +164,8 @@ extension AddWordViewController {
             .drive(meanTextField.rx.placeholder)
             .disposed(by: disposeBag)
         
-        
-        
         output.isValidSave
             .drive(addWordButton.rx.isEnabled)
             .disposed(by: disposeBag)
-        
-        addWordButton.rx.tap
-            .bind(with: self) { owner, _ in
-                print("버튼 터치")
-            }.disposed(by: disposeBag)
-
-        
-       
-        
     }
 }
