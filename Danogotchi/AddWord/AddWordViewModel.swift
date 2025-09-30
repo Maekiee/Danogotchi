@@ -5,12 +5,21 @@ import RealmSwift
 
 final class AddWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
+    private let wordBookRepo: WordBookRepositoryProtocol
+    private let wordRepo: WordRepositoryProtocol
     
     let wordBookId: ObjectId?
     
-    init(wordBookId: ObjectId? = nil) {
+    
+    init(wordBookId: ObjectId? = nil,
+         wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
+         wordRepo: WordRepositoryProtocol = WordRepository()
+    ) {
         self.wordBookId = wordBookId
+        self.wordBookRepo = wordBookRepo
+        self.wordRepo = wordRepo
     }
+    
     
     struct Input {
         let wordBookTitleTextField: Observable<String>
@@ -97,6 +106,7 @@ final class AddWordViewModel: BaseViewModel {
         // 저장 버튼
         input.savedButtonTapped
             .bind(with: self) { owner, _ in
+                
               // 단어 추가 화면 진입시 이미 단어장에 대한 데이터를 들고 있음
                 // 단어장 타이틀이 빈값인지 체크
                 // 이미지가 있는지 체크
