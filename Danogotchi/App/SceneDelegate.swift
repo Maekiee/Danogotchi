@@ -1,4 +1,5 @@
 import UIKit
+import RealmSwift
 
 enum Coordinator {
     static func switchToMainVieWController() {
@@ -20,6 +21,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene)
         
+        let realm = try? Realm()
+        
+        print("Realm is located at:", realm!.configuration.fileURL!)
         
         if UserInfoManager.shared.username != nil {
             window?.rootViewController = MainTabViewController()

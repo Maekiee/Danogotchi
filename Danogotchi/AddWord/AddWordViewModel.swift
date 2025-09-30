@@ -8,14 +8,14 @@ final class AddWordViewModel: BaseViewModel {
     private let wordBookRepo: WordBookRepositoryProtocol
     private let wordRepo: WordRepositoryProtocol
     
-    let wordBookId: ObjectId?
+    let isWordBookId: ObjectId?
     
     
     init(wordBookId: ObjectId? = nil,
          wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
          wordRepo: WordRepositoryProtocol = WordRepository()
     ) {
-        self.wordBookId = wordBookId
+        self.isWordBookId = wordBookId
         self.wordBookRepo = wordBookRepo
         self.wordRepo = wordRepo
     }
@@ -103,31 +103,43 @@ final class AddWordViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
         
-        // 저장 버튼
-        input.savedButtonTapped
-            .bind(with: self) { owner, _ in
-                
-              // 단어 추가 화면 진입시 이미 단어장에 대한 데이터를 들고 있음
-                // 단어장 타이틀이 빈값인지 체크
-                // 이미지가 있는지 체크
-                // 단어가 있는지 체크
-                // 뜻이 있는지 체크
-                // 모두 있으면 해당 값을 디비에 저장
-                // 저장이 완료 됐으면 단어장 타이틀을 제외한 모든 값 초기화
-                // 저장이 되었다는 토스트 메세지 출력
-            }.disposed(by: disposeBag)
+
         
         // 단어장 유효성 검사
-        Observable.combineLatest(
-            wordImageUrl.map { !$0.isEmpty },
-            validWord.map { !$0.isEmpty },
-            wordBookTitle.map { !$0.isEmpty },
+        let allInputData = Observable.combineLatest(
+            wordImageUrl,
+            validWord,
+            wordBookTitle,
             meanWord,
-            translateWord).map { imageValid, wordValid, titleValid, mean, translate in
+            translateWord)
+        
+        allInputData
+            .map { title, url, word, mean, translate in
                 let hasMeaning = !mean.isEmpty || !translate.isEmpty
-                return imageValid && wordValid && titleValid && hasMeaning
+                return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
             }.bind(with: self) { owner, isValid in
                 isValidSaved.accept(isValid)
+            }.disposed(by: disposeBag)
+        
+        // 저장 버튼
+        input.savedButtonTapped
+            .withLatestFrom(allInputData)
+            .filter { title, url, word, mean, translate in
+                let hasMeaning = !mean.isEmpty || !translate.isEmpty
+                return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
+            }.bind(with: self) { owner, validData in
+                let (url, word, wordBookTitle, mean, _) = validData
+                print("이미지>>\(url)")
+                print("이미지>>\(wordBookTitle)")
+                print("이미지>>\(word)")
+                print("이미지>>\(mean)")
+                
+                
+                owner.saveWord(
+                    currentWordBookTitle: wordBookTitle,
+                    url: url,
+                    word: word,
+                    meaning: mean)
             }.disposed(by: disposeBag)
         
         return Output(
@@ -136,5 +148,22 @@ final class AddWordViewModel: BaseViewModel {
             translateWord: translateWord.asDriver(onErrorJustReturn: ""),
             isValidSave: isValidSaved.asDriver(onErrorJustReturn: false)
         )
+    }
+    
+    private func saveWord(currentWordBookTitle: String, url: String, word: String, meaning: String) {
+        let wordBookId: ObjectId
+        
+        if let id = isWordBookId {
+            //
+            wordBookRepo.update(id: id, title: currentWordBookTitle)
+            wordBookId = id
+        } else {
+            // 신규 단어장
+            wordBookRepo.create(title: currentWordBookTitle)
+            wordBookId = wordBookRepo.readAll().last!.id
+        }
+        
+        let word = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
+        wordBookRepo.addWord(bookId: wordBookId, word: word)
     }
 }
