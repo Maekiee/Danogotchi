@@ -13,13 +13,19 @@ final class WordTabViewController: BaseViewController {
         button.tintColor = .systemBlue
         return button
     }()
-    
     private let shoWordBookButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
         button.tintColor = .systemBlue
         return button
     }()
+    private let noWordBookLabel: UILabel = {
+        let label = UILabel()
+        label.text = "학습할 단어장을 만들어 주세요"
+        label.textColor = .black
+        return label
+    }()
+    private let goCreateWordBookButton = PrimaryFillButton(title: "단어장 만들기")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,11 +37,22 @@ final class WordTabViewController: BaseViewController {
     }
     
     override func configHierarchy() {
-        
+        [
+            noWordBookLabel,
+            goCreateWordBookButton
+        ].forEach { view.addSubview($0) }
     }
     
     override func configLayout() {
+        noWordBookLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         
+        goCreateWordBookButton.snp.makeConstraints { make in
+            make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
+            make.horizontalEdges.equalToSuperview().inset(24)
+            make.height.equalTo(40)
+        }
     }
     
     override func configView() {
@@ -55,7 +72,8 @@ extension WordTabViewController {
         
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = UINavigationController(rootViewController: AddWordViewController())
+                let vm = AddWordViewModel() // 여기에는 선택한 단어장의 pk 주입
+                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
@@ -63,6 +81,14 @@ extension WordTabViewController {
         shoWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 let vc = WordBookListViewController()
+                owner.present(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
+        goCreateWordBookButton.rx.tap
+            .bind(with: self) { owner, _ in
+                let vm = AddWordViewModel()
+                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
+                vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         

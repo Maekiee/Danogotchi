@@ -1,9 +1,16 @@
 import Foundation
 import RxSwift
 import RxCocoa
+import RealmSwift
 
 final class AddWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
+    
+    let wordBookId: ObjectId?
+    
+    init(wordBookId: ObjectId? = nil) {
+        self.wordBookId = wordBookId
+    }
     
     struct Input {
         let wordBookTitleTextField: Observable<String>

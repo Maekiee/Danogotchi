@@ -6,7 +6,16 @@ import Kingfisher
 
 final class AddWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel = AddWordViewModel()
+    private let viewModel: AddWordViewModel
+    
+    init(viewModel: AddWordViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: UI Property
     private let VScrollView: UIScrollView = {
