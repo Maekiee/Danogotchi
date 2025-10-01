@@ -131,6 +131,7 @@ final class AddWordViewModel: BaseViewModel {
                     url: url,
                     word: word,
                     meaning: finalMeaning)
+                
             }.disposed(by: disposeBag)
         
         return Output(
@@ -151,7 +152,15 @@ final class AddWordViewModel: BaseViewModel {
         } else {
             // 신규 단어장
             wordBookRepo.create(title: wordBookTitle)
-            wordBookId = wordBookRepo.readAll().last!.id
+            
+            guard let newWordBook = wordBookRepo.readAll().last else {
+                print("단어 생성 후 ID 못가져옴")
+                return
+            }
+            let newWordBookId = newWordBook.id
+            wordBookId = newWordBookId
+            
+            self.isWordBookId = newWordBookId
         }
         
         let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
