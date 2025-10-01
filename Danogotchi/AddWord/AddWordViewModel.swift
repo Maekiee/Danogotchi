@@ -34,6 +34,7 @@ final class AddWordViewModel: BaseViewModel {
         let itemSet: Observable<(SearchPhotoDTO, String)>
         let translateWord: Driver<String>
         let isValidSave: Driver<Bool>
+        let resetTrigger: Signal<Void>
     }
     
     func transform(input: Input) -> Output {
@@ -41,9 +42,10 @@ final class AddWordViewModel: BaseViewModel {
         let wordImageItems = PublishRelay<SearchPhotoDTO>()
         let wordText = PublishRelay<String>()
         let validWord = PublishRelay<String>()
-        let translateWord = PublishRelay<String>()
+        let translatedWord = PublishRelay<String>()
         let isValidSaved = BehaviorRelay<Bool>(value: false)
         let meanText = BehaviorRelay<String>(value: "")
+        let resetTrigger = PublishRelay<Void>()
         
         // 단어장 이름
         let wordBookTitle = input.wordBookTitleTextField
@@ -98,7 +100,7 @@ final class AddWordViewModel: BaseViewModel {
             }.bind(with: self) { owner, responseValue in
                 switch responseValue {
                 case .success(let value):
-                    translateWord.accept(value.translations.first!.text)
+                    translatedWord.accept(value.translations.first!.text)
                 case .failure(_):
                     print("네트워크 에러")
                 }
@@ -110,7 +112,7 @@ final class AddWordViewModel: BaseViewModel {
             validWord,
             wordBookTitle,
             meanText,
-            translateWord)
+            translatedWord)
         
         allInputData
             .map { title, url, word, mean, translate in
@@ -132,13 +134,16 @@ final class AddWordViewModel: BaseViewModel {
                     word: word,
                     meaning: finalMeaning)
                 
+                translatedWord.accept("")
+                resetTrigger.accept(())
             }.disposed(by: disposeBag)
         
         return Output(
             wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
             itemSet: Observable.combineLatest(wordImageItems, wordText),
-            translateWord: translateWord.asDriver(onErrorJustReturn: ""),
-            isValidSave: isValidSaved.asDriver()
+            translateWord: translatedWord.asDriver(onErrorJustReturn: ""),
+            isValidSave: isValidSaved.asDriver(),
+            resetTrigger: resetTrigger.asSignal()
         )
     }
     

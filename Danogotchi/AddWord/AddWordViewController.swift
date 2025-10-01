@@ -166,7 +166,10 @@ extension AddWordViewController {
         
         output.wordImageUrl
             .drive(with: self) { owner, url in
-                owner.thumbnail.kf.setImage(with: URL(string: url)!)
+                if url != "" {
+                    owner.thumbnail.kf.setImage(with: URL(string: url)!)
+                }
+                
             }.disposed(by: disposeBag)
         
         output.translateWord
@@ -176,5 +179,17 @@ extension AddWordViewController {
         output.isValidSave
             .drive(addWordButton.rx.isEnabled)
             .disposed(by: disposeBag)
+        
+        output.resetTrigger
+                .emit(onNext: { [weak self] in
+                    // 단어장 제목을 제외한 나머지 필드를 초기화합니다.
+                    self?.wordTextField.text = ""
+                    self?.meanTextField.text = ""
+                    
+                    // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
+                     self?.thumbnail.image = UIImage(systemName: "photo")
+                    print("입력 필드가 초기화되었습니다.")
+                })
+                .disposed(by: disposeBag)
     }
 }
