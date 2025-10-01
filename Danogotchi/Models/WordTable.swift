@@ -5,13 +5,11 @@ class WordBook: Object {
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var title: String
     @Persisted var wordList: List<Word>
-    @Persisted var isLearning: Bool
     @Persisted var createAt: Date
     
-    convenience init(title: String, isLearning: Bool, createAt: Date) {
+    convenience init(title: String, createAt: Date) {
         self.init()
         self.title = title
-        self.isLearning = isLearning
         self.createAt = createAt
     }
 }
@@ -21,7 +19,6 @@ extension WordBook {
         return WordBookModel(
             id: id.stringValue,
             title: title,
-            isLearning: isLearning,
             wordList: wordList.map { $0.toStruct() },
             createAt: createAt
         )

@@ -8,9 +8,9 @@ final class WordBookRepository: WordBookRepositoryProtocol {
         self.realm = realm
     }
     
-    // 단어장 생성
+    // 새로운 단어장 생성
     func create(title: String) {
-        let wordBook = WordBook(title: title, isLearning: false, createAt: Date())
+        let wordBook = WordBook(title: title, createAt: Date())
         try? realm.write {
             realm.add(wordBook)
         }
@@ -24,6 +24,7 @@ final class WordBookRepository: WordBookRepositoryProtocol {
         return realm.object(ofType: WordBook.self, forPrimaryKey: id)
     }
     
+    // 단어장 수정: 타이틀, 학습 상태
     func update(id: ObjectId, title: String) {
         guard let wordBook = read(id: id) else { return }
         try? realm.write {

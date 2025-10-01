@@ -8,14 +8,14 @@ final class AddWordViewModel: BaseViewModel {
     private let wordBookRepo: WordBookRepositoryProtocol
     private let wordRepo: WordRepositoryProtocol
     
-    let isWordBookId: ObjectId?
+    private var isWordBookId: ObjectId?
     
     
-    init(wordBookId: ObjectId? = nil,
+    init(isWordBookId: ObjectId? = nil,
          wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
          wordRepo: WordRepositoryProtocol = WordRepository()
     ) {
-        self.isWordBookId = wordBookId
+        self.isWordBookId = isWordBookId
         self.wordBookRepo = wordBookRepo
         self.wordRepo = wordRepo
     }
@@ -104,8 +104,6 @@ final class AddWordViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
         
-
-        
         // 단어장 유효성 검사
         let allInputData = Observable.combineLatest(
             wordImageUrl,
@@ -128,17 +126,11 @@ final class AddWordViewModel: BaseViewModel {
                 let (url, word, wordBookTitle, mean, translateWord) = validData
                 let finalMeaning = !mean.isEmpty ? mean : translateWord
                 
-                print("이미지>>\(url)")
-                print("단어장 타이틀>>\(wordBookTitle)")
-                print("단어>>\(word)")
-                print("최종뜻>> \(finalMeaning)")
-                //
-//                owner.saveWord(
-//                    wordBookTitle: wordBookTitle,
-//                    url: url,
-//                    word: word,
-//                    meaning: finalMeaning)
-                
+                owner.saveWord(
+                    wordBookTitle: wordBookTitle,
+                    url: url,
+                    word: word,
+                    meaning: finalMeaning)
             }.disposed(by: disposeBag)
         
         return Output(
@@ -163,6 +155,7 @@ final class AddWordViewModel: BaseViewModel {
         }
         
         let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
+        
         wordBookRepo.addWord(bookId: wordBookId, word: newWord)
     }
 }
