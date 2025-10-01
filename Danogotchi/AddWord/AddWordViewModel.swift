@@ -43,6 +43,7 @@ final class AddWordViewModel: BaseViewModel {
         let validWord = PublishRelay<String>()
         let translateWord = PublishRelay<String>()
         let isValidSaved = BehaviorRelay<Bool>(value: false)
+        let meanText = BehaviorRelay<String>(value: "")
         
         // 단어장 이름
         let wordBookTitle = input.wordBookTitleTextField
@@ -64,9 +65,10 @@ final class AddWordViewModel: BaseViewModel {
             }.share()
         
         // 뜻
-        let meanWord = input.meanTextField
+        input.meanTextField
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .share()
+            .bind(to: meanText)
+            .disposed(by: disposeBag)
         
         
         // 이미지
@@ -109,7 +111,7 @@ final class AddWordViewModel: BaseViewModel {
             wordImageUrl,
             validWord,
             wordBookTitle,
-            meanWord,
+            meanText,
             translateWord)
         
         allInputData
