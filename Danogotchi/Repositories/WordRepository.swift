@@ -8,9 +8,9 @@ final class WordRepository: WordRepositoryProtocol {
         self.realm = realm
     }
     
-    
+
     func create(thumbnail: String, word: String, meaning: String) -> Word {
-        let word = Word(thumbnail: thumbnail, word: word, meaning: meaning)
+        let word = Word(thumbnail: thumbnail, word: word, meaning: meaning, createAt: Date())
         try? realm.write {
             realm.add(word)
         }

@@ -7,5 +7,5 @@ protocol WordBookRepositoryProtocol {
     func read(id: ObjectId) -> WordBook?
     func update(id: ObjectId, title: String)
     func delete(id: ObjectId)
-    func addWord(bookId: ObjectId, word: Word) 
+    func addWord(bookId: ObjectId, word: Word)
 }

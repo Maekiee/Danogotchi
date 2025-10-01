@@ -10,7 +10,7 @@ final class WordBookRepository: WordBookRepositoryProtocol {
     
     // 단어장 생성
     func create(title: String) {
-        let wordBook = WordBook(title: title)
+        let wordBook = WordBook(title: title, isLearning: false, createAt: Date())
         try? realm.write {
             realm.add(wordBook)
         }
@@ -42,9 +42,7 @@ final class WordBookRepository: WordBookRepositoryProtocol {
     func addWord(bookId: ObjectId, word: Word) {
         guard let wordBook = read(id: bookId) else { return }
         try? realm.write {
-            wordBook.wordList.insert(word, at: 0)
+            wordBook.wordList.append(word)
         }
     }
-    
-    
 }

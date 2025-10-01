@@ -60,7 +60,6 @@ final class AddWordViewModel: BaseViewModel {
             .distinctUntilChanged()
             .debounce(.seconds(2), scheduler: MainScheduler.instance)
             .do { text in
-                print(text)
                 wordText.accept(text)
             }.share()
         
@@ -117,53 +116,51 @@ final class AddWordViewModel: BaseViewModel {
             .map { title, url, word, mean, translate in
                 let hasMeaning = !mean.isEmpty || !translate.isEmpty
                 return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
-            }.bind(with: self) { owner, isValid in
-                isValidSaved.accept(isValid)
-            }.disposed(by: disposeBag)
+            }.bind(to: isValidSaved)
+            .disposed(by: disposeBag)
         
         // 저장 버튼
         input.savedButtonTapped
             .withLatestFrom(allInputData)
-            .filter { title, url, word, mean, translate in
-                let hasMeaning = !mean.isEmpty || !translate.isEmpty
-                return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
-            }.bind(with: self) { owner, validData in
-                let (url, word, wordBookTitle, mean, _) = validData
+            .bind(with: self) { owner, validData in
+                let (url, word, wordBookTitle, mean, translateWord) = validData
+                let finalMeaning = !mean.isEmpty ? mean : translateWord
+                
                 print("이미지>>\(url)")
-                print("이미지>>\(wordBookTitle)")
-                print("이미지>>\(word)")
-                print("이미지>>\(mean)")
+                print("단어장 타이틀>>\(wordBookTitle)")
+                print("단어>>\(word)")
+                print("최종뜻>> \(finalMeaning)")
+                //
+//                owner.saveWord(
+//                    wordBookTitle: wordBookTitle,
+//                    url: url,
+//                    word: word,
+//                    meaning: finalMeaning)
                 
-                
-                owner.saveWord(
-                    currentWordBookTitle: wordBookTitle,
-                    url: url,
-                    word: word,
-                    meaning: mean)
             }.disposed(by: disposeBag)
         
         return Output(
             wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
             itemSet: Observable.combineLatest(wordImageItems, wordText),
             translateWord: translateWord.asDriver(onErrorJustReturn: ""),
-            isValidSave: isValidSaved.asDriver(onErrorJustReturn: false)
+            isValidSave: isValidSaved.asDriver()
         )
     }
     
-    private func saveWord(currentWordBookTitle: String, url: String, word: String, meaning: String) {
+    private func saveWord(wordBookTitle: String, url: String, word: String, meaning: String) {
         let wordBookId: ObjectId
         
         if let id = isWordBookId {
-            //
-            wordBookRepo.update(id: id, title: currentWordBookTitle)
+            // 기존 단어장 타이틀 업데이트
+            wordBookRepo.update(id: id, title: wordBookTitle)
             wordBookId = id
         } else {
             // 신규 단어장
-            wordBookRepo.create(title: currentWordBookTitle)
+            wordBookRepo.create(title: wordBookTitle)
             wordBookId = wordBookRepo.readAll().last!.id
         }
         
-        let word = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
-        wordBookRepo.addWord(bookId: wordBookId, word: word)
+        let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
+        wordBookRepo.addWord(bookId: wordBookId, word: newWord)
     }
 }
