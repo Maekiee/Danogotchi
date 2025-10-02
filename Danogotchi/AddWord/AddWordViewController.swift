@@ -188,6 +188,8 @@ extension AddWordViewController {
                     
                     // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
                      self?.thumbnail.image = UIImage(systemName: "photo")
+                    
+                    self?.showToast("단어가 추가 되었습니다.", duration: .short)
                     print("입력 필드가 초기화되었습니다.")
                 })
                 .disposed(by: disposeBag)
