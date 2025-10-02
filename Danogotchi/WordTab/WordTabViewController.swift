@@ -18,6 +18,7 @@ final class WordTabViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - UI 프로퍼티
     private let addWordButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "plus"), for: .normal)
@@ -37,12 +38,15 @@ final class WordTabViewController: BaseViewController {
         return label
     }()
     private let goCreateWordBookButton = PrimaryFillButton(title: "단어장 만들기")
+    private lazy var collectionView = UICollectionView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
         configLayout()
         configView()
+        
+        configureCollectionView()
         
         bind()
     }
@@ -74,6 +78,8 @@ final class WordTabViewController: BaseViewController {
         // 선택한 단어장의 타이틀 명
 //        navigationItem.title = "토익 테스트 영단어"
     }
+    
+
 }
 
 extension WordTabViewController {
@@ -96,6 +102,13 @@ extension WordTabViewController {
         output.bookTitle
             .drive(navigationItem.rx.title)
             .disposed(by: disposeBag)
+        
+        output.wordItems
+            .drive(collectionView.rx.items(cellIdentifier: WordListCollectionViewCell.id, cellType: WordListCollectionViewCell.self)) { (row, element, cell) in
+                cell.titleLabel.text = element.word
+                cell.subtitleLabel.text = element.meaning
+            }.disposed(by: disposeBag)
+        
         
         addWordButton.rx.tap
             .withLatestFrom(output.bookTitle)
@@ -131,4 +144,44 @@ extension WordTabViewController {
             }.disposed(by: disposeBag)
         
     }
+}
+
+
+// MARK: - CollectionView
+extension WordTabViewController {
+    private func configureCollectionView() {
+
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
+        collectionView.backgroundColor = .systemBackground
+        collectionView.register(WordListCollectionViewCell.self, forCellWithReuseIdentifier: WordListCollectionViewCell.id)
+        
+        view.addSubview(collectionView)
+        collectionView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
+    }
+    
+    private static func layout() -> UICollectionViewLayout {
+        let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .fractionalHeight(1.0))
+        )
+        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(150)
+        )
+        
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        //        section.interGroupSpacing = 50
+        
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        
+        return layout
+    }
+    
+    
 }
