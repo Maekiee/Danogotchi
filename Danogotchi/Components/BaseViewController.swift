@@ -30,11 +30,6 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
     
 }
 
-// MARK: - Toast Presentable Protocol
-protocol ToastPresentable: AnyObject {
-    func showToast(_ message: String, duration: ToastDuration)
-}
-
 extension ToastPresentable where Self: UIViewController {
     func showToast(_ message: String, duration: ToastDuration = .short) {
         var style = ToastStyle()

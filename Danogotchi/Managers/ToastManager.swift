@@ -3,13 +3,6 @@ import Toast
 import RxSwift
 import RxCocoa
 
-//protocol ToastPresentable {
-//    func showToast(_ message: String, duration: ToastDuration)
-//}
-
-
-
-
 enum ToastDuration {
     case short
     case long
@@ -39,13 +32,11 @@ final class ToastManager {
     
     private init() { }
     
-//    private let disposeBag = DisposeBag()
     private let toastRelay = PublishRelay<ToastMessage>()
     
     var toastObservable: Observable<ToastMessage> {
         return toastRelay.asObservable()
     }
-    
     
     func show(_ message: String, duration: ToastDuration = .short) {
         let toast = ToastMessage(message: message, duration: duration)
