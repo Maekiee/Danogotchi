@@ -7,6 +7,7 @@ final class AddWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let wordBookRepo: WordBookRepositoryProtocol
     private let wordRepo: WordRepositoryProtocol
+    private let userInfoManager = UserInfoManager.shared
     
     private var isWordBookId: ObjectId?
     
@@ -166,6 +167,10 @@ final class AddWordViewModel: BaseViewModel {
             wordBookId = newWordBookId
             
             self.isWordBookId = newWordBookId
+            
+            // 유저 디폴트에 추가한 단어장 아이디 넣기
+            print("새로 생성한 단어장 아이디 유저 디볼트에 넣기")
+            userInfoManager.selectedWordBook = newWordBookId.stringValue
         }
         
         let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)

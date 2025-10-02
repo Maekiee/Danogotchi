@@ -24,6 +24,12 @@ final class WordBookRepository: WordBookRepositoryProtocol {
         return realm.object(ofType: WordBook.self, forPrimaryKey: id)
     }
     
+    // 특정 단어장의 단어들 가져오기
+    func fetchWordsInWordBook(id: ObjectId) -> [Word] {
+        guard let wordBook = read(id: id) else { return [] }
+        return Array(wordBook.wordList)
+    }
+    
     // 단어장 수정: 타이틀, 학습 상태
     func update(id: ObjectId, title: String) {
         guard let wordBook = read(id: id) else { return }

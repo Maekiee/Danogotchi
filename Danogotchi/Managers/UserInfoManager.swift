@@ -8,6 +8,7 @@ final class UserInfoManager: UserInfoProtocol {
     private enum Keys {
         static let username = "username"
         static let userId = "userId"
+        static let wordBookId = "WordBookId"
     }
     
     var username: String? {
@@ -30,6 +31,17 @@ final class UserInfoManager: UserInfoProtocol {
         
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.userId)
+        }
+    }
+    
+    var selectedWordBook: String? {
+        get {
+            guard let wordBookId = UserDefaults.standard.string(forKey: Keys.wordBookId) else { return nil }
+            return wordBookId
+        }
+        
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.wordBookId)
         }
     }
     

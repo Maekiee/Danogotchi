@@ -5,7 +5,16 @@ import RxCocoa
 
 final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel = WordTabViewModel()
+    private let viewModel: WordTabViewModel
+    
+    init(viewModel: WordTabViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private let addWordButton: UIButton = {
         let button = UIButton(type: .system)
@@ -13,7 +22,7 @@ final class WordTabViewController: BaseViewController {
         button.tintColor = .systemBlue
         return button
     }()
-    private let shoWordBookButton: UIButton = {
+    private let showWordBookButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
         button.tintColor = .systemBlue
@@ -56,18 +65,35 @@ final class WordTabViewController: BaseViewController {
     }
     
     override func configView() {
-        let firstBarButton = UIBarButtonItem(customView: shoWordBookButton)
+        let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
         let secondBarButton = UIBarButtonItem(customView: addWordButton)
         navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
         
-        navigationItem.title = "토익 테스트 영단어"
+        // 선택한 단어장의 타이틀 명
+//        navigationItem.title = "토익 테스트 영단어"
     }
 }
 
 extension WordTabViewController {
     private func bind() {
-        let input = WordTabViewModel.Input()
+        let input = WordTabViewModel.Input(
+            viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+        )
         let output = viewModel.transform(input: input)
+        
+        output.selectedWordBookId
+            .drive(with: self) { owner, hasWordBook in
+                owner.addWordButton.isHidden = hasWordBook
+                owner.showWordBookButton.isHidden = hasWordBook
+                owner.noWordBookLabel.isHidden = !hasWordBook
+                owner.goCreateWordBookButton.isHidden = !hasWordBook
+                
+                if hasWordBook {
+                    owner.navigationItem.title = "단어장 만들기"
+                }
+                
+            }
+            .disposed(by: disposeBag)
         
         
         addWordButton.rx.tap
@@ -78,11 +104,12 @@ extension WordTabViewController {
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
-        shoWordBookButton.rx.tap
+        showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 let vc = WordBookListViewController()
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
+        
         
         goCreateWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
