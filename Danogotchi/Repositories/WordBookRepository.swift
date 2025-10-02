@@ -25,9 +25,9 @@ final class WordBookRepository: WordBookRepositoryProtocol {
     }
     
     // 특정 단어장의 단어들 가져오기
-    func fetchWordsInWordBook(id: ObjectId) -> [Word] {
+    func fetchWordsInWordBook(id: ObjectId) -> [WordModel] {
         guard let wordBook = read(id: id) else { return [] }
-        return Array(wordBook.wordList)
+        return wordBook.wordList.map { $0.toStruct() }
     }
     
     // 단어장 수정: 타이틀, 학습 상태

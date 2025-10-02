@@ -24,16 +24,32 @@ final class WordTabViewModel: BaseViewModel {
     
     struct Output {
         let selectedWordBookId: Driver<Bool>
+        let bookTitle: Driver<String>
+        let wordItems: Driver<[WordModel]>
     }
     
     func transform(input: Input) -> Output {
         let selectedWordBook = BehaviorRelay(value: true)
+        let bookTitle = BehaviorRelay<String>(value: "")
+        let wordItems = BehaviorRelay<[WordModel]>(value: [])
+        
+        // viewDidLoad 시점
         if let wordBookId = userInfo.selectedWordBook,
            let bookId = try? ObjectId(string: wordBookId) {
-            // 선택된 단어장이 이미 있으면 선택된 단어장 불러오기
-            let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId)
-            print("단어 리스트>>>\(wordList)")
             selectedWordBook.accept(false)
+            
+            if let wordBook = wordBookRepo.read(id: bookId) {
+                bookTitle.accept(wordBook.title)
+            }
+            
+            let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId)
+            print(" ================ 단어 리스트 ================")
+            dump(wordList)
+            print(" ==========================================")
+            wordItems.accept(wordList)
+            
+            // 단어장 0개인지 아닌지 체크
+            
         } else {
             print("유저 디볼트에 값이 없나요?")
             selectedWordBook.accept(true)
@@ -55,7 +71,9 @@ final class WordTabViewModel: BaseViewModel {
         
         
         return Output(
-            selectedWordBookId: selectedWordBook.asDriver()
+            selectedWordBookId: selectedWordBook.asDriver(),
+            bookTitle: bookTitle.asDriver(onErrorJustReturn: ""),
+            wordItems: wordItems.asDriver()
         )
     }
 }

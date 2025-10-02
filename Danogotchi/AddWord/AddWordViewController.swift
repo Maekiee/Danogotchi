@@ -7,9 +7,12 @@ import Kingfisher
 final class AddWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: AddWordViewModel
+    private let initWordBookTitle: String
     
-    init(viewModel: AddWordViewModel) {
+    init(viewModel: AddWordViewModel,
+         initWordBookTitle: String = "") {
         self.viewModel = viewModel
+        self.initWordBookTitle = initWordBookTitle
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -108,7 +111,6 @@ final class AddWordViewController: BaseViewController {
         textFieldStackView.snp.makeConstraints { make in
             make.top.equalTo(thumbnail.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(20)
-//            make.bottom.lessThanOrEqualToSuperview().offset(-20)
         }
         
         addWordButton.snp.makeConstraints { make in
@@ -120,6 +122,10 @@ final class AddWordViewController: BaseViewController {
     }
     
     override func configView() {
+        
+        // 여기 수정
+        wordBookTitleTextField.text = initWordBookTitle
+        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"),
             style: .plain,

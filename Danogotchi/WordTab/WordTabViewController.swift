@@ -1,11 +1,13 @@
 import UIKit
 import SnapKit
+import RealmSwift
 import RxSwift
 import RxCocoa
 
 final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordTabViewModel
+    private let userInfo = UserInfoManager.shared
     
     init(viewModel: WordTabViewModel) {
         self.viewModel = viewModel
@@ -85,21 +87,30 @@ extension WordTabViewController {
             .drive(with: self) { owner, hasWordBook in
                 owner.addWordButton.isHidden = hasWordBook
                 owner.showWordBookButton.isHidden = hasWordBook
+                
                 owner.noWordBookLabel.isHidden = !hasWordBook
                 owner.goCreateWordBookButton.isHidden = !hasWordBook
-                
-                if hasWordBook {
-                    owner.navigationItem.title = "단어장 만들기"
-                }
-                
             }
             .disposed(by: disposeBag)
         
+        output.bookTitle
+            .drive(navigationItem.rx.title)
+            .disposed(by: disposeBag)
         
         addWordButton.rx.tap
-            .bind(with: self) { owner, _ in
-                let vm = AddWordViewModel() // 여기에는 선택한 단어장의 pk 주입
-                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
+            .withLatestFrom(output.bookTitle)
+            .do { text in
+                print("값이 왓나..?: \(text)")
+            }
+            .bind(with: self) { owner, bookTitle in
+                guard let bookId = owner.userInfo.selectedWordBook else { return }
+                let bookObjectId = try? ObjectId(string: bookId)
+                // 여기에는 선택한 단어장의 pk 주입
+                let vm = AddWordViewModel(isWordBookId: bookObjectId)
+                let vc = UINavigationController(rootViewController: AddWordViewController(
+                    viewModel: vm,
+                    initWordBookTitle: bookTitle)
+                )
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
