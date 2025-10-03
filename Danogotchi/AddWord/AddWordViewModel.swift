@@ -10,13 +10,17 @@ final class AddWordViewModel: BaseViewModel {
     private let userInfoManager = UserInfoManager.shared
     
     private var isWordBookId: ObjectId?
+    private let wordItem: CreateWordModel?
     
     
-    init(isWordBookId: ObjectId? = nil,
+    init(
+//        isWordBookId: ObjectId? = nil,
+         wordItem: CreateWordModel? = nil,
          wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
          wordRepo: WordRepositoryProtocol = WordRepository()
     ) {
-        self.isWordBookId = isWordBookId
+//        self.isWordBookId = isWordBookId
+        self.wordItem = wordItem
         self.wordBookRepo = wordBookRepo
         self.wordRepo = wordRepo
     }
@@ -36,6 +40,7 @@ final class AddWordViewModel: BaseViewModel {
         let translateWord: Driver<String>
         let isValidSave: Driver<Bool>
         let resetTrigger: Signal<Void>
+        let bookTitle: Driver<String>
     }
     
     func transform(input: Input) -> Output {
@@ -47,11 +52,22 @@ final class AddWordViewModel: BaseViewModel {
         let isValidSaved = BehaviorRelay<Bool>(value: false)
         let meanText = BehaviorRelay<String>(value: "")
         let resetTrigger = PublishRelay<Void>()
+        let bookTitleText = BehaviorRelay<String>(value: "")
+        
+        if let item = wordItem {
+            wordImageUrl.accept(item.thumbnail)
+            bookTitleText.accept(item.bookTitle)
+            validWord.accept(item.word)
+            meanText.accept(item.meaning)
+        }
         
         // 단어장 이름
-        let wordBookTitle = input.wordBookTitleTextField
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        let wordBookTitle = Observable.merge(
+            bookTitleText.asObservable(),
+            input.wordBookTitleTextField
+        ).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .share()
+            
         
         // 단어
         let learningWord = input.wordTextField
@@ -144,14 +160,15 @@ final class AddWordViewModel: BaseViewModel {
             itemSet: Observable.combineLatest(wordImageItems, wordText),
             translateWord: translatedWord.asDriver(onErrorJustReturn: ""),
             isValidSave: isValidSaved.asDriver(),
-            resetTrigger: resetTrigger.asSignal()
+            resetTrigger: resetTrigger.asSignal(),
+            bookTitle: bookTitleText.asDriver(onErrorJustReturn: "")
         )
     }
     
     private func saveWord(wordBookTitle: String, url: String, word: String, meaning: String) {
         let wordBookId: ObjectId
         
-        if let id = isWordBookId {
+        if let id = wordItem?.wordBookId {
             // 기존 단어장 타이틀 업데이트
             wordBookRepo.update(id: id, title: wordBookTitle)
             wordBookId = id

@@ -7,12 +7,9 @@ import Kingfisher
 final class AddWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: AddWordViewModel
-    private let initWordBookTitle: String
-    
-    init(viewModel: AddWordViewModel,
-         initWordBookTitle: String = "") {
+
+    init(viewModel: AddWordViewModel) {
         self.viewModel = viewModel
-        self.initWordBookTitle = initWordBookTitle
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -124,7 +121,7 @@ final class AddWordViewController: BaseViewController {
     override func configView() {
         
         // 여기 수정
-        wordBookTitleTextField.text = initWordBookTitle
+//        wordBookTitleTextField.text = 
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"),
@@ -177,6 +174,10 @@ extension AddWordViewController {
                 }
                 
             }.disposed(by: disposeBag)
+        
+        output.bookTitle
+            .drive(wordBookTitleTextField.rx.text)
+            .disposed(by: disposeBag)
         
         output.translateWord
             .drive(meanTextField.rx.placeholder)

@@ -31,6 +31,12 @@ final class WordListCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        disposeBag = DisposeBag()
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configHierarchy()

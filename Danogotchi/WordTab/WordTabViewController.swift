@@ -9,6 +9,7 @@ final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordTabViewModel
     private let userInfo = UserInfoManager.shared
+    private var bookTitle = ""
     
     private enum Section {
         case main
@@ -125,21 +126,26 @@ extension WordTabViewController {
                 owner.applySnapshot(items: items)
             }.disposed(by: disposeBag)
         
-        
+        // 단어 추가
         addWordButton.rx.tap
             .withLatestFrom(output.bookTitle)
-            .do { text in
-                print("값이 왓나..?: \(text)")
-            }
             .bind(with: self) { owner, bookTitle in
-                guard let bookId = owner.userInfo.selectedWordBook else { return }
-                let bookObjectId = try? ObjectId(string: bookId)
-                // 여기에는 선택한 단어장의 pk 주입
-                let vm = AddWordViewModel(isWordBookId: bookObjectId)
-                let vc = UINavigationController(rootViewController: AddWordViewController(
-                    viewModel: vm,
-                    initWordBookTitle: bookTitle)
+                owner.bookTitle = bookTitle
+                guard let bookObjectId = owner.userInfo.selectedWordBook
+                    .flatMap({ try? ObjectId(string: $0) }) else { return }
+                
+                let createWordModel = CreateWordModel(
+                    wordBookId: bookObjectId,
+                    thumbnail: "",
+                    bookTitle: bookTitle,
+                    word: "",
+                    meaning: ""
                 )
+                
+              
+                // 여기에는 선택한 단어장의 pk 주입
+                let vm = AddWordViewModel(wordItem: createWordModel)
+                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
@@ -151,6 +157,7 @@ extension WordTabViewController {
             }.disposed(by: disposeBag)
         
         
+        // 단어장 생성
         goCreateWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 let vm = AddWordViewModel()
@@ -169,15 +176,24 @@ extension WordTabViewController {
         let cellRegistration = UICollectionView.CellRegistration<WordListCollectionViewCell, WordModel> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                print("셀 아이콘 텝텝\(item.meaning)")
                 owner.showActionSheet(
                     title: item.word,
                     editAction: { [weak self] in
-                        guard let self = self else { return }
-                        print("수정수정")
-                        // 단어 추가 화면으로 이동
-                        // 단어장 이름, 아미지, 단어, 뜻 전달
-//                        self?.editWord(item)
+                        guard let _ = self else { return }
+                        guard let bookObjectId = owner.userInfo.selectedWordBook
+                            .flatMap({ try? ObjectId(string: $0) }) else { return }
+                        
+                        let createWordModel = CreateWordModel(
+                            wordBookId: bookObjectId,
+                            thumbnail: item.thumbnail,
+                            bookTitle: owner.bookTitle, // 여기
+                            word: item.word,
+                            meaning: item.meaning
+                        )
+                        let vm = AddWordViewModel(wordItem: createWordModel)
+                        let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
+                        vc.modalPresentationStyle = .fullScreen
+                        owner.present(vc, animated: true)
                     },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }

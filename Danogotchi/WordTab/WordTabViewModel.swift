@@ -67,12 +67,12 @@ final class WordTabViewModel: BaseViewModel {
                     guard let bookId = owner.userInfo.selectedWordBook else { return }
                     let bookObjectId = try! ObjectId(string: bookId)
                     
+                    // 단어장 타이틀 업데이트
                     if let wordBook = owner.wordBookRepo.read(id: bookObjectId) {
                         bookTitle.accept(wordBook.title)
                     }
                     
                     // 단어 리스트 업데이트
-                    
                     let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
                     wordItems.accept(Array(wordList))
                     hasLearningWordBook.accept(false)
