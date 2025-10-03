@@ -14,12 +14,10 @@ final class AddWordViewModel: BaseViewModel {
     
     
     init(
-//        isWordBookId: ObjectId? = nil,
-         wordItem: CreateWordModel? = nil,
-         wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
-         wordRepo: WordRepositoryProtocol = WordRepository()
+        wordItem: CreateWordModel? = nil,
+        wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
+        wordRepo: WordRepositoryProtocol = WordRepository()
     ) {
-//        self.isWordBookId = isWordBookId
         self.wordItem = wordItem
         self.wordBookRepo = wordBookRepo
         self.wordRepo = wordRepo
@@ -55,6 +53,7 @@ final class AddWordViewModel: BaseViewModel {
         let bookTitleText = BehaviorRelay<String>(value: "")
         
         if let item = wordItem {
+            print("실해영@@ㄴ")
             wordImageUrl.accept(item.thumbnail)
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
@@ -64,10 +63,10 @@ final class AddWordViewModel: BaseViewModel {
         // 단어장 이름
         let wordBookTitle = Observable.merge(
             bookTitleText.asObservable(),
-            input.wordBookTitleTextField
-        ).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            input.wordBookTitleTextField)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .share()
-            
+        
         
         // 단어
         let learningWord = input.wordTextField
@@ -141,13 +140,14 @@ final class AddWordViewModel: BaseViewModel {
         // 저장 버튼
         input.savedButtonTapped
             .withLatestFrom(allInputData)
+            .do { print("🔵 saveButton : '\($0)'") }
             .bind(with: self) { owner, validData in
-                let (url, word, wordBookTitle, mean, translateWord) = validData
-                let finalMeaning = !mean.isEmpty ? mean : translateWord
+                let (imageUrl, word, bookTitle, mean, translate) = validData
+                let finalMeaning = !mean.isEmpty ? mean : translate
                 
                 owner.saveWord(
-                    wordBookTitle: wordBookTitle,
-                    url: url,
+                    wordBookTitle: bookTitle,
+                    url: imageUrl,
                     word: word,
                     meaning: finalMeaning)
                 

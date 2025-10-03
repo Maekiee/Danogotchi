@@ -5,6 +5,7 @@ import RxSwift
 import RxCocoa
 import Kingfisher
 
+
 final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordTabViewModel
