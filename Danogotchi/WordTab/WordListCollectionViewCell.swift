@@ -30,6 +30,13 @@ final class WordListCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func configure(with item: WordModel) {
+        titleLabel.text = item.word
+        subtitleLabel.text = item.meaning
+        let url = URL(string: item.thumbnail)
+        thumbnail.kf.setImage(with: url)
+    }
 }
 
 
@@ -63,10 +70,8 @@ extension WordListCollectionViewCell: UIConfigurationLayout {
         }
         
         subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(4)
-            make.leading.equalToSuperview().offset(4)
-            make.trailing.equalToSuperview().inset(4)
-            make.bottom.lessThanOrEqualToSuperview().inset(4)
+            make.top.equalTo(thumbnail.snp.bottom).offset(4)
+            make.leading.equalTo(titleLabel.snp.trailing).offset(8)
         }
     }
     

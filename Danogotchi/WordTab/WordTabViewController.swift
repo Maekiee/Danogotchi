@@ -3,11 +3,22 @@ import SnapKit
 import RealmSwift
 import RxSwift
 import RxCocoa
+import Kingfisher
 
 final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordTabViewModel
     private let userInfo = UserInfoManager.shared
+    
+    private enum Section {
+        case main
+    }
+    
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordModel>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordModel>
+    
+    private var dataSource: DataSource!
+    
     
     init(viewModel: WordTabViewModel) {
         self.viewModel = viewModel
@@ -38,23 +49,22 @@ final class WordTabViewController: BaseViewController {
         return label
     }()
     private let goCreateWordBookButton = PrimaryFillButton(title: "단어장 만들기")
-    private lazy var collectionView = UICollectionView()
+    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
         configLayout()
         configView()
-        
-        configureCollectionView()
-        
+        configDataSource()
         bind()
     }
     
     override func configHierarchy() {
         [
             noWordBookLabel,
-            goCreateWordBookButton
+            goCreateWordBookButton,
+            collectionView
         ].forEach { view.addSubview($0) }
     }
     
@@ -68,18 +78,17 @@ final class WordTabViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(40)
         }
+        
+        collectionView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
     }
     
     override func configView() {
         let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
         let secondBarButton = UIBarButtonItem(customView: addWordButton)
         navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
-        
-        // 선택한 단어장의 타이틀 명
-//        navigationItem.title = "토익 테스트 영단어"
     }
-    
-
 }
 
 extension WordTabViewController {
@@ -104,9 +113,8 @@ extension WordTabViewController {
             .disposed(by: disposeBag)
         
         output.wordItems
-            .drive(collectionView.rx.items(cellIdentifier: WordListCollectionViewCell.id, cellType: WordListCollectionViewCell.self)) { (row, element, cell) in
-                cell.titleLabel.text = element.word
-                cell.subtitleLabel.text = element.meaning
+            .drive(with: self) { owner, items in
+                owner.applySnapshot(items: items)
             }.disposed(by: disposeBag)
         
         
@@ -149,17 +157,26 @@ extension WordTabViewController {
 
 // MARK: - CollectionView
 extension WordTabViewController {
-    private func configureCollectionView() {
-
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
-        collectionView.backgroundColor = .systemBackground
-        collectionView.register(WordListCollectionViewCell.self, forCellWithReuseIdentifier: WordListCollectionViewCell.id)
+    private func configDataSource() {
+        let cellRegistration = UICollectionView.CellRegistration<WordListCollectionViewCell, WordModel> { cell, indexPath, item in
+            cell.configure(with: item)
+        }
         
-        view.addSubview(collectionView)
-        collectionView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+        dataSource = DataSource(collectionView: collectionView) { collectionView, indexPath, itemIdentifier in
+            return collectionView.dequeueConfiguredReusableCell(
+                using: cellRegistration,
+                for: indexPath,
+                item: itemIdentifier)
         }
     }
+    
+    private func applySnapshot(items: [WordModel]) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(items)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
     
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
@@ -176,12 +193,9 @@ extension WordTabViewController {
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
-        //        section.interGroupSpacing = 50
         
         let layout = UICollectionViewCompositionalLayout(section: section)
         
         return layout
     }
-    
-    
 }
