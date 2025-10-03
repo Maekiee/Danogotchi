@@ -49,7 +49,14 @@ final class WordTabViewController: BaseViewController {
         return label
     }()
     private let goCreateWordBookButton = PrimaryFillButton(title: "단어장 만들기")
-    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
+    private let collectionView: UICollectionView = {
+        let view = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
+        view.showsVerticalScrollIndicator = false
+        return view
+    }()
+    
+    private let deleteWordTrigger = PublishRelay<WordModel>()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -94,11 +101,12 @@ final class WordTabViewController: BaseViewController {
 extension WordTabViewController {
     private func bind() {
         let input = WordTabViewModel.Input(
-            viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+            viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
+            selectedWordCard: deleteWordTrigger.asObservable()
         )
         let output = viewModel.transform(input: input)
         
-        output.selectedWordBookId
+        output.currentWordbook
             .drive(with: self) { owner, hasWordBook in
                 owner.addWordButton.isHidden = hasWordBook
                 owner.showWordBookButton.isHidden = hasWordBook
@@ -160,6 +168,23 @@ extension WordTabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<WordListCollectionViewCell, WordModel> { cell, indexPath, item in
             cell.configure(with: item)
+            cell.onTouchTopIcon.bind(with: self) { owner, _ in
+                print("셀 아이콘 텝텝\(item.meaning)")
+                owner.showActionSheet(
+                    title: item.word,
+                    editAction: { [weak self] in
+                        guard let self = self else { return }
+                        print("수정수정")
+                        // 단어 추가 화면으로 이동
+                        // 단어장 이름, 아미지, 단어, 뜻 전달
+//                        self?.editWord(item)
+                    },
+                    deleteAction: { [weak self] in
+                        guard let self = self else { return }
+                        deleteWordTrigger.accept(item)
+                    }
+                )
+            }.disposed(by: cell.disposeBag)
         }
         
         dataSource = DataSource(collectionView: collectionView) { collectionView, indexPath, itemIdentifier in
@@ -183,11 +208,11 @@ extension WordTabViewController {
             widthDimension: .fractionalWidth(1),
             heightDimension: .fractionalHeight(1.0))
         )
-        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(150)
+            heightDimension: .absolute(200)
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])

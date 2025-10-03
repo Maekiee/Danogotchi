@@ -1,9 +1,40 @@
-//
-//  AlertUtil.swift
-//  Danogotchi
-//
-//  Created by 박도원 on 10/3/25.
-//
+import UIKit
 
-import Foundation
-AlertUtils
+enum AlertUtils {
+    static func showActionSheet(
+        on viewController: UIViewController,
+        title: String? = nil,
+        message: String? = nil,
+        editAction: (() -> Void)? = nil,
+        deleteAction: (() -> Void)? = nil
+    ) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .actionSheet
+        )
+        
+        // 수정하기
+        if let editAction = editAction {
+            let edit = UIAlertAction(title: "수정하기", style: .default) { _ in
+                editAction()
+            }
+            alert.addAction(edit)
+        }
+        
+        // 지우기
+        if let deleteAction = deleteAction {
+            let delete = UIAlertAction(title: "지우기", style: .destructive) { _ in
+                deleteAction()
+            }
+            alert.addAction(delete)
+        }
+        
+        // 취소
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        alert.addAction(cancel)
+        
+        viewController.present(alert, animated: true)
+    }
+}
+

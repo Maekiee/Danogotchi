@@ -1,12 +1,20 @@
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
 
 /// 재사용 가능한 셀
-/// 단어 리스트, 단어장 리스트, 학습완료 화면 단어 리스트 등등
 final class WordListCollectionViewCell: UICollectionViewCell {
-    static let id = "WordListCollectionViewCell"
-    let thumbnail = UIImageView()
+    var disposeBag = DisposeBag()
+    var onTouchTopIcon: Observable<Void> {
+        return iconButton.rx.tap.asObservable()
+    }
+    
+    let thumbnail: UIImageView = {
+        let imageView = UIImageView()
+        return imageView
+    }()
     let titleLabel: UILabel = {
         let label = UILabel()
         return label
@@ -17,6 +25,9 @@ final class WordListCollectionViewCell: UICollectionViewCell {
     }()
     let iconButton: UIButton = {
         let button = UIButton()
+        var config = UIButton.Configuration.gray()
+        config.image = UIImage(systemName: "ellipsis")
+        button.configuration = config
         return button
     }()
     
@@ -29,6 +40,12 @@ final class WordListCollectionViewCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // contentView의 경계를 벗어나는 내용은 잘라냅니다.
+        contentView.clipsToBounds = true
     }
     
     func configure(with item: WordModel) {
@@ -52,9 +69,9 @@ extension WordListCollectionViewCell: UIConfigurationLayout {
     
     func configLayout() {
         thumbnail.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(4)
-            make.horizontalEdges.equalToSuperview().offset(4)
-            make.height.equalTo(100)
+            make.top.equalToSuperview()
+            make.horizontalEdges.equalToSuperview()
+            make.height.equalTo(120)
         }
         
         iconButton.snp.makeConstraints { make in
@@ -77,5 +94,6 @@ extension WordListCollectionViewCell: UIConfigurationLayout {
     
     func configView() {
         backgroundColor = .yellow
+        
     }
 }

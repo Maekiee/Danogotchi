@@ -20,60 +20,83 @@ final class WordTabViewModel: BaseViewModel {
     
     struct Input {
         let viewWillAppear: Observable<Void>
+        let selectedWordCard: Observable<WordModel>
     }
     
     struct Output {
-        let selectedWordBookId: Driver<Bool>
+        let currentWordbook: Driver<Bool>
         let bookTitle: Driver<String>
         let wordItems: Driver<[WordModel]>
     }
     
     func transform(input: Input) -> Output {
-        let selectedWordBook = BehaviorRelay(value: true)
+        let hasLearningWordBook = BehaviorRelay(value: true)
         let bookTitle = BehaviorRelay<String>(value: "")
         let wordItems = BehaviorRelay<[WordModel]>(value: [])
         
-        // viewDidLoad 시점
+        // viewDidLoad
         if let wordBookId = userInfo.selectedWordBook,
            let bookId = try? ObjectId(string: wordBookId) {
-            selectedWordBook.accept(false)
+            hasLearningWordBook.accept(false)
             
+            // 단어장 타이틀
             if let wordBook = wordBookRepo.read(id: bookId) {
                 bookTitle.accept(wordBook.title)
             }
             
-            let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId)
-            print(" ================ 단어 리스트 ================")
-            dump(wordList)
-            print(" ==========================================")
-            wordItems.accept(wordList)
+            // 단어장 단어 리스트
+            let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
+            wordItems.accept(Array(wordList))
             
             // 단어장 0개인지 아닌지 체크
-            
         } else {
             print("유저 디볼트에 값이 없나요?")
-            selectedWordBook.accept(true)
+            hasLearningWordBook.accept(true)
         }
-        
         
         input.viewWillAppear
             .skip(1)
             .bind(with: self) { owner, _ in
+                // 전체 단어장 불러오기
                 let allWordBook = owner.wordBookRepo.readAll()
                 if allWordBook.isEmpty {
-                    print("단어장 없음")
-                    selectedWordBook.accept(true)
+                    // 단어장 없는 경우
+                    hasLearningWordBook.accept(true)
                 } else {
-                    print("단어장 있음")
-                    selectedWordBook.accept(false)
+                    // 단어장 있는 경우
+                    guard let bookId = owner.userInfo.selectedWordBook else { return }
+                    let bookObjectId = try! ObjectId(string: bookId)
+                    
+                    if let wordBook = owner.wordBookRepo.read(id: bookObjectId) {
+                        bookTitle.accept(wordBook.title)
+                    }
+                    
+                    // 단어 리스트 업데이트
+                    
+                    let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
+                    wordItems.accept(Array(wordList))
+                    hasLearningWordBook.accept(false)
                 }
+            }.disposed(by: disposeBag)
+        
+        input.selectedWordCard
+            .bind(with: self) { owner, wordCard in
+                // UI에서 지우기
+                let filteredList = wordItems.value.filter { $0.id != wordCard.id }
+                wordItems.accept(filteredList)
+                
+                // 디비에서 지우기
+                let wordId = try! ObjectId(string: wordCard.id)
+                owner.wordRepo.delete(id: wordId)
             }.disposed(by: disposeBag)
         
         
         return Output(
-            selectedWordBookId: selectedWordBook.asDriver(),
+            currentWordbook: hasLearningWordBook.asDriver(),
             bookTitle: bookTitle.asDriver(onErrorJustReturn: ""),
             wordItems: wordItems.asDriver()
         )
     }
+    
+
 }
