@@ -65,8 +65,22 @@ final class AddWordViewModel: BaseViewModel {
             wordImageUrl.accept(item.thumbnail)
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
+            wordText.accept(item.word)
             meanText.accept(item.meaning)
             actionType.accept(item.actionType)
+            
+            if item.actionType == .edit && !item.word.isEmpty {
+                    ApiService.searchPhoto(api: .searchPhoto(word: item.word, page: 1), type: SearchPhotoDTO.self)
+                        .subscribe { result in
+                            switch result {
+                            case .success(let value):
+                                wordImageItems.accept(value)
+                            case .failure:
+                                print("이미지 검색 실패")
+                            }
+                        }.disposed(by: disposeBag)
+                }
+            
         }
         
         // 단어장 이름
