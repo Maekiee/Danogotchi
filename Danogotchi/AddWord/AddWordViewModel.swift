@@ -53,6 +53,7 @@ final class AddWordViewModel: BaseViewModel {
         let meanText = BehaviorRelay<String>(value: "")
         let resetTrigger = PublishRelay<Void>()
         let bookTitleText = BehaviorRelay<String>(value: "")
+        let actionType = BehaviorRelay<EntryPoint>(value: .add)
         
         if let item = wordItem {
             print("넘겨 받음음")
@@ -65,6 +66,7 @@ final class AddWordViewModel: BaseViewModel {
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
             meanText.accept(item.meaning)
+            actionType.accept(item.actionType)
         }
         
         // 단어장 이름
@@ -152,11 +154,16 @@ final class AddWordViewModel: BaseViewModel {
                 let (imageUrl, word, bookTitle, mean, translate) = validData
                 let finalMeaning = !mean.isEmpty ? mean : translate
                 
+                
+                let actionType = actionType.value
+                
                 owner.saveWord(
+                    actionType: actionType,
                     wordBookTitle: bookTitle,
                     url: imageUrl,
                     word: word,
                     meaning: finalMeaning)
+                
                 
                 translatedWord.accept("")
                 resetTrigger.accept(())
@@ -174,7 +181,7 @@ final class AddWordViewModel: BaseViewModel {
         )
     }
     
-    private func saveWord(wordBookTitle: String, url: String, word: String, meaning: String) {
+    private func saveWord(actionType: EntryPoint, wordBookTitle: String, url: String, word: String, meaning: String) {
         let wordBookId: ObjectId
         
         if let id = wordItem?.wordBookId {
@@ -186,21 +193,26 @@ final class AddWordViewModel: BaseViewModel {
             wordBookRepo.create(title: wordBookTitle)
             
             guard let newWordBook = wordBookRepo.readAll().last else {
-                print("단어 생성 후 ID 못가져옴")
+                print("단어장 생성 실패")
                 return
             }
-            let newWordBookId = newWordBook.id
-            wordBookId = newWordBookId
-            
-            self.isWordBookId = newWordBookId
-            
-            // 유저 디폴트에 추가한 단어장 아이디 넣기
-            print("새로 생성한 단어장 아이디 유저 디볼트에 넣기")
-            userInfoManager.selectedWordBook = newWordBookId.stringValue
+            wordBookId = newWordBook.id
+            userInfoManager.selectedWordBook = newWordBook.id.stringValue
         }
         
-        let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
+        switch actionType {
+        case .add:
+            let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
+            wordBookRepo.addWord(bookId: wordBookId, word: newWord)
+        case .edit:
+            // 단어 수정
+            guard let wordId = wordItem?.wordId else {
+                print("수정할 단어 ID 없음")
+                return
+            }
+            wordRepo.update(id: wordId, thumbnail: url, word: word, meaning: meaning)
+        }
         
-        wordBookRepo.addWord(bookId: wordBookId, word: newWord)
+        
     }
 }

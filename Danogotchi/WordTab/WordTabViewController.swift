@@ -141,15 +141,17 @@ extension WordTabViewController {
                 
                 let createWordModel = CreateWordModel(
                     wordBookId: bookObjectId,
+                    wordId: nil,
                     thumbnail: "",
                     bookTitle: owner.bookTitle,
                     word: "",
-                    meaning: ""
+                    meaning: "",
+                    actionType: .add
                 )
                 
                 // 여기에는 선택한 단어장의 pk 주입
                 let vm = AddWordViewModel(wordItem: createWordModel)
-                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
+                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .add))
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
@@ -165,7 +167,7 @@ extension WordTabViewController {
         goCreateWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 let vm = AddWordViewModel()
-                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
+                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .add))
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
@@ -189,13 +191,15 @@ extension WordTabViewController {
                         
                         let createWordModel = CreateWordModel(
                             wordBookId: bookObjectId,
+                            wordId: try! ObjectId(string: item.id),
                             thumbnail: item.thumbnail,
                             bookTitle: owner.bookTitle, // 여기
                             word: item.word,
-                            meaning: item.meaning
+                            meaning: item.meaning,
+                            actionType: .edit
                         )
                         let vm = AddWordViewModel(wordItem: createWordModel)
-                        let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
+                        let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .edit))
                         vc.modalPresentationStyle = .fullScreen
                         owner.present(vc, animated: true)
                     },

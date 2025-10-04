@@ -7,9 +7,11 @@ import Kingfisher
 final class AddWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: AddWordViewModel
+    private let entryPoint: EntryPoint
 
-    init(viewModel: AddWordViewModel) {
+    init(viewModel: AddWordViewModel, entryPoint: EntryPoint) {
         self.viewModel = viewModel
+        self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -65,7 +67,7 @@ final class AddWordViewController: BaseViewController {
         tf.isUserInteractionEnabled = true
         return tf
     }()
-    private let addWordButton = PrimaryFillButton(title: "저장")
+    private lazy var addWordButton = PrimaryFillButton(title: self.entryPoint == .add ? "저장" : "수정")
 
     override func viewDidLoad() {
         super.viewDidLoad()
