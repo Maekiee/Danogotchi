@@ -108,6 +108,11 @@ extension WordTabViewController {
         )
         let output = viewModel.transform(input: input)
         
+        output.bookTitle
+            .drive(with: self) { owner, title in
+                owner.bookTitle = title
+            }.disposed(by: disposeBag)
+        
         output.currentWordbook
             .drive(with: self) { owner, hasWordBook in
                 owner.addWordButton.isHidden = hasWordBook
@@ -130,21 +135,18 @@ extension WordTabViewController {
         
         // 단어 추가
         addWordButton.rx.tap
-            .withLatestFrom(output.bookTitle)
-            .bind(with: self) { owner, bookTitle in
-                owner.bookTitle = bookTitle
+            .bind(with: self) { owner, _ in
                 guard let bookObjectId = owner.userInfo.selectedWordBook
                     .flatMap({ try? ObjectId(string: $0) }) else { return }
                 
                 let createWordModel = CreateWordModel(
                     wordBookId: bookObjectId,
                     thumbnail: "",
-                    bookTitle: bookTitle,
+                    bookTitle: owner.bookTitle,
                     word: "",
                     meaning: ""
                 )
                 
-              
                 // 여기에는 선택한 단어장의 pk 주입
                 let vm = AddWordViewModel(wordItem: createWordModel)
                 let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm))
