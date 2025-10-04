@@ -199,14 +199,16 @@ extension AddWordViewController {
         
         output.resetTrigger
                 .emit(onNext: { [weak self] in
+                    guard let self = self else { return }
                     // 단어장 제목을 제외한 나머지 필드를 초기화합니다.
-                    self?.wordTextField.text = ""
-                    self?.meanTextField.text = ""
+                    wordTextField.text = ""
+                    meanTextField.text = ""
                     
                     // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
-                     self?.thumbnail.image = UIImage(systemName: "photo")
+                    thumbnail.image = UIImage(systemName: "photo")
                     
-                    self?.showToast("단어가 추가 되었습니다.", duration: .short)
+                    let message = entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
+                    showToast(message, duration: .short)
                     print("입력 필드가 초기화되었습니다.")
                 })
                 .disposed(by: disposeBag)
