@@ -39,21 +39,28 @@ final class AddWordViewModel: BaseViewModel {
         let isValidSave: Driver<Bool>
         let resetTrigger: Signal<Void>
         let bookTitle: Driver<String>
+        let meanText: Driver<String>
+        let wordTextFieldText: Driver<String>
     }
     
     func transform(input: Input) -> Output {
-        let wordImageUrl = PublishRelay<String>()
+        let wordImageUrl = BehaviorRelay<String>(value: "")
         let wordImageItems = PublishRelay<SearchPhotoDTO>()
-        let wordText = PublishRelay<String>()
-        let validWord = PublishRelay<String>()
-        let translatedWord = PublishRelay<String>()
+        let wordText = BehaviorRelay<String>(value: "")
+        let validWord = BehaviorRelay<String>(value: "")
+        let translatedWord = BehaviorRelay<String>(value: "")
         let isValidSaved = BehaviorRelay<Bool>(value: false)
         let meanText = BehaviorRelay<String>(value: "")
         let resetTrigger = PublishRelay<Void>()
         let bookTitleText = BehaviorRelay<String>(value: "")
         
         if let item = wordItem {
-            print("실해영@@ㄴ")
+            print("넘겨 받음음")
+            print("이미지>>>>\(item.thumbnail)")
+            print("제목>>>>\(item.bookTitle)")
+            print("단어>>>>\(item.word)")
+            print("뜻>>>>>\(item.meaning)")
+            
             wordImageUrl.accept(item.thumbnail)
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
@@ -84,6 +91,7 @@ final class AddWordViewModel: BaseViewModel {
         
         // 뜻
         input.meanTextField
+            .filter { !$0.isEmpty }
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .bind(to: meanText)
             .disposed(by: disposeBag)
@@ -140,7 +148,6 @@ final class AddWordViewModel: BaseViewModel {
         // 저장 버튼
         input.savedButtonTapped
             .withLatestFrom(allInputData)
-            .do { print("🔵 saveButton : '\($0)'") }
             .bind(with: self) { owner, validData in
                 let (imageUrl, word, bookTitle, mean, translate) = validData
                 let finalMeaning = !mean.isEmpty ? mean : translate
@@ -161,7 +168,9 @@ final class AddWordViewModel: BaseViewModel {
             translateWord: translatedWord.asDriver(onErrorJustReturn: ""),
             isValidSave: isValidSaved.asDriver(),
             resetTrigger: resetTrigger.asSignal(),
-            bookTitle: bookTitleText.asDriver(onErrorJustReturn: "")
+            bookTitle: bookTitleText.asDriver(onErrorJustReturn: ""),
+            meanText: meanText.asDriver(onErrorJustReturn: ""),
+            wordTextFieldText: validWord.asDriver(onErrorJustReturn: "")
         )
     }
     
