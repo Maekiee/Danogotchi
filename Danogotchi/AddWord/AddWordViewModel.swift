@@ -86,9 +86,12 @@ final class AddWordViewModel: BaseViewModel {
         // 단어장 이름
         let wordBookTitle = Observable.merge(
             bookTitleText.asObservable(),
-            input.wordBookTitleTextField)
+            input.wordBookTitleTextField
+                .skip(1)
+        )
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .share()
+            .share(replay: 1, scope: .whileConnected)
+        
         
         
         // 단어
