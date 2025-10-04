@@ -112,6 +112,7 @@ extension WordTabViewController {
             .drive(with: self) { owner, hasWordBook in
                 owner.addWordButton.isHidden = hasWordBook
                 owner.showWordBookButton.isHidden = hasWordBook
+                owner.collectionView.isHidden = hasWordBook
                 
                 owner.noWordBookLabel.isHidden = !hasWordBook
                 owner.goCreateWordBookButton.isHidden = !hasWordBook
