@@ -5,7 +5,7 @@ import RxCocoa
 
 
 /// 재사용 가능한 셀
-final class WordListCollectionViewCell: UICollectionViewCell {
+final class WordCardCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     var onTouchTopIcon: Observable<Void> {
         return iconButton.rx.tap.asObservable()
@@ -54,16 +54,20 @@ final class WordListCollectionViewCell: UICollectionViewCell {
         contentView.clipsToBounds = true
     }
     
-    func configure(with item: WordModel) {
-        titleLabel.text = item.word
-        subtitleLabel.text = item.meaning
-        let url = URL(string: item.thumbnail)
-        thumbnail.kf.setImage(with: url)
+    func configure(with item: CardDisplayable) {
+        titleLabel.text = item.cardTitle
+        subtitleLabel.text = item.cardSubtitle
+        if let thumbnailUrl = item.cardThumbnail {
+            thumbnail.kf.setImage(with: URL(string: thumbnailUrl))
+        } else {
+            thumbnail.isHidden = true
+        }
+       
     }
 }
 
 
-extension WordListCollectionViewCell: UIConfigurationLayout {
+extension WordCardCollectionViewCell: UIConfigurationLayout {
     func configHierarchy() {
         [
             thumbnail,

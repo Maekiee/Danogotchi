@@ -56,12 +56,6 @@ final class AddWordViewModel: BaseViewModel {
         let actionType = BehaviorRelay<EntryPoint>(value: .add)
         
         if let item = wordItem {
-            print("넘겨 받음음")
-            print("이미지>>>>\(item.thumbnail)")
-            print("제목>>>>\(item.bookTitle)")
-            print("단어>>>>\(item.word)")
-            print("뜻>>>>>\(item.meaning)")
-            
             wordImageUrl.accept(item.thumbnail)
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
@@ -213,8 +207,8 @@ final class AddWordViewModel: BaseViewModel {
                 print("단어장 생성 실패")
                 return
             }
-            wordBookId = newWordBook.id
-            userInfoManager.selectedWordBook = newWordBook.id.stringValue
+            wordBookId = try! ObjectId(string: newWordBook.id)
+            userInfoManager.selectedWordBook = newWordBook.id
         }
         
         switch actionType {

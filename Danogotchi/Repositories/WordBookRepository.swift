@@ -16,8 +16,11 @@ final class WordBookRepository: WordBookRepositoryProtocol {
         }
     }
     
-    func readAll() -> [WordBook] {
-        return Array(realm.objects(WordBook.self))
+    // 단어장 세트 불러오기
+    func readAll() -> [WordBookModel] {
+        let wordBooks = Array(realm.objects(WordBook.self))
+        return wordBooks.map { $0.toStruct() }
+//        return Array(realm.objects(WordBook.self))
     }
     
     func read(id: ObjectId) -> WordBook? {

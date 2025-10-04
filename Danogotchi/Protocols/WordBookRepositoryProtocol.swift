@@ -3,7 +3,7 @@ import RealmSwift
 
 protocol WordBookRepositoryProtocol {
     func create(title: String)
-    func readAll() -> [WordBook]
+    func readAll() -> [WordBookModel]
     func read(id: ObjectId) -> WordBook?
     func fetchWordsInWordBook(id: ObjectId) -> [WordModel]
     func update(id: ObjectId, title: String)

@@ -158,7 +158,7 @@ extension WordTabViewController {
         
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = WordBookListViewController()
+                let vc = MyBookListViewController()
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
@@ -179,7 +179,7 @@ extension WordTabViewController {
 // MARK: - CollectionView
 extension WordTabViewController {
     private func configDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<WordListCollectionViewCell, WordModel> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordModel> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(

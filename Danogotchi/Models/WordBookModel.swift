@@ -8,7 +8,11 @@ struct WordBookModel: Hashable {
     let createAt: Date
 }
 
-extension WordBookModel {
+extension WordBookModel: CardDisplayable {
+    var cardThumbnail: String? { nil }
+    var cardTitle: String { title }
+    var cardSubtitle: String { "\(wordList.count)개 단어" }
+    
     func toObject() -> WordBook {
         let wordBook = WordBook()
         wordBook.id = try! ObjectId(string: id)

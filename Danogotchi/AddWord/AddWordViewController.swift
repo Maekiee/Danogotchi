@@ -121,10 +121,6 @@ final class AddWordViewController: BaseViewController {
     }
     
     override func configView() {
-        
-        // 여기 수정
-//        wordBookTitleTextField.text = 
-        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"),
             style: .plain,
@@ -200,7 +196,7 @@ extension AddWordViewController {
         output.resetTrigger
                 .emit(onNext: { [weak self] in
                     guard let self = self else { return }
-                    // 단어장 제목을 제외한 나머지 필드를 초기화합니다.
+                    // 단어장 제목을 제외한 나머지 필드를 초기화
                     wordTextField.text = ""
                     meanTextField.text = ""
                     

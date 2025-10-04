@@ -9,7 +9,11 @@ struct WordModel: Hashable {
     let createAt: Date
 }
 
-extension WordModel {
+extension WordModel: CardDisplayable {
+    var cardThumbnail: String? { self.thumbnail }
+    var cardTitle: String { word }
+    var cardSubtitle: String { meaning }
+    
     func toObject() -> Word {
         let vocab = Word()
         vocab.id = try! ObjectId(string: id)
