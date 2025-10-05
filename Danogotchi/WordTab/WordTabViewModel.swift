@@ -54,9 +54,37 @@ final class WordTabViewModel: BaseViewModel {
             hasLearningWordBook.accept(true)
         }
         
+        userInfo.selectedBookIdObservable
+            .compactMap { $0 } // nil 제거
+            .distinctUntilChanged() // 중복 이벤트 방지
+            .bind(with: self) { owner, bookStrId in
+                print("선택된 단어장 ID 변경됨: \(bookStrId)")
+                // 여기서 필요한 동작 수행
+                let allWordBook = owner.wordBookRepo.readAll()
+                if allWordBook.isEmpty {
+                    // 단어장 없는 경우
+                    hasLearningWordBook.accept(true)
+                } else {
+                    // 단어장 있는 경우
+                    guard let bookObjectId = try? ObjectId(string: bookStrId) else { return }
+                    
+                    // 단어장 타이틀 업데이트
+                    if let wordBook = owner.wordBookRepo.read(id: bookObjectId) {
+                        bookTitle.accept(wordBook.title)
+                    }
+//                    
+//                    // 단어 리스트 업데이트
+                    let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
+                    wordItems.accept(Array(wordList))
+                    hasLearningWordBook.accept(false)
+                }
+            }.disposed(by: disposeBag)
+        
         input.viewWillAppear
             .skip(1)
             .bind(with: self) { owner, _ in
+                print("단어 장 업데이트")
+                
                 // 전체 단어장 불러오기
                 let allWordBook = owner.wordBookRepo.readAll()
                 if allWordBook.isEmpty {
