@@ -38,19 +38,24 @@ final class WordTabViewController: BaseViewController {
         button.tintColor = .systemBlue
         return button
     }()
+    
     private let showWordBookButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
         button.tintColor = .systemBlue
         return button
     }()
+    
     private let noWordBookLabel: UILabel = {
         let label = UILabel()
         label.text = "학습할 단어장을 만들어 주세요"
         label.textColor = .black
         return label
     }()
+    
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
+    
+    private let startLearningButton = PrimaryFillButton(title: "학습하기")
     private let collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
         view.showsVerticalScrollIndicator = false
@@ -73,7 +78,8 @@ final class WordTabViewController: BaseViewController {
         [
             noWordBookLabel,
             showCreateBookButton,
-            collectionView
+            collectionView,
+            startLearningButton,
         ].forEach { view.addSubview($0) }
     }
     
@@ -90,6 +96,12 @@ final class WordTabViewController: BaseViewController {
         
         collectionView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        startLearningButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.horizontalEdges.equalToSuperview().inset(24)
+            make.height.equalTo(44)
         }
     }
     
@@ -169,6 +181,13 @@ extension WordTabViewController {
                 let vc = CreateBookViewController()
                 vc.modalPresentationStyle = .overFullScreen
                 vc.modalTransitionStyle = .crossDissolve
+                owner.present(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
+        startLearningButton.rx.tap
+            .bind(with: self) { owner, _ in
+                let vc = ChoiceQuizViewController()
+                vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
