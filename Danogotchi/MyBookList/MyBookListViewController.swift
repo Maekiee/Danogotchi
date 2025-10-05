@@ -71,9 +71,18 @@ extension MyBookListViewController {
         
         output.bookList
             .drive(with: self) { owner, book in
-                print(book)
                 owner.applySnapshot(items: book)
             }.disposed(by: disposeBag)
+        
+        collectionView.rx.itemSelected
+            .compactMap { [weak self] indexPath -> WordBookModel? in
+                guard let self = self else { return nil }
+                return dataSource.itemIdentifier(for: indexPath)
+            }
+            .bind(with: self) { owner, book in
+                print(book.title)
+            }.disposed(by: disposeBag)
+
     }
 }
 
