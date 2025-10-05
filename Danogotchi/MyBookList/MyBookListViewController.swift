@@ -31,6 +31,8 @@ final class MyBookListViewController: BaseViewController {
         return view
     }()
     
+    private let deleteTrigger = PublishRelay<WordBookModel>()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -65,7 +67,8 @@ extension MyBookListViewController {
         
         let input = MyBookListViewModel.Input(
             viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
-            refreshTrigger: refreshTrigger.asObservable()
+            refreshTrigger: refreshTrigger.asObservable(),
+            selectedDeleteTrigger: deleteTrigger.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -110,8 +113,8 @@ extension MyBookListViewController {
                 owner.showActionSheet(
                     title: item.title,
                     deleteAction: { [weak self] in
-                        guard let _ = self else { return }
-                        print("some Action")
+                        guard let self = self else { return }
+                        deleteTrigger.accept(item)
                     }
                 )
             }.disposed(by: cell.disposeBag)
