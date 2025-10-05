@@ -35,7 +35,7 @@ final class WordTabViewModel: BaseViewModel {
         let wordItems = BehaviorRelay<[WordModel]>(value: [])
         
         // viewDidLoad
-        if let wordBookId = userInfo.selectedWordBook,
+        if let wordBookId = userInfo.selectedBookId,
            let bookId = try? ObjectId(string: wordBookId) {
             hasLearningWordBook.accept(false)
             
@@ -64,7 +64,7 @@ final class WordTabViewModel: BaseViewModel {
                     hasLearningWordBook.accept(true)
                 } else {
                     // 단어장 있는 경우
-                    guard let bookId = owner.userInfo.selectedWordBook else { return }
+                    guard let bookId = owner.userInfo.selectedBookId else { return }
                     let bookObjectId = try! ObjectId(string: bookId)
                     
                     // 단어장 타이틀 업데이트

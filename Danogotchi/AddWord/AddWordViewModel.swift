@@ -193,34 +193,33 @@ final class AddWordViewModel: BaseViewModel {
     }
     
     private func saveWord(actionType: EntryPoint, wordBookTitle: String, url: String, word: String, meaning: String) {
-        let wordBookId: ObjectId
+        let bookObjectId: ObjectId
+
         
-        if let id = wordItem?.wordBookId {
+        if let bookId = wordItem?.wordBookId {
             // 기존 단어장 타이틀 업데이트
-            wordBookRepo.update(id: id, title: wordBookTitle)
-            wordBookId = id
+            wordBookRepo.update(id: bookId, title: wordBookTitle)
+            bookObjectId = bookId
         } else {
-            // 신규 단어장
+            // 신규 단어장 생성
             wordBookRepo.create(title: wordBookTitle)
+            // 새 단어장 불러오기
+            guard let newBook = wordBookRepo.readAll().last else { return }
             
-            guard let newWordBook = wordBookRepo.readAll().last else {
-                print("단어장 생성 실패")
-                return
-            }
-            wordBookId = try! ObjectId(string: newWordBook.id)
-            userInfoManager.selectedWordBook = newWordBook.id
+            bookObjectId = try! ObjectId(string: newBook.id) // ObjectId로 변경해서 값 할당
+            self.isWordBookId = bookObjectId
+            userInfoManager.selectedBookId = newBook.id
         }
         
         switch actionType {
+            // 단어 추가 로직
         case .add:
             let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
-            wordBookRepo.addWord(bookId: wordBookId, word: newWord)
+            wordBookRepo.addWord(bookId: bookObjectId, word: newWord)
+            // 단어 수정 ㅇ로직
         case .edit:
             // 단어 수정
-            guard let wordId = wordItem?.wordId else {
-                print("수정할 단어 ID 없음")
-                return
-            }
+            guard let wordId = wordItem?.wordId else { return }
             wordRepo.update(id: wordId, thumbnail: url, word: word, meaning: meaning)
         }
         

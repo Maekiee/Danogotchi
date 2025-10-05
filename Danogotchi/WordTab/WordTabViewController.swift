@@ -50,7 +50,7 @@ final class WordTabViewController: BaseViewController {
         label.textColor = .black
         return label
     }()
-    private let goCreateWordBookButton = PrimaryFillButton(title: "단어장 만들기")
+    private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
     private let collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
         view.showsVerticalScrollIndicator = false
@@ -72,7 +72,7 @@ final class WordTabViewController: BaseViewController {
     override func configHierarchy() {
         [
             noWordBookLabel,
-            goCreateWordBookButton,
+            showCreateBookButton,
             collectionView
         ].forEach { view.addSubview($0) }
     }
@@ -82,7 +82,7 @@ final class WordTabViewController: BaseViewController {
             make.center.equalToSuperview()
         }
         
-        goCreateWordBookButton.snp.makeConstraints { make in
+        showCreateBookButton.snp.makeConstraints { make in
             make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(40)
@@ -120,7 +120,7 @@ extension WordTabViewController {
                 owner.collectionView.isHidden = hasWordBook
                 
                 owner.noWordBookLabel.isHidden = !hasWordBook
-                owner.goCreateWordBookButton.isHidden = !hasWordBook
+                owner.showCreateBookButton.isHidden = !hasWordBook
             }
             .disposed(by: disposeBag)
         
@@ -136,9 +136,9 @@ extension WordTabViewController {
         // 단어 추가
         addWordButton.rx.tap
             .bind(with: self) { owner, _ in
-                guard let bookObjectId = owner.userInfo.selectedWordBook
+                guard let bookObjectId = owner.userInfo.selectedBookId
                     .flatMap({ try? ObjectId(string: $0) }) else { return }
-                
+            
                 let createWordModel = CreateWordModel(
                     wordBookId: bookObjectId,
                     wordId: nil,
@@ -164,12 +164,17 @@ extension WordTabViewController {
         
         
         // 단어장 생성
-        goCreateWordBookButton.rx.tap
+        showCreateBookButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vm = AddWordViewModel()
-                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .add))
-                vc.modalPresentationStyle = .fullScreen
+                let vc = CreateBookViewController()
+                vc.modalPresentationStyle = .overFullScreen
+                vc.modalTransitionStyle = .crossDissolve
                 owner.present(vc, animated: true)
+                
+//                let vm = AddWordViewModel()
+//                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .add))
+//                vc.modalPresentationStyle = .fullScreen
+//                owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
     }
@@ -179,14 +184,14 @@ extension WordTabViewController {
 // MARK: - CollectionView
 extension WordTabViewController {
     private func configDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordModel> { cell, indexPath, item in
+       let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordModel> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
                     title: item.word,
                     editAction: { [weak self] in
                         guard let _ = self else { return }
-                        guard let bookObjectId = owner.userInfo.selectedWordBook
+                        guard let bookObjectId = owner.userInfo.selectedBookId
                             .flatMap({ try? ObjectId(string: $0) }) else { return }
                         
                         let createWordModel = CreateWordModel(

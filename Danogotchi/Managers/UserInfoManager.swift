@@ -1,7 +1,15 @@
 import Foundation
+import RxSwift
+import RxCocoa
+
 
 final class UserInfoManager: UserInfoProtocol {
-    private init() { }
+    private init() {
+        // UserDefaults에서 초기값 로드
+        if let savedId = UserDefaults.standard.string(forKey: Keys.wordBookId) {
+            selectedBookIdRelay.accept(savedId)
+        }
+    }
     
     static let shared = UserInfoManager()
     
@@ -9,6 +17,11 @@ final class UserInfoManager: UserInfoProtocol {
         static let username = "username"
         static let userId = "userId"
         static let wordBookId = "WordBookId"
+    }
+    
+    private let selectedBookIdRelay = BehaviorRelay<String?>(value: nil)
+    var selectedBookIdObservable: Observable<String?> {
+        return selectedBookIdRelay.asObservable()
     }
     
     var username: String? {
@@ -34,20 +47,30 @@ final class UserInfoManager: UserInfoProtocol {
         }
     }
     
-    var selectedWordBook: String? {
+    var selectedBookId: String? {
         get {
-            guard let wordBookId = UserDefaults.standard.string(forKey: Keys.wordBookId) else { return nil }
-            return wordBookId
+            return selectedBookIdRelay.value
         }
         
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.wordBookId)
+            selectedBookIdRelay.accept(newValue)
         }
+//        get {
+//            guard let wordBookId = UserDefaults.standard.string(forKey: Keys.wordBookId) else { return nil }
+//            return wordBookId
+//        }
+//        
+//        set {
+//            UserDefaults.standard.set(newValue, forKey: Keys.wordBookId)
+//        }
     }
     
     // 아직 사용 안함
     func removeUserInfo() {
         UserDefaults.standard.removeObject(forKey: Keys.username)
         UserDefaults.standard.removeObject(forKey: Keys.userId)
+        UserDefaults.standard.removeObject(forKey: Keys.wordBookId)
+        selectedBookIdRelay.accept(nil)
     }
 }

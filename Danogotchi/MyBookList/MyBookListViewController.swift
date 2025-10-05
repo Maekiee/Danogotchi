@@ -82,6 +82,14 @@ extension MyBookListViewController {
             .bind(with: self) { owner, book in
                 print(book.title)
             }.disposed(by: disposeBag)
+        
+        addBookButton.rx.tap
+            .bind(with: self) { owner, _ in
+                let vc = CreateBookViewController()
+                vc.modalPresentationStyle = .overFullScreen
+                vc.modalTransitionStyle = .crossDissolve
+                owner.present(vc, animated: true)
+            }.disposed(by: disposeBag)
 
     }
 }
@@ -92,7 +100,7 @@ extension MyBookListViewController {
         let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBookModel> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                print("터치터치")
+                
             }.disposed(by: cell.disposeBag)
         }
         
