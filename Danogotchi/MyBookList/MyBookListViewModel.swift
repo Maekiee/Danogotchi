@@ -4,7 +4,7 @@ import RxCocoa
 
 
 final class MyBookListViewModel: BaseViewModel {
-    private let dispose = DisposeBag()
+    private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     
     private let wordBookRepo: WordBookRepositoryProtocol
@@ -17,7 +17,8 @@ final class MyBookListViewModel: BaseViewModel {
     }
     
     struct Input {
-        
+        let viewWillAppear: Observable<Void>
+        let refreshTrigger: Observable<Void>
     }
     
     struct Output {
@@ -27,9 +28,16 @@ final class MyBookListViewModel: BaseViewModel {
     func transform(input: Input) -> Output {
         let bookList = BehaviorRelay<[WordBookModel]>(value: [])
         // 단어장 세트 리스트 불러오기
-        let bookItemList = wordBookRepo.readAll().reversed()
-        bookList.accept(Array(bookItemList))
-//        dump(bookList)
+        
+        
+        // 단어 추가
+        Observable.merge(
+            input.viewWillAppear,
+            input.refreshTrigger
+        ).bind(with: self) { owner, _ in
+            let bookItemList = owner.wordBookRepo.readAll().reversed()
+            bookList.accept(Array(bookItemList))
+        }.disposed(by: disposeBag)
         
         return Output(
             bookList: bookList.asDriver()

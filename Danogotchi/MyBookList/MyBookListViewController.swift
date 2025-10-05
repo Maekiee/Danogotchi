@@ -35,7 +35,6 @@ final class MyBookListViewController: BaseViewController {
         super.viewDidLoad()
         configHierarchy()
         configLayout()
-        configView()
         configDataSource()
         bind()
     }
@@ -57,16 +56,17 @@ final class MyBookListViewController: BaseViewController {
             make.trailing.equalToSuperview().offset(-20)
         }
     }
-    
-    override func configView() {
-        
-    }
 }
 
 // MARK: - Rx 바인딩
 extension MyBookListViewController {
     private func bind() {
-        let input = MyBookListViewModel.Input()
+        let refreshTrigger = PublishRelay<Void>()
+        
+        let input = MyBookListViewModel.Input(
+            viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
+            refreshTrigger: refreshTrigger.asObservable()
+        )
         let output = viewModel.transform(input: input)
         
         output.bookList
@@ -74,13 +74,14 @@ extension MyBookListViewController {
                 owner.applySnapshot(items: book)
             }.disposed(by: disposeBag)
         
+        // 셀 터치
         collectionView.rx.itemSelected
             .compactMap { [weak self] indexPath -> WordBookModel? in
                 guard let self = self else { return nil }
                 return dataSource.itemIdentifier(for: indexPath)
             }
             .bind(with: self) { owner, book in
-                print(book.title)
+                print("셀 터치 \(book.title)")
             }.disposed(by: disposeBag)
         
         addBookButton.rx.tap
@@ -88,7 +89,12 @@ extension MyBookListViewController {
                 let vc = CreateBookViewController()
                 vc.modalPresentationStyle = .overFullScreen
                 vc.modalTransitionStyle = .crossDissolve
+                
+                vc.bookCreated
+                    .bind(to: refreshTrigger)
+                    .disposed(by: vc.disposeBag)
                 owner.present(vc, animated: true)
+                
             }.disposed(by: disposeBag)
 
     }
@@ -100,7 +106,14 @@ extension MyBookListViewController {
         let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBookModel> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                
+                print("아이콘 터치 \(item.cardTitle)")
+                owner.showActionSheet(
+                    title: item.title,
+                    deleteAction: { [weak self] in
+                        guard let _ = self else { return }
+                        print("some Action")
+                    }
+                )
             }.disposed(by: cell.disposeBag)
         }
         

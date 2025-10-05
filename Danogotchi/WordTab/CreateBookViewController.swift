@@ -4,10 +4,10 @@ import RxSwift
 import RxCocoa
 
 final class CreateBookViewController: BaseViewController {
-    private let disposeBag = DisposeBag()
+    let disposeBag = DisposeBag()
     private let viewModel = CreateBookViewModel()
     
-    
+    let bookCreated = PublishRelay<Void>()
     //MARK: - UI 프로퍼티
     private let containerView: UIView = {
         let view = UIView()
@@ -88,6 +88,7 @@ final class CreateBookViewController: BaseViewController {
             make.height.equalTo(48)
         }
     }
+    
     override func configView() {
         view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
     }
@@ -104,6 +105,7 @@ extension CreateBookViewController {
         
         output.createBookDoneTrigger
             .emit(with: self) { owner, _ in
+                owner.bookCreated.accept(())
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         

@@ -170,11 +170,6 @@ extension WordTabViewController {
                 vc.modalPresentationStyle = .overFullScreen
                 vc.modalTransitionStyle = .crossDissolve
                 owner.present(vc, animated: true)
-                
-//                let vm = AddWordViewModel()
-//                let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .add))
-//                vc.modalPresentationStyle = .fullScreen
-//                owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
         
     }
