@@ -2,9 +2,8 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class ChoiceQuizViewModel: BaseViewModel {
+final class SelectQuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let viewModel = ChoiceQuizViewModel()
     
     struct Input {
         
@@ -20,3 +19,4 @@ final class ChoiceQuizViewModel: BaseViewModel {
         return Output()
     }
 }
+
