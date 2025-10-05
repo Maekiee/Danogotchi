@@ -30,6 +30,13 @@ final class MyBookListViewController: BaseViewController {
         view.showsVerticalScrollIndicator = false
         return view
     }()
+    private let changeButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.title = "변경"
+        button.configuration = config
+        return button
+    }()
     
     private let deleteTrigger = PublishRelay<WordBookModel>()
     
@@ -43,14 +50,21 @@ final class MyBookListViewController: BaseViewController {
     
     override func configHierarchy() {
         [
+            changeButton,
             collectionView,
             addBookButton
         ].forEach { view.addSubview($0) }
     }
     
     override func configLayout() {
+        changeButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.trailing.equalToSuperview().offset(-16)
+        }
+        
         collectionView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+            make.top.equalTo(changeButton.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
         addBookButton.snp.makeConstraints { make in
@@ -64,13 +78,22 @@ final class MyBookListViewController: BaseViewController {
 extension MyBookListViewController {
     private func bind() {
         let refreshTrigger = PublishRelay<Void>()
+        let selectedBook = PublishRelay<WordBookModel>()
         
         let input = MyBookListViewModel.Input(
             viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
             refreshTrigger: refreshTrigger.asObservable(),
+            selectedChangeBook: selectedBook.asObservable(),
             selectedDeleteTrigger: deleteTrigger.asObservable()
         )
         let output = viewModel.transform(input: input)
+        
+        changeButton.rx.tap
+            .withLatestFrom(selectedBook)
+            .bind(with: self) { owner, book in
+                UserInfoManager.shared.selectedBookId = book.id
+                owner.dismiss(animated: true)
+            }.disposed(by: disposeBag)
         
         output.bookList
             .drive(with: self) { owner, book in
@@ -84,9 +107,10 @@ extension MyBookListViewController {
                 return dataSource.itemIdentifier(for: indexPath)
             }
             .bind(with: self) { owner, book in
-                print("셀 터치 \(book.title)")
+                selectedBook.accept(book)
             }.disposed(by: disposeBag)
         
+        // 단어장 추가하기
         addBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 let vc = CreateBookViewController()
@@ -99,7 +123,7 @@ extension MyBookListViewController {
                 owner.present(vc, animated: true)
                 
             }.disposed(by: disposeBag)
-
+        
     }
 }
 

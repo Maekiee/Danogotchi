@@ -19,6 +19,7 @@ final class MyBookListViewModel: BaseViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let refreshTrigger: Observable<Void>
+        let selectedChangeBook: Observable<WordBookModel>
         let selectedDeleteTrigger: Observable<WordBookModel>
     }
     
@@ -36,6 +37,12 @@ final class MyBookListViewModel: BaseViewModel {
             let bookItemList = owner.wordBookRepo.readAll().reversed()
             bookList.accept(Array(bookItemList))
         }.disposed(by: disposeBag)
+        
+        input.selectedChangeBook
+            .distinctUntilChanged()
+            .bind(with: self) { owner, book in
+                print("선택한 단어책: \(book)")
+            }.disposed(by: disposeBag)
         
         // 단어장 삭제
         input.selectedDeleteTrigger
