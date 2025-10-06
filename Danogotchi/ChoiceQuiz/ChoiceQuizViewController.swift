@@ -135,11 +135,14 @@ final class ChoiceQuizViewController: BaseViewController {
     
     override func configHierarchy() {
         [
+            titleLabel,
+            closeButton,
             progressStackView,
             wordImageView,
             questionLabel,
             choiceStackView
         ].forEach { view.addSubview($0) }
+        
         
         [
             currentQuestionLabel,
@@ -156,45 +159,46 @@ final class ChoiceQuizViewController: BaseViewController {
     }
     
     override func configLayout() {
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.centerX.equalToSuperview()
+        }
+        
+        closeButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
+        }
+        
+        
         progressStackView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(20)
         }
         
-        currentQuestionLabel.snp.makeConstraints { make in
-            make.width.equalTo(30)
-        }
-        
-        totalQuestionLabel.snp.makeConstraints { make in
-            make.width.equalTo(30)
-        }
-        
         wordImageView.snp.makeConstraints { make in
-            make.top.equalTo(progressStackView.snp.bottom).offset(24)
+            make.top.equalTo(progressStackView.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(200)
+            make.height.equalTo(wordImageView.snp.width).multipliedBy(2.0/3.0)
         }
         
         questionLabel.snp.makeConstraints { make in
             make.top.equalTo(wordImageView.snp.bottom).offset(24)
-            make.horizontalEdges.equalToSuperview().inset(24)
+            make.center.equalToSuperview()
         }
         
         choiceStackView.snp.makeConstraints { make in
-            make.top.equalTo(questionLabel.snp.bottom).offset(32)
+            make.top.equalTo(questionLabel.snp.bottom).offset(80)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-24)
         }
     }
     
     override func configView() {
-        let closeBarButton = UIBarButtonItem(customView: closeButton)
-        navigationItem.rightBarButtonItem = closeBarButton
-        navigationItem.titleView = titleLabel
+        
     }
-
-
+    
+    
 }
 
 extension ChoiceQuizViewController {
