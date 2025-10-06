@@ -129,11 +129,21 @@ extension SelectQuizViewController {
             toggleIsOn: toggleSwitch.rx.isOn.asObservable(),
             decreaseButtonTap: decreaseButton.rx.tap.asObservable(),
             increaseButtonTap: increaseButton.rx.tap.asObservable(),
+            startLearningTap: startLearningButton.rx.tap.asObservable()
         )
         let output = viewModel.transform(input: input)
         
-        startLearningButton.rx.tap
-            .bind(with: self) { owner, _ in
+//        startLearningButton.rx.tap
+//            .bind(with: self) { owner, _ in
+//                let vc = ChoiceQuizViewController()
+//                vc.modalPresentationStyle = .fullScreen
+//                owner.present(vc, animated: true)
+//            }.disposed(by: disposeBag)
+        
+        output.startQuiz
+            .asSignal()
+            .emit(with: self) { owner, quizData in
+                print(quizData)
                 let vc = ChoiceQuizViewController()
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
@@ -141,7 +151,11 @@ extension SelectQuizViewController {
         
         output.isSection
             .drive(with: self) { owner, isEnabled in
-                owner.counterContainerView.alpha = isEnabled ?  1.0 : 0.0
+                
+                UIView.animate(withDuration: 0.2) {
+                    owner.counterContainerView.alpha = isEnabled ? 1.0 : 0.0
+                }
+//                owner.counterContainerView.alpha = isEnabled ?  1.0 : 0.0
             }.disposed(by: disposeBag)
         
         output.sectionCount

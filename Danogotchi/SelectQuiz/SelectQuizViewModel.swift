@@ -12,21 +12,23 @@ final class SelectQuizViewModel: BaseViewModel {
         self.bookRepo = bookRepo
     }
     
-    
     struct Input {
         let toggleIsOn: Observable<Bool>
         let decreaseButtonTap: Observable<Void>
         let increaseButtonTap: Observable<Void>
+        let startLearningTap: Observable<Void>
     }
     
     struct Output {
         let isSection: Driver<Bool>
         let sectionCount: Driver<Int>
+        let startQuiz: Signal<QuizData>
     }
     
     func transform(input: Input) -> Output {
         let isSection = BehaviorRelay<Bool>(value: false)
         let sectionCount = BehaviorRelay<Int>(value: 10)
+        let startQuizTrigger = PublishRelay<QuizData>()
         
         input.toggleIsOn
             .bind(to: isSection)
@@ -46,9 +48,18 @@ final class SelectQuizViewModel: BaseViewModel {
             .bind(to: sectionCount)
             .disposed(by: disposeBag)
         
+        input.startLearningTap
+            .bind(with: self) { owner, _ in
+                print("시작하기 버튼")
+                
+                let quizData = QuizData(words: [], allWord: [])
+                startQuizTrigger.accept(quizData)
+            }.disposed(by: disposeBag)
+        
         return Output(
             isSection: isSection.asDriver(),
-            sectionCount: sectionCount.asDriver()
+            sectionCount: sectionCount.asDriver(),
+            startQuiz: startQuizTrigger.asSignal()
         )
     }
 }

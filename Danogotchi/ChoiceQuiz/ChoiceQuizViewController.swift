@@ -132,7 +132,7 @@ final class ChoiceQuizViewController: BaseViewController {
             choice2Button,
             choice3Button,
             choice4Button
-        ].forEach { choiceStackView.addArrangedSubview($0) }
+        ].forEach { stack.addArrangedSubview($0) }
         return stack
     }()
     
