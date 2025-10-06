@@ -7,6 +7,17 @@ import Kingfisher
 
 final class ChoiceQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
+    private let viewModel: ChoiceQuizViewModel
+    
+    init(viewModel: ChoiceQuizViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     // MARK: - UI 프로퍼티
     private let closeButton: UIButton = {
@@ -154,9 +165,6 @@ final class ChoiceQuizViewController: BaseViewController {
             questionLabel,
             choiceStackView
         ].forEach { view.addSubview($0) }
-        
-        
-        
     }
     
     override func configLayout() {
@@ -204,6 +212,12 @@ final class ChoiceQuizViewController: BaseViewController {
 
 extension ChoiceQuizViewController {
     private func bind() {
+        let input = ChoiceQuizViewModel.Input()
+        let output = viewModel.transform(input: input)
         
+        closeButton.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.dismiss(animated: true)
+            }.disposed(by: disposeBag)
     }
 }

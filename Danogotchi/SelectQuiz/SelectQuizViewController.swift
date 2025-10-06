@@ -134,10 +134,12 @@ extension SelectQuizViewController {
         let output = viewModel.transform(input: input)
         
         output.startQuiz
-            .asSignal()
-            .emit(with: self) { owner, quizData in
-                dump(quizData)
-                let vc = ChoiceQuizViewController()
+            .drive(with: self) { owner, quizData in
+                let vm = ChoiceQuizViewModel(
+                    quizWords: quizData.words,
+                    allWords: quizData.allWord
+                )
+                let vc = ChoiceQuizViewController(viewModel: vm)
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
