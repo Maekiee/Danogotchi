@@ -133,17 +133,10 @@ extension SelectQuizViewController {
         )
         let output = viewModel.transform(input: input)
         
-//        startLearningButton.rx.tap
-//            .bind(with: self) { owner, _ in
-//                let vc = ChoiceQuizViewController()
-//                vc.modalPresentationStyle = .fullScreen
-//                owner.present(vc, animated: true)
-//            }.disposed(by: disposeBag)
-        
         output.startQuiz
             .asSignal()
             .emit(with: self) { owner, quizData in
-                print(quizData)
+                dump(quizData)
                 let vc = ChoiceQuizViewController()
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
@@ -155,7 +148,7 @@ extension SelectQuizViewController {
                 UIView.animate(withDuration: 0.2) {
                     owner.counterContainerView.alpha = isEnabled ? 1.0 : 0.0
                 }
-//                owner.counterContainerView.alpha = isEnabled ?  1.0 : 0.0
+                
             }.disposed(by: disposeBag)
         
         output.sectionCount
