@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-final class LearningHistory: Object {
+class LearningHistory: Object {
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var wordObjectId: ObjectId
     @Persisted var isCorrect: Bool

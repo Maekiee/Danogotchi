@@ -20,7 +20,6 @@ final class WordBookRepository: WordBookRepositoryProtocol {
     func readAll() -> [WordBookModel] {
         let wordBooks = Array(realm.objects(WordBook.self))
         return wordBooks.map { $0.toStruct() }
-//        return Array(realm.objects(WordBook.self))
     }
     
     func read(id: ObjectId) -> WordBook? {
