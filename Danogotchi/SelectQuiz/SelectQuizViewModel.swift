@@ -6,7 +6,6 @@ import RxCocoa
 final class SelectQuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
-    
     private let bookRepo: WordBookRepositoryProtocol
     
     init(bookRepo: WordBookRepositoryProtocol = WordBookRepository()) {

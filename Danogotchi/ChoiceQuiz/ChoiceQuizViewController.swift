@@ -38,7 +38,6 @@ final class ChoiceQuizViewController: BaseViewController {
     
     private let currentQuestionLabel: UILabel = {
         let label = UILabel()
-        label.text = "1"
         label.textColor = .black
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
@@ -54,13 +53,12 @@ final class ChoiceQuizViewController: BaseViewController {
     
     private let totalQuestionLabel: UILabel = {
         let label = UILabel()
-        label.text = "10"
         label.textColor = .black
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
     }()
     
-    private let wordImageView: UIImageView = {
+    private let thumbnailImage: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -161,7 +159,7 @@ final class ChoiceQuizViewController: BaseViewController {
             titleLabel,
             closeButton,
             progressStackView,
-            wordImageView,
+            thumbnailImage,
             questionLabel,
             choiceStackView
         ].forEach { view.addSubview($0) }
@@ -185,14 +183,14 @@ final class ChoiceQuizViewController: BaseViewController {
             make.height.equalTo(20)
         }
         
-        wordImageView.snp.makeConstraints { make in
+        thumbnailImage.snp.makeConstraints { make in
             make.top.equalTo(progressStackView.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(wordImageView.snp.width).multipliedBy(2.0/3.0)
+            make.height.equalTo(thumbnailImage.snp.width).multipliedBy(2.0/3.0)
         }
         
         questionLabel.snp.makeConstraints { make in
-            make.top.equalTo(wordImageView.snp.bottom).offset(24)
+            make.top.equalTo(thumbnailImage.snp.bottom).offset(24)
             make.center.equalToSuperview()
         }
         
@@ -202,22 +200,109 @@ final class ChoiceQuizViewController: BaseViewController {
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-24)
         }
     }
-    
-    override func configView() {
-        
-    }
-    
-    
 }
 
 extension ChoiceQuizViewController {
     private func bind() {
-        let input = ChoiceQuizViewModel.Input()
+        let choiceTaps = Observable.merge(
+            choice1Button.rx.tap.map { 0 },
+            choice2Button.rx.tap.map { 1 },
+            choice3Button.rx.tap.map { 2 },
+            choice4Button.rx.tap.map { 3 }
+        )
+        
+        let input = ChoiceQuizViewModel.Input(
+            choiceSelected: choiceTaps
+        )
         let output = viewModel.transform(input: input)
+        
+        
+        
+        output.currentQuestion
+            .map { "\($0)" }
+            .drive(currentQuestionLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.progress
+            .drive(progressView.rx.progress)
+            .disposed(by: disposeBag)
+        
+        output.totalQuestion
+            .map { "\($0)" }
+            .drive(totalQuestionLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.wordImage
+            .drive(with: self) { owner, urlString in
+                if let url = URL(string: urlString) {
+                    owner.thumbnailImage.kf.setImage(with: url)
+                } else {
+                    print("이미지 업음")
+                    owner.thumbnailImage.image = nil
+                }
+            }.disposed(by: disposeBag)
+        
+        output.questionWord
+            .drive(questionLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.choices
+            .drive(with: self) { owner, choices in
+                owner.choice1Button.setTitle(choices[0], for: .normal)
+                owner.choice2Button.setTitle(choices[1], for: .normal)
+                owner.choice3Button.setTitle(choices[2], for: .normal)
+                owner.choice4Button.setTitle(choices[3], for: .normal)
+                
+                // 버튼 색상 초기화
+                [owner.choice1Button, owner.choice2Button,
+                 owner.choice3Button, owner.choice4Button].forEach {
+                    $0.backgroundColor = .systemGray6
+                    $0.isEnabled = true
+                }
+            }.disposed(by: disposeBag)
+        
+        output.answerResult
+            .emit(with: self) { owner, result in
+                let buttons = [owner.choice1Button, owner.choice2Button,
+                               owner.choice3Button, owner.choice4Button]
+                
+                buttons.forEach { $0.isEnabled = false }
+                
+                let selectedButton = buttons[result.selectedIndex]
+                selectedButton.backgroundColor = result.isCorrect ? .systemGreen : .systemRed
+                
+                if !result.isCorrect {
+                    buttons[result.correctIndex].backgroundColor = .systemGreen
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                    self?.viewModel.moveToNextQuestion()
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        output.quizCompleted
+            .emit(with: self) { owner, result in
+                owner.showCompletionAlert(correct: result.correct, total: result.total)
+            }.disposed(by: disposeBag)
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
     }
+    
+    private func showCompletionAlert(correct: Int, total: Int) {
+            let alert = UIAlertController(
+                title: "학습 완료",
+                message: "\(total)개 중 \(correct)개 정답",
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+                self?.dismiss(animated: true)
+            })
+            
+            present(alert, animated: true)
+        }
 }
