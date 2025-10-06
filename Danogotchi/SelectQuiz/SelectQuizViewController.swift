@@ -126,7 +126,9 @@ final class SelectQuizViewController: BaseViewController {
 extension SelectQuizViewController {
     private func bind() {
         let input = SelectQuizViewModel.Input(
-            toggleIsOn: toggleSwitch.rx.isOn.asObservable()
+            toggleIsOn: toggleSwitch.rx.isOn.asObservable(),
+            decreaseButtonTap: decreaseButton.rx.tap.asObservable(),
+            increaseButtonTap: increaseButton.rx.tap.asObservable(),
         )
         let output = viewModel.transform(input: input)
         
@@ -141,6 +143,11 @@ extension SelectQuizViewController {
             .drive(with: self) { owner, isEnabled in
                 owner.counterContainerView.alpha = isEnabled ?  1.0 : 0.0
             }.disposed(by: disposeBag)
+        
+        output.sectionCount
+            .map { "\($0)" }
+            .drive(countLabel.rx.text)
+            .disposed(by: disposeBag)
     }
 }
 
