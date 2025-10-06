@@ -186,13 +186,13 @@ extension WordTabViewController {
         
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
+                let vm = SelectQuizViewModel()
                 let vc = SelectQuizViewController()
                 vc.modalPresentationStyle = .formSheet
                 
                 if let sheet =  vc.sheetPresentationController {
                     sheet.detents = [.medium(), .large()]
                     sheet.prefersGrabberVisible = true
-                    // (선택) 모서리 둥글기 값을 설정합니다.
                     sheet.preferredCornerRadius = 20
                 }
                 

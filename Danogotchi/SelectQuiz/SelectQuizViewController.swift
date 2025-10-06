@@ -121,17 +121,13 @@ final class SelectQuizViewController: BaseViewController {
             make.height.equalTo(48)
         }
     }
-    
-    override func configView() {
-        
-    }
-    
-    
 }
 
 extension SelectQuizViewController {
     private func bind() {
-        let input = SelectQuizViewModel.Input()
+        let input = SelectQuizViewModel.Input(
+            toggleIsOn: toggleSwitch.rx.isOn.asObservable()
+        )
         let output = viewModel.transform(input: input)
         
         startLearningButton.rx.tap
@@ -139,6 +135,11 @@ extension SelectQuizViewController {
                 let vc = ChoiceQuizViewController()
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
+        output.isSection
+            .drive(with: self) { owner, isEnabled in
+                owner.counterContainerView.alpha = isEnabled ?  1.0 : 0.0
             }.disposed(by: disposeBag)
     }
 }
