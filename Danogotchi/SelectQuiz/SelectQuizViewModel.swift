@@ -23,7 +23,7 @@ final class SelectQuizViewModel: BaseViewModel {
     struct Output {
         let isSection: Driver<Bool>
         let sectionCount: Driver<Int>
-        let startQuiz: Driver<QuizData>
+        let startQuiz: Signal<QuizData>
     }
     
     func transform(input: Input) -> Output {
@@ -93,7 +93,7 @@ final class SelectQuizViewModel: BaseViewModel {
         return Output(
             isSection: isSection.asDriver(),
             sectionCount: sectionCount.asDriver(),
-            startQuiz: startQuizTrigger.asDriver(onErrorDriveWith: .empty())
+            startQuiz: startQuizTrigger.asSignal()
         )
     }
 }

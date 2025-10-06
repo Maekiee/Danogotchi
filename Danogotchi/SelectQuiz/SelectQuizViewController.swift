@@ -134,14 +134,21 @@ extension SelectQuizViewController {
         let output = viewModel.transform(input: input)
         
         output.startQuiz
-            .drive(with: self) { owner, quizData in
-                let vm = ChoiceQuizViewModel(
-                    quizWords: quizData.words,
-                    allWords: quizData.allWord
-                )
-                let vc = ChoiceQuizViewController(viewModel: vm)
-                vc.modalPresentationStyle = .fullScreen
-                owner.present(vc, animated: true)
+            .emit(with: self) { owner, quizData in
+                guard let presentingVC = owner.presentingViewController else { return }
+                
+                owner.dismiss(animated: true) {
+                    let vm = ChoiceQuizViewModel(
+                        quizWords: quizData.words,
+                        allWords: quizData.allWord
+                    )
+                    let vc = ChoiceQuizViewController(viewModel: vm)
+                    vc.modalPresentationStyle = .fullScreen
+                    
+                    
+                    presentingVC.present(vc, animated: true)
+                }
+                
             }.disposed(by: disposeBag)
         
         output.isSection
