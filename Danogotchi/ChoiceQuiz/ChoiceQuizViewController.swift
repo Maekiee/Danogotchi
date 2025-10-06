@@ -108,19 +108,31 @@ final class ChoiceQuizViewController: BaseViewController {
         return button
     }()
     
-    private let progressStackView: UIStackView = {
+    private lazy var progressStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 8
         stack.alignment = .center
+        [
+            currentQuestionLabel,
+            progressView,
+            totalQuestionLabel
+        ].forEach { stack.addArrangedSubview($0) }
         return stack
     }()
     
-    private let choiceStackView: UIStackView = {
+    private lazy var choiceStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 12
         stack.distribution = .fillEqually
+        
+        [
+            choice1Button,
+            choice2Button,
+            choice3Button,
+            choice4Button
+        ].forEach { choiceStackView.addArrangedSubview($0) }
         return stack
     }()
     
@@ -144,18 +156,7 @@ final class ChoiceQuizViewController: BaseViewController {
         ].forEach { view.addSubview($0) }
         
         
-        [
-            currentQuestionLabel,
-            progressView,
-            totalQuestionLabel
-        ].forEach { progressStackView.addArrangedSubview($0) }
         
-        [
-            choice1Button,
-            choice2Button,
-            choice3Button,
-            choice4Button
-        ].forEach { choiceStackView.addArrangedSubview($0) }
     }
     
     override func configLayout() {
