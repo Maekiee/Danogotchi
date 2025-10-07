@@ -9,6 +9,8 @@ final class SelectQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: SelectQuizViewModel
     
+    var onStartQuiz: ((QuizData) -> Void)?
+    
     init(viewModel: SelectQuizViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -159,14 +161,18 @@ extension SelectQuizViewController {
         
         output.startQuiz
             .drive(with: self) { owner, quizData in
-                guard let presentingVC = owner.presentingViewController else { return }
-                
                 owner.dismiss(animated: true) {
-                    let vm = ChoiceQuizViewModel(quizData: quizData)
-                    let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
-                    vc.modalPresentationStyle = .fullScreen
-                    presentingVC.present(vc, animated: true)
+                    owner.onStartQuiz?(quizData)
                 }
+                
+//                guard let presentingVC = owner.presentingViewController else { return }
+//                
+//                owner.dismiss(animated: true) {
+//                    let vm = ChoiceQuizViewModel(quizData: quizData)
+//                    let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
+//                    vc.modalPresentationStyle = .fullScreen
+//                    presentingVC.present(vc, animated: true)
+//                }
                 
             }.disposed(by: disposeBag)
     }

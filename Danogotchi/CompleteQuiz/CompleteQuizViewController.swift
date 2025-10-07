@@ -11,6 +11,9 @@ final class CompleteQuizViewController: BaseViewController {
     private let originalQuizData: QuizData
     private let currentResult: QuizResult
     
+    // MARK: - 완료 후 액션을 전달하기 위한 클로저
+    var onDismissAction: ((CompleteQuizViewModel.ActionType, QuizData, QuizResult) -> Void)?
+    
     init(viewModel: CompleteQuizViewModel, originalQuizData: QuizData, result: QuizResult) {
         self.viewModel = viewModel
         self.originalQuizData = originalQuizData
@@ -146,138 +149,51 @@ extension CompleteQuizViewController {
     
 }
 
-
 extension CompleteQuizViewController {
     private func handleAction(_ action: CompleteQuizViewModel.ActionType) {
-            print("Handling action: \(action)")
-            
-            switch action {
-            case .continueNextSection(let startIndex):
-                presentNextSection(startIndex: startIndex)
-                
-            case .showRetryActionSheet:
-                showRetryActionSheet()
-                
-            case .retryCurrentSection:
-                retryCurrentSection()
-                
-            case .retryWrongWords(let words):
-                print("Wrong words count: \(words.count)")
-                if words.isEmpty {
-                    ToastManager.shared.show("틀린 단어가 없습니다.")
-                    return
+        // 액션 시트를 띄우는 경우를 제외하고 모두 dismiss 처리
+        switch action {
+        case .showRetryActionSheet:
+            showRetryActionSheet()
+        case .retryWrongWords(let words):
+            if words.isEmpty {
+                ToastManager.shared.show("틀린 단어가 없습니다.")
+                // 틀린 단어가 없으면 액션을 전달하지 않고 종료
+            } else {
+                dismiss(animated: true) { [weak self] in
+                    guard let self = self else { return }
+                    self.onDismissAction?(action, self.originalQuizData, self.currentResult)
                 }
-                presentWrongWordsQuiz(words: words)
-                
-            case .restartFromBeginning:
-                restartFromBeginning()
             }
-        }
+        case .restartFromBeginning:
+            // 이 경우, WordTabViewController에서 새로운 SelectQuizVC를 띄워야 하므로,
+            // 현재 ChoiceQuizVC까지 모두 dismiss 되어야 함.
+            presentingViewController?.presentingViewController?.dismiss(animated: true)
         
-        private func presentNextSection(startIndex: Int) {
-            print("Present next section: \(startIndex)")
-            
-            guard let presentingVC = presentingViewController else { return }
-            
+        default:
             dismiss(animated: true) { [weak self] in
                 guard let self = self else { return }
-                
-                
-                let vm = SelectQuizViewModel(startIndex: startIndex)
-                let vc = SelectQuizViewController(viewModel: vm)
-                vc.modalPresentationStyle = .formSheet
-                
-                if let sheet = vc.sheetPresentationController {
-                    sheet.detents = [.medium(), .large()]
-                    sheet.prefersGrabberVisible = true
-                    sheet.preferredCornerRadius = 20
-                }
-                
-                presentingVC.present(vc, animated: true)
+                self.onDismissAction?(action, self.originalQuizData, self.currentResult)
             }
         }
+    }
+    
+    private func showRetryActionSheet() {
+        let alert = UIAlertController(title: "다시 학습하기", message: "방금 학습한 구간을 다시 학습합니다.", preferredStyle: .actionSheet)
         
-        private func showRetryActionSheet() {
-            print("Show retry action sheet")
-            let alert = UIAlertController(title: "다시 학습", message: nil, preferredStyle: .actionSheet)
-            
-            alert.addAction(UIAlertAction(title: "구간 전체 학습", style: .default) { [weak self] _ in
-                print("Retry current section selected")
-                self?.retryCurrentSection()
-            })
-            
-            alert.addAction(UIAlertAction(title: "틀린 단어 학습하기", style: .default) { [weak self] _ in
-                print("Retry wrong words selected")
-                guard let self = self else { return }
-                handleAction(.retryWrongWords(words: currentResult.incorrectWords))
-            })
-            
-            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-            
-            present(alert, animated: true)
-        }
+        alert.addAction(UIAlertAction(title: "구간 전체 학습", style: .default) { [weak self] _ in
+            self?.handleAction(.retryCurrentSection)
+        })
         
-        private func retryCurrentSection() {
-            print("Retry current section")
-            guard let presentingVC = presentingViewController else { return }
-            
-            dismiss(animated: true) { [weak self] in
-                guard let self = self else { return }
-                
-                let quizData = QuizData(
-                    mode: originalQuizData.mode,
-                    words: originalQuizData.words,
-                    allWord: originalQuizData.allWord,
-                    startIndex: originalQuizData.startIndex,
-                    sectionSize: originalQuizData.sectionSize
-                )
-                
-                let vm = ChoiceQuizViewModel(quizData: quizData)
-                let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
-                vc.modalPresentationStyle = .fullScreen
-                presentingVC.present(vc, animated: true)
-            }
-        }
-        
-        private func presentWrongWordsQuiz(words: [WordModel]) {
-            guard let presentingVC = presentingViewController else { return }
-            
-            dismiss(animated: true) { [weak self] in
-                guard let self = self else { return }
-                
-                let quizData = QuizData(
-                    mode: originalQuizData.mode,
-                    words: words,
-                    allWord: originalQuizData.allWord,
-                    startIndex: 0,
-                    sectionSize: nil
-                )
-                
-                let vm = ChoiceQuizViewModel(quizData: quizData)
-                let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
-                vc.modalPresentationStyle = .fullScreen
-                presentingVC.present(vc, animated: true)
-            }
-        }
-        
-    private func restartFromBeginning() {
-        print("Restart from beginning")
-        guard let presentingVC = presentingViewController else { return }
-        
-        dismiss(animated: true) { [weak self] in
+        alert.addAction(UIAlertAction(title: "틀린 단어만 학습", style: .default) { [weak self] _ in
             guard let self = self else { return }
-            
-            let vm = SelectQuizViewModel(startIndex: 0)
-            let vc = SelectQuizViewController(viewModel: vm)
-            vc.modalPresentationStyle = .formSheet
-            
-            if let sheet = vc.sheetPresentationController {
-                sheet.detents = [.medium(), .large()]
-                sheet.prefersGrabberVisible = true
-                sheet.preferredCornerRadius = 20
-            }
-            
-            presentingVC.present(vc, animated: true)
-        }
+            self.handleAction(.retryWrongWords(words: self.currentResult.incorrectWords))
+        })
+        
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel) { [weak self] _ in
+             self?.handleAction(.dismiss)
+        })
+        
+        present(alert, animated: true)
     }
 }

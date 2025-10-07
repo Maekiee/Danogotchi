@@ -190,6 +190,13 @@ extension WordTabViewController {
                 let vc = SelectQuizViewController(viewModel: vm)
                 vc.modalPresentationStyle = .formSheet
                 
+                vc.onStartQuiz = { quizData in
+                    let choiceVM = ChoiceQuizViewModel(quizData: quizData)
+                    let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
+                    choiceVC.modalPresentationStyle = .fullScreen
+                    owner.present(choiceVC, animated: true)
+                }
+                
                 if let sheet =  vc.sheetPresentationController {
                     sheet.detents = [.medium(), .large()]
                     sheet.prefersGrabberVisible = true

@@ -105,7 +105,8 @@ final class SelectQuizViewModel: BaseViewModel {
                     words: quizWords,
                     allWord: allWord,
                     startIndex: startIndex,
-                    sectionSize: sectionSize
+                    sectionSize: sectionSize,
+                    isRestart: false
                 )
             }.bind(to: startQuizTrigger)
             .disposed(by: disposeBag)

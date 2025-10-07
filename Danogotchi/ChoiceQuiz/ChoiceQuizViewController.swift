@@ -8,11 +8,12 @@ import Kingfisher
 final class ChoiceQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: ChoiceQuizViewModel
-    private let quizData: QuizData
     
-    init(viewModel: ChoiceQuizViewModel, quizData: QuizData) {
+    // 외부에서 새로운 QuizData를 받아 ViewModel을 리셋하기 위한 Relay
+    private let restartTrigger = PublishRelay<QuizData>()
+    
+    init(viewModel: ChoiceQuizViewModel) {
         self.viewModel = viewModel
-        self.quizData = quizData
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -214,11 +215,11 @@ extension ChoiceQuizViewController {
         )
         
         let input = ChoiceQuizViewModel.Input(
-            choiceSelected: choiceTaps
+            choiceSelected: choiceTaps,
+            restartWithNewData: restartTrigger.asObservable()
         )
+        
         let output = viewModel.transform(input: input)
-        
-        
         
         output.currentQuestion
             .map { "\($0)" }
@@ -278,15 +279,24 @@ extension ChoiceQuizViewController {
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                    self?.viewModel.moveToNextQuestion()
+                    guard let self = self else { return }
+                    viewModel.moveToNextQuestion()
                 }
             }
             .disposed(by: disposeBag)
         
         output.quizCompleted
             .emit(with: self) { owner, result in
+                let currentQuizData = owner.viewModel.quizDataRelay.value // 현재 퀴즈 데이터 가져오기
                 let vm = CompleteQuizViewModel(result: result)
-                let vc = CompleteQuizViewController(viewModel: vm, originalQuizData: owner.quizData, result: result)
+                let vc = CompleteQuizViewController(viewModel: vm, originalQuizData: currentQuizData, result: result)
+                
+                // MARK: - 학습 완료 화면의 액션을 처리하는 클로저
+                vc.onDismissAction = { [weak self] action, quizData, result in
+                    guard let self = self else { return }
+                    self.handleQuizAction(action, originalData: quizData, result: result)
+                }
+                
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
@@ -297,17 +307,53 @@ extension ChoiceQuizViewController {
             }.disposed(by: disposeBag)
     }
     
-    private func showCompletionAlert(correct: Int, total: Int) {
-            let alert = UIAlertController(
-                title: "학습 완료",
-                message: "\(total)개 중 \(correct)개 정답",
-                preferredStyle: .alert
-            )
-            
-            alert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-                self?.dismiss(animated: true)
-            })
-            
-            present(alert, animated: true)
+    private func handleQuizAction(_ action: CompleteQuizViewModel.ActionType, originalData: QuizData, result: QuizResult) {
+            switch action {
+            case .continueNextSection(let startIndex):
+                let sectionSize = originalData.sectionSize ?? 10
+                let endIndex = min(startIndex + sectionSize, originalData.allWord.count)
+                let nextSectionWords = Array(originalData.allWord[startIndex..<endIndex])
+                
+                let newQuizData = QuizData(
+                    mode: originalData.mode,
+                    words: nextSectionWords,
+                    allWord: originalData.allWord,
+                    startIndex: startIndex,
+                    sectionSize: originalData.sectionSize,
+                    isRestart: false
+                )
+                restartTrigger.accept(newQuizData)
+                
+            case .retryCurrentSection:
+                let newQuizData = QuizData(
+                    mode: originalData.mode,
+                    words: originalData.words,
+                    allWord: originalData.allWord,
+                    startIndex: originalData.startIndex,
+                    sectionSize: originalData.sectionSize,
+                    isRestart: true
+                )
+                restartTrigger.accept(newQuizData)
+                
+            case .retryWrongWords(let words):
+                let newQuizData = QuizData(
+                    mode: originalData.mode,
+                    words: words,
+                    allWord: originalData.allWord,
+                    startIndex: originalData.startIndex,
+                    sectionSize: nil,
+                    isRestart: true
+                )
+                restartTrigger.accept(newQuizData)
+                
+            case .restartFromBeginning:
+                // 최상위 뷰까지 모두 dismiss
+                self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
+                
+            case .dismiss, .showRetryActionSheet:
+                // .showRetryActionSheet는 CompleteQuizVC에서 자체 처리하므로 여기까지 오지 않음
+                // .dismiss는 아무 동작 안함
+                break
+            }
         }
 }

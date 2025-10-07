@@ -6,7 +6,8 @@ import RealmSwift
 final class ChoiceQuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let learningHistory: LearningHistoryRepositoryProtocol
-    private let quizData: QuizData
+    
+    let quizDataRelay: BehaviorRelay<QuizData>
     
     
     private let currentIndex = BehaviorRelay<Int>(value: 0)
@@ -24,11 +25,12 @@ final class ChoiceQuizViewModel: BaseViewModel {
         quizData: QuizData
     ) {
         self.learningHistory = learningHistoryRepo
-        self.quizData = quizData
+        self.quizDataRelay = BehaviorRelay(value: quizData)
     }
     
     struct Input {
         let choiceSelected: Observable<Int>
+        let restartWithNewData: Observable<QuizData>
     }
     
     struct Output {
@@ -46,25 +48,40 @@ final class ChoiceQuizViewModel: BaseViewModel {
         let answerResultRelay = PublishRelay<AnswerResult>()
         let quizCompletedRelay = PublishRelay<QuizResult>()
         
+        // 새로운 퀴즈 데이터가 들어오면 quizDataRelay를 업데이트하고 상태 초기화
+        input.restartWithNewData
+            .bind(with: self) { owner, newQuizData in
+                owner.incorrectWords = [] // 오답 목록 초기화
+                owner.currentIndex.accept(0) // 현재 인덱스 초기화
+                owner.quizDataRelay.accept(newQuizData) // 퀴즈 데이터 교체
+            }
+            .disposed(by: disposeBag)
+        
         // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
-        let currentQuizData = currentIndex
-            .map {[weak self] index -> (WordModel, [String], Int)? in
-                guard let self = self,
-                      index < quizData.words.count else { return nil }
-                let word = quizData.words[index] // 현제 문제 단어
-                let (choices, correctIndex) = generateChoices(for: word)
-                return (word, choices, correctIndex)
-            }.share(replay: 1, scope: .whileConnected)
+        let currentQuizData = Observable.combineLatest(
+            currentIndex,
+            quizDataRelay
+        ).map { index, quizData -> (WordModel, [String], Int)? in
+            guard index < quizData.words.count else { return nil }
+            let word = quizData.words[index]
+            let (choices, correctIndex) = self.generateChoices(for: word, allWords: quizData.allWord)
+            return (word, choices, correctIndex)
+        }.share(replay: 1, scope: .whileConnected)
+        
         
         // 현제 문제 카운트
         let currentQuestionCount = currentIndex
             .map { $0 + 1 }
             .asDriver(onErrorJustReturn: 1)
         
-        let totalQuestionCount = Driver.just(quizData.words.count)
+        let totalQuestionCount = quizDataRelay.asDriver()
+            .map { $0.words.count }
         
-        let progress = currentIndex
-            .map { Float($0) / Float(max(1, self.quizData.words.count)) }
+        
+        let progress = Observable.combineLatest(currentIndex, quizDataRelay)
+            .map { index, quizData in
+                Float(index) / Float(max(1, quizData.words.count))
+            }
             .asDriver(onErrorJustReturn: 0)
         
         // 이미지
@@ -112,18 +129,24 @@ final class ChoiceQuizViewModel: BaseViewModel {
             .disposed(by: disposeBag)
         
         nextQuestionTrigger
-            .withLatestFrom(currentIndex.asObservable())
-            .bind(with: self) { owner, index in
+            .withLatestFrom(Observable.combineLatest(currentIndex, quizDataRelay))
+            .bind(with: self) { owner, result in
+                let (index, quizData) = result
                 let nextIndex = index + 1
                 
-                if nextIndex >= owner.quizData.words.count {
-                    let nextStartIndex = owner.quizData.startIndex + owner.quizData.words.count
+                if nextIndex >= quizData.words.count {
+                    let nextStartIndex: Int
                     let hasNextSection: Bool
                     
+                    if quizData.isRestart {
+                        nextStartIndex = quizData.startIndex // 재시작인 경우, 원래 시작 인덱스 유지
+                    } else {
+                        nextStartIndex = quizData.startIndex + quizData.words.count
+                    }
                     
-                    switch self.quizData.mode {
+                    switch quizData.mode {
                     case .section(_):
-                        hasNextSection = nextStartIndex < owner.quizData.allWord.count
+                        hasNextSection = nextStartIndex < quizData.allWord.count
                     case .full:
                         hasNextSection = false
                     }
@@ -131,9 +154,9 @@ final class ChoiceQuizViewModel: BaseViewModel {
                     quizCompletedRelay.accept(
                         QuizResult(
                             correct: correctCount,
-                            total: owner.quizData.words.count,
+                            total: quizData.words.count,
                             incorrectWords: owner.incorrectWords,
-                            mode: owner.quizData.mode,
+                            mode: quizData.mode,
                             nextStartIndex: nextStartIndex,
                             hasNextSection: hasNextSection
                         )
@@ -160,9 +183,9 @@ final class ChoiceQuizViewModel: BaseViewModel {
         nextQuestionTrigger.accept(())
     }
     
-    private func generateChoices(for word: WordModel) -> ([String], Int) {
+    private func generateChoices(for word: WordModel, allWords: [WordModel]) -> ([String], Int) {
         // 오답 3개 만들기
-        var wrongChoices = quizData.allWord
+        var wrongChoices = allWords
             .filter { $0.id != word.id } // 정답 제외
             .shuffled()
             .prefix(3)
