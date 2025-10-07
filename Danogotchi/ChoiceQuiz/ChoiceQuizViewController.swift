@@ -286,7 +286,7 @@ extension ChoiceQuizViewController {
         output.quizCompleted
             .emit(with: self) { owner, result in
                 let vm = CompleteQuizViewModel(result: result)
-                let vc = CompleteQuizViewController(viewModel: vm, originalQuizData: owner.quizData)
+                let vc = CompleteQuizViewController(viewModel: vm, originalQuizData: owner.quizData, result: result)
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)

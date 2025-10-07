@@ -9,10 +9,12 @@ final class CompleteQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: CompleteQuizViewModel
     private let originalQuizData: QuizData
+    private let currentResult: QuizResult
     
-    init(viewModel: CompleteQuizViewModel, originalQuizData: QuizData) {
+    init(viewModel: CompleteQuizViewModel, originalQuizData: QuizData, result: QuizResult) {
         self.viewModel = viewModel
         self.originalQuizData = originalQuizData
+        self.currentResult = result
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -57,6 +59,10 @@ final class CompleteQuizViewController: BaseViewController {
         configView()
         
         bind()
+        
+        print("CompleteQuiz - Mode: \(originalQuizData.mode)")
+        print("CompleteQuiz - HasNext: \(currentResult.hasNextSection)")
+        print("CompleteQuiz - WrongWords: \(currentResult.incorrectWords.count)")
     }
     
     override func configHierarchy() {
@@ -109,21 +115,29 @@ extension CompleteQuizViewController {
             .disposed(by: disposeBag)
         
         output.primaryButtonTitle
-            .drive(primaryButton.rx.title(for: .normal))
+            .drive(with: self) { owner, title in
+                print("Primary button title: \(title)")
+                owner.primaryButton.setTitle(title, for: .normal)
+            }
             .disposed(by: disposeBag)
         
         output.secondaryButtonTitle
-            .drive(secondaryButton.rx.title(for: .normal))
+            .drive(with: self) { owner, title in
+                print("Secondary button title: \(title)")
+                owner.secondaryButton.setTitle(title, for: .normal)
+            }
             .disposed(by: disposeBag)
         
         output.primaryAction
             .emit(with: self) { owner, action in
+                print("Primary action triggered: \(action)")
                 owner.handleAction(action)
             }
             .disposed(by: disposeBag)
         
         output.secondaryAction
             .emit(with: self) { owner, action in
+                print("Secondary action triggered: \(action)")
                 owner.handleAction(action)
             }
             .disposed(by: disposeBag)
@@ -135,110 +149,123 @@ extension CompleteQuizViewController {
 
 extension CompleteQuizViewController {
     private func handleAction(_ action: CompleteQuizViewModel.ActionType) {
-        switch action {
-        case .continueNextSection(let startIndex):
-            presentNextSection(startIndex: startIndex)
+            print("Handling action: \(action)")
             
-        case .showRetryActionSheet:
-            showRetryActionSheet()
-            
-        case .retryCurrentSection:
-            retryCurrentSection()
-            
-        case .retryWrongWords(let words):
-            if words.isEmpty {
-                ToastManager.shared.show("틀린 단어가 없습니다.")
-                return
+            switch action {
+            case .continueNextSection(let startIndex):
+                presentNextSection(startIndex: startIndex)
+                
+            case .showRetryActionSheet:
+                showRetryActionSheet()
+                
+            case .retryCurrentSection:
+                retryCurrentSection()
+                
+            case .retryWrongWords(let words):
+                print("Wrong words count: \(words.count)")
+                if words.isEmpty {
+                    ToastManager.shared.show("틀린 단어가 없습니다.")
+                    return
+                }
+                presentWrongWordsQuiz(words: words)
+                
+            case .restartFromBeginning:
+                restartFromBeginning()
             }
-            presentWrongWordsQuiz(words: words)
-            
-        case .restartFromBeginning:
-            restartFromBeginning()
         }
-    }
-    
-    private func presentNextSection(startIndex: Int) {
-        dismiss(animated: true) { [weak self] in
-            guard let self = self,
-                  let presentingVC = self.presentingViewController else { return }
+        
+        private func presentNextSection(startIndex: Int) {
+            print("Present next section: \(startIndex)")
             
-            let vm = SelectQuizViewModel(startIndex: startIndex)
-            let vc = SelectQuizViewController(viewModel: vm)
-            vc.modalPresentationStyle = .formSheet
+            guard let presentingVC = presentingViewController else { return }
             
-            if let sheet = vc.sheetPresentationController {
-                sheet.detents = [.medium(), .large()]
-                sheet.prefersGrabberVisible = true
-                sheet.preferredCornerRadius = 20
+            dismiss(animated: true) { [weak self] in
+                guard let self = self else { return }
+                
+                
+                let vm = SelectQuizViewModel(startIndex: startIndex)
+                let vc = SelectQuizViewController(viewModel: vm)
+                vc.modalPresentationStyle = .formSheet
+                
+                if let sheet = vc.sheetPresentationController {
+                    sheet.detents = [.medium(), .large()]
+                    sheet.prefersGrabberVisible = true
+                    sheet.preferredCornerRadius = 20
+                }
+                
+                presentingVC.present(vc, animated: true)
             }
-            
-            presentingVC.present(vc, animated: true)
         }
-    }
-    
-    
-    private func showRetryActionSheet() {
-        let alert = UIAlertController(title: "다시 학습", message: nil, preferredStyle: .actionSheet)
         
-        alert.addAction(UIAlertAction(title: "구간 전체 학습", style: .default) { [weak self] _ in
-            self?.retryCurrentSection()
-        })
-        
-        alert.addAction(UIAlertAction(title: "틀린 단어 학습하기", style: .default) { [weak self] _ in
-            self?.handleAction(.retryWrongWords(words: self?.originalQuizData.words.filter { word in
-                // 현재 구간의 틀린 단어 필터링 로직 필요
-                true
-            } ?? []))
-        })
-        
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        
-        present(alert, animated: true)
-    }
-    
-    private func retryCurrentSection() {
-        dismiss(animated: true) { [weak self] in
-            guard let self = self,
-                  let presentingVC = self.presentingViewController else { return }
+        private func showRetryActionSheet() {
+            print("Show retry action sheet")
+            let alert = UIAlertController(title: "다시 학습", message: nil, preferredStyle: .actionSheet)
             
-            let quizData = QuizData(
-                mode: originalQuizData.mode,
-                words: originalQuizData.words,
-                allWord: originalQuizData.allWord,
-                startIndex: originalQuizData.startIndex,
-                sectionSize: originalQuizData.sectionSize
-            )
+            alert.addAction(UIAlertAction(title: "구간 전체 학습", style: .default) { [weak self] _ in
+                print("Retry current section selected")
+                self?.retryCurrentSection()
+            })
             
-            let vm = ChoiceQuizViewModel(quizData: quizData)
-            let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
-            vc.modalPresentationStyle = .fullScreen
-            presentingVC.present(vc, animated: true)
+            alert.addAction(UIAlertAction(title: "틀린 단어 학습하기", style: .default) { [weak self] _ in
+                print("Retry wrong words selected")
+                guard let self = self else { return }
+                handleAction(.retryWrongWords(words: currentResult.incorrectWords))
+            })
+            
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            
+            present(alert, animated: true)
         }
-    }
-    private func presentWrongWordsQuiz(words: [WordModel]) {
-        dismiss(animated: true) { [weak self] in
-            guard let self = self,
-                  let presentingVC = self.presentingViewController else { return }
+        
+        private func retryCurrentSection() {
+            print("Retry current section")
+            guard let presentingVC = presentingViewController else { return }
             
-            let quizData = QuizData(
-                mode: self.originalQuizData.mode,
-                words: words,
-                allWord: originalQuizData.allWord,
-                startIndex: 0,
-                sectionSize: nil
-            )
-            
-            let vm = ChoiceQuizViewModel(quizData: quizData)
-            let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
-            vc.modalPresentationStyle = .fullScreen
-            presentingVC.present(vc, animated: true)
+            dismiss(animated: true) { [weak self] in
+                guard let self = self else { return }
+                
+                let quizData = QuizData(
+                    mode: originalQuizData.mode,
+                    words: originalQuizData.words,
+                    allWord: originalQuizData.allWord,
+                    startIndex: originalQuizData.startIndex,
+                    sectionSize: originalQuizData.sectionSize
+                )
+                
+                let vm = ChoiceQuizViewModel(quizData: quizData)
+                let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
+                vc.modalPresentationStyle = .fullScreen
+                presentingVC.present(vc, animated: true)
+            }
         }
-    }
-    
+        
+        private func presentWrongWordsQuiz(words: [WordModel]) {
+            guard let presentingVC = presentingViewController else { return }
+            
+            dismiss(animated: true) { [weak self] in
+                guard let self = self else { return }
+                
+                let quizData = QuizData(
+                    mode: originalQuizData.mode,
+                    words: words,
+                    allWord: originalQuizData.allWord,
+                    startIndex: 0,
+                    sectionSize: nil
+                )
+                
+                let vm = ChoiceQuizViewModel(quizData: quizData)
+                let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
+                vc.modalPresentationStyle = .fullScreen
+                presentingVC.present(vc, animated: true)
+            }
+        }
+        
     private func restartFromBeginning() {
+        print("Restart from beginning")
+        guard let presentingVC = presentingViewController else { return }
+        
         dismiss(animated: true) { [weak self] in
-            guard let self = self,
-                  let presentingVC = self.presentingViewController else { return }
+            guard let self = self else { return }
             
             let vm = SelectQuizViewModel(startIndex: 0)
             let vc = SelectQuizViewController(viewModel: vm)
