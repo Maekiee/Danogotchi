@@ -11,6 +11,7 @@ final class WordTabViewController: BaseViewController {
     private let viewModel: WordTabViewModel
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
+    private var allWords: [WordModel] = []
     
     private enum Section {
         case main
@@ -118,6 +119,7 @@ extension WordTabViewController {
             viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
             selectedWordCard: deleteWordTrigger.asObservable()
         )
+        
         let output = viewModel.transform(input: input)
         
         output.bookTitle
@@ -142,6 +144,7 @@ extension WordTabViewController {
         
         output.wordItems
             .drive(with: self) { owner, items in
+                owner.allWords = items
                 owner.applySnapshot(items: items)
             }.disposed(by: disposeBag)
         
@@ -186,24 +189,28 @@ extension WordTabViewController {
         
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vm = SelectQuizViewModel()
-                let vc = SelectQuizViewController(viewModel: vm)
-                vc.modalPresentationStyle = .formSheet
-                
-                vc.onStartQuiz = { quizData in
-                    let choiceVM = ChoiceQuizViewModel(quizData: quizData)
-                    let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
-                    choiceVC.modalPresentationStyle = .fullScreen
-                    owner.present(choiceVC, animated: true)
+                print("학습 시작")
+                guard !owner.allWords.isEmpty else {
+                    ToastManager.shared.show("학습할 단어가 없습니다.")
+                    return
+                }
+                print("학습 시작1")
+                guard owner.allWords.count >= 4 else {
+                    ToastManager.shared.show("최소 4개 이상의 단어가 필요합니다.")
+                    return
+                }
+                print("학습 시작2")
+                if owner.userInfo.currentQuizWordIds == nil {
+                    let wordIds = owner.allWords.map { $0.id }
+                    self.userInfo.currentQuizWordIds = wordIds
+                    self.userInfo.currentQuizIndex = 0
                 }
                 
-                if let sheet =  vc.sheetPresentationController {
-                    sheet.detents = [.medium(), .large()]
-                    sheet.prefersGrabberVisible = true
-                    sheet.preferredCornerRadius = 20
-                }
-                
-                owner.present(vc, animated: true)
+                let quizData = QuizData(words: owner.allWords, allWord: owner.allWords)
+                let choiceVM = ChoiceQuizViewModel(quizData: quizData)
+                let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
+                choiceVC.modalPresentationStyle = .fullScreen
+                owner.present(choiceVC, animated: true)
             }.disposed(by: disposeBag)
         
     }

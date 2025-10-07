@@ -116,6 +116,8 @@ final class WordTabViewModel: BaseViewModel {
                 // 디비에서 지우기
                 let wordId = try! ObjectId(string: wordCard.id)
                 owner.wordRepo.delete(id: wordId)
+                
+                owner.userInfo.clearQuizState()
             }.disposed(by: disposeBag)
         
         

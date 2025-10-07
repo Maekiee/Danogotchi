@@ -17,6 +17,10 @@ final class UserInfoManager: UserInfoProtocol {
         static let username = "username"
         static let userId = "userId"
         static let wordBookId = "WordBookId"
+        static let currentQuizWordIds = "currentQuizWordIds"
+        static let currentQuizIndex = "currentQuizIndex"
+        static let currentCorrectCount = "currentCorrectCount"
+        static let currentIncorrectWordIds = "currentIncorrectWordIds"
     }
     
     private let selectedBookIdRelay = BehaviorRelay<String?>(value: nil)
@@ -56,15 +60,46 @@ final class UserInfoManager: UserInfoProtocol {
             UserDefaults.standard.set(newValue, forKey: Keys.wordBookId)
             selectedBookIdRelay.accept(newValue)
         }
-//        get {
-//            guard let wordBookId = UserDefaults.standard.string(forKey: Keys.wordBookId) else { return nil }
-//            return wordBookId
-//        }
-//        
-//        set {
-//            UserDefaults.standard.set(newValue, forKey: Keys.wordBookId)
-//        }
     }
+    
+    var currentCorrectCount: Int {
+        get {
+            UserDefaults.standard.integer(forKey: Keys.currentCorrectCount)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.currentCorrectCount)
+        }
+    }
+    
+    var currentIncorrectWordIds: [String]? {
+        get {
+            UserDefaults.standard.array(forKey: Keys.currentIncorrectWordIds) as? [String]
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.currentIncorrectWordIds)
+        }
+    }
+    
+    // 현제퀴즈 단어 아이디 배열
+    var currentQuizWordIds: [String]? {
+        get {
+            UserDefaults.standard.array(forKey: Keys.currentQuizWordIds) as? [String]
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.currentQuizWordIds)
+        }
+    }
+    
+    var currentQuizIndex: Int {
+        get {
+            UserDefaults.standard.integer(forKey: Keys.currentQuizIndex)
+        }
+        
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.currentQuizIndex)
+        }
+    }
+    
     
     // 아직 사용 안함
     func removeUserInfo() {
@@ -72,5 +107,10 @@ final class UserInfoManager: UserInfoProtocol {
         UserDefaults.standard.removeObject(forKey: Keys.userId)
         UserDefaults.standard.removeObject(forKey: Keys.wordBookId)
         selectedBookIdRelay.accept(nil)
+    }
+    
+    func clearQuizState() {
+        UserDefaults.standard.removeObject(forKey: Keys.currentQuizWordIds)
+        UserDefaults.standard.removeObject(forKey: Keys.currentQuizIndex)
     }
 }

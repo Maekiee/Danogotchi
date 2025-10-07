@@ -7,21 +7,17 @@ import RxCocoa
 final class CompleteQuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let result: QuizResult
-    private let allIncorrectWords: [WordModel]
     
     // MARK: - ActionType 재정의
     enum ActionType {
-        case continueNextSection(startIndex: Int) // 이어 학습하기
-        case showRetryActionSheet // 다시 학습하기 (액션시트)
-        case retryCurrentSection // 현재 구간 전체 재학습
-        case retryWrongWords(words: [WordModel]) // 틀린 단어만 학습
-        case restartFromBeginning // 처음부터 다시 학습
-        case dismiss // 화면 닫기
+        case restart
+        case retryIncorrect(words: [WordModel])
+        case finish
+        case dismiss
     }
     
-    init(result: QuizResult, allIncorrectWords: [WordModel] = []) {
+    init(result: QuizResult) {
         self.result = result
-        self.allIncorrectWords = allIncorrectWords.isEmpty ? result.incorrectWords : allIncorrectWords
     }
     
     struct Input {
@@ -65,34 +61,20 @@ final class CompleteQuizViewModel: BaseViewModel {
         )
     }
     
-    // MARK: - 기획서에 따른 버튼 로직 수정
     private func determineButtons() -> (String, String, ActionType, ActionType) {
-        switch result.mode {
-        case .section:
-            if result.hasNextSection {
-                // [구간 학습] 중간 단계
-                return (
-                    "이어 학습하기", // 다음 구간
-                    "다시 학습하기", // 현재 구간 액션시트
-                    .continueNextSection(startIndex: result.nextStartIndex),
-                    .showRetryActionSheet
-                )
-            } else {
-                // [구간 학습] 모든 구간 완료
-                return (
-                    "틀린 단어 학습하기", // 전체에서 틀린 단어
-                    "처음부터 다시 학습하기", // 구간 설정 그대로 처음부터
-                    .retryWrongWords(words: allIncorrectWords),
-                    .restartFromBeginning
-                )
-            }
-        case .full:
-            // [전체 학습] 완료
+        if result.incorrectWords.isEmpty {
             return (
                 "처음부터 다시 학습하기",
-                "틀린 단어만 학습하기",
-                .restartFromBeginning,
-                .retryWrongWords(words: result.incorrectWords)
+                "학습 끝내기",
+                .restart,
+                .finish
+            )
+        } else {
+            return (
+                "처음부터 다시 학습하기",
+                "틀린 문제 학습하기",
+                .restart,
+                .retryIncorrect(words: result.incorrectWords)
             )
         }
     }

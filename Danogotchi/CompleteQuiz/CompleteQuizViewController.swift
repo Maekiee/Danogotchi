@@ -62,10 +62,7 @@ final class CompleteQuizViewController: BaseViewController {
         configView()
         
         bind()
-        
-        print("CompleteQuiz - Mode: \(originalQuizData.mode)")
-        print("CompleteQuiz - HasNext: \(currentResult.hasNextSection)")
-        print("CompleteQuiz - WrongWords: \(currentResult.incorrectWords.count)")
+       
     }
     
     override func configHierarchy() {
@@ -145,55 +142,13 @@ extension CompleteQuizViewController {
             }
             .disposed(by: disposeBag)
     }
-    
-    
 }
 
 extension CompleteQuizViewController {
     private func handleAction(_ action: CompleteQuizViewModel.ActionType) {
-        // 액션 시트를 띄우는 경우를 제외하고 모두 dismiss 처리
-        switch action {
-        case .showRetryActionSheet:
-            showRetryActionSheet()
-        case .retryWrongWords(let words):
-            if words.isEmpty {
-                ToastManager.shared.show("틀린 단어가 없습니다.")
-                // 틀린 단어가 없으면 액션을 전달하지 않고 종료
-            } else {
-                dismiss(animated: true) { [weak self] in
-                    guard let self = self else { return }
-                    self.onDismissAction?(action, self.originalQuizData, self.currentResult)
-                }
-            }
-        case .restartFromBeginning:
-            // 이 경우, WordTabViewController에서 새로운 SelectQuizVC를 띄워야 하므로,
-            // 현재 ChoiceQuizVC까지 모두 dismiss 되어야 함.
-            presentingViewController?.presentingViewController?.dismiss(animated: true)
-        
-        default:
-            dismiss(animated: true) { [weak self] in
-                guard let self = self else { return }
-                self.onDismissAction?(action, self.originalQuizData, self.currentResult)
-            }
-        }
-    }
-    
-    private func showRetryActionSheet() {
-        let alert = UIAlertController(title: "다시 학습하기", message: "방금 학습한 구간을 다시 학습합니다.", preferredStyle: .actionSheet)
-        
-        alert.addAction(UIAlertAction(title: "구간 전체 학습", style: .default) { [weak self] _ in
-            self?.handleAction(.retryCurrentSection)
-        })
-        
-        alert.addAction(UIAlertAction(title: "틀린 단어만 학습", style: .default) { [weak self] _ in
+        dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
-            self.handleAction(.retryWrongWords(words: self.currentResult.incorrectWords))
-        })
-        
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel) { [weak self] _ in
-             self?.handleAction(.dismiss)
-        })
-        
-        present(alert, animated: true)
+            self.onDismissAction?(action, self.originalQuizData, self.currentResult)
+        }
     }
 }
