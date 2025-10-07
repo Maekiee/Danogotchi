@@ -18,6 +18,8 @@ final class CompleteQuizViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - UI 프로퍼티
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 

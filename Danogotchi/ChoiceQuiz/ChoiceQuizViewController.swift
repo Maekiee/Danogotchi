@@ -287,9 +287,6 @@ extension ChoiceQuizViewController {
                 let vc = CompleteQuizViewController(viewModel: vm)
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
-                
-                
-//                owner.showCompletionAlert(correct: result.correct, total: result.total)
             }.disposed(by: disposeBag)
         
         closeButton.rx.tap
