@@ -8,9 +8,11 @@ import Kingfisher
 final class ChoiceQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: ChoiceQuizViewModel
+    private let quizData: QuizData
     
-    init(viewModel: ChoiceQuizViewModel) {
+    init(viewModel: ChoiceQuizViewModel, quizData: QuizData) {
         self.viewModel = viewModel
+        self.quizData = quizData
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -283,8 +285,8 @@ extension ChoiceQuizViewController {
         
         output.quizCompleted
             .emit(with: self) { owner, result in
-                let vm = CompleteQuizViewModel()
-                let vc = CompleteQuizViewController(viewModel: vm)
+                let vm = CompleteQuizViewModel(result: result)
+                let vc = CompleteQuizViewController(viewModel: vm, originalQuizData: owner.quizData)
                 vc.modalPresentationStyle = .fullScreen
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)

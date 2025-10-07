@@ -7,9 +7,14 @@ final class SelectQuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     private let bookRepo: WordBookRepositoryProtocol
+    private let startIndex: Int
     
-    init(bookRepo: WordBookRepositoryProtocol = WordBookRepository()) {
+    
+    init(bookRepo: WordBookRepositoryProtocol = WordBookRepository(),
+         startIndex: Int = 0
+    ) {
         self.bookRepo = bookRepo
+        self.startIndex = startIndex
     }
     
     struct Input {
@@ -22,7 +27,7 @@ final class SelectQuizViewModel: BaseViewModel {
     struct Output {
         let isSection: Driver<Bool>
         let sectionCount: Driver<Int>
-        let startQuiz: Signal<QuizData>
+        let startQuiz: Driver<QuizData>
     }
     
     func transform(input: Input) -> Output {
@@ -49,10 +54,6 @@ final class SelectQuizViewModel: BaseViewModel {
             .bind(to: sectionCount)
             .disposed(by: disposeBag)
         
-        // 학습할 데이터 가져오기
-        
-        
-        
         // 학습 시작하기 & 학습할 데이터 가져오기
         input.startLearningTap
             .withLatestFrom(Observable.combineLatest(
@@ -77,22 +78,42 @@ final class SelectQuizViewModel: BaseViewModel {
                     return nil
                 }
                 
+                let mode: QuizMode
                 let quizWords: [WordModel]
+                let sectionSize: Int?
+                
                 if isEnabled {
-                    let quizCount = min(selectedCount, allWord.count)
-                    quizWords = Array(allWord.prefix(quizCount))
+                    let start = startIndex
+                    let end = min(start + selectedCount, allWord.count)
+                    
+                    guard start < allWord.count else {
+                        ToastManager.shared.show("더 이상 학습할 단어가 없습니다.")
+                        return nil
+                    }
+                    
+                    quizWords = Array(allWord[start..<end])
+                    mode = .section(count: selectedCount)
+                    sectionSize = selectedCount
                 } else {
-                    quizWords = allWord
+                    quizWords = Array(allWord[startIndex...])
+                    mode = .full
+                    sectionSize = nil
                 }
                 
-                return QuizData(words: quizWords, allWord: allWord)
+                return QuizData(
+                    mode: mode,
+                    words: quizWords,
+                    allWord: allWord,
+                    startIndex: startIndex,
+                    sectionSize: sectionSize
+                )
             }.bind(to: startQuizTrigger)
             .disposed(by: disposeBag)
         
         return Output(
             isSection: isSection.asDriver(),
             sectionCount: sectionCount.asDriver(),
-            startQuiz: startQuizTrigger.asSignal()
+            startQuiz: startQuizTrigger.asDriver(onErrorDriveWith: .empty())
         )
     }
 }

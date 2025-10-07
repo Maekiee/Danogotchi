@@ -187,7 +187,7 @@ extension WordTabViewController {
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
                 let vm = SelectQuizViewModel()
-                let vc = SelectQuizViewController()
+                let vc = SelectQuizViewController(viewModel: vm)
                 vc.modalPresentationStyle = .formSheet
                 
                 if let sheet =  vc.sheetPresentationController {

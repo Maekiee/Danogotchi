@@ -7,7 +7,18 @@ import Kingfisher
 
 final class SelectQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel = SelectQuizViewModel()
+    private let viewModel: SelectQuizViewModel
+    
+    init(viewModel: SelectQuizViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     
     // MARK: - UI 프로퍼티
@@ -131,39 +142,33 @@ extension SelectQuizViewController {
             increaseButtonTap: increaseButton.rx.tap.asObservable(),
             startLearningTap: startLearningButton.rx.tap.asObservable()
         )
+        
         let output = viewModel.transform(input: input)
-        
-        output.startQuiz
-            .emit(with: self) { owner, quizData in
-                guard let presentingVC = owner.presentingViewController else { return }
-                
-                owner.dismiss(animated: true) {
-                    let vm = ChoiceQuizViewModel(
-                        quizWords: quizData.words,
-                        allWords: quizData.allWord
-                    )
-                    let vc = ChoiceQuizViewController(viewModel: vm)
-                    vc.modalPresentationStyle = .fullScreen
-                    
-                    
-                    presentingVC.present(vc, animated: true)
-                }
-                
-            }.disposed(by: disposeBag)
-        
-        output.isSection
-            .drive(with: self) { owner, isEnabled in
-                
-                UIView.animate(withDuration: 0.2) {
-                    owner.counterContainerView.alpha = isEnabled ? 1.0 : 0.0
-                }
-                
-            }.disposed(by: disposeBag)
         
         output.sectionCount
             .map { "\($0)" }
             .drive(countLabel.rx.text)
             .disposed(by: disposeBag)
+        
+        output.isSection
+            .drive(with: self) { owner, isEnabled in
+                UIView.animate(withDuration: 0.2) {
+                    owner.counterContainerView.alpha = isEnabled ? 1.0 : 0.0
+                }
+            }.disposed(by: disposeBag)
+        
+        output.startQuiz
+            .drive(with: self) { owner, quizData in
+                guard let presentingVC = owner.presentingViewController else { return }
+                
+                owner.dismiss(animated: true) {
+                    let vm = ChoiceQuizViewModel(quizData: quizData)
+                    let vc = ChoiceQuizViewController(viewModel: vm, quizData: quizData)
+                    vc.modalPresentationStyle = .fullScreen
+                    presentingVC.present(vc, animated: true)
+                }
+                
+            }.disposed(by: disposeBag)
     }
 }
 
