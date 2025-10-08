@@ -38,7 +38,7 @@ final class MainTabViewController: UITabBarController {
         navigationBarAppearance.backgroundColor = .white
         navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
         navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
-        navigationBarAppearance.shadowColor =  UIColor.gray
+        navigationBarAppearance.shadowColor = .clear
         UINavigationBar.appearance().standardAppearance = navigationBarAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
         
