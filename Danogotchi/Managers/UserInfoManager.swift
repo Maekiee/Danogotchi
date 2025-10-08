@@ -112,5 +112,7 @@ final class UserInfoManager: UserInfoProtocol {
     func clearQuizState() {
         UserDefaults.standard.removeObject(forKey: Keys.currentQuizWordIds)
         UserDefaults.standard.removeObject(forKey: Keys.currentQuizIndex)
+        UserDefaults.standard.removeObject(forKey: Keys.currentCorrectCount)
+        UserDefaults.standard.removeObject(forKey: Keys.currentIncorrectWordIds)
     }
 }

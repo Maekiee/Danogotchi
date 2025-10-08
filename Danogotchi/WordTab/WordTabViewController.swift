@@ -189,24 +189,38 @@ extension WordTabViewController {
         
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
-                print("학습 시작")
+                
                 guard !owner.allWords.isEmpty else {
                     ToastManager.shared.show("학습할 단어가 없습니다.")
                     return
                 }
-                print("학습 시작1")
+                
                 guard owner.allWords.count >= 4 else {
                     ToastManager.shared.show("최소 4개 이상의 단어가 필요합니다.")
                     return
                 }
-                print("학습 시작2")
-                if owner.userInfo.currentQuizWordIds == nil {
-                    let wordIds = owner.allWords.map { $0.id }
-                    self.userInfo.currentQuizWordIds = wordIds
-                    self.userInfo.currentQuizIndex = 0
-                }
                 
-                let quizData = QuizData(words: owner.allWords, allWord: owner.allWords)
+                var wordsForQuiz: [WordModel]
+                
+                // 이어할 퀴즈가 있는지 확인합니다.
+                if let currentWordIds = owner.userInfo.currentQuizWordIds {
+                    // 이어할 퀴즈가 있다면, 저장된 단어 ID 목록을 기반으로 퀴즈를 재구성합니다.
+                    // (틀린 문제 학습하기를 이어하는 경우도 이 로직으로 처리됩니다.)
+                    let wordIdSet = Set(currentWordIds)
+                    wordsForQuiz = owner.allWords.filter { wordIdSet.contains($0.id) }
+                } else {
+                    // 새로 시작하는 퀴즈라면, 전체 단어 목록으로 퀴즈를 구성하고 상태를 저장합니다.
+                    wordsForQuiz = owner.allWords
+                    let wordIds = wordsForQuiz.map { $0.id }
+                    owner.userInfo.currentQuizWordIds = wordIds
+                    owner.userInfo.currentQuizIndex = 0
+                    owner.userInfo.currentCorrectCount = 0
+                    owner.userInfo.currentIncorrectWordIds = nil
+                }
+                                
+                // 위에서 결정된 `wordsForQuiz`를 사용하여 퀴즈 데이터를 생성합니다.
+                let quizData = QuizData(words: wordsForQuiz, allWord: owner.allWords)
+                
                 let choiceVM = ChoiceQuizViewModel(quizData: quizData)
                 let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
                 choiceVC.modalPresentationStyle = .fullScreen
