@@ -35,14 +35,14 @@ final class WordTabViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let addWordButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         button.tintColor = .systemBlue
         return button
     }()
     
     private let showWordBookButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
+        button.setImage(UIImage(systemName: "rectangle.stack.fill"), for: .normal)
         button.tintColor = .systemBlue
         return button
     }()
@@ -123,7 +123,8 @@ final class WordTabViewController: BaseViewController {
         }
         
         collectionView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+            make.edges.equalToSuperview()
+//            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
         startLearningButton.snp.makeConstraints { make in
