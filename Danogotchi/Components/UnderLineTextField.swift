@@ -92,8 +92,17 @@ final class UnderlineTextField: UIView {
         textField.textColor = .label
         textField.font = .systemFont(ofSize: 20, weight: .semibold)
         
+        textField.backgroundColor = .systemGray6 // 배경색을 회색으로 설정
+        textField.layer.cornerRadius = 8 // 모서리를 둥글게
+        
+        // 텍스트 필드에 좌우 패딩 추가
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
+        textField.leftViewMode = .always
+        textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
+        textField.rightViewMode = .always
+        
         // Underline 설정
-        underlineView.backgroundColor = .systemGray3
+//        underlineView.backgroundColor = .systemGray3
         
         // Title Label 설정
         titleLabel.font = .systemFont(ofSize: 14, weight: .medium)

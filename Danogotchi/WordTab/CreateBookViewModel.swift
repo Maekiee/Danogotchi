@@ -21,10 +21,16 @@ final class CreateBookViewModel: BaseViewModel {
     
     struct Output {
         let createBookDoneTrigger: Signal<Void>
+        let isCreateButtonEnabled: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
         let createBookDoneTrigger = PublishRelay<Void>()
+        
+        let isTitleValid = input.textFieldValue
+            .map { (2..<10).contains($0.count) }
+            .distinctUntilChanged()
+            .share(replay: 1)
         
         input.createButtonTapped
             .withLatestFrom(input.textFieldValue)
@@ -46,7 +52,8 @@ final class CreateBookViewModel: BaseViewModel {
         
         
         return Output(
-            createBookDoneTrigger: createBookDoneTrigger.asSignal()
+            createBookDoneTrigger: createBookDoneTrigger.asSignal(),
+            isCreateButtonEnabled: isTitleValid.asDriver(onErrorJustReturn: false)
         )
     }
 }

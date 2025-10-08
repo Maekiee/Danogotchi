@@ -165,7 +165,6 @@ extension WordTabViewController {
                     actionType: .add
                 )
                 
-                // 여기에는 선택한 단어장의 pk 주입
                 let vm = AddWordViewModel(wordItem: createWordModel)
                 let vc = UINavigationController(rootViewController: AddWordViewController(viewModel: vm, entryPoint: .add))
                 vc.modalPresentationStyle = .fullScreen

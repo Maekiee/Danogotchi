@@ -20,14 +20,16 @@ final class CreateBookViewController: BaseViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "새로운 단어장"
+        label.text = "새 단어장"
         label.textColor = .black
         label.font = .boldSystemFont(ofSize: 17)
         return label
     }()
+    
     private let bookTitleTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
-        tf.font = .systemFont(ofSize: 18, weight: .regular)
+        tf.font = .systemFont(ofSize: 15, weight: .regular)
+        tf.placeholder = "단어장 제목을 입력해주세요"
         tf.isUserInteractionEnabled = true
         return tf
     }()
@@ -36,13 +38,14 @@ final class CreateBookViewController: BaseViewController {
     private let createButton = PrimaryFillButton(title: "확인")
     private let cancelButton = PrimaryFillButton(title: "취소")
     
-    private let buttonStackView: UIStackView = {
-           let stack = UIStackView()
-           stack.axis = .horizontal
-           stack.spacing = 12
-           stack.distribution = .fillEqually
-           return stack
-       }()
+    private lazy var buttonStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        stack.distribution = .fillEqually
+        [createButton, cancelButton].forEach { stack.addArrangedSubview($0) }
+        return stack
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,9 +62,6 @@ final class CreateBookViewController: BaseViewController {
         containerView.addSubview(titleLabel)
         containerView.addSubview(bookTitleTextField)
         containerView.addSubview(buttonStackView)
-        
-        buttonStackView.addArrangedSubview(cancelButton)
-        buttonStackView.addArrangedSubview(createButton)
     }
     
     override func configLayout() {
@@ -72,7 +72,7 @@ final class CreateBookViewController: BaseViewController {
         
         titleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(24)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.centerX.equalToSuperview()
         }
         
         bookTitleTextField.snp.makeConstraints { make in
@@ -81,11 +81,12 @@ final class CreateBookViewController: BaseViewController {
             make.height.equalTo(44)
         }
         
+        
         buttonStackView.snp.makeConstraints { make in
-            make.top.equalTo(bookTitleTextField.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(bookTitleTextField.snp.bottom).offset(12)
+            make.horizontalEdges.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().offset(-24)
-            make.height.equalTo(48)
+            make.height.equalTo(72)
         }
     }
     
@@ -108,6 +109,10 @@ extension CreateBookViewController {
                 owner.bookCreated.accept(())
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
+        
+        output.isCreateButtonEnabled
+            .drive(createButton.rx.isEnabled)
+            .disposed(by: disposeBag)
         
         cancelButton.rx.tap
             .bind(with: self) { owner, _ in
