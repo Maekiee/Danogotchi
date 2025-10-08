@@ -56,7 +56,33 @@ final class WordTabViewController: BaseViewController {
     
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
     
-    private let startLearningButton = PrimaryFillButton(title: "학습하기")
+//    private let startLearningButton = PrimaryFillButton(title: "학습하기")
+    let startLearningButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        
+        // 텍스트 설정
+        config.title = "학습하기"
+        config.baseForegroundColor = .white
+        
+        // 배경 blur 효과 설정
+        config.background.backgroundColor = UIColor.white.withAlphaComponent(0.1)
+        config.background.cornerRadius = 22
+        config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+    
+        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24)
+        
+        let button = UIButton(configuration: config)
+        // 폰트 설정 (Configuration에서 직접 설정)
+        button.configuration?.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = .systemFont(ofSize: 15, weight: .semibold)
+            return outgoing
+        }
+        
+        return button
+    }()
+    
+    
     private let collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
         view.showsVerticalScrollIndicator = false
@@ -288,16 +314,17 @@ extension WordTabViewController {
             widthDimension: .fractionalWidth(1),
             heightDimension: .fractionalHeight(1.0))
         )
-        item.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(200)
+            heightDimension: .fractionalHeight(0.4)
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets.bottom = 80
         
         let layout = UICollectionViewCompositionalLayout(section: section)
         

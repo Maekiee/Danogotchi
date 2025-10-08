@@ -15,8 +15,23 @@
 		7651837A2E844257005EE2F7 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 765183792E844257005EE2F7 /* Kingfisher */; };
 		7651837D2E844260005EE2F7 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 7651837C2E844260005EE2F7 /* Toast */; };
 		76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */; };
+		76C9E3762E966239001B37B2 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		76C9E3772E966239001B37B2 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				76C9E3762E966239001B37B2 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		765182CB2E843A75005EE2F7 /* Danogotchi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Danogotchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,6 +105,7 @@
 				765182C72E843A75005EE2F7 /* Sources */,
 				765182C82E843A75005EE2F7 /* Frameworks */,
 				765182C92E843A75005EE2F7 /* Resources */,
+				76C9E3772E966239001B37B2 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

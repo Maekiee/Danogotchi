@@ -8,25 +8,44 @@ import RxCocoa
 final class WordCardCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     var onTouchTopIcon: Observable<Void> {
-        return iconButton.rx.tap.asObservable()
+        return trailingIconButton.rx.tap.asObservable()
     }
     
     let thumbnail: UIImageView = {
         let imageView = UIImageView()
+        imageView.layer.cornerRadius = 16
+        imageView.clipsToBounds = true
         return imageView
     }()
+    
+    // TTS 추가시 사용
+//    let imageIconButton: UIButton = {
+//        let button = UIButton()
+//        var config = UIButton.Configuration.gray()
+//        config.image = UIImage(systemName: "ellipsis")
+//        button.configuration = config
+//        return button
+//    }()
+    
     let titleLabel: UILabel = {
         let label = UILabel()
+        label.textColor = AppColor.textPrimaryColor
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
         return label
     }()
+    
     let subtitleLabel: UILabel = {
         let label = UILabel()
+        label.textColor = AppColor.textSecondaryColor
+        label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()
-    let iconButton: UIButton = {
+    
+    let trailingIconButton: UIButton = {
         let button = UIButton()
-        var config = UIButton.Configuration.gray()
+        var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "ellipsis")
+        config.baseForegroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0) 
         button.configuration = config
         return button
     }()
@@ -73,37 +92,51 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
             thumbnail,
             titleLabel,
             subtitleLabel,
-            iconButton
+            trailingIconButton
         ].forEach { contentView.addSubview($0) }
+        
+        /// TTS 추가시 사용
+//        thumbnail.addSubview(imageIconButton)
     }
     
     func configLayout() {
         thumbnail.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.horizontalEdges.equalToSuperview()
-            make.height.equalTo(120)
+            make.top.equalToSuperview().offset(6)
+            make.horizontalEdges.equalToSuperview().inset(6)
+            make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
+//            make.height.equalTo(thumbnail.snp.width).multipliedBy(9.0/16.0)
         }
         
-        iconButton.snp.makeConstraints { make in
+        /// TTS 추가시 사용
+//        imageIconButton.snp.makeConstraints { make in
+//            make.top.equalToSuperview().offset(16)
+//            make.trailing.equalToSuperview().offset(-16)
+//            make.size.equalTo(24)
+//        }
+        
+        trailingIconButton.snp.makeConstraints { make in
             make.top.equalTo(thumbnail.snp.bottom).offset(8)
-            make.trailing.equalToSuperview().inset(4)
+            make.trailing.equalToSuperview().offset(-16)
             make.size.equalTo(24)
         }
         
+        
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(thumbnail.snp.bottom).offset(8)
-            make.leading.equalToSuperview().offset(4)
-            make.trailing.lessThanOrEqualTo(iconButton.snp.leading).offset(-8)
+            make.leading.equalToSuperview().offset(16)
+            make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
         }
         
         subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(4)
-            make.leading.equalTo(titleLabel.snp.trailing).offset(8)
+            make.top.equalTo(titleLabel.snp.bottom).offset(4)
+            make.leading.equalToSuperview().offset(16)
         }
     }
     
     func configView() {
-        backgroundColor = .yellow
+        backgroundColor = AppColor.cardColor
+        self.layer.cornerRadius = 20
+        self.clipsToBounds = true
         
     }
 }
