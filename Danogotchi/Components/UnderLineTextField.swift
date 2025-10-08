@@ -92,7 +92,7 @@ final class UnderlineTextField: UIView {
         textField.textColor = .label
         textField.font = .systemFont(ofSize: 20, weight: .semibold)
         
-        textField.backgroundColor = .systemGray6 // 배경색을 회색으로 설정
+        textField.backgroundColor = .systemGray5 // 배경색을 회색으로 설정
         textField.layer.cornerRadius = 8 // 모서리를 둥글게
         
         // 텍스트 필드에 좌우 패딩 추가

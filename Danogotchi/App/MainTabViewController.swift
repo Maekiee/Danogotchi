@@ -35,7 +35,7 @@ final class MainTabViewController: UITabBarController {
     private func configTabBarAppearance() {
         let navigationBarAppearance = UINavigationBarAppearance()
         navigationBarAppearance.configureWithOpaqueBackground()
-        navigationBarAppearance.backgroundColor = .white
+        navigationBarAppearance.backgroundColor = AppColor.appBackgroundColor
         navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
         navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
         navigationBarAppearance.shadowColor = .clear
@@ -44,7 +44,7 @@ final class MainTabViewController: UITabBarController {
         
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = .white
+        tabBarAppearance.backgroundColor = AppColor.appBackgroundColor
         tabBarAppearance.shadowColor = .clear
         tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor.black
         tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.black]

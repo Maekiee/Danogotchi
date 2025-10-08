@@ -60,6 +60,7 @@ final class WordTabViewController: BaseViewController {
     private let collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
         view.showsVerticalScrollIndicator = false
+        view.backgroundColor = AppColor.appBackgroundColor
         return view
     }()
     
