@@ -8,7 +8,7 @@ final class AddWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: AddWordViewModel
     private let entryPoint: EntryPoint
-
+    
     init(viewModel: AddWordViewModel, entryPoint: EntryPoint) {
         self.viewModel = viewModel
         self.entryPoint = entryPoint
@@ -31,44 +31,39 @@ final class AddWordViewController: BaseViewController {
     private let contentView = UIView()
     private let thumbnail: UIImageView = {
         let view = UIImageView()
-        view.backgroundColor = .systemGray4
+        view.backgroundColor = .systemGray5
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
         return view
     }()
-    private lazy var textFieldStackView: UIStackView = {
-        let view = UIStackView()
-        view.axis = .vertical
-        view.spacing = 8
-        [wordBookTitleTextField, wordTextField, meanTextField].forEach {
-            view.addArrangedSubview($0)
-        }
-        return view
-    }()
+    
     private let wordBookTitleTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어장 세트 이름"
-        tf.font = .systemFont(ofSize: 18, weight: .regular)
+        tf.font = .systemFont(ofSize: 16, weight: .regular)
         tf.isUserInteractionEnabled = true
         return tf
     }()
+    
     private let wordTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어"
-        tf.font = .systemFont(ofSize: 18, weight: .regular)
+        tf.font = .systemFont(ofSize: 16, weight: .regular)
         tf.isUserInteractionEnabled = true
         return tf
     }()
+    
     private let meanTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "뜻"
-        tf.font = .systemFont(ofSize: 18, weight: .regular)
+        tf.font = .systemFont(ofSize: 16, weight: .regular)
         tf.isUserInteractionEnabled = true
         return tf
     }()
+    
     private lazy var addWordButton = PrimaryFillButton(title: self.entryPoint == .add ? "저장" : "수정")
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -86,7 +81,9 @@ final class AddWordViewController: BaseViewController {
         
         [
             thumbnail,
-            textFieldStackView,
+            wordBookTitleTextField,
+            wordTextField,
+            meanTextField,
             addWordButton
         ].forEach { contentView.addSubview($0) }
     }
@@ -107,15 +104,32 @@ final class AddWordViewController: BaseViewController {
             make.height.equalTo(thumbnail.snp.width).multipliedBy(2.0/3.0)
         }
         
-        textFieldStackView.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(16)
+        wordBookTitleTextField.snp.makeConstraints { make in
+            make.top.equalTo(thumbnail.snp.bottom).offset(20)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
-        addWordButton.snp.makeConstraints { make in
-            make.top.equalTo(textFieldStackView.snp.bottom).offset(16)
+        wordTextField.snp.makeConstraints { make in
+            make.top.equalTo(wordBookTitleTextField.snp.bottom).offset(8)
             make.horizontalEdges.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+        }
+        
+        meanTextField.snp.makeConstraints { make in
+            make.top.equalTo(wordTextField.snp.bottom).offset(8)
+            make.horizontalEdges.equalToSuperview().inset(20)
+        }
+        
+        // 각 컴포넌트 내부의 실제 UITextField(tf)에 높이 제약조건을 설정합니다.
+        [wordBookTitleTextField, wordTextField, meanTextField].forEach { underlineTextField in
+            underlineTextField.tf.snp.makeConstraints { make in
+                make.height.equalTo(40) // 원하는 높이 설정
+            }
+        }
+        
+        addWordButton.snp.makeConstraints { make in
+            make.top.equalTo(meanTextField.snp.bottom).offset(24)
+            make.horizontalEdges.equalToSuperview().inset(20)
+            make.height.equalTo(48)
             make.bottom.equalToSuperview().offset(-20)
         }
     }
@@ -194,19 +208,18 @@ extension AddWordViewController {
             .disposed(by: disposeBag)
         
         output.resetTrigger
-                .emit(onNext: { [weak self] in
-                    guard let self = self else { return }
-                    // 단어장 제목을 제외한 나머지 필드를 초기화
-                    wordTextField.text = ""
-                    meanTextField.text = ""
-                    
-                    // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
-                    thumbnail.image = UIImage(systemName: "photo")
-                    
-                    let message = entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
-                    showToast(message, duration: .short)
-                    print("입력 필드가 초기화되었습니다.")
-                })
-                .disposed(by: disposeBag)
+            .emit(with: self) { owner, _  in
+//                guard let self = self else { return }
+                // 단어장 제목을 제외한 나머지 필드를 초기화
+                owner.wordTextField.text = ""
+                owner.meanTextField.text = ""
+                
+                // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
+                owner.thumbnail.image = UIImage(systemName: "photo")
+                
+                let message = owner.entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
+                owner.showToast(message, duration: .short)
+                print("입력 필드가 초기화되었습니다.")
+            }.disposed(by: disposeBag)
     }
 }
