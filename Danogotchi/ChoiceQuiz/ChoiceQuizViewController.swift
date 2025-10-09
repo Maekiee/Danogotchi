@@ -100,8 +100,6 @@ final class ChoiceQuizViewController: BaseViewController {
         return button
     }()
     
-    
-    
     private let choice3Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 3", for: .normal)
@@ -172,13 +170,14 @@ final class ChoiceQuizViewController: BaseViewController {
     
     override func configLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.centerY.equalTo(closeButton)
             make.centerX.equalToSuperview()
         }
         
         closeButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.size.equalTo(44)
         }
         
         
@@ -227,18 +226,14 @@ extension ChoiceQuizViewController {
         
         let output = viewModel.transform(input: input)
         
-        output.currentQuestion
-            .map { "\($0)" }
-            .drive(currentQuestionLabel.rx.text)
-            .disposed(by: disposeBag)
         
         output.progress
             .drive(progressView.rx.progress)
             .disposed(by: disposeBag)
         
-        output.totalQuestion
-            .map { "\($0)" }
-            .drive(totalQuestionLabel.rx.text)
+        Driver.combineLatest(output.currentQuestion, output.totalQuestion)
+            .map { "\($0) / \($1)" }
+            .drive(titleLabel.rx.text)
             .disposed(by: disposeBag)
         
         output.wordImage
