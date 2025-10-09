@@ -55,6 +55,8 @@ final class MyBookListViewController: BaseViewController {
     }()
     
     private let deleteTrigger = PublishRelay<WordBookModel>()
+    let selectedBook = PublishRelay<WordBookModel>()
+    private var currentSelectedBook: WordBookModel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -95,7 +97,7 @@ final class MyBookListViewController: BaseViewController {
 extension MyBookListViewController {
     private func bind() {
         let refreshTrigger = PublishRelay<Void>()
-        let selectedBook = PublishRelay<WordBookModel>()
+//        let selectedBook = PublishRelay<WordBookModel>()
         
         let input = MyBookListViewModel.Input(
             viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
@@ -113,8 +115,14 @@ extension MyBookListViewController {
             }.disposed(by: disposeBag)
         
         output.bookList
-            .drive(with: self) { owner, book in
-                owner.applySnapshot(items: book)
+            .drive(with: self) { owner, books in
+                if let selectedId = UserInfoManager.shared.selectedBookId,
+                   let initiallySelected = books.first(where: { $0.id == selectedId }) {
+                    owner.currentSelectedBook = initiallySelected
+                    owner.selectedBook.accept(initiallySelected)
+                }
+                
+                owner.applySnapshot(items: books)
             }.disposed(by: disposeBag)
         
         // 셀 터치
@@ -124,7 +132,21 @@ extension MyBookListViewController {
                 return dataSource.itemIdentifier(for: indexPath)
             }
             .bind(with: self) { owner, book in
-                selectedBook.accept(book)
+                var itemsToReload = [WordBookModel]()
+                
+                if let previousBook = owner.currentSelectedBook, previousBook.id != book.id {
+                    itemsToReload.append(previousBook)
+                }
+                
+                itemsToReload.append(book)
+                owner.currentSelectedBook = book
+                
+                var snapshot = owner.dataSource.snapshot()
+                snapshot.reconfigureItems(itemsToReload)
+                owner.dataSource.apply(snapshot, animatingDifferences: false)
+                
+                
+                owner.selectedBook.accept(book)
             }.disposed(by: disposeBag)
         
         // 단어장 추가하기
@@ -148,7 +170,12 @@ extension MyBookListViewController {
 extension MyBookListViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBookModel> { cell, indexPath, item in
-            cell.configure(with: item, isSelected: true)
+            
+            
+            
+            let isSelected = self.currentSelectedBook?.id == item.id
+            cell.configure(with: item, isSelected: isSelected)
+            
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
                     title: item.title,
