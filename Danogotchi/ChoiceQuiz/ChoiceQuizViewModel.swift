@@ -93,7 +93,7 @@ final class ChoiceQuizViewModel: BaseViewModel {
         
         let progress = Observable.combineLatest(currentIndex, quizDataRelay)
             .map { index, quizData in
-                Float(index) / Float(max(1, quizData.words.count))
+                Float(index + 1) / Float(max(1, quizData.words.count))
             }
             .asDriver(onErrorJustReturn: 0)
         

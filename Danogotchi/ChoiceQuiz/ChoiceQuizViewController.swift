@@ -48,9 +48,13 @@ final class ChoiceQuizViewController: BaseViewController {
     
     private let progressView: UIProgressView = {
         let progress = UIProgressView(progressViewStyle: .bar)
-        progress.progressTintColor = .systemBlue
-        progress.trackTintColor = .systemGray5
-        progress.progress = 0.0
+        progress.progressTintColor = .systemGreen
+          progress.trackTintColor = .systemGray5
+          progress.progress = 0.0
+          progress.layer.cornerRadius = 4
+          progress.clipsToBounds = true
+          progress.layer.sublayers?[1].cornerRadius = 4
+          progress.subviews[1].clipsToBounds = true
         return progress
     }()
     
@@ -125,11 +129,7 @@ final class ChoiceQuizViewController: BaseViewController {
         stack.axis = .horizontal
         stack.spacing = 8
         stack.alignment = .center
-        [
-            currentQuestionLabel,
-            progressView,
-            totalQuestionLabel
-        ].forEach { stack.addArrangedSubview($0) }
+        stack.addArrangedSubview(progressView)
         return stack
     }()
     
@@ -161,7 +161,8 @@ final class ChoiceQuizViewController: BaseViewController {
         [
             titleLabel,
             closeButton,
-            progressStackView,
+            progressView,
+//            progressStackView,
             thumbnailImage,
             questionLabel,
             choiceStackView
@@ -181,14 +182,19 @@ final class ChoiceQuizViewController: BaseViewController {
         }
         
         
-        progressStackView.snp.makeConstraints { make in
+        progressView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(20)
+            make.height.equalTo(8)  // 두께 조정 (기본 2 → 8)
         }
+//        progressStackView.snp.makeConstraints { make in
+//            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+//            make.horizontalEdges.equalToSuperview().inset(24)
+//            make.height.equalTo(20)
+//        }
         
         thumbnailImage.snp.makeConstraints { make in
-            make.top.equalTo(progressStackView.snp.bottom).offset(16)
+            make.top.equalTo(progressView.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(thumbnailImage.snp.width).multipliedBy(2.0/3.0)
         }
