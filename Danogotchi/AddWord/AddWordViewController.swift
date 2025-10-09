@@ -236,14 +236,6 @@ extension AddWordViewController {
             .drive(wordBookTitleTextField.rx.text)
             .disposed(by: disposeBag)
         
-//        output.wordTextFieldText
-//            .drive(wordTextField.rx.text)
-//            .disposed(by: disposeBag)
-//        
-//        output.meanText
-//            .drive(meanTextField.rx.text)
-//            .disposed(by: disposeBag)
-        
         
         output.wordTextFieldText
             .drive(with: self) { owner, text in
