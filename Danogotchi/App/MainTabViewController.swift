@@ -68,17 +68,13 @@ final class MainTabViewController: UITabBarController {
         
         
         let tabBarAppearance = UITabBarAppearance()
-//        tabBarAppearance.configureWithOpaqueBackground()
         tabBarAppearance.configureWithTransparentBackground()
         
         tabBarAppearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
-//        tabBarAppearance.backgroundColor = AppColor.appBackgroundColor
         tabBarAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.1)
         
         tabBarAppearance.shadowColor = .clear
-        
-//        tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor.black
-//        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.black]
+
         tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor.black
         tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.black]
         tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor.gray
@@ -87,10 +83,10 @@ final class MainTabViewController: UITabBarController {
         UITabBar.appearance().standardAppearance = tabBarAppearance
         UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
         
-//        self.tabBar.standardAppearance = tabBarAppearance
-//        if #available(iOS 15.0, *) {
-//            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-//        }
+        self.tabBar.standardAppearance = tabBarAppearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
     }
 }
 

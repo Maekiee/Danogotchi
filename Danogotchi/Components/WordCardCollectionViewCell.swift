@@ -31,6 +31,8 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.textColor = AppColor.textPrimaryColor
         label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.numberOfLines = 0
+        
         return label
     }()
     
@@ -38,6 +40,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.textColor = AppColor.textSecondaryColor
         label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.numberOfLines = 0
         return label
     }()
     
@@ -45,7 +48,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "ellipsis")
-        config.baseForegroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0) 
+        config.baseForegroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0)
         button.configuration = config
         return button
     }()
@@ -130,6 +133,8 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
         subtitleLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(4)
             make.leading.equalToSuperview().offset(16)
+            make.trailing.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(12)
         }
     }
     

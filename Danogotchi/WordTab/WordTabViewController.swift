@@ -36,14 +36,15 @@ final class WordTabViewController: BaseViewController {
     private let addWordButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
-        button.tintColor = .systemBlue
+        button.tintColor = UIColor.black.withAlphaComponent(0.8)
+
         return button
     }()
     
     private let showWordBookButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "rectangle.stack.fill"), for: .normal)
-        button.tintColor = .systemBlue
+        button.tintColor = UIColor.black.withAlphaComponent(0.8)
         return button
     }()
     
@@ -56,7 +57,6 @@ final class WordTabViewController: BaseViewController {
     
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
     
-//    private let startLearningButton = PrimaryFillButton(title: "학습하기")
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.plain()
         
@@ -124,7 +124,6 @@ final class WordTabViewController: BaseViewController {
         
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-//            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
         startLearningButton.snp.makeConstraints { make in
@@ -313,19 +312,25 @@ extension WordTabViewController {
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .fractionalHeight(1.0))
+            heightDimension: .estimated(150))
         )
-        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+//        item.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalHeight(0.4)
+            heightDimension: .estimated(150)
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets.bottom = 80
+        section.interGroupSpacing = 16
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: 16,      // 상단 여백
+            leading: 16,  // 좌측 여백
+            bottom: 80,   // 하단 여백 (학습하기 버튼 공간)
+            trailing: 16  // 우측 여백
+        )
         
         let layout = UICollectionViewCompositionalLayout(section: section)
         
