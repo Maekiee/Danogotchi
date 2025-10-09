@@ -5,8 +5,32 @@ enum Coordinator {
     static func switchToMainVieWController() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let sceneDelegate = windowScene.delegate as? SceneDelegate else { return }
+  
+        let vm = WordTabViewModel()
+        let NavVC = UINavigationController(rootViewController: WordTabViewController(viewModel: vm))
         
-        sceneDelegate.changeRootVC(MainTabViewController())
+        configureNavigationBar(NavVC)
+        sceneDelegate.changeRootVC(NavVC)
+//        sceneDelegate.changeRootVC(MainTabViewController())
+    }
+    
+    
+    // 임시 파일
+    static func configureNavigationBar(_ navController: UINavigationController) {
+        let navigationBarAppearance = UINavigationBarAppearance()
+        navigationBarAppearance.configureWithTransparentBackground()
+
+        navigationBarAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
+        navigationBarAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.1)
+        
+        navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
+        navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+        
+        navigationBarAppearance.shadowColor = .clear
+        
+        UINavigationBar.appearance().standardAppearance = navigationBarAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+        UINavigationBar.appearance().compactAppearance = navigationBarAppearance
     }
 }
 
@@ -26,7 +50,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         print("Realm is located at:", realm!.configuration.fileURL!)
         
         if UserInfoManager.shared.username != nil {
-            window?.rootViewController = MainTabViewController()
+            let vm = WordTabViewModel()
+            let vc = WordTabViewController(viewModel: vm)
+            let navVC = UINavigationController(rootViewController: vc)
+            Coordinator.configureNavigationBar(navVC)
+            window?.rootViewController = navVC
+//            window?.rootViewController = MainTabViewController()
         } else {
             window?.rootViewController = SetUserNameViewController()
         }

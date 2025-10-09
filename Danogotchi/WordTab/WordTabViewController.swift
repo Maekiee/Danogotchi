@@ -92,7 +92,6 @@ final class WordTabViewController: BaseViewController {
     
     private let deleteWordTrigger = PublishRelay<WordModel>()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -137,6 +136,9 @@ final class WordTabViewController: BaseViewController {
         let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
         let secondBarButton = UIBarButtonItem(customView: addWordButton)
         navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
+        
+        
+   
     }
 }
 
