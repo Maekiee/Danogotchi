@@ -47,6 +47,14 @@ final class AddWordViewController: BaseViewController {
         return view
     }()
     
+    private let showMoreImagesButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.gray()
+        config.image = UIImage(systemName: "photo.on.rectangle")
+        button.configuration = config
+        return button
+    }()
+    
     private let wordBookTitleTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어장 세트 이름"
@@ -97,6 +105,7 @@ final class AddWordViewController: BaseViewController {
         ].forEach { contentView.addSubview($0) }
         
         thumbnail.addSubview(emptyImageIcon)
+        thumbnail.addSubview(showMoreImagesButton)
     }
     
     override func configLayout() {
@@ -118,6 +127,11 @@ final class AddWordViewController: BaseViewController {
         emptyImageIcon.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.width.height.equalTo(32)
+        }
+        
+        showMoreImagesButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(12)
+            make.trailing.equalToSuperview().offset(-12)
         }
         
         wordBookTitleTextField.snp.makeConstraints { make in
