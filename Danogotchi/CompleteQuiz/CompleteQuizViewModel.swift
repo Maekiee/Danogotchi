@@ -32,13 +32,18 @@ final class CompleteQuizViewModel: BaseViewModel {
         let primaryAction: Signal<ActionType>
         let secondaryAction: Signal<ActionType>
     }
-
+    
     func transform(input: Input) -> Output {
         
         let primaryActionRelay = PublishRelay<ActionType>()
         let secondaryActionRelay = PublishRelay<ActionType>()
         
-        let scoreText = Driver.just("\(result.total)개 중 \(result.correct)개 정답")
+        let incorrectCount = result.total - result.correct
+        let scoreText = Driver.just("""
+               \(result.total)개를 학습했어요!
+               정답 \(result.correct)개
+               오답 \(incorrectCount)개
+               """)
         
         let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
         

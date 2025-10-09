@@ -40,6 +40,7 @@ final class CompleteQuizViewController: BaseViewController {
         label.textColor = .black
         label.font = .systemFont(ofSize: 18, weight: .medium)
         label.textAlignment = .center
+        label.numberOfLines = 0
         return label
     }()
     
@@ -116,28 +117,24 @@ extension CompleteQuizViewController {
         
         output.primaryButtonTitle
             .drive(with: self) { owner, title in
-                print("Primary button title: \(title)")
                 owner.primaryButton.setTitle(title, for: .normal)
             }
             .disposed(by: disposeBag)
         
         output.secondaryButtonTitle
             .drive(with: self) { owner, title in
-                print("Secondary button title: \(title)")
                 owner.secondaryButton.setTitle(title, for: .normal)
             }
             .disposed(by: disposeBag)
         
         output.primaryAction
             .emit(with: self) { owner, action in
-                print("Primary action triggered: \(action)")
                 owner.handleAction(action)
             }
             .disposed(by: disposeBag)
         
         output.secondaryAction
             .emit(with: self) { owner, action in
-                print("Secondary action triggered: \(action)")
                 owner.handleAction(action)
             }
             .disposed(by: disposeBag)
