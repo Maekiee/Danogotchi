@@ -16,7 +16,12 @@ final class SetUserNameViewController: BaseViewController {
         label.font = .systemFont(ofSize: 22, weight: .bold)
         return label
     }()
-    private let usernameTextField = UnderlineTextField(placeholder: "닉네임")
+    private let usernameTextField: UnderlineTextField = {
+        let tf = UnderlineTextField()
+        tf.font = .systemFont(ofSize: 18, weight: .semibold)
+        tf.placeholder = "닉네임"
+        return tf
+    }()
     private let confirmButton = PrimaryFillButton(title: "확인")
     private let validText: UILabel = {
         let label = UILabel()
@@ -52,12 +57,12 @@ final class SetUserNameViewController: BaseViewController {
         usernameTextField.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(68)
             make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(40)
+            make.height.equalTo(52)
         }
         
         validText.snp.makeConstraints { make in
-            make.top.equalTo(usernameTextField.snp.bottom).offset(4)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(24)
+            make.top.equalTo(usernameTextField.snp.bottom)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(28)
         }
         
         confirmButton.snp.makeConstraints { make in
