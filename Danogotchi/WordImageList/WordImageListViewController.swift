@@ -42,6 +42,11 @@ final class WordImageListViewController: BaseViewController {
         bind()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+    }
+    
     override func configHierarchy() {
         [
             collectionView
@@ -50,11 +55,25 @@ final class WordImageListViewController: BaseViewController {
     
     override func configLayout() {
         collectionView.snp.makeConstraints {
-            $0.edges.equalTo(view.safeAreaLayoutGuide)
+            $0.edges.equalToSuperview()
+//            $0.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
     
     override func configView() {
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithTransparentBackground()
+        navBarAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
+        navBarAppearance.backgroundColor = .systemGray5.withAlphaComponent(0.1)
+        navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
+        navBarAppearance.shadowColor = .clear
+        
+        navigationController?.navigationBar.standardAppearance = navBarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
+        navigationController?.navigationBar.compactAppearance = navBarAppearance
+        navigationController?.navigationBar.tintColor = .black
+        
+        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
             style: .plain,
@@ -70,6 +89,8 @@ final class WordImageListViewController: BaseViewController {
                 height: (view.frame.width - 48) / 3
             )
         }
+        
+        
     }
 }
 
@@ -90,7 +111,7 @@ extension WordImageListViewController {
         let input = WordImageListViewModel.Input()
         let output = viewModel.transform(input: input)
         
-     
+        
         
         output.imageList
             .drive(collectionView.rx.items(cellIdentifier: WordImageCollectionViewCell.identifier, cellType: WordImageCollectionViewCell.self)) { index, item, cell in
