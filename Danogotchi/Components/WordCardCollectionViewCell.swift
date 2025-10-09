@@ -11,7 +11,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         return trailingIconButton.rx.tap.asObservable()
     }
     
-    let thumbnail: UIImageView = {
+    private let thumbnail: UIImageView = {
         let imageView = UIImageView()
         imageView.layer.cornerRadius = 16
         imageView.clipsToBounds = true
@@ -27,7 +27,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
 //        return button
 //    }()
     
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimaryColor
         label.font = .systemFont(ofSize: 18, weight: .semibold)
@@ -36,7 +36,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    let subtitleLabel: UILabel = {
+    private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textSecondaryColor
         label.font = .systemFont(ofSize: 14, weight: .regular)
@@ -44,7 +44,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    let trailingIconButton: UIButton = {
+    private let trailingIconButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "ellipsis")
@@ -76,9 +76,17 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         contentView.clipsToBounds = true
     }
     
-    func configure(with item: CardDisplayable) {
+    func configure(with item: CardDisplayable, isSelected: Bool = false) {
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
+        if isSelected {
+            layer.borderColor = AppColor.primaryColor.cgColor
+            layer.borderWidth = 2.0
+        } else {
+            layer.borderColor = UIColor.clear.cgColor
+            layer.borderWidth = 0
+        }
+        
         if let thumbnailUrl = item.cardThumbnail {
             thumbnail.isHidden = false
             thumbnail.kf.setImage(with: URL(string: thumbnailUrl))
@@ -185,8 +193,7 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
     
     func configView() {
         backgroundColor = AppColor.cardColor
-        self.layer.cornerRadius = 20
-        self.clipsToBounds = true
-        
+        layer.cornerRadius = 20
+        clipsToBounds = true
     }
 }

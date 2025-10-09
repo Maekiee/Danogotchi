@@ -148,9 +148,8 @@ extension MyBookListViewController {
 extension MyBookListViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBookModel> { cell, indexPath, item in
-            cell.configure(with: item)
+            cell.configure(with: item, isSelected: true)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                print("아이콘 터치 \(item.cardTitle)")
                 owner.showActionSheet(
                     title: item.title,
                     deleteAction: { [weak self] in
