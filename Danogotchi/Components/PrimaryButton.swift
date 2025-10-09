@@ -8,8 +8,9 @@ final class PrimaryFillButton: UIButton {
         config.titleAlignment = .center
         config.attributedTitle?.font = .systemFont(ofSize: 15, weight: .bold)
         config.baseForegroundColor = .white
-        config.baseBackgroundColor = .systemGreen
-        config.background.cornerRadius = 8
+        config.baseBackgroundColor = AppColor.primaryColor
+//        config.background.cornerRadius = 8
+        config.background.cornerRadius = 24
         self.configuration = config
         
         self.configurationUpdateHandler = { button in
@@ -18,7 +19,7 @@ final class PrimaryFillButton: UIButton {
             if button.state == .disabled {
                 button.configuration?.baseBackgroundColor = .lightGray
             } else {
-                button.configuration?.baseBackgroundColor = .systemGreen
+                button.configuration?.baseBackgroundColor = AppColor.primaryColor
             }
             
             

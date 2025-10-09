@@ -115,7 +115,8 @@ final class UnderlineTextField: UIView {
         addSubview(underlineView)
         
         titleLabel.snp.makeConstraints { make in
-            make.top.horizontalEdges.equalToSuperview()
+            make.top.equalToSuperview()
+            make.horizontalEdges.equalToSuperview().inset(4)
         }
         
         // AutoLayout 설정
@@ -124,7 +125,7 @@ final class UnderlineTextField: UIView {
             if titleLabel.isHidden {
                 make.top.equalToSuperview()
             } else {
-                make.top.equalTo(titleLabel.snp.bottom).offset(8)
+                make.top.equalTo(titleLabel.snp.bottom).offset(4)
             }
         }
         

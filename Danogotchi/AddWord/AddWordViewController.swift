@@ -28,13 +28,22 @@ final class AddWordViewController: BaseViewController {
         view.canCancelContentTouches = true
         return view
     }()
+    
     private let contentView = UIView()
+    
     private let thumbnail: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = .systemGray5
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
+        return view
+    }()
+    
+    private let emptyImageIcon: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(systemName: "photo.on.rectangle")
+        view.tintColor = .systemGray3
         return view
     }()
     
@@ -86,6 +95,8 @@ final class AddWordViewController: BaseViewController {
             meanTextField,
             addWordButton
         ].forEach { contentView.addSubview($0) }
+        
+        thumbnail.addSubview(emptyImageIcon)
     }
     
     override func configLayout() {
@@ -99,9 +110,14 @@ final class AddWordViewController: BaseViewController {
         }
         
         thumbnail.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(16)
+            make.top.equalToSuperview().offset(8)
             make.horizontalEdges.equalToSuperview().inset(16)
-            make.height.equalTo(thumbnail.snp.width).multipliedBy(2.0/3.0)
+            make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
+        }
+        
+        emptyImageIcon.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.height.equalTo(32)
         }
         
         wordBookTitleTextField.snp.makeConstraints { make in
@@ -119,7 +135,6 @@ final class AddWordViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
-        // 각 컴포넌트 내부의 실제 UITextField(tf)에 높이 제약조건을 설정합니다.
         [wordBookTitleTextField, wordTextField, meanTextField].forEach { underlineTextField in
             underlineTextField.tf.snp.makeConstraints { make in
                 make.height.equalTo(40) // 원하는 높이 설정
@@ -135,17 +150,19 @@ final class AddWordViewController: BaseViewController {
     }
     
     override func configView() {
+        navigationController?.navigationBar.tintColor = .black
+        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"),
             style: .plain,
             target: nil,
             action: nil)
-        
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: "더 많은 사진 보기",
             style: .plain,
             target: nil,
             action: nil)
+        
     }
 }
 
@@ -183,7 +200,9 @@ extension AddWordViewController {
             .drive(with: self) { owner, url in
                 if url != "" {
                     owner.thumbnail.kf.setImage(with: URL(string: url)!)
+                    owner.emptyImageIcon.isHidden = true
                 }
+                
                 
             }.disposed(by: disposeBag)
         
@@ -215,7 +234,10 @@ extension AddWordViewController {
                 owner.meanTextField.text = ""
                 
                 // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
-                owner.thumbnail.image = UIImage(systemName: "photo")
+                owner.thumbnail.image = nil
+                if owner.thumbnail.image == nil {
+                    owner.emptyImageIcon.isHidden = false
+                }
                 
                 let message = owner.entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
                 owner.showToast(message, duration: .short)
