@@ -84,8 +84,8 @@ final class ChoiceQuizViewController: BaseViewController {
         let button = UIButton(type: .system)
         button.setTitle("선택지 1", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .systemGray6
-        button.layer.cornerRadius = 12
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         return button
     }()
@@ -94,18 +94,20 @@ final class ChoiceQuizViewController: BaseViewController {
         let button = UIButton(type: .system)
         button.setTitle("선택지 2", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .systemGray6
-        button.layer.cornerRadius = 12
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         return button
     }()
+    
+    
     
     private let choice3Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 3", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .systemGray6
-        button.layer.cornerRadius = 12
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         return button
     }()
@@ -114,8 +116,8 @@ final class ChoiceQuizViewController: BaseViewController {
         let button = UIButton(type: .system)
         button.setTitle("선택지 4", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .systemGray6
-        button.layer.cornerRadius = 12
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         return button
     }()
@@ -202,6 +204,10 @@ final class ChoiceQuizViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(24)
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-24)
         }
+        
+        choice1Button.snp.makeConstraints { make in
+            make.height.equalTo(40)
+        }
     }
 }
 
@@ -259,7 +265,7 @@ extension ChoiceQuizViewController {
                 // 버튼 색상 초기화
                 [owner.choice1Button, owner.choice2Button,
                  owner.choice3Button, owner.choice4Button].forEach {
-                    $0.backgroundColor = .systemGray6
+                    $0.backgroundColor = .white
                     $0.isEnabled = true
                 }
             }.disposed(by: disposeBag)
