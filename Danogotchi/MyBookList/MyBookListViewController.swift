@@ -27,6 +27,7 @@ final class MyBookListViewController: BaseViewController {
     }()
     private let collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: MyBookListViewController.layout())
+        view.backgroundColor = AppColor.appBackgroundColor
         view.showsVerticalScrollIndicator = false
         return view
     }()
@@ -169,7 +170,7 @@ extension MyBookListViewController {
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(200)
+            heightDimension: .absolute(140)
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
