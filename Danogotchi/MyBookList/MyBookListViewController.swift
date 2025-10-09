@@ -20,8 +20,15 @@ final class MyBookListViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let addBookButton: UIButton = {
         let button = UIButton()
-        var config = UIButton.Configuration.filled()
-        config.image = UIImage(systemName: "plus")
+        var config = UIButton.Configuration.plain()
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+                pointSize: 28,
+                weight: .medium
+            )
+        config.image = UIImage(systemName: "plus.circle.fill")
+        
+        config.baseForegroundColor = UIColor.black.withAlphaComponent(0.8)
+        config.cornerStyle = .capsule
         button.configuration = config
         return button
     }()
@@ -35,6 +42,14 @@ final class MyBookListViewController: BaseViewController {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
         config.title = "변경"
+        config.baseForegroundColor = UIColor.black.withAlphaComponent(0.8)
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            // 현재 폰트 사이즈는 유지하면서 굵기만 semibold로 변경합니다.
+            let font = incoming.font ?? UIFont.systemFont(ofSize: 17) // 기본 폰트 정보 가져오기
+            outgoing.font = UIFont.systemFont(ofSize: font.pointSize, weight: .semibold)
+            return outgoing
+        }
         button.configuration = config
         return button
     }()
@@ -71,6 +86,7 @@ final class MyBookListViewController: BaseViewController {
         addBookButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             make.trailing.equalToSuperview().offset(-20)
+            make.size.equalTo(40)
         }
     }
 }

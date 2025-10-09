@@ -99,7 +99,6 @@ final class AddWordViewController: BaseViewController {
         configLayout()
         configView()
         
-        
         bind()
     }
     
