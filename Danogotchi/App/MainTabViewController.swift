@@ -47,16 +47,11 @@ final class MainTabViewController: UITabBarController {
     
     private func configTabBarAppearance() {
         let navigationBarAppearance = UINavigationBarAppearance()
-        //        navigationBarAppearance.configureWithOpaqueBackground()
         navigationBarAppearance.configureWithTransparentBackground()
 
-        navigationBarAppearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
-//        navigationBarAppearance.backgroundColor = AppColor.appBackgroundColor
+        navigationBarAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
         navigationBarAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.1)
         
-        
-//        navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
-//        navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
         navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
         navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
         
@@ -70,7 +65,7 @@ final class MainTabViewController: UITabBarController {
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithTransparentBackground()
         
-        tabBarAppearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
+        tabBarAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
         tabBarAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.1)
         
         tabBarAppearance.shadowColor = .clear
