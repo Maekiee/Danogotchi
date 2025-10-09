@@ -213,7 +213,9 @@ extension AddWordViewController {
                 let (items, text) = item
                 let selectedImage = selectedImage
                 let vm = WordImageListViewModel(imageItems: items, wordText: text)
-                let vc = WordImageListViewController(viewModel: vm, selectedImage: Observable.just(currentImageUrl))
+                let vc = WordImageListViewController(
+                    viewModel: vm,
+                    selectedImage: Observable.just(currentImageUrl))
                 vc.onChangedImage = { selectedUrl in
                     selectedImage.accept(selectedUrl)
                 }

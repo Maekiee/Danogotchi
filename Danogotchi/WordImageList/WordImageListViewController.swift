@@ -56,7 +56,6 @@ final class WordImageListViewController: BaseViewController {
     override func configLayout() {
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-//            $0.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
     
@@ -98,7 +97,7 @@ extension WordImageListViewController {
     private func bind() {
         
         let selectedImageUrl = BehaviorRelay<String?>(value: nil)
-        
+        let loadNextPage = PublishRelay<Void>() //추가
         
         selectedImage
             .take(1)
@@ -108,7 +107,9 @@ extension WordImageListViewController {
             }
             .disposed(by: disposeBag)
         
-        let input = WordImageListViewModel.Input()
+        let input = WordImageListViewModel.Input(
+            loadNextPage: loadNextPage.asObservable()
+        )
         let output = viewModel.transform(input: input)
         
         
@@ -118,6 +119,19 @@ extension WordImageListViewController {
                 
                 cell.config(with: item.urls.small, isSelected: item.urls.small == selectedImageUrl.value)
             }.disposed(by: disposeBag)
+        
+        collectionView.rx.contentOffset
+            .map { [weak self] offset in
+                guard let self = self else { return false }
+                let contentHeight = collectionView.contentSize.height
+                let scrollViewHeight = collectionView.frame.height
+                let offsetY = offset.y
+                return offsetY > contentHeight - scrollViewHeight - 100
+            }.distinctUntilChanged()
+            .filter { $0 }
+            .map { _ in () }
+            .bind(to: loadNextPage)
+            .disposed(by: disposeBag)
         
         collectionView.rx.modelSelected(PhotoDTO.self)
             .bind(with: self) { owner, item in
@@ -135,6 +149,8 @@ extension WordImageListViewController {
                 owner.onChangedImage?(item.urls.small)
                 owner.onChangedImage?(item.urls.small)
             }.disposed(by: disposeBag)
+        
+        
         
         navigationItem.leftBarButtonItem!.rx.tap
             .bind(with: self) { owner, _ in
