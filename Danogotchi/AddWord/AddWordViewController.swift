@@ -37,6 +37,7 @@ final class AddWordViewController: BaseViewController {
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
+        view.isUserInteractionEnabled = true
         return view
     }()
     
@@ -50,7 +51,18 @@ final class AddWordViewController: BaseViewController {
     private let showMoreImagesButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.gray()
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+                pointSize: 14,
+                weight: .regular
+            )
         config.image = UIImage(systemName: "photo.on.rectangle")
+        config.baseForegroundColor = UIColor.black.withAlphaComponent(0.8)
+        config.background.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+        
+        
+        config.background.cornerRadius = 20 // 원형을 위한 반지름 (버튼 크기의 절반)
+        config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
+        button.isHidden = true
         button.configuration = config
         return button
     }()
@@ -132,6 +144,7 @@ final class AddWordViewController: BaseViewController {
         showMoreImagesButton.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(12)
             make.trailing.equalToSuperview().offset(-12)
+            make.size.equalTo(40)
         }
         
         wordBookTitleTextField.snp.makeConstraints { make in
@@ -171,11 +184,11 @@ final class AddWordViewController: BaseViewController {
             style: .plain,
             target: nil,
             action: nil)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "더 많은 사진 보기",
-            style: .plain,
-            target: nil,
-            action: nil)
+//        navigationItem.rightBarButtonItem = UIBarButtonItem(
+//            title: "더 많은 사진 보기",
+//            style: .plain,
+//            target: nil,
+//            action: nil)
         
     }
 }
@@ -198,7 +211,19 @@ extension AddWordViewController {
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         
-        navigationItem.rightBarButtonItem!.rx.tap
+//        navigationItem.rightBarButtonItem!.rx.tap
+//            .withLatestFrom(output.itemSet)
+//            .bind(with: self) { owner, item in
+//                let (items, text) = item
+//                let vm = WordImageListViewModel(imageItems: items, wordText: text)
+//                let vc = WordImageListViewController(viewModel: vm)
+//                vc.onChangedImage = { selectedUrl in
+//                    selectedImage.accept(selectedUrl)
+//                }
+//                owner.navigationController?.pushViewController(vc, animated: true)
+//            }.disposed(by: disposeBag)
+        
+        showMoreImagesButton.rx.tap
             .withLatestFrom(output.itemSet)
             .bind(with: self) { owner, item in
                 let (items, text) = item
@@ -210,14 +235,14 @@ extension AddWordViewController {
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
         
+        
         output.wordImageUrl
             .drive(with: self) { owner, url in
                 if url != "" {
                     owner.thumbnail.kf.setImage(with: URL(string: url)!)
                     owner.emptyImageIcon.isHidden = true
+                    owner.showMoreImagesButton.isHidden = false
                 }
-                
-                
             }.disposed(by: disposeBag)
         
         output.bookTitle
@@ -247,10 +272,10 @@ extension AddWordViewController {
                 owner.wordTextField.text = ""
                 owner.meanTextField.text = ""
                 
-                // 이미지 뷰도 기본 이미지로 초기화할 수 있습니다.
                 owner.thumbnail.image = nil
                 if owner.thumbnail.image == nil {
                     owner.emptyImageIcon.isHidden = false
+                    owner.showMoreImagesButton.isHidden = true
                 }
                 
                 let message = owner.entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
