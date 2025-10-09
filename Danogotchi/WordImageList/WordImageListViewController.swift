@@ -7,11 +7,13 @@ import RxCocoa
 final class WordImageListViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordImageListViewModel
+    private let selectedImage: Observable<String>
     
     var onChangedImage: ((String) -> Void)?
     
-    init(viewModel: WordImageListViewModel) {
+    init(viewModel: WordImageListViewModel, selectedImage: Observable<String>) {
         self.viewModel = viewModel
+        self.selectedImage = selectedImage
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -26,7 +28,7 @@ final class WordImageListViewController: BaseViewController {
         layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        cv.backgroundColor = .systemBackground
+        cv.backgroundColor = .systemGray5
         cv.register(WordImageCollectionViewCell.self, forCellWithReuseIdentifier: WordImageCollectionViewCell.identifier)
         return cv
     }()
@@ -74,29 +76,38 @@ final class WordImageListViewController: BaseViewController {
 extension WordImageListViewController {
     private func bind() {
         
-        var selectedImageUrl: String?
+        let selectedImageUrl = BehaviorRelay<String?>(value: nil)
+        
+        
+        selectedImage
+            .take(1)
+            .bind(with: self) { owner, url in
+                print(url)
+                selectedImageUrl.accept(url)
+            }
+            .disposed(by: disposeBag)
         
         let input = WordImageListViewModel.Input()
         let output = viewModel.transform(input: input)
         
+     
+        
         output.imageList
             .drive(collectionView.rx.items(cellIdentifier: WordImageCollectionViewCell.identifier, cellType: WordImageCollectionViewCell.self)) { index, item, cell in
-                cell.config(with: item.urls.small, isSelected: item.urls.small == selectedImageUrl)
+                
+                cell.config(with: item.urls.small, isSelected: item.urls.small == selectedImageUrl.value)
             }.disposed(by: disposeBag)
         
         collectionView.rx.modelSelected(PhotoDTO.self)
             .bind(with: self) { owner, item in
-                
-                // ✅ 선택 상태 업데이트
-                let previousUrl = selectedImageUrl
-                selectedImageUrl = item.urls.small
+                selectedImageUrl.accept(item.urls.small)
                 
                 // 셀 업데이트
                 for cell in owner.collectionView.visibleCells {
                     if let imageCell = cell as? WordImageCollectionViewCell,
                        let indexPath = owner.collectionView.indexPath(for: cell),
                        let photoItem = try? owner.collectionView.rx.model(at: indexPath) as PhotoDTO {
-                        imageCell.setSelected(photoItem.urls.small == selectedImageUrl)
+                        imageCell.setSelected(photoItem.urls.small == selectedImageUrl.value)
                     }
                 }
                 

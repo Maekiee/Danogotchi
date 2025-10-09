@@ -191,6 +191,7 @@ final class AddWordViewController: BaseViewController {
 extension AddWordViewController {
     private func bind() {
         let selectedImage = PublishRelay<String>()
+        var currentImageUrl = ""
         
         let input = AddWordViewModel.Input(
             wordBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
@@ -210,8 +211,9 @@ extension AddWordViewController {
             .withLatestFrom(output.itemSet)
             .bind(with: self) { owner, item in
                 let (items, text) = item
+                let selectedImage = selectedImage
                 let vm = WordImageListViewModel(imageItems: items, wordText: text)
-                let vc = WordImageListViewController(viewModel: vm)
+                let vc = WordImageListViewController(viewModel: vm, selectedImage: Observable.just(currentImageUrl))
                 vc.onChangedImage = { selectedUrl in
                     selectedImage.accept(selectedUrl)
                 }
@@ -221,6 +223,7 @@ extension AddWordViewController {
         
         output.wordImageUrl
             .drive(with: self) { owner, url in
+                currentImageUrl = url
                 if url != "" {
                     owner.thumbnail.kf.setImage(with: URL(string: url)!)
                     owner.emptyImageIcon.isHidden = true
@@ -254,7 +257,7 @@ extension AddWordViewController {
                 // 단어장 제목을 제외한 나머지 필드를 초기화
                 owner.wordTextField.text = ""
                 owner.meanTextField.text = ""
-                
+                currentImageUrl = ""
                 owner.thumbnail.image = nil
                 if owner.thumbnail.image == nil {
                     owner.emptyImageIcon.isHidden = false

@@ -124,7 +124,7 @@ final class AddWordViewModel: BaseViewModel {
                 switch responseValue {
                 case .success(let value):
                     wordImageItems.accept(value)
-                    wordImageUrl.accept(value.results.first!.urls.small)
+                    wordImageUrl.accept(value.results.first!.urls.raw)
                 case .failure(_):
                     print("네트워크 에러")
                 }
