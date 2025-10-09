@@ -302,7 +302,14 @@ extension ChoiceQuizViewController {
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.dismiss(animated: true)
+                AlertUtils.showAlert(
+                    on: owner,
+                    title: "학습 중단",
+                    message: "정말로 학습을 중단하시겠습니까?",
+                    confirmAction: {
+                        owner.dismiss(animated: true)
+                    }
+                )
             }.disposed(by: disposeBag)
     }
     
