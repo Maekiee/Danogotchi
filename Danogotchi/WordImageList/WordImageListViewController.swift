@@ -27,7 +27,7 @@ final class WordImageListViewController: BaseViewController {
         
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = .systemBackground
-        cv.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "ImageCell")
+        cv.register(WordImageCollectionViewCell.self, forCellWithReuseIdentifier: WordImageCollectionViewCell.identifier)
         return cv
     }()
     
@@ -73,33 +73,34 @@ final class WordImageListViewController: BaseViewController {
 
 extension WordImageListViewController {
     private func bind() {
+        
+        var selectedImageUrl: String?
+        
         let input = WordImageListViewModel.Input()
         let output = viewModel.transform(input: input)
         
         output.imageList
-            .drive(collectionView.rx.items(cellIdentifier: "ImageCell")) { index, item, cell in
-                // 기본 셀 설정 (나중에 커스텀 셀로 교체 예정)
-                cell.backgroundColor = .systemGray5
-                cell.layer.cornerRadius = 8
-                cell.clipsToBounds = true
-                
-                let imageView = UIImageView()
-                imageView.contentMode = .scaleAspectFill
-                imageView.clipsToBounds = true
-                
-                cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-                cell.contentView.addSubview(imageView)
-                
-                
-                imageView.snp.makeConstraints { $0.edges.equalToSuperview() }
-                
-                imageView.backgroundColor = .systemBlue
-                imageView.kf.setImage(with: URL(string: item.urls.small)!)
+            .drive(collectionView.rx.items(cellIdentifier: WordImageCollectionViewCell.identifier, cellType: WordImageCollectionViewCell.self)) { index, item, cell in
+                cell.config(with: item.urls.small, isSelected: item.urls.small == selectedImageUrl)
             }.disposed(by: disposeBag)
         
         collectionView.rx.modelSelected(PhotoDTO.self)
             .bind(with: self) { owner, item in
-                print(item.urls.raw)
+                
+                // ✅ 선택 상태 업데이트
+                let previousUrl = selectedImageUrl
+                selectedImageUrl = item.urls.small
+                
+                // 셀 업데이트
+                for cell in owner.collectionView.visibleCells {
+                    if let imageCell = cell as? WordImageCollectionViewCell,
+                       let indexPath = owner.collectionView.indexPath(for: cell),
+                       let photoItem = try? owner.collectionView.rx.model(at: indexPath) as PhotoDTO {
+                        imageCell.setSelected(photoItem.urls.small == selectedImageUrl)
+                    }
+                }
+                
+                owner.onChangedImage?(item.urls.small)
                 owner.onChangedImage?(item.urls.small)
             }.disposed(by: disposeBag)
         
