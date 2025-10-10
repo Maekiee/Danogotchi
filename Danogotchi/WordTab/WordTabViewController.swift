@@ -58,27 +58,30 @@ final class WordTabViewController: BaseViewController {
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
     
     let startLearningButton: UIButton = {
-        var config = UIButton.Configuration.plain()
+        var config = UIButton.Configuration.filled()
         
         // 텍스트 설정
-        config.title = "학습하기"
-        config.baseForegroundColor = .white
-        
-        // 배경 blur 효과 설정
-        config.background.backgroundColor = UIColor.white.withAlphaComponent(0.1)
-        config.background.cornerRadius = 22
-        config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-    
-        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24)
-        
-        let button = UIButton(configuration: config)
-        // 폰트 설정 (Configuration에서 직접 설정)
-        button.configuration?.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = .systemFont(ofSize: 15, weight: .semibold)
-            return outgoing
-        }
-        
+            config.title = "학습하기"
+            config.baseForegroundColor = .black
+            
+            // 하얀색 유리 효과 배경 설정
+            config.background.backgroundColor = UIColor.white.withAlphaComponent(0.25)
+            config.background.cornerRadius = 22
+            config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
+            config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24)
+            
+            // 테두리 추가 (유리 느낌 강화)
+            config.background.strokeColor = UIColor.white.withAlphaComponent(0.8)
+            config.background.strokeWidth = 1
+            
+            let button = UIButton(configuration: config)
+            
+            // 폰트 설정
+            button.configuration?.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var outgoing = incoming
+                outgoing.font = .systemFont(ofSize: 15, weight: .semibold)
+                return outgoing
+            }
         return button
     }()
     
@@ -277,7 +280,7 @@ extension WordTabViewController {
                             wordBookId: bookObjectId,
                             wordId: try! ObjectId(string: item.id),
                             thumbnail: item.thumbnail,
-                            bookTitle: owner.bookTitle, // 여기
+                            bookTitle: owner.bookTitle,
                             word: item.word,
                             meaning: item.meaning,
                             actionType: .edit
@@ -316,7 +319,6 @@ extension WordTabViewController {
             widthDimension: .fractionalWidth(1),
             heightDimension: .estimated(150))
         )
-//        item.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
