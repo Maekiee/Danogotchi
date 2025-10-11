@@ -31,7 +31,6 @@ final class WordImageListViewModel: BaseViewModel {
             
             .withLatestFrom(nextPage.asObservable())
             .flatMapLatest{ page -> Single<Result<SearchPhotoDTO, Error>> in
-                print(page)
                 return ApiService.searchPhoto(api: .searchPhoto(word: self.wordText, page: page), type: SearchPhotoDTO.self)
             }
             .bind(with: self) { owner, responseValue in

@@ -247,7 +247,6 @@ extension ChoiceQuizViewController {
                 if let url = URL(string: urlString) {
                     owner.thumbnailImage.kf.setImage(with: url)
                 } else {
-                    print("이미지 업음")
                     owner.thumbnailImage.image = nil
                 }
             }.disposed(by: disposeBag)

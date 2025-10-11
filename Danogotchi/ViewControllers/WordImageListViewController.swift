@@ -102,7 +102,6 @@ extension WordImageListViewController {
         selectedImage
             .take(1)
             .bind(with: self) { owner, url in
-                print(url)
                 selectedImageUrl.accept(url)
             }
             .disposed(by: disposeBag)

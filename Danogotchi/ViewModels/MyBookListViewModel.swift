@@ -41,7 +41,6 @@ final class MyBookListViewModel: BaseViewModel {
         input.selectedChangeBook
             .distinctUntilChanged()
             .bind(with: self) { owner, book in
-                print("선택한 단어책: \(book)")
             }.disposed(by: disposeBag)
         
         // 단어장 삭제

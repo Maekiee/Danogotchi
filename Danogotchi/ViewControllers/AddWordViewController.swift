@@ -275,7 +275,6 @@ extension AddWordViewController {
                 
                 let message = owner.entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
                 owner.showToast(message, duration: .short)
-                print("입력 필드가 초기화되었습니다.")
             }.disposed(by: disposeBag)
     }
 }

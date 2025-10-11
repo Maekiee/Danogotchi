@@ -22,7 +22,7 @@ enum ApiRouter {
         switch self {
         case .searchPhoto:
             return [:]
-        case .translate(text: let text):
+        case .translate(text: _):
             return [
                 "Authorization": "DeepL-Auth-Key \(Secret.deeplApiKey)",
                 "Content-Type": "application/json"
@@ -33,9 +33,10 @@ enum ApiRouter {
     var parameter: [String: String] {
         switch self {
         case .searchPhoto(word: _, page: _):
-            return ["client_id": Secret.unsplashAccessKey]
+            let accessKey = Secret.unsplashKeys.randomElement()!
+            print("언스플래쉬 엑세스키 \(accessKey)")
+            return ["client_id": accessKey]
         case .translate(text: let text):
-            print(text)
             return [
                 "text": text,
                 "target_lang":"KO"

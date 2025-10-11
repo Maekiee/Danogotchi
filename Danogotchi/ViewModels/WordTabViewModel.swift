@@ -58,7 +58,6 @@ final class WordTabViewModel: BaseViewModel {
             .compactMap { $0 } // nil 제거
             .distinctUntilChanged() // 중복 이벤트 방지
             .bind(with: self) { owner, bookStrId in
-                print("선택된 단어장 ID 변경됨: \(bookStrId)")
                 // 여기서 필요한 동작 수행
                 let allWordBook = owner.wordBookRepo.readAll()
                 if allWordBook.isEmpty {
@@ -83,8 +82,6 @@ final class WordTabViewModel: BaseViewModel {
         input.viewWillAppear
             .skip(1)
             .bind(with: self) { owner, _ in
-                print("단어 장 업데이트")
-                
                 // 전체 단어장 불러오기
                 let allWordBook = owner.wordBookRepo.readAll()
                 if allWordBook.isEmpty {

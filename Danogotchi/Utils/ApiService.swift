@@ -34,7 +34,6 @@ enum ApiService {
                 parameters: api.parameter,
                 headers: api.header
             ).responseDecodable(of: TranslatedDTO.self) { res in
-                print(res)
                 switch res.result {
                 case .success(let value):
                     observer(.success(.success(value)))
