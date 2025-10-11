@@ -26,17 +26,26 @@ final class WordImageListViewModel: BaseViewModel {
     func transform(input: Input) -> Output {
         let imageItems = BehaviorRelay<[PhotoDTO]>(value: imageItems.results)
         let nextPage = BehaviorRelay<Int>(value: 2)
+        let totalImageCount = BehaviorRelay<Int>(value: 0)
         
         input.loadNextPage
-            
-            .withLatestFrom(nextPage.asObservable())
-            .flatMapLatest{ page -> Single<Result<SearchPhotoDTO, Error>> in
+        
+            .withLatestFrom(Observable.combineLatest(
+                nextPage.asObservable(),
+                imageItems.asObservable(),
+                totalImageCount.asObservable()
+            ))
+            .filter {  (_, currentImages, total) in
+                return total == 0 || currentImages.count < total
+            }
+            .flatMapLatest{ (page, _, _) -> Single<Result<SearchPhotoDTO, Error>> in
                 return ApiService.searchPhoto(api: .searchPhoto(word: self.wordText, page: page), type: SearchPhotoDTO.self)
             }
             .bind(with: self) { owner, responseValue in
                 switch responseValue {
                 case .success(let value):
                     var currentList = imageItems.value
+                    totalImageCount.accept(value.total)
                     currentList.append(contentsOf: value.results)
                     imageItems.accept(currentList)
                     nextPage.accept(nextPage.value + 1)

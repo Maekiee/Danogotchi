@@ -42,11 +42,6 @@ final class WordImageListViewController: BaseViewController {
         bind()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-    }
-    
     override func configHierarchy() {
         [
             collectionView
@@ -82,6 +77,7 @@ final class WordImageListViewController: BaseViewController {
         
         navigationItem.title = viewModel.wordText
         
+        collectionView.showsVerticalScrollIndicator = false
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.itemSize = CGSize(
                 width: (view.frame.width - 48) / 3, // 3개 컬럼, 패딩 고려
@@ -115,7 +111,6 @@ extension WordImageListViewController {
         
         output.imageList
             .drive(collectionView.rx.items(cellIdentifier: WordImageCollectionViewCell.identifier, cellType: WordImageCollectionViewCell.self)) { index, item, cell in
-                
                 cell.config(with: item.urls.small, isSelected: item.urls.small == selectedImageUrl.value)
             }.disposed(by: disposeBag)
         
