@@ -6,7 +6,4 @@ enum AppColor {
     static let textPrimaryColor =  UIColor(red: 0.13, green: 0.13, blue: 0.13, alpha: 1)
     static let textSecondaryColor =  UIColor(red: 0.36, green: 0.36, blue: 0.38, alpha: 1)
     static let primaryColor = UIColor(red: 0.17, green: 0.24, blue: 0.31, alpha: 0.95)
-    
-    
-//    UIColor(red: 0.36, green: 0.68, blue: 0.89, alpha: 0.9)
 }
