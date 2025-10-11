@@ -64,16 +64,16 @@ final class AddWordViewModel: BaseViewModel {
             actionType.accept(item.actionType)
             
             if item.actionType == .edit && !item.word.isEmpty {
-                    ApiService.searchPhoto(api: .searchPhoto(word: item.word, page: 1), type: SearchPhotoDTO.self)
-                        .subscribe { result in
-                            switch result {
-                            case .success(let value):
-                                wordImageItems.accept(value)
-                            case .failure:
-                                print("이미지 검색 실패")
-                            }
-                        }.disposed(by: disposeBag)
-                }
+                ApiService.searchPhoto(api: .searchPhoto(word: item.word, page: 1), type: SearchPhotoDTO.self)
+                    .subscribe { result in
+                        switch result {
+                        case .success(let value):
+                            wordImageItems.accept(value)
+                        case .failure:
+                            print("이미지 검색 실패")
+                        }
+                    }.disposed(by: disposeBag)
+            }
             
         }
         
@@ -124,7 +124,9 @@ final class AddWordViewModel: BaseViewModel {
                 switch responseValue {
                 case .success(let value):
                     wordImageItems.accept(value)
-                    wordImageUrl.accept(value.results.first!.urls.raw)
+                    if let firstImageUrl = value.results.first?.urls.raw {
+                        wordImageUrl.accept(firstImageUrl)
+                    } 
                 case .failure(_):
                     print("네트워크 에러")
                 }
@@ -194,7 +196,7 @@ final class AddWordViewModel: BaseViewModel {
     
     private func saveWord(actionType: EntryPoint, wordBookTitle: String, url: String, word: String, meaning: String) {
         let bookObjectId: ObjectId
-
+        
         
         if let bookId = wordItem?.wordBookId {
             // 기존 단어장 타이틀 업데이트
