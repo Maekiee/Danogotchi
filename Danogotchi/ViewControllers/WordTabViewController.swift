@@ -55,6 +55,16 @@ final class WordTabViewController: BaseViewController {
         return label
     }()
     
+    private let createWordLabel: UILabel = {
+        let label = UILabel()
+        label.text = "단어를 추가해 주세요"
+        label.textColor = .black
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        
+        label.isHidden = true
+        return label
+    }()
+    
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
     
     let startLearningButton: UIButton = {
@@ -85,7 +95,6 @@ final class WordTabViewController: BaseViewController {
         return button
     }()
     
-    
     private let collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: WordTabViewController.layout())
         view.showsVerticalScrollIndicator = false
@@ -107,6 +116,7 @@ final class WordTabViewController: BaseViewController {
     override func configHierarchy() {
         [
             noWordBookLabel,
+            createWordLabel,
             showCreateBookButton,
             collectionView,
             startLearningButton,
@@ -124,9 +134,14 @@ final class WordTabViewController: BaseViewController {
             make.height.equalTo(40)
         }
         
+        createWordLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+        
         
         startLearningButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
@@ -139,9 +154,6 @@ final class WordTabViewController: BaseViewController {
         let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
         let secondBarButton = UIBarButtonItem(customView: addWordButton)
         navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
-        
-        
-   
     }
 }
 
@@ -177,6 +189,15 @@ extension WordTabViewController {
         
         output.wordItems
             .drive(with: self) { owner, items in
+                if items.isEmpty {
+                    owner.createWordLabel.isHidden = false
+                    owner.collectionView.isHidden = true
+                    print("값 없음")
+                } else {
+                    owner.createWordLabel.isHidden = true
+                    owner.collectionView.isHidden = false
+                    print("값 있음")
+                }
                 owner.allWords = items
                 owner.applySnapshot(items: items)
             }.disposed(by: disposeBag)
@@ -266,6 +287,7 @@ extension WordTabViewController {
 // MARK: - CollectionView
 extension WordTabViewController {
     private func configDataSource() {
+        // 셀ㅜ
        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordModel> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
@@ -313,7 +335,7 @@ extension WordTabViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    
+    // 추후에 공용으로 사용할 수 있는 메서드로 분리 해보기
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),

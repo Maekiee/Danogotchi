@@ -48,7 +48,6 @@ final class WordTabViewModel: BaseViewModel {
             let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
             wordItems.accept(Array(wordList))
             
-            // 단어장 0개인지 아닌지 체크
         } else {
             print("유저 디볼트에 값이 없나요?")
             hasLearningWordBook.accept(true)
@@ -82,6 +81,7 @@ final class WordTabViewModel: BaseViewModel {
         input.viewWillAppear
             .skip(1)
             .bind(with: self) { owner, _ in
+                print("WordTab 뷰윌 어피어")
                 // 전체 단어장 불러오기
                 let allWordBook = owner.wordBookRepo.readAll()
                 if allWordBook.isEmpty {
