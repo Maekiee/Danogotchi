@@ -170,9 +170,6 @@ extension MyBookListViewController {
 extension MyBookListViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBook> { cell, indexPath, item in
-            
-            
-            
             let isSelected = self.currentSelectedBook?.id == item.id
             cell.configure(with: item, isSelected: isSelected)
             
@@ -206,13 +203,14 @@ extension MyBookListViewController {
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .fractionalHeight(1.0))
+            heightDimension: .estimated(140))
         )
+        
         item.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(140)
+            heightDimension: .estimated(140)
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])

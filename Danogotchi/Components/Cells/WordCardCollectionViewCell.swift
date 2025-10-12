@@ -20,20 +20,19 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     }()
     
     // TTS 추가시 사용
-//    let imageIconButton: UIButton = {
-//        let button = UIButton()
-//        var config = UIButton.Configuration.gray()
-//        config.image = UIImage(systemName: "ellipsis")
-//        button.configuration = config
-//        return button
-//    }()
+    //    let imageIconButton: UIButton = {
+    //        let button = UIButton()
+    //        var config = UIButton.Configuration.gray()
+    //        config.image = UIImage(systemName: "ellipsis")
+    //        button.configuration = config
+    //        return button
+    //    }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimaryColor
         label.font = .systemFont(ofSize: 18, weight: .semibold)
         label.numberOfLines = 0
-        
         return label
     }()
     
@@ -54,9 +53,15 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
+    private let chip: UIChip = {
+        let view = UIChip(text: "n번 학습")
+        view.layer.cornerRadius = 10
+        view.setFont(.systemFont(ofSize: 10))
+        return view
+    }()
+    
     override func prepareForReuse() {
         super.prepareForReuse()
-
         disposeBag = DisposeBag()
     }
     
@@ -77,9 +82,9 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(with item: CardDisplayable, isSelected: Bool = false) {
-        //
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
+        
         // 셀 스타일
         if isSelected {
             layer.borderColor = AppColor.primaryColor.cgColor
@@ -89,11 +94,18 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             layer.borderWidth = 0
         }
         
+        // 이미지 있는 경우
         if let thumbnailUrl = item.cardThumbnail {
             thumbnail.isHidden = false
+            chip.isHidden = false
             thumbnail.kf.setImage(with: URL(string: thumbnailUrl))
             
-            // ✅ 셀 재사용을 위해 원래 제약 조건으로 되돌립니다.
+            thumbnail.snp.remakeConstraints { make in
+                make.top.equalToSuperview().offset(6)
+                make.horizontalEdges.equalToSuperview().inset(6)
+                make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
+            }
+            
             // titleLabel을 썸네일 아래에 위치시킵니다.
             titleLabel.snp.remakeConstraints { make in
                 make.top.equalTo(thumbnail.snp.bottom).offset(8)
@@ -113,11 +125,19 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
                 make.top.equalTo(titleLabel.snp.bottom).offset(4)
                 make.leading.equalToSuperview().offset(16)
                 make.trailing.equalToSuperview().inset(16)
-                make.bottom.equalToSuperview().inset(12) // 하단 고정
             }
             
+            chip.snp.remakeConstraints { make in
+                make.top.equalTo(subtitleLabel.snp.bottom).offset(20)
+                make.leading.equalToSuperview().offset(16)
+                make.bottom.equalToSuperview().inset(16)
+                make.height.equalTo(20)
+            }
         } else {
+            // 이미지 없는 경우
             thumbnail.isHidden = true
+            chip.isHidden = true
+            
             /// titleLabel을 셀 상단에 위치시킵니다.
             titleLabel.snp.remakeConstraints { make in
                 make.top.equalToSuperview().offset(16)
@@ -134,10 +154,10 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             
             // subtitleLabel에서 하단 고정 제약 조건을 제거합니다.
             subtitleLabel.snp.remakeConstraints { make in
-                make.top.equalTo(titleLabel.snp.bottom).offset(4)
+                make.top.equalTo(titleLabel.snp.bottom).offset(40)
                 make.leading.equalToSuperview().offset(16)
                 make.trailing.equalToSuperview().inset(16)
-                // make.bottom 제약 조건 없음
+                make.bottom.equalToSuperview().inset(16)
             }
         }
     }
@@ -152,47 +172,13 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
             thumbnail,
             titleLabel,
             subtitleLabel,
-            trailingIconButton
+            trailingIconButton,
+            chip
         ].forEach { contentView.addSubview($0) }
         
-        /// TTS 추가시 사용
-//        thumbnail.addSubview(imageIconButton)
     }
     
-    func configLayout() {
-        thumbnail.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(6)
-            make.horizontalEdges.equalToSuperview().inset(6)
-            make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
-        }
-        
-        /// TTS 추가시 사용
-//        imageIconButton.snp.makeConstraints { make in
-//            make.top.equalToSuperview().offset(16)
-//            make.trailing.equalToSuperview().offset(-16)
-//            make.size.equalTo(24)
-//        }
-        
-        trailingIconButton.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(8)
-            make.trailing.equalToSuperview().offset(-16)
-            make.size.equalTo(24)
-        }
-        
-        
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(8)
-            make.leading.equalToSuperview().offset(16)
-            make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
-        }
-        
-        subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(4)
-            make.leading.equalToSuperview().offset(16)
-            make.trailing.equalToSuperview().inset(16)
-            make.bottom.equalToSuperview().inset(12)
-        }
-    }
+    func configLayout() { }
     
     func configView() {
         backgroundColor = AppColor.cardColor

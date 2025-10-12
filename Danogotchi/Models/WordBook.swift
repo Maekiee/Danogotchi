@@ -12,6 +12,7 @@ extension WordBook: CardDisplayable {
     var cardThumbnail: String? { nil }
     var cardTitle: String { title }
     var cardSubtitle: String { "\(wordList.count)개 단어" }
+    var cardChipText: String? { nil }
     
     func toObject() -> WordBookObject {
         let wordBook = WordBookObject()

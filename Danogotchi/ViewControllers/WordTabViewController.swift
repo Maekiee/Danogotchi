@@ -188,13 +188,8 @@ extension WordTabViewController {
         
         output.wordItems
             .drive(with: self) { owner, wordList in
-                
-
-                
                 let selectedBook = owner.userInfo.selectedBookId
                 
-                print("리스트 >> \(wordList)")
-                print("리스트 책책 >> \(selectedBook)")
                 if selectedBook == nil && wordList.isEmpty {
                     owner.noWordLabel.isHidden = true
                     owner.collectionView.isHidden = true
@@ -208,10 +203,6 @@ extension WordTabViewController {
                 
                 owner.allWords = wordList
                 owner.applySnapshot(items: wordList)
-                
-                
-                
-                
             }.disposed(by: disposeBag)
         
         // 단어 추가
@@ -364,10 +355,10 @@ extension WordTabViewController {
         let section = NSCollectionLayoutSection(group: group)
         section.interGroupSpacing = 16
         section.contentInsets = NSDirectionalEdgeInsets(
-            top: 16,      // 상단 여백
-            leading: 16,  // 좌측 여백
-            bottom: 80,   // 하단 여백 (학습하기 버튼 공간)
-            trailing: 16  // 우측 여백
+            top: 16,
+            leading: 16,
+            bottom: 80,
+            trailing: 16
         )
         
         let layout = UICollectionViewCompositionalLayout(section: section)

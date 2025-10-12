@@ -10,9 +10,10 @@ struct Word: Hashable {
 }
 
 extension Word: CardDisplayable {
-    var cardThumbnail: String? { self.thumbnail }
+    var cardThumbnail: String? { thumbnail }
     var cardTitle: String { word }
     var cardSubtitle: String { meaning }
+    var cardChipText: String? { nil }
     
     func toObject() -> WordObject {
         let vocab = WordObject()
