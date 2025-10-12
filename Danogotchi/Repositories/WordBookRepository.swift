@@ -10,24 +10,24 @@ final class WordBookRepository: WordBookRepositoryProtocol {
     
     // 새로운 단어장 생성
     func create(title: String) {
-        let wordBook = WordBook(title: title, createAt: Date())
+        let wordBook = WordBookObject(title: title, createAt: Date())
         try? realm.write {
             realm.add(wordBook)
         }
     }
     
     // 단어장 세트 불러오기
-    func readAll() -> [WordBookModel] {
-        let wordBooks = Array(realm.objects(WordBook.self))
+    func readAll() -> [WordBook] {
+        let wordBooks = Array(realm.objects(WordBookObject.self))
         return wordBooks.map { $0.toStruct() }
     }
     
-    func read(id: ObjectId) -> WordBook? {
-        return realm.object(ofType: WordBook.self, forPrimaryKey: id)
+    func read(id: ObjectId) -> WordBookObject? {
+        return realm.object(ofType: WordBookObject.self, forPrimaryKey: id)
     }
     
     // 특정 단어장의 단어들 가져오기
-    func fetchWordsInWordBook(id: ObjectId) -> [WordModel] {
+    func fetchWordsInWordBook(id: ObjectId) -> [Word] {
         guard let wordBook = read(id: id) else { return [] }
         return wordBook.wordList.map { $0.toStruct() }
     }
@@ -48,7 +48,7 @@ final class WordBookRepository: WordBookRepositoryProtocol {
         }
     }
     
-    func addWord(bookId: ObjectId, word: Word) {
+    func addWord(bookId: ObjectId, word: WordObject) {
         guard let wordBook = read(id: bookId) else { return }
         try? realm.write {
             wordBook.wordList.append(word)

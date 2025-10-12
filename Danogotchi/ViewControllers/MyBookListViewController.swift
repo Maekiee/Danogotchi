@@ -12,8 +12,8 @@ final class MyBookListViewController: BaseViewController {
         case main
     }
     
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordBookModel>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordBookModel>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordBook>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordBook>
     
     private var dataSource: DataSource!
     
@@ -54,9 +54,9 @@ final class MyBookListViewController: BaseViewController {
         return button
     }()
     
-    private let deleteTrigger = PublishRelay<WordBookModel>()
-    let selectedBook = PublishRelay<WordBookModel>()
-    private var currentSelectedBook: WordBookModel?
+    private let deleteTrigger = PublishRelay<WordBook>()
+    let selectedBook = PublishRelay<WordBook>()
+    private var currentSelectedBook: WordBook?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -127,12 +127,12 @@ extension MyBookListViewController {
         
         // 셀 터치
         collectionView.rx.itemSelected
-            .compactMap { [weak self] indexPath -> WordBookModel? in
+            .compactMap { [weak self] indexPath -> WordBook? in
                 guard let self = self else { return nil }
                 return dataSource.itemIdentifier(for: indexPath)
             }
             .bind(with: self) { owner, book in
-                var itemsToReload = [WordBookModel]()
+                var itemsToReload = [WordBook]()
                 
                 if let previousBook = owner.currentSelectedBook, previousBook.id != book.id {
                     itemsToReload.append(previousBook)
@@ -169,7 +169,7 @@ extension MyBookListViewController {
 // MARK: - 컬렉션 뷰
 extension MyBookListViewController {
     private func configDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBookModel> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBook> { cell, indexPath, item in
             
             
             
@@ -195,7 +195,7 @@ extension MyBookListViewController {
         }
     }
     
-    private func applySnapshot(items: [WordBookModel]) {
+    private func applySnapshot(items: [WordBook]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)

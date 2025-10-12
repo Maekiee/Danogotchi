@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-struct CreateWordModel {
+struct CreateWord {
     let wordBookId: ObjectId?
     let wordId: ObjectId?
     let thumbnail: String

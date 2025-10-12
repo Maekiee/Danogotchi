@@ -10,11 +10,11 @@ final class AddWordViewModel: BaseViewModel {
     private let userInfoManager = UserInfoManager.shared
     
     private var isWordBookId: ObjectId?
-    private let wordItem: CreateWordModel?
+    private let wordItem: CreateWord?
     
     
     init(
-        wordItem: CreateWordModel? = nil,
+        wordItem: CreateWord? = nil,
         wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
         wordRepo: WordRepositoryProtocol = WordRepository()
     ) {

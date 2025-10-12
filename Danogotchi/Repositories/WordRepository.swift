@@ -8,8 +8,8 @@ final class WordRepository: WordRepositoryProtocol {
         self.realm = realm
     }
     
-    func create(thumbnail: String, word: String, meaning: String) -> Word {
-        let word = Word(thumbnail: thumbnail, word: word, meaning: meaning, createAt: Date())
+    func create(thumbnail: String, word: String, meaning: String) -> WordObject {
+        let word = WordObject(thumbnail: thumbnail, word: word, meaning: meaning, createAt: Date())
         try? realm.write {
             realm.add(word)
         }
@@ -17,13 +17,13 @@ final class WordRepository: WordRepositoryProtocol {
     }
     
     // 단어 스크마에 있는 전체 단어를 불러옴
-    func readAll() -> [Word] {
-        return Array(realm.objects(Word.self))
+    func readAll() -> [WordObject] {
+        return Array(realm.objects(WordObject.self))
     }
     
     // 특정 레코드의 id값으로 특정 단어만 가져옴
-    func read(id: ObjectId) -> Word? {
-        return realm.object(ofType: Word.self, forPrimaryKey: id)
+    func read(id: ObjectId) -> WordObject? {
+        return realm.object(ofType: WordObject.self, forPrimaryKey: id)
     }
     
     func update(id: RealmSwift.ObjectId, thumbnail: String?, word: String?, meaning: String?) {

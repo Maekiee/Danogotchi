@@ -19,16 +19,16 @@ final class MyBookListViewModel: BaseViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let refreshTrigger: Observable<Void>
-        let selectedChangeBook: Observable<WordBookModel>
-        let selectedDeleteTrigger: Observable<WordBookModel>
+        let selectedChangeBook: Observable<WordBook>
+        let selectedDeleteTrigger: Observable<WordBook>
     }
     
     struct Output {
-        let bookList: Driver<[WordBookModel]>
+        let bookList: Driver<[WordBook]>
     }
     
     func transform(input: Input) -> Output {
-        let bookList = BehaviorRelay<[WordBookModel]>(value: [])
+        let bookList = BehaviorRelay<[WordBook]>(value: [])
         // 단어장 추가
         Observable.merge(
             input.viewWillAppear,

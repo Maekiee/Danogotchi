@@ -7,6 +7,7 @@ import RxCocoa
 /// 재사용 가능한 셀
 final class WordCardCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
+    
     var onTouchTopIcon: Observable<Void> {
         return trailingIconButton.rx.tap.asObservable()
     }
@@ -72,13 +73,14 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // contentView의 경계를 벗어나는 내용은 잘라냅니다.
         contentView.clipsToBounds = true
     }
     
     func configure(with item: CardDisplayable, isSelected: Bool = false) {
+        //
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
+        // 셀 스타일
         if isSelected {
             layer.borderColor = AppColor.primaryColor.cgColor
             layer.borderWidth = 2.0
@@ -138,11 +140,12 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
                 // make.bottom 제약 조건 없음
             }
         }
-       
     }
 }
 
 
+
+// MARK: Basic Config View
 extension WordCardCollectionViewCell: UIConfigurationLayout {
     func configHierarchy() {
         [

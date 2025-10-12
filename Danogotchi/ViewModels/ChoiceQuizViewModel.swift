@@ -12,7 +12,7 @@ final class ChoiceQuizViewModel: BaseViewModel {
     
     private let currentIndex: BehaviorRelay<Int>
     private let nextQuestionTrigger = PublishRelay<Void>()
-    private var incorrectWords: [WordModel] = []
+    private var incorrectWords: [Word] = []
     
     
     struct AnswerResult {
@@ -73,7 +73,7 @@ final class ChoiceQuizViewModel: BaseViewModel {
         let currentQuizData = Observable.combineLatest(
             currentIndex,
             quizDataRelay
-        ).map { index, quizData -> (WordModel, [String], Int)? in
+        ).map { index, quizData -> (Word, [String], Int)? in
             guard let wordIds = self.userInfo.currentQuizWordIds, index < wordIds.count else { return nil }
             let currentWordId = wordIds[index]
             guard let word = quizData.allWord.first(where: { $0.id == currentWordId }) else { return nil }
@@ -183,7 +183,7 @@ final class ChoiceQuizViewModel: BaseViewModel {
         nextQuestionTrigger.accept(())
     }
     
-    private func generateChoices(for word: WordModel, allWords: [WordModel]) -> ([String], Int) {
+    private func generateChoices(for word: Word, allWords: [Word]) -> ([String], Int) {
         // 오답 3개 만들기
         var wrongChoices = allWords
             .filter { $0.id != word.id } // 정답 제외

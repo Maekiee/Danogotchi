@@ -20,19 +20,19 @@ final class WordTabViewModel: BaseViewModel {
     
     struct Input {
         let viewWillAppear: Observable<Void>
-        let selectedWordCard: Observable<WordModel>
+        let selectedWordCard: Observable<Word>
     }
     
     struct Output {
         let currentWordbook: Driver<Bool>
         let bookTitle: Driver<String>
-        let wordItems: Driver<[WordModel]>
+        let wordItems: Driver<[Word]>
     }
     
     func transform(input: Input) -> Output {
-        let hasLearningWordBook = BehaviorRelay(value: true)
+        let hasLearningWordBook = BehaviorRelay<Bool>(value: true)
         let bookTitle = BehaviorRelay<String>(value: "")
-        let wordItems = BehaviorRelay<[WordModel]>(value: [])
+        let wordItems = BehaviorRelay<[Word]>(value: [])
         
         // viewDidLoad
         if let wordBookId = userInfo.selectedBookId,

@@ -9,7 +9,7 @@ final class LearningHistoryRepository: LearningHistoryRepositoryProtocol{
     }
     
     func addHistory(wordObjectId: ObjectId, isCorrect: Bool) {
-            let history = LearningHistory(
+            let history = LearningHistoryObject(
                 wordObjectId: wordObjectId,
                 isCorrect: isCorrect,
                 learningDate: Date()

@@ -11,14 +11,14 @@ final class WordTabViewController: BaseViewController {
     private let viewModel: WordTabViewModel
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
-    private var allWords: [WordModel] = []
+    private var allWords: [Word] = []
     
     private enum Section {
         case main
     }
     
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordModel>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordModel>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, Word>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Word>
     
     private var dataSource: DataSource!
     
@@ -52,16 +52,6 @@ final class WordTabViewController: BaseViewController {
         let label = UILabel()
         label.text = "학습할 단어장을 만들어 주세요"
         label.textColor = .black
-        return label
-    }()
-    
-    private let createWordLabel: UILabel = {
-        let label = UILabel()
-        label.text = "단어를 추가해 주세요"
-        label.textColor = .black
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        
-        label.isHidden = true
         return label
     }()
     
@@ -102,7 +92,7 @@ final class WordTabViewController: BaseViewController {
         return view
     }()
     
-    private let deleteWordTrigger = PublishRelay<WordModel>()
+    private let deleteWordTrigger = PublishRelay<Word>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -116,7 +106,7 @@ final class WordTabViewController: BaseViewController {
     override func configHierarchy() {
         [
             noWordBookLabel,
-            createWordLabel,
+//            createWordLabel,
             showCreateBookButton,
             collectionView,
             startLearningButton,
@@ -134,9 +124,6 @@ final class WordTabViewController: BaseViewController {
             make.height.equalTo(40)
         }
         
-        createWordLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
         
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -171,6 +158,10 @@ extension WordTabViewController {
                 owner.bookTitle = title
             }.disposed(by: disposeBag)
         
+        output.bookTitle
+            .drive(navigationItem.rx.title)
+            .disposed(by: disposeBag)
+        
         output.currentWordbook
             .drive(with: self) { owner, hasWordBook in
                 owner.addWordButton.isHidden = hasWordBook
@@ -183,23 +174,10 @@ extension WordTabViewController {
             }
             .disposed(by: disposeBag)
         
-        output.bookTitle
-            .drive(navigationItem.rx.title)
-            .disposed(by: disposeBag)
-        
         output.wordItems
-            .drive(with: self) { owner, items in
-                if items.isEmpty {
-                    owner.createWordLabel.isHidden = false
-                    owner.collectionView.isHidden = true
-                    print("값 없음")
-                } else {
-                    owner.createWordLabel.isHidden = true
-                    owner.collectionView.isHidden = false
-                    print("값 있음")
-                }
-                owner.allWords = items
-                owner.applySnapshot(items: items)
+            .drive(with: self) { owner, wordList in
+                owner.allWords = wordList
+                owner.applySnapshot(items: wordList)
             }.disposed(by: disposeBag)
         
         // 단어 추가
@@ -208,7 +186,7 @@ extension WordTabViewController {
                 guard let bookObjectId = owner.userInfo.selectedBookId
                     .flatMap({ try? ObjectId(string: $0) }) else { return }
             
-                let createWordModel = CreateWordModel(
+                let createWordModel = CreateWord(
                     wordBookId: bookObjectId,
                     wordId: nil,
                     thumbnail: "",
@@ -253,7 +231,7 @@ extension WordTabViewController {
                     return
                 }
                 
-                var wordsForQuiz: [WordModel]
+                var wordsForQuiz: [Word]
                 
                 // 이어할 퀴즈가 있는지 확인합니다.
                 if let currentWordIds = owner.userInfo.currentQuizWordIds {
@@ -288,7 +266,7 @@ extension WordTabViewController {
 extension WordTabViewController {
     private func configDataSource() {
         // 셀ㅜ
-       let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordModel> { cell, indexPath, item in
+       let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, Word> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
@@ -298,7 +276,7 @@ extension WordTabViewController {
                         guard let bookObjectId = owner.userInfo.selectedBookId
                             .flatMap({ try? ObjectId(string: $0) }) else { return }
                         
-                        let createWordModel = CreateWordModel(
+                        let createWordModel = CreateWord(
                             wordBookId: bookObjectId,
                             wordId: try! ObjectId(string: item.id),
                             thumbnail: item.thumbnail,
@@ -328,7 +306,7 @@ extension WordTabViewController {
         }
     }
     
-    private func applySnapshot(items: [WordModel]) {
+    private func applySnapshot(items: [Word]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)

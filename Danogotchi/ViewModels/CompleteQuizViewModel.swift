@@ -11,7 +11,7 @@ final class CompleteQuizViewModel: BaseViewModel {
     // MARK: - ActionType 재정의
     enum ActionType {
         case restart
-        case retryIncorrect(words: [WordModel])
+        case retryIncorrect(words: [Word])
         case finish
         case dismiss
     }
