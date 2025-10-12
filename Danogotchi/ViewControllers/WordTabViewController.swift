@@ -51,6 +51,15 @@ final class WordTabViewController: BaseViewController {
     private let noWordBookLabel: UILabel = {
         let label = UILabel()
         label.text = "학습할 단어장을 만들어 주세요"
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .black
+        return label
+    }()
+    
+    private let noWordLabel: UILabel = {
+        let label = UILabel()
+        label.text = "학습할 단어를 추가해주세요"
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
         label.textColor = .black
         return label
     }()
@@ -106,7 +115,7 @@ final class WordTabViewController: BaseViewController {
     override func configHierarchy() {
         [
             noWordBookLabel,
-//            createWordLabel,
+            noWordLabel,
             showCreateBookButton,
             collectionView,
             startLearningButton,
@@ -115,6 +124,10 @@ final class WordTabViewController: BaseViewController {
     
     override func configLayout() {
         noWordBookLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
+        noWordLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
         
@@ -156,19 +169,18 @@ extension WordTabViewController {
         output.bookTitle
             .drive(with: self) { owner, title in
                 owner.bookTitle = title
+                owner.navigationItem.title = title
             }.disposed(by: disposeBag)
-        
-        output.bookTitle
-            .drive(navigationItem.rx.title)
-            .disposed(by: disposeBag)
         
         output.currentWordbook
             .drive(with: self) { owner, hasWordBook in
+                // 단어장 1개 이상
                 owner.addWordButton.isHidden = hasWordBook
                 owner.showWordBookButton.isHidden = hasWordBook
-                owner.collectionView.isHidden = hasWordBook
+//                owner.collectionView.isHidden = hasWordBook
                 owner.startLearningButton.isHidden = hasWordBook
                 
+                // 단어장 0개
                 owner.noWordBookLabel.isHidden = !hasWordBook
                 owner.showCreateBookButton.isHidden = !hasWordBook
             }
@@ -176,8 +188,30 @@ extension WordTabViewController {
         
         output.wordItems
             .drive(with: self) { owner, wordList in
+                
+
+                
+                let selectedBook = owner.userInfo.selectedBookId
+                
+                print("리스트 >> \(wordList)")
+                print("리스트 책책 >> \(selectedBook)")
+                if selectedBook == nil && wordList.isEmpty {
+                    owner.noWordLabel.isHidden = true
+                    owner.collectionView.isHidden = true
+                } else if selectedBook != nil && wordList.isEmpty {
+                    owner.noWordLabel.isHidden = false
+                    owner.collectionView.isHidden = true
+                } else {
+                    owner.collectionView.isHidden = false
+                }
+                 
+                
                 owner.allWords = wordList
                 owner.applySnapshot(items: wordList)
+                
+                
+                
+                
             }.disposed(by: disposeBag)
         
         // 단어 추가
