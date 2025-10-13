@@ -33,6 +33,13 @@ final class WordTabViewController: BaseViewController {
     }
     
     // MARK: - UI 프로퍼티
+    private let listSegmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["학습", "복습"])
+        control.selectedSegmentIndex = 0
+        control.backgroundColor = .systemGray5
+        return control
+    }()
+    
     private let addWordButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
@@ -114,11 +121,13 @@ final class WordTabViewController: BaseViewController {
     
     override func configHierarchy() {
         [
+            
             noWordBookLabel,
             noWordLabel,
             showCreateBookButton,
             collectionView,
             startLearningButton,
+            listSegmentedControl,
         ].forEach { view.addSubview($0) }
     }
     
@@ -135,6 +144,12 @@ final class WordTabViewController: BaseViewController {
             make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(40)
+        }
+        
+        listSegmentedControl.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.horizontalEdges.equalToSuperview().inset(16)
+            make.height.equalTo(32) // 적절한 높이 설정
         }
         
         
@@ -368,7 +383,7 @@ extension WordTabViewController {
         let section = NSCollectionLayoutSection(group: group)
         section.interGroupSpacing = 16
         section.contentInsets = NSDirectionalEdgeInsets(
-            top: 16,
+            top: 48,
             leading: 16,
             bottom: 80,
             trailing: 16
