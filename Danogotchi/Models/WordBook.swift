@@ -13,6 +13,7 @@ extension WordBook: CardDisplayable {
     var cardTitle: String { title }
     var cardSubtitle: String { "\(wordList.count)개 단어" }
     var cardChipText: Int? { nil }
+    var cardAccuracy: Double? { nil }
     
     func toObject() -> WordBookObject {
         let wordBook = WordBookObject()

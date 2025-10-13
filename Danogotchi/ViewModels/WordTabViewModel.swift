@@ -52,12 +52,23 @@ final class WordTabViewModel: BaseViewModel {
             let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
             
             let histories = learningHistoryRepo.fetchAllHistory()
-            let learningCounts = Dictionary(grouping: histories, by: { $0.wordId }).mapValues { $0.count }
-            let displayItems = wordList.map { word -> WordDisplayInfo in
-                let count = learningCounts[word.id] ?? 0
-                return WordDisplayInfo(word: word, learningCount: count)
+            let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
+            
+            let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
+                let correctCount = historyModels.filter { $0.isCorrect }.count
+                return (correct: correctCount, total: historyModels.count)
             }
             
+            
+            
+            let displayItems = wordList.map { word -> WordDisplayInfo in
+                if let stats = historyStats[word.id] {
+                    let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
+                    return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
+                } else {
+                    return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+                }
+            }
             wordItems.accept(Array(displayItems))
             
         } else {
@@ -85,16 +96,29 @@ final class WordTabViewModel: BaseViewModel {
                     
 //                    // 단어 리스트 업데이트
                     let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
-                   
-                    hasLearningWordBook.accept(false)
-                    
+
                     let histories = owner.learningHistoryRepo.fetchAllHistory()
-                    let learningCounts = Dictionary(grouping: histories, by: { $0.wordId }).mapValues { $0.count }
-                    let displayItems = wordList.map { word -> WordDisplayInfo in
-                        let count = learningCounts[word.id] ?? 0
-                        return WordDisplayInfo(word: word, learningCount: count)
+                    
+                    let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
+                    
+                    let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
+                        let correctCount = historyModels.filter { $0.isCorrect }.count
+                        return (correct: correctCount, total: historyModels.count)
                     }
                     
+                    
+                    
+                    let displayItems = wordList.map { word -> WordDisplayInfo in
+                        if let stats = historyStats[word.id] {
+                            let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
+                            return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
+                        } else {
+                            return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+                        }
+                    }
+                    
+                    
+                    hasLearningWordBook.accept(false)
                     wordItems.accept(Array(displayItems))
                     
                 }
@@ -124,10 +148,22 @@ final class WordTabViewModel: BaseViewModel {
                     
                     
                     let histories = owner.learningHistoryRepo.fetchAllHistory()
-                    let learningCounts = Dictionary(grouping: histories, by: { $0.wordId }).mapValues { $0.count }
+                    let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
+                    
+                    let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
+                        let correctCount = historyModels.filter { $0.isCorrect }.count
+                        return (correct: correctCount, total: historyModels.count)
+                    }
+                    
+                    
+                    
                     let displayItems = wordList.map { word -> WordDisplayInfo in
-                        let count = learningCounts[word.id] ?? 0
-                        return WordDisplayInfo(word: word, learningCount: count)
+                        if let stats = historyStats[word.id] {
+                            let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
+                            return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
+                        } else {
+                            return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+                        }
                     }
                     
                     

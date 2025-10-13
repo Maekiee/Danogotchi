@@ -14,6 +14,7 @@ extension Word: CardDisplayable {
     var cardTitle: String { word }
     var cardSubtitle: String { meaning }
     var cardChipText: Int? { nil }
+    var cardAccuracy: Double? { nil }
     
     func toObject() -> WordObject {
         let vocab = WordObject()

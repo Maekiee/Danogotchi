@@ -90,6 +90,11 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             chip.setText("\(learningCount)번 학습")
         }
         
+        if let aaa = item.cardAccuracy {
+            circleProgress.setProgress(aaa, animated: false)
+        }
+        
+        
         
         // 셀 스타일
         if isSelected {
@@ -199,6 +204,6 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
         layer.cornerRadius = 20
         clipsToBounds = true
         
-        circleProgress.setProgress(0.88, animated: false)
+        
     }
 }
