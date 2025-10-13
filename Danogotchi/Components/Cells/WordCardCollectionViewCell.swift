@@ -60,6 +60,8 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
+    private let circleProgress = UICircleProgress()
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
@@ -102,6 +104,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         if let thumbnailUrl = item.cardThumbnail {
             thumbnail.isHidden = false
             chip.isHidden = false
+            circleProgress.isHidden = false
             thumbnail.kf.setImage(with: URL(string: thumbnailUrl))
             
             thumbnail.snp.remakeConstraints { make in
@@ -124,6 +127,11 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
                 make.size.equalTo(24)
             }
             
+            circleProgress.snp.remakeConstraints { make in
+                make.bottom.trailing.equalToSuperview().inset(16)
+                make.size.equalTo(40)
+            }
+            
             // subtitleLabel도 하단 고정 제약 조건을 다시 추가합니다.
             subtitleLabel.snp.remakeConstraints { make in
                 make.top.equalTo(titleLabel.snp.bottom).offset(4)
@@ -141,6 +149,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             // 이미지 없는 경우
             thumbnail.isHidden = true
             chip.isHidden = true
+            circleProgress.isHidden = true
             
             /// titleLabel을 셀 상단에 위치시킵니다.
             titleLabel.snp.remakeConstraints { make in
@@ -177,7 +186,8 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
             titleLabel,
             subtitleLabel,
             trailingIconButton,
-            chip
+            chip,
+            circleProgress
         ].forEach { contentView.addSubview($0) }
         
     }
@@ -188,5 +198,7 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
         backgroundColor = AppColor.cardColor
         layer.cornerRadius = 20
         clipsToBounds = true
+        
+        circleProgress.setProgress(0.88, animated: false)
     }
 }
