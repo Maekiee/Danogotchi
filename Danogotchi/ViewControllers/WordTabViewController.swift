@@ -176,10 +176,20 @@ extension WordTabViewController {
     private func bind() {
         let input = WordTabViewModel.Input(
             viewWillAppear:  rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
-            selectedWordCard: deleteWordTrigger.asObservable()
+            selectedWordCard: deleteWordTrigger.asObservable(),
+            segmentChanged: listSegmentedControl.rx.selectedSegmentIndex.asObservable()
         )
         
         let output = viewModel.transform(input: input)
+        
+        print(listSegmentedControl.rx.selectedSegmentIndex.values)
+        
+        let aa  = listSegmentedControl.rx.selectedSegmentIndex.asObservable()
+        
+        listSegmentedControl.rx.selectedSegmentIndex
+            .bind(with: self) { owenr, index in
+                print(index)
+            }.disposed(by: disposeBag)
         
         output.bookTitle
             .drive(with: self) { owner, title in

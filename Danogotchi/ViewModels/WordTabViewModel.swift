@@ -25,6 +25,7 @@ final class WordTabViewModel: BaseViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let selectedWordCard: Observable<Word>
+        let segmentChanged: Observable<Int>
     }
     
     struct Output {
@@ -37,6 +38,23 @@ final class WordTabViewModel: BaseViewModel {
         let hasLearningWordBook = BehaviorRelay<Bool>(value: true)
         let bookTitle = BehaviorRelay<String>(value: "")
         let wordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
+        let allWordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
+        
+        Observable.combineLatest(
+            input.segmentChanged.startWith(0),
+            allWordItems.asObservable()
+        ).map { segmentIndex, allWordItems -> [WordDisplayInfo] in
+            switch segmentIndex {
+            case 0:
+                return allWordItems.filter { $0.accuracy < 0.75 }
+            case 1:
+                return allWordItems.filter { $0.accuracy >= 0.75 }
+            default:
+                return allWordItems
+            }
+        }.bind(to: wordItems)
+            .disposed(by: disposeBag)
+        
         
         // viewDidLoad
         if let wordBookId = userInfo.selectedBookId,
@@ -69,7 +87,7 @@ final class WordTabViewModel: BaseViewModel {
                     return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
                 }
             }
-            wordItems.accept(Array(displayItems))
+            allWordItems.accept(Array(displayItems))
             
         } else {
             print("유저 디볼트에 값이 없나요?")
@@ -119,7 +137,7 @@ final class WordTabViewModel: BaseViewModel {
                     
                     
                     hasLearningWordBook.accept(false)
-                    wordItems.accept(Array(displayItems))
+                    allWordItems.accept(Array(displayItems))
                     
                 }
             }.disposed(by: disposeBag)
@@ -167,7 +185,7 @@ final class WordTabViewModel: BaseViewModel {
                     }
                     
                     
-                    wordItems.accept(Array(displayItems))
+                    allWordItems.accept(Array(displayItems))
                     hasLearningWordBook.accept(false)
                 }
             }.disposed(by: disposeBag)
@@ -175,13 +193,12 @@ final class WordTabViewModel: BaseViewModel {
         input.selectedWordCard
             .bind(with: self) { owner, wordCard in
                 // UI에서 지우기
-                let filteredList = wordItems.value.filter { $0.word.id != wordCard.id }
-                wordItems.accept(filteredList)
+                let filteredList = allWordItems.value.filter { $0.word.id != wordCard.id }
+                allWordItems.accept(filteredList)
                 
                 // 디비에서 지우기
                 let wordId = try! ObjectId(string: wordCard.id)
                 owner.wordRepo.delete(id: wordId)
-                
                 owner.userInfo.clearQuizState()
             }.disposed(by: disposeBag)
         
