@@ -84,6 +84,10 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     func configure(with item: CardDisplayable, isSelected: Bool = false) {
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
+        if let learningCount = item.cardChipText {
+            chip.setText("\(learningCount)번 학습")
+        }
+        
         
         // 셀 스타일
         if isSelected {

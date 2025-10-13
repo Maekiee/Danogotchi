@@ -10,12 +10,16 @@ final class WordTabViewModel: BaseViewModel {
     
     private let wordBookRepo: WordBookRepositoryProtocol
     private let wordRepo: WordRepositoryProtocol
+    private let learningHistoryRepo: LearningHistoryRepositoryProtocol
     
     init(
         wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
-        wordRepo: WordRepositoryProtocol = WordRepository()) {
-            self.wordBookRepo = wordBookRepo
-            self.wordRepo = wordRepo
+        wordRepo: WordRepositoryProtocol = WordRepository(),
+        learningHistoryRepo: LearningHistoryRepositoryProtocol = LearningHistoryRepository()
+    ) {
+        self.wordBookRepo = wordBookRepo
+        self.wordRepo = wordRepo
+        self.learningHistoryRepo = learningHistoryRepo
     }
     
     struct Input {
@@ -26,13 +30,13 @@ final class WordTabViewModel: BaseViewModel {
     struct Output {
         let currentWordbook: Driver<Bool>
         let bookTitle: Driver<String>
-        let wordItems: Driver<[Word]>
+        let wordItems: Driver<[WordDisplayInfo]>
     }
     
     func transform(input: Input) -> Output {
         let hasLearningWordBook = BehaviorRelay<Bool>(value: true)
         let bookTitle = BehaviorRelay<String>(value: "")
-        let wordItems = BehaviorRelay<[Word]>(value: [])
+        let wordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
         
         // viewDidLoad
         if let wordBookId = userInfo.selectedBookId,
@@ -46,7 +50,15 @@ final class WordTabViewModel: BaseViewModel {
             
             // 단어장 단어 리스트
             let wordList = wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
-            wordItems.accept(Array(wordList))
+            
+            let histories = learningHistoryRepo.fetchAllHistory()
+            let learningCounts = Dictionary(grouping: histories, by: { $0.wordId }).mapValues { $0.count }
+            let displayItems = wordList.map { word -> WordDisplayInfo in
+                let count = learningCounts[word.id] ?? 0
+                return WordDisplayInfo(word: word, learningCount: count)
+            }
+            
+            wordItems.accept(Array(displayItems))
             
         } else {
             print("유저 디볼트에 값이 없나요?")
@@ -70,11 +82,21 @@ final class WordTabViewModel: BaseViewModel {
                     if let wordBook = owner.wordBookRepo.read(id: bookObjectId) {
                         bookTitle.accept(wordBook.title)
                     }
-//                    
+                    
 //                    // 단어 리스트 업데이트
                     let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
-                    wordItems.accept(Array(wordList))
+                   
                     hasLearningWordBook.accept(false)
+                    
+                    let histories = owner.learningHistoryRepo.fetchAllHistory()
+                    let learningCounts = Dictionary(grouping: histories, by: { $0.wordId }).mapValues { $0.count }
+                    let displayItems = wordList.map { word -> WordDisplayInfo in
+                        let count = learningCounts[word.id] ?? 0
+                        return WordDisplayInfo(word: word, learningCount: count)
+                    }
+                    
+                    wordItems.accept(Array(displayItems))
+                    
                 }
             }.disposed(by: disposeBag)
         
@@ -99,7 +121,17 @@ final class WordTabViewModel: BaseViewModel {
                     
                     // 단어 리스트 업데이트
                     let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
-                    wordItems.accept(Array(wordList))
+                    
+                    
+                    let histories = owner.learningHistoryRepo.fetchAllHistory()
+                    let learningCounts = Dictionary(grouping: histories, by: { $0.wordId }).mapValues { $0.count }
+                    let displayItems = wordList.map { word -> WordDisplayInfo in
+                        let count = learningCounts[word.id] ?? 0
+                        return WordDisplayInfo(word: word, learningCount: count)
+                    }
+                    
+                    
+                    wordItems.accept(Array(displayItems))
                     hasLearningWordBook.accept(false)
                 }
             }.disposed(by: disposeBag)
@@ -107,7 +139,7 @@ final class WordTabViewModel: BaseViewModel {
         input.selectedWordCard
             .bind(with: self) { owner, wordCard in
                 // UI에서 지우기
-                let filteredList = wordItems.value.filter { $0.id != wordCard.id }
+                let filteredList = wordItems.value.filter { $0.word.id != wordCard.id }
                 wordItems.accept(filteredList)
                 
                 // 디비에서 지우기

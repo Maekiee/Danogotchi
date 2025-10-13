@@ -11,14 +11,14 @@ final class WordTabViewController: BaseViewController {
     private let viewModel: WordTabViewModel
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
-    private var allWords: [Word] = []
+    private var allWordsInfo: [WordDisplayInfo] = []
     
     private enum Section {
         case main
     }
     
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, Word>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Word>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordDisplayInfo>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordDisplayInfo>
     
     private var dataSource: DataSource!
     
@@ -201,7 +201,7 @@ extension WordTabViewController {
                 }
                  
                 
-                owner.allWords = wordList
+                owner.allWordsInfo = wordList
                 owner.applySnapshot(items: wordList)
             }.disposed(by: disposeBag)
         
@@ -245,13 +245,14 @@ extension WordTabViewController {
         
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
+                let allWords = owner.allWordsInfo.map { $0.word }
                 
-                guard !owner.allWords.isEmpty else {
+                guard !allWords.isEmpty else {
                     ToastManager.shared.show("학습할 단어가 없습니다.")
                     return
                 }
                 
-                guard owner.allWords.count >= 4 else {
+                guard allWords.count >= 4 else {
                     ToastManager.shared.show("최소 4개 이상의 단어가 필요합니다.")
                     return
                 }
@@ -263,10 +264,10 @@ extension WordTabViewController {
                     // 이어할 퀴즈가 있다면, 저장된 단어 ID 목록을 기반으로 퀴즈를 재구성합니다.
                     // (틀린 문제 학습하기를 이어하는 경우도 이 로직으로 처리됩니다.)
                     let wordIdSet = Set(currentWordIds)
-                    wordsForQuiz = owner.allWords.filter { wordIdSet.contains($0.id) }
+                    wordsForQuiz = allWords.filter { wordIdSet.contains($0.id) }
                 } else {
                     // 새로 시작하는 퀴즈라면, 전체 단어 목록으로 퀴즈를 구성하고 상태를 저장합니다.
-                    wordsForQuiz = owner.allWords
+                    wordsForQuiz = allWords
                     let wordIds = wordsForQuiz.map { $0.id }
                     owner.userInfo.currentQuizWordIds = wordIds
                     owner.userInfo.currentQuizIndex = 0
@@ -275,7 +276,7 @@ extension WordTabViewController {
                 }
                                 
                 // 위에서 결정된 `wordsForQuiz`를 사용하여 퀴즈 데이터를 생성합니다.
-                let quizData = QuizData(words: wordsForQuiz, allWord: owner.allWords)
+                let quizData = QuizData(words: wordsForQuiz, allWord: allWords)
                 
                 let choiceVM = ChoiceQuizViewModel(quizData: quizData)
                 let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
@@ -291,23 +292,24 @@ extension WordTabViewController {
 extension WordTabViewController {
     private func configDataSource() {
         // 셀ㅜ
-       let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, Word> { cell, indexPath, item in
+       let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordDisplayInfo> { cell, indexPath, item in
             cell.configure(with: item)
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
-                    title: item.word,
+                    title: item.word.word,
                     editAction: { [weak self] in
                         guard let _ = self else { return }
+                        
                         guard let bookObjectId = owner.userInfo.selectedBookId
                             .flatMap({ try? ObjectId(string: $0) }) else { return }
                         
                         let createWordModel = CreateWord(
                             wordBookId: bookObjectId,
-                            wordId: try! ObjectId(string: item.id),
-                            thumbnail: item.thumbnail,
+                            wordId: try! ObjectId(string: item.word.id),
+                            thumbnail: item.word.thumbnail,
                             bookTitle: owner.bookTitle,
-                            word: item.word,
-                            meaning: item.meaning,
+                            word: item.word.word,
+                            meaning: item.word.meaning,
                             actionType: .edit
                         )
                         let vm = AddWordViewModel(wordItem: createWordModel)
@@ -317,7 +319,7 @@ extension WordTabViewController {
                     },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }
-                        deleteWordTrigger.accept(item)
+                        deleteWordTrigger.accept(item.word)
                     }
                 )
             }.disposed(by: cell.disposeBag)
@@ -331,7 +333,7 @@ extension WordTabViewController {
         }
     }
     
-    private func applySnapshot(items: [Word]) {
+    private func applySnapshot(items: [WordDisplayInfo]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)

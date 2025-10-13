@@ -19,4 +19,9 @@ final class LearningHistoryRepository: LearningHistoryRepositoryProtocol{
                 realm.add(history)
             }
         }
+    
+    func fetchAllHistory() -> [LearningHistoryModel] {
+        let learningHistories = Array(realm.objects(LearningHistoryObject.self))
+        return learningHistories.map { $0.toStruct() }
+    }
 }

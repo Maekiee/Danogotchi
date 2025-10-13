@@ -13,7 +13,7 @@ extension Word: CardDisplayable {
     var cardThumbnail: String? { thumbnail }
     var cardTitle: String { word }
     var cardSubtitle: String { meaning }
-    var cardChipText: String? { nil }
+    var cardChipText: Int? { nil }
     
     func toObject() -> WordObject {
         let vocab = WordObject()

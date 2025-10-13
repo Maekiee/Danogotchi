@@ -18,3 +18,15 @@ class LearningHistoryObject: Object {
         self.createAt = createAt
     }
 }
+
+extension LearningHistoryObject {
+    func toStruct() -> LearningHistoryModel {
+        return LearningHistoryModel(
+            wordId: wordObjectId.stringValue,
+            isCorrect: isCorrect
+        )
+    }
+}
+
+
+
