@@ -62,5 +62,20 @@ enum AlertUtils {
         
         viewController.present(alert, animated: true)
     }
+    
+    static func showNotificationAlert(
+        on viewController: UIViewController,
+        title: String,
+        message: String,
+        confirmTitle: String = "확인",
+        handler: (() -> Void)? = nil
+    ) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let confirmAction = UIAlertAction(title: confirmTitle, style: .default) { _ in
+            handler?()
+        }
+        alert.addAction(confirmAction)
+        viewController.present(alert, animated: true)
+    }
 }
 

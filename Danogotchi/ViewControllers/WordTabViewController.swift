@@ -247,13 +247,24 @@ extension WordTabViewController {
             .bind(with: self) { owner, _ in
                 let allWords = owner.allWordsInfo.map { $0.word }
                 
+                print( "안녕안녕")
                 guard !allWords.isEmpty else {
-                    ToastManager.shared.show("학습할 단어가 없습니다.")
+                    AlertUtils.showNotificationAlert(
+                        on: owner,
+                        title: "알림",
+                        message: "학습할 단어가 없습니다."
+                    )
                     return
                 }
                 
                 guard allWords.count >= 4 else {
-                    ToastManager.shared.show("최소 4개 이상의 단어가 필요합니다.")
+                    print("최소 4개 이상 필요해요")
+                    
+                    AlertUtils.showNotificationAlert(
+                        on: owner,
+                        title: "알림",
+                        message: "최소 4개 이상의 단어가 필요합니다."
+                    )
                     return
                 }
                 
