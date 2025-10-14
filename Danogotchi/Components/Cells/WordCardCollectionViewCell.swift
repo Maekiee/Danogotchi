@@ -15,6 +15,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     private let thumbnail: UIImageView = {
         let imageView = UIImageView()
         imageView.layer.cornerRadius = 16
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
     }()
