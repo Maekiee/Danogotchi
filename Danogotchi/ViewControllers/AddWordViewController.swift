@@ -43,6 +43,7 @@ final class AddWordViewController: BaseViewController {
     
     private let emptyImageIcon: UIImageView = {
         let view = UIImageView()
+//        view.image = UIImage(systemName: "photo.stack.fill")
         view.image = UIImage(systemName: "photo.on.rectangle")
         view.tintColor = .systemGray3
         return view
@@ -55,7 +56,8 @@ final class AddWordViewController: BaseViewController {
                 pointSize: 14,
                 weight: .regular
             )
-        config.image = UIImage(systemName: "photo.on.rectangle")
+        config.image = UIImage(systemName: "photo.stack.fill")
+//        config.image = UIImage(systemName: "photo.on.rectangle")
         config.baseForegroundColor = UIColor.black.withAlphaComponent(0.8)
         config.background.backgroundColor = UIColor.white.withAlphaComponent(0.2)
         
@@ -91,6 +93,14 @@ final class AddWordViewController: BaseViewController {
         return tf
     }()
     
+    private let noImageLabel: UILabel = {
+        let label = UILabel()
+        label.text = "단어를 입력하면 이미지를 추천해 줍니다"
+        label.textColor = .systemGray2
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        return label
+    }()
+    
     private lazy var addWordButton = PrimaryFillButton(title: self.entryPoint == .add ? "저장" : "수정")
     
     override func viewDidLoad() {
@@ -116,6 +126,7 @@ final class AddWordViewController: BaseViewController {
         ].forEach { contentView.addSubview($0) }
         
         thumbnail.addSubview(emptyImageIcon)
+        thumbnail.addSubview(noImageLabel)
         thumbnail.addSubview(showMoreImagesButton)
     }
     
@@ -137,11 +148,18 @@ final class AddWordViewController: BaseViewController {
         
         emptyImageIcon.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.height.equalTo(32)
+            make.width.equalTo(40)
+            make.height.equalTo(32)
+        }
+        
+        noImageLabel.snp.makeConstraints { make in
+            make.top.equalTo(emptyImageIcon.snp.bottom).offset(8)
+            make.centerX.equalToSuperview()
         }
         
         showMoreImagesButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(12)
+//            make.top.equalToSuperview().offset(12)
+            make.bottom.equalToSuperview().offset(-12)
             make.trailing.equalToSuperview().offset(-12)
             make.size.equalTo(40)
         }
@@ -233,6 +251,7 @@ extension AddWordViewController {
                 if url != "" {
                     owner.thumbnail.kf.setImage(with: URL(string: url))
                     owner.emptyImageIcon.isHidden = true
+                    owner.noImageLabel.isHidden = true
                     owner.showMoreImagesButton.isHidden = false
                 }
             }.disposed(by: disposeBag)
@@ -279,6 +298,7 @@ extension AddWordViewController {
                 owner.thumbnail.image = nil
                 if owner.thumbnail.image == nil {
                     owner.emptyImageIcon.isHidden = false
+                    owner.noImageLabel.isHidden = false
                     owner.showMoreImagesButton.isHidden = true
                 }
                 
