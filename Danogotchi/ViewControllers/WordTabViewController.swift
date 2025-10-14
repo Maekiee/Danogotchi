@@ -34,7 +34,7 @@ final class WordTabViewController: BaseViewController {
     
     // MARK: - UI 프로퍼티
     private let listSegmentedControl: UISegmentedControl = {
-        let control = UISegmentedControl(items: ["학습", "복습"])
+        let control = UISegmentedControl(items: ["학습", "전체"])
         control.selectedSegmentIndex = 0
         control.backgroundColor = .systemGray5
         return control
@@ -182,13 +182,9 @@ extension WordTabViewController {
         
         let output = viewModel.transform(input: input)
         
-        print(listSegmentedControl.rx.selectedSegmentIndex.values)
-        
-        let aa  = listSegmentedControl.rx.selectedSegmentIndex.asObservable()
-        
         listSegmentedControl.rx.selectedSegmentIndex
-            .bind(with: self) { owenr, index in
-                print(index)
+            .bind(with: self) { owner, index in
+                owner.startLearningButton.isHidden = index == 1 ? true : false
             }.disposed(by: disposeBag)
         
         output.bookTitle

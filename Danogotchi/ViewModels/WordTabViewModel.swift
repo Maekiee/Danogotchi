@@ -46,7 +46,7 @@ final class WordTabViewModel: BaseViewModel {
         ).map { segmentIndex, allWordItems -> [WordDisplayInfo] in
             switch segmentIndex {
             case 0:
-                return allWordItems.filter { $0.accuracy < 0.75 }
+                return allWordItems
             case 1:
                 return allWordItems.filter { $0.accuracy >= 0.75 }
             default:
@@ -76,8 +76,6 @@ final class WordTabViewModel: BaseViewModel {
                 let correctCount = historyModels.filter { $0.isCorrect }.count
                 return (correct: correctCount, total: historyModels.count)
             }
-            
-            
             
             let displayItems = wordList.map { word -> WordDisplayInfo in
                 if let stats = historyStats[word.id] {
@@ -164,16 +162,14 @@ final class WordTabViewModel: BaseViewModel {
                     // 단어 리스트 업데이트
                     let wordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookObjectId).reversed()
                     
-                    
                     let histories = owner.learningHistoryRepo.fetchAllHistory()
+                    
                     let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
                     
                     let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
                         let correctCount = historyModels.filter { $0.isCorrect }.count
                         return (correct: correctCount, total: historyModels.count)
                     }
-                    
-                    
                     
                     let displayItems = wordList.map { word -> WordDisplayInfo in
                         if let stats = historyStats[word.id] {
@@ -183,7 +179,6 @@ final class WordTabViewModel: BaseViewModel {
                             return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
                         }
                     }
-                    
                     
                     allWordItems.accept(Array(displayItems))
                     hasLearningWordBook.accept(false)

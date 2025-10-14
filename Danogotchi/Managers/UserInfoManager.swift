@@ -24,6 +24,7 @@ final class UserInfoManager: UserInfoProtocol {
     }
     
     private let selectedBookIdRelay = BehaviorRelay<String?>(value: nil)
+    
     var selectedBookIdObservable: Observable<String?> {
         return selectedBookIdRelay.asObservable()
     }
