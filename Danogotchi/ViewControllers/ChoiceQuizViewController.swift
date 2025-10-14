@@ -90,7 +90,7 @@ final class ChoiceQuizViewController: BaseViewController {
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
         button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
     
@@ -100,7 +100,7 @@ final class ChoiceQuizViewController: BaseViewController {
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
         button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
     
@@ -110,7 +110,7 @@ final class ChoiceQuizViewController: BaseViewController {
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
         button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
     
@@ -120,7 +120,7 @@ final class ChoiceQuizViewController: BaseViewController {
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
         button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
     
@@ -205,7 +205,7 @@ final class ChoiceQuizViewController: BaseViewController {
         }
         
         choiceStackView.snp.makeConstraints { make in
-            make.top.equalTo(questionLabel.snp.bottom).offset(80)
+            make.top.equalTo(questionLabel.snp.bottom).offset(64)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-24)
         }
@@ -266,6 +266,7 @@ extension ChoiceQuizViewController {
                 [owner.choice1Button, owner.choice2Button,
                  owner.choice3Button, owner.choice4Button].forEach {
                     $0.backgroundColor = .white
+                    $0.setTitleColor(.black, for: .normal)
                     $0.isEnabled = true
                 }
             }.disposed(by: disposeBag)
@@ -278,10 +279,13 @@ extension ChoiceQuizViewController {
                 buttons.forEach { $0.isEnabled = false }
                 
                 let selectedButton = buttons[result.selectedIndex]
+                
                 selectedButton.backgroundColor = result.isCorrect ? .systemGreen : .systemRed
+                selectedButton.setTitleColor(.white, for: .normal)
                 
                 if !result.isCorrect {
                     buttons[result.correctIndex].backgroundColor = .systemGreen
+                    buttons[result.correctIndex].setTitleColor(.white, for: .normal)
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
