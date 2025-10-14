@@ -46,7 +46,7 @@ final class WordTabViewModel: BaseViewModel {
         ).map { segmentIndex, allWordItems -> [WordDisplayInfo] in
             switch segmentIndex {
             case 0:
-                return allWordItems
+                return allWordItems.sorted { $0.accuracy < $1.accuracy }
             case 1:
                 return allWordItems.filter { $0.accuracy >= 0.75 }
             default:
