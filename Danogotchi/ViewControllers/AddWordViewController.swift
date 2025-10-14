@@ -109,7 +109,7 @@ final class AddWordViewController: BaseViewController {
         
         [
             thumbnail,
-            wordBookTitleTextField,
+//            wordBookTitleTextField,
             wordTextField,
             meanTextField,
             addWordButton
@@ -146,13 +146,13 @@ final class AddWordViewController: BaseViewController {
             make.size.equalTo(40)
         }
         
-        wordBookTitleTextField.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(20)
-            make.horizontalEdges.equalToSuperview().inset(20)
-        }
+//        wordBookTitleTextField.snp.makeConstraints { make in
+//            make.top.equalTo(thumbnail.snp.bottom).offset(20)
+//            make.horizontalEdges.equalToSuperview().inset(20)
+//        }
         
         wordTextField.snp.makeConstraints { make in
-            make.top.equalTo(wordBookTitleTextField.snp.bottom).offset(8)
+            make.top.equalTo(thumbnail.snp.bottom).offset(8)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
@@ -161,7 +161,10 @@ final class AddWordViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
-        [wordBookTitleTextField, wordTextField, meanTextField].forEach { underlineTextField in
+        [
+//            wordBookTitleTextField,
+            wordTextField,
+            meanTextField].forEach { underlineTextField in
             underlineTextField.tf.snp.makeConstraints { make in
                 make.height.equalTo(40) // 원하는 높이 설정
             }
@@ -234,9 +237,9 @@ extension AddWordViewController {
                 }
             }.disposed(by: disposeBag)
         
-        output.bookTitle
-            .drive(wordBookTitleTextField.rx.text)
-            .disposed(by: disposeBag)
+//        output.bookTitle
+//            .drive(wordBookTitleTextField.rx.text)
+//            .disposed(by: disposeBag)
         
         output.bookTitle
             .drive(navigationItem.rx.title)
