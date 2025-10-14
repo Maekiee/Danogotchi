@@ -225,8 +225,10 @@ extension AddWordViewController {
         output.wordImageUrl
             .drive(with: self) { owner, url in
                 currentImageUrl = url
+                
+             
                 if url != "" {
-                    owner.thumbnail.kf.setImage(with: URL(string: url)!)
+                    owner.thumbnail.kf.setImage(with: URL(string: url))
                     owner.emptyImageIcon.isHidden = true
                     owner.showMoreImagesButton.isHidden = false
                 }

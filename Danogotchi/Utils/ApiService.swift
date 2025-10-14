@@ -15,7 +15,7 @@ enum ApiService {
             ).responseDecodable(of: SearchPhotoDTO.self) { res in
                 switch res.result {
                 case .success(let value):
-                    print("네트워크 호출 성공")
+                    print("라우터>> \(value)")
                     observer(.success(.success(value)))
                 case .failure(let error):
                     print("네트워크 에러\(error)")

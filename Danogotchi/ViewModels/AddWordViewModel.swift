@@ -68,6 +68,7 @@ final class AddWordViewModel: BaseViewModel {
                     .subscribe { result in
                         switch result {
                         case .success(let value):
+                            print("여기 \(value)")
                             wordImageItems.accept(value)
                         case .failure:
                             print("이미지 검색 실패")
@@ -123,6 +124,7 @@ final class AddWordViewModel: BaseViewModel {
             .bind(with: self) { owner, responseValue in
                 switch responseValue {
                 case .success(let value):
+                    print("여기 검색: \(value)")
                     wordImageItems.accept(value)
                     if let firstImageUrl = value.results.first?.urls.raw {
                         wordImageUrl.accept(firstImageUrl)
@@ -165,8 +167,15 @@ final class AddWordViewModel: BaseViewModel {
             .withLatestFrom(allInputData)
             .bind(with: self) { owner, validData in
                 let (imageUrl, word, bookTitle, mean, translate) = validData
+                
+                print("---- 🐞 저장 직전 데이터 확인 🐞 ----")
+                print("1. 수동 입력 뜻 (meanText): '\(mean)'")
+                print("2. API 번역 뜻 (translatedWord): '\(translate)'")
+                
                 let finalMeaning = !mean.isEmpty ? mean : translate
                 
+                print("최종 저장될 뜻: '\(finalMeaning)'")
+                print("---------------------------------")
                 
                 let actionType = actionType.value
                 
@@ -177,7 +186,7 @@ final class AddWordViewModel: BaseViewModel {
                     word: word,
                     meaning: finalMeaning)
                 
-                
+                meanText.accept("")
                 translatedWord.accept("")
                 resetTrigger.accept(())
             }.disposed(by: disposeBag)
