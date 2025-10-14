@@ -87,6 +87,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     func configure(with item: CardDisplayable, isSelected: Bool = false) {
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
+        
         if let learningCount = item.cardChipText {
             chip.setText("\(learningCount)번 학습")
         }
@@ -97,81 +98,141 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         
         
         
-        // 셀 스타일
-        if isSelected {
-            layer.borderColor = AppColor.primaryColor.cgColor
-            layer.borderWidth = 2.0
-        } else {
-            layer.borderColor = UIColor.clear.cgColor
-            layer.borderWidth = 0
-        }
+//        // 셀 스타일
+//        if isSelected {
+//            layer.borderColor = AppColor.primaryColor.cgColor
+//            layer.borderWidth = 2.0
+//        } else {
+//            layer.borderColor = UIColor.clear.cgColor
+//            layer.borderWidth = 0
+//        }
+//        
+//        // 이미지 있는 경우
+//        if let thumbnailUrl = item.cardThumbnail {
+//            thumbnail.isHidden = false
+//            chip.isHidden = false
+//            circleProgress.isHidden = false
+//            thumbnail.kf.setImage(with: URL(string: thumbnailUrl))
+//            
+//            thumbnail.snp.remakeConstraints { make in
+//                make.top.equalToSuperview().offset(6)
+//                make.horizontalEdges.equalToSuperview().inset(6)
+//                make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
+//            }
+//            
+//            // titleLabel을 썸네일 아래에 위치시킵니다.
+//            titleLabel.snp.remakeConstraints { make in
+//                make.top.equalTo(thumbnail.snp.bottom).offset(8)
+//                make.leading.equalToSuperview().offset(16)
+//                make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
+//            }
+//            
+//            // trailingIconButton도 원래 위치로 되돌립니다.
+//            trailingIconButton.snp.remakeConstraints { make in
+//                make.top.equalTo(thumbnail.snp.bottom).offset(8)
+//                make.trailing.equalToSuperview().offset(-16)
+//                make.size.equalTo(24)
+//            }
+//            
+//            circleProgress.snp.remakeConstraints { make in
+//                make.bottom.trailing.equalToSuperview().inset(16)
+//                make.size.equalTo(40)
+//            }
+//            
+//            // subtitleLabel도 하단 고정 제약 조건을 다시 추가합니다.
+//            subtitleLabel.snp.remakeConstraints { make in
+//                make.top.equalTo(titleLabel.snp.bottom).offset(4)
+//                make.leading.equalToSuperview().offset(16)
+//                make.trailing.equalToSuperview().inset(16)
+//            }
+//            
+//            chip.snp.remakeConstraints { make in
+//                make.top.equalTo(subtitleLabel.snp.bottom).offset(20)
+//                make.leading.equalToSuperview().offset(16)
+//                make.bottom.equalToSuperview().inset(16)
+//                make.height.equalTo(20)
+//            }
+//        } else {
+//            // 이미지 없는 경우
+//            thumbnail.isHidden = true
+//            chip.isHidden = true
+//            circleProgress.isHidden = true
+//            
+//            /// titleLabel을 셀 상단에 위치시킵니다.
+//            titleLabel.snp.remakeConstraints { make in
+//                make.top.equalToSuperview().offset(16)
+//                make.leading.equalToSuperview().offset(16)
+//                make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
+//            }
+//            
+//            // trailingIconButton을 titleLabel 상단에 맞춥니다.
+//            trailingIconButton.snp.remakeConstraints { make in
+//                make.top.equalTo(titleLabel.snp.top).offset(-4)
+//                make.trailing.equalToSuperview().offset(-16)
+//                make.size.equalTo(24)
+//            }
+//            
+//            // subtitleLabel에서 하단 고정 제약 조건을 제거합니다.
+//            subtitleLabel.snp.remakeConstraints { make in
+//                make.top.equalTo(titleLabel.snp.bottom).offset(40)
+//                make.leading.equalToSuperview().offset(16)
+//                make.trailing.equalToSuperview().inset(16)
+//                make.bottom.equalToSuperview().inset(16)
+//            }
+//        }
         
-        // 이미지 있는 경우
-        if let thumbnailUrl = item.cardThumbnail {
-            thumbnail.isHidden = false
-            chip.isHidden = false
-            circleProgress.isHidden = false
-            thumbnail.kf.setImage(with: URL(string: thumbnailUrl))
+        // --- 레이아웃 분기 처리 ---
+        let hasThumbnail = item.cardThumbnail != nil
+        thumbnail.isHidden = !hasThumbnail
+        chip.isHidden = !hasThumbnail
+        circleProgress.isHidden = !hasThumbnail
+        
+        if hasThumbnail {
+            // [이미지가 있는 경우]
+            thumbnail.kf.setImage(with: URL(string: item.cardThumbnail!))
             
-            thumbnail.snp.remakeConstraints { make in
-                make.top.equalToSuperview().offset(6)
-                make.horizontalEdges.equalToSuperview().inset(6)
-                make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
-            }
-            
-            // titleLabel을 썸네일 아래에 위치시킵니다.
+            // titleLabel의 상단을 thumbnail의 하단에 연결
             titleLabel.snp.remakeConstraints { make in
                 make.top.equalTo(thumbnail.snp.bottom).offset(8)
                 make.leading.equalToSuperview().offset(16)
                 make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
             }
             
-            // trailingIconButton도 원래 위치로 되돌립니다.
+            // trailingIconButton의 상단을 titleLabel의 상단과 맞춤
             trailingIconButton.snp.remakeConstraints { make in
-                make.top.equalTo(thumbnail.snp.bottom).offset(8)
+                make.top.equalTo(titleLabel.snp.top)
                 make.trailing.equalToSuperview().offset(-16)
                 make.size.equalTo(24)
             }
             
-            circleProgress.snp.remakeConstraints { make in
-                make.bottom.trailing.equalToSuperview().inset(16)
-                make.size.equalTo(40)
-            }
-            
-            // subtitleLabel도 하단 고정 제약 조건을 다시 추가합니다.
-            subtitleLabel.snp.remakeConstraints { make in
-                make.top.equalTo(titleLabel.snp.bottom).offset(4)
-                make.leading.equalToSuperview().offset(16)
-                make.trailing.equalToSuperview().inset(16)
-            }
-            
-            chip.snp.remakeConstraints { make in
-                make.top.equalTo(subtitleLabel.snp.bottom).offset(20)
-                make.leading.equalToSuperview().offset(16)
+            // [중요] 셀의 최종 높이를 결정하는 하단 제약조건
+            // chip의 하단을 셀의 하단에 연결하여 수직 경로를 완성합니다.
+            chip.snp.makeConstraints { make in
                 make.bottom.equalToSuperview().inset(16)
-                make.height.equalTo(20)
             }
-        } else {
-            // 이미지 없는 경우
-            thumbnail.isHidden = true
-            chip.isHidden = true
-            circleProgress.isHidden = true
+            circleProgress.snp.makeConstraints { make in
+                make.bottom.equalToSuperview().inset(16)
+            }
             
-            /// titleLabel을 셀 상단에 위치시킵니다.
+        } else {
+            // [이미지가 없는 경우]
+            
+            // titleLabel의 상단을 셀의 상단에 연결
             titleLabel.snp.remakeConstraints { make in
                 make.top.equalToSuperview().offset(16)
                 make.leading.equalToSuperview().offset(16)
                 make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
             }
             
-            // trailingIconButton을 titleLabel 상단에 맞춥니다.
+            // trailingIconButton의 상단을 titleLabel의 상단과 맞춤
             trailingIconButton.snp.remakeConstraints { make in
                 make.top.equalTo(titleLabel.snp.top).offset(-4)
                 make.trailing.equalToSuperview().offset(-16)
                 make.size.equalTo(24)
             }
             
-            // subtitleLabel에서 하단 고정 제약 조건을 제거합니다.
+            // [중요] 셀의 최종 높이를 결정하는 하단 제약조건
+            // subtitleLabel의 하단을 셀의 하단에 연결하여 수직 경로를 완성합니다.
             subtitleLabel.snp.remakeConstraints { make in
                 make.top.equalTo(titleLabel.snp.bottom).offset(40)
                 make.leading.equalToSuperview().offset(16)
@@ -198,7 +259,43 @@ extension WordCardCollectionViewCell: UIConfigurationLayout {
         
     }
     
-    func configLayout() { }
+    func configLayout() {
+        
+        // --- 고정 제약 조건들 ---
+        thumbnail.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(6)
+            make.horizontalEdges.equalToSuperview().inset(6)
+            make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
+        }
+        
+        trailingIconButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().offset(-16)
+            make.size.equalTo(24)
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(16)
+            make.trailing.lessThanOrEqualTo(trailingIconButton.snp.leading).offset(-8)
+        }
+        
+        subtitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(4)
+            make.leading.equalToSuperview().offset(16)
+            make.trailing.equalToSuperview().inset(16)
+        }
+        
+        chip.snp.makeConstraints { make in
+            make.top.equalTo(subtitleLabel.snp.bottom).offset(20)
+            make.leading.equalToSuperview().offset(16)
+            make.height.equalTo(20)
+        }
+        
+        circleProgress.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(16)
+            make.size.equalTo(40)
+        }
+        
+    }
     
     func configView() {
         backgroundColor = AppColor.cardColor

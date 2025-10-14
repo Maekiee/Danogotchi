@@ -376,12 +376,12 @@ extension WordTabViewController {
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .estimated(150))
+            heightDimension: .estimated(250))
         )
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(150)
+            heightDimension: .estimated(250)
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
