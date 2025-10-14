@@ -99,13 +99,13 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         
         
 //        // 셀 스타일
-//        if isSelected {
-//            layer.borderColor = AppColor.primaryColor.cgColor
-//            layer.borderWidth = 2.0
-//        } else {
-//            layer.borderColor = UIColor.clear.cgColor
-//            layer.borderWidth = 0
-//        }
+        if isSelected {
+            layer.borderColor = AppColor.primaryColor.cgColor
+            layer.borderWidth = 2.0
+        } else {
+            layer.borderColor = UIColor.clear.cgColor
+            layer.borderWidth = 0
+        }
 //        
 //        // 이미지 있는 경우
 //        if let thumbnailUrl = item.cardThumbnail {

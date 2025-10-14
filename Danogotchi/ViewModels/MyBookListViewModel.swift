@@ -25,10 +25,12 @@ final class MyBookListViewModel: BaseViewModel {
     
     struct Output {
         let bookList: Driver<[WordBook]>
+        let deleteFaileTrigger: Signal<Void>
     }
     
     func transform(input: Input) -> Output {
         let bookList = BehaviorRelay<[WordBook]>(value: [])
+        let deleteFaileTrigger = PublishRelay<Void>()
         // 단어장 추가
         Observable.merge(
             input.viewWillAppear,
@@ -46,17 +48,24 @@ final class MyBookListViewModel: BaseViewModel {
         // 단어장 삭제
         input.selectedDeleteTrigger
             .bind(with: self) { owner, bookInfo in
-                let filteredList = bookList.value.filter { $0.id != bookInfo.id }
-                bookList.accept(filteredList)
-                
-                // DB에서 지우기
-                guard let bookObjectId = try? ObjectId(string: bookInfo.id) else { return }
-                owner.wordBookRepo.delete(id: bookObjectId)
+                let bookCount = bookList.value.count
+                if bookCount == 1 {
+                    deleteFaileTrigger.accept(())
+                } else {
+                    let filteredList = bookList.value.filter { $0.id != bookInfo.id }
+                    bookList.accept(filteredList)
+                    
+                    // DB에서 지우기
+                    guard let bookObjectId = try? ObjectId(string: bookInfo.id) else { return }
+                    owner.wordBookRepo.delete(id: bookObjectId)
+                }
+
             }.disposed(by: disposeBag)
         
         
         return Output(
-            bookList: bookList.asDriver()
+            bookList: bookList.asDriver(),
+            deleteFaileTrigger: deleteFaileTrigger.asSignal()
         )
     }
 }

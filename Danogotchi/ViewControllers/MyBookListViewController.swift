@@ -125,6 +125,15 @@ extension MyBookListViewController {
                 owner.applySnapshot(items: books)
             }.disposed(by: disposeBag)
         
+        output.deleteFaileTrigger
+            .emit(with: self) { owner, _ in
+                AlertUtils.showNotificationAlert(
+                    on: owner,
+                    title: "알림",
+                    message: "단어장은 최소 1개 이상 있어야 합니다."
+                )
+            }.disposed(by: disposeBag)
+        
         // 셀 터치
         collectionView.rx.itemSelected
             .compactMap { [weak self] indexPath -> WordBook? in
@@ -176,6 +185,18 @@ extension MyBookListViewController {
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
                     title: item.title,
+//                    editAction: { [weak self] in
+//                        guard let _ = self else { return }
+//                        let vc = CreateBookViewController()
+//                        vc.modalPresentationStyle = .overFullScreen
+//                        vc.modalTransitionStyle = .crossDissolve
+//                        
+////                        vc.bookCreated
+////                            .bind(to: owner.refreshTrigger)
+////                            .disposed(by: vc.disposeBag)
+//                        owner.present(vc, animated: true)
+//                        print("수정수정")
+//                    },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }
                         deleteTrigger.accept(item)
@@ -216,6 +237,7 @@ extension MyBookListViewController {
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 12
         
         let layout = UICollectionViewCompositionalLayout(section: section)
         
