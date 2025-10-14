@@ -34,7 +34,7 @@ final class WordTabViewController: BaseViewController {
     
     // MARK: - UI 프로퍼티
     private let listSegmentedControl: UISegmentedControl = {
-        let control = UISegmentedControl(items: ["학습", "전체"])
+        let control = UISegmentedControl(items: ["전체", "완료"])
         control.selectedSegmentIndex = 0
         control.backgroundColor = .systemGray5
         return control
@@ -63,13 +63,13 @@ final class WordTabViewController: BaseViewController {
         return label
     }()
     
-    private let noWordLabel: UILabel = {
-        let label = UILabel()
-        label.text = "학습할 단어를 추가해주세요"
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = .black
-        return label
-    }()
+//    private let noWordLabel: UILabel = {
+//        let label = UILabel()
+//        label.text = "학습할 단어를 추가해주세요"
+//        label.font = .systemFont(ofSize: 16, weight: .semibold)
+//        label.textColor = .black
+//        return label
+//    }()
     
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
     
@@ -123,7 +123,7 @@ final class WordTabViewController: BaseViewController {
         [
             
             noWordBookLabel,
-            noWordLabel,
+//            noWordLabel,
             showCreateBookButton,
             collectionView,
             startLearningButton,
@@ -136,9 +136,9 @@ final class WordTabViewController: BaseViewController {
             make.center.equalToSuperview()
         }
         
-        noWordLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
+//        noWordLabel.snp.makeConstraints { make in
+//            make.center.equalToSuperview()
+//        }
         
         showCreateBookButton.snp.makeConstraints { make in
             make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
@@ -212,10 +212,10 @@ extension WordTabViewController {
                 let selectedBook = owner.userInfo.selectedBookId
                 
                 if selectedBook == nil && wordList.isEmpty {
-                    owner.noWordLabel.isHidden = true
+//                    owner.noWordLabel.isHidden = true
                     owner.collectionView.isHidden = true
                 } else if selectedBook != nil && wordList.isEmpty {
-                    owner.noWordLabel.isHidden = false
+//                    owner.noWordLabel.isHidden = false
                     owner.collectionView.isHidden = true
                 } else {
                     owner.collectionView.isHidden = false

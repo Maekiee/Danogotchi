@@ -48,7 +48,7 @@ final class WordTabViewModel: BaseViewModel {
             case 0:
                 return allWordItems.sorted { $0.accuracy < $1.accuracy }
             case 1:
-                return allWordItems.filter { $0.accuracy >= 0.75 }
+                return allWordItems.filter { $0.accuracy >= 0.80 }
             default:
                 return allWordItems
             }
@@ -121,7 +121,6 @@ final class WordTabViewModel: BaseViewModel {
                         let correctCount = historyModels.filter { $0.isCorrect }.count
                         return (correct: correctCount, total: historyModels.count)
                     }
-                    
                     
                     
                     let displayItems = wordList.map { word -> WordDisplayInfo in
