@@ -177,7 +177,7 @@ final class AddWordViewController: BaseViewController {
     
     override func configView() {
         navigationController?.navigationBar.tintColor = .black
-        
+            
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"),
             style: .plain,
@@ -236,6 +236,10 @@ extension AddWordViewController {
         
         output.bookTitle
             .drive(wordBookTitleTextField.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.bookTitle
+            .drive(navigationItem.rx.title)
             .disposed(by: disposeBag)
         
         
