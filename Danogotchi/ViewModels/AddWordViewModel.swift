@@ -167,16 +167,8 @@ final class AddWordViewModel: BaseViewModel {
             .withLatestFrom(allInputData)
             .bind(with: self) { owner, validData in
                 let (imageUrl, word, bookTitle, mean, translate) = validData
-                
-                print("---- 🐞 저장 직전 데이터 확인 🐞 ----")
-                print("1. 수동 입력 뜻 (meanText): '\(mean)'")
-                print("2. API 번역 뜻 (translatedWord): '\(translate)'")
-                
                 let finalMeaning = !mean.isEmpty ? mean : translate
-                
-                print("최종 저장될 뜻: '\(finalMeaning)'")
-                print("---------------------------------")
-                
+             
                 let actionType = actionType.value
                 
                 owner.saveWord(

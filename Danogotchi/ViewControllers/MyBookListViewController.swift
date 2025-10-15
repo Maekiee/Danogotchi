@@ -55,8 +55,12 @@ final class MyBookListViewController: BaseViewController {
     }()
     
     private let deleteTrigger = PublishRelay<WordBook>()
+    
     let selectedBook = PublishRelay<WordBook>()
+    
     private var currentSelectedBook: WordBook?
+    
+    private let refreshTrigger = PublishRelay<Void>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -91,12 +95,14 @@ final class MyBookListViewController: BaseViewController {
             make.size.equalTo(40)
         }
     }
+    
+    
 }
 
 // MARK: - Rx 바인딩
 extension MyBookListViewController {
     private func bind() {
-        let refreshTrigger = PublishRelay<Void>()
+//        let refreshTrigger = PublishRelay<Void>()
 //        let selectedBook = PublishRelay<WordBookModel>()
         
         let input = MyBookListViewModel.Input(
@@ -166,7 +172,7 @@ extension MyBookListViewController {
                 vc.modalTransitionStyle = .crossDissolve
                 
                 vc.bookCreated
-                    .bind(to: refreshTrigger)
+                    .bind(to: owner.refreshTrigger)
                     .disposed(by: vc.disposeBag)
                 owner.present(vc, animated: true)
                 
@@ -185,18 +191,18 @@ extension MyBookListViewController {
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
                     title: item.title,
-//                    editAction: { [weak self] in
-//                        guard let _ = self else { return }
-//                        let vc = CreateBookViewController()
-//                        vc.modalPresentationStyle = .overFullScreen
-//                        vc.modalTransitionStyle = .crossDissolve
-//                        
-////                        vc.bookCreated
-////                            .bind(to: owner.refreshTrigger)
-////                            .disposed(by: vc.disposeBag)
-//                        owner.present(vc, animated: true)
-//                        print("수정수정")
-//                    },
+                    editAction: { [weak self] in
+                        guard let self = self else { return }
+                        let vc = CreateBookViewController(selectedBookInfo: (item.id, item.title))
+                        vc.modalPresentationStyle = .overFullScreen
+                        vc.modalTransitionStyle = .crossDissolve
+                        
+                        vc.bookCreated
+                            .bind(to: owner.refreshTrigger)
+                            .disposed(by: disposeBag)
+                        owner.present(vc, animated: true)
+                        print("수정수정")
+                    },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }
                         deleteTrigger.accept(item)

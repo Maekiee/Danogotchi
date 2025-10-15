@@ -1,6 +1,7 @@
 import Foundation
 import RxSwift
 import RxCocoa
+import RealmSwift
 
 final class CreateBookViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
@@ -15,6 +16,7 @@ final class CreateBookViewModel: BaseViewModel {
     
     
     struct Input {
+        let selectedBookId: String?
         let textFieldValue: Observable<String>
         let createButtonTapped: Observable<Void>
     }
@@ -35,18 +37,28 @@ final class CreateBookViewModel: BaseViewModel {
         input.createButtonTapped
             .withLatestFrom(input.textFieldValue)
             .bind(with: self) { owner, text in
-                // 단어장 생성
-                owner.wordBookRepo.create(title: text)
-                // 생성한 단어장 가져오기
-                guard let newBook = owner.wordBookRepo.readAll().last else { return }
-
-                // UserInfoManager의 selectedBookId값이 nil 이면  newBook의 아이디 값 UserInfoManager의 selectedBookId로 값 전달
-                if owner.userInfo.selectedBookId == nil {
-                    owner.userInfo.selectedBookId = newBook.id
-                }
                 
-                createBookDoneTrigger.accept(())
-                // UserInfoManagerdml selectedBookId값이 nil이 아니면 아무런 동작 하지 않음
+                if let bookId = input.selectedBookId {
+                    let bookObjectId = try! ObjectId(string: bookId)
+                    owner.wordBookRepo.update(id: bookObjectId, title: text)
+                    
+                    createBookDoneTrigger.accept(())
+                } else {
+                    print("타이틀 없음")
+                    // 단어장 생성
+                    owner.wordBookRepo.create(title: text)
+                    // 생성한 단어장 가져오기
+                    guard let newBook = owner.wordBookRepo.readAll().last else { return }
+
+                    // UserInfoManager의 selectedBookId값이 nil 이면  newBook의 아이디 값 UserInfoManager의 selectedBookId로 값 전달
+                    if owner.userInfo.selectedBookId == nil {
+                        owner.userInfo.selectedBookId = newBook.id
+                    }
+                    
+                    createBookDoneTrigger.accept(())
+                    // UserInfoManagerdml selectedBookId값이 nil이 아니면 아무런 동작 하지 않음
+                }
+
                 
             }.disposed(by: disposeBag)
         

@@ -6,6 +6,16 @@ import RxCocoa
 final class CreateBookViewController: BaseViewController {
     let disposeBag = DisposeBag()
     private let viewModel = CreateBookViewModel()
+    private let selectedBookInfo: (String, String)?
+    
+    init(selectedBookInfo: (String, String)? = nil) {
+        self.selectedBookInfo = selectedBookInfo
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     let bookCreated = PublishRelay<Void>()
     //MARK: - UI 프로퍼티
@@ -99,6 +109,7 @@ final class CreateBookViewController: BaseViewController {
 extension CreateBookViewController {
     private func bind() {
         let input = CreateBookViewModel.Input(
+            selectedBookId: selectedBookInfo?.0,
             textFieldValue: bookTitleTextField.tf.rx.text.orEmpty.asObservable(),
             createButtonTapped: createButton.rx.tap.asObservable()
         )
@@ -113,6 +124,10 @@ extension CreateBookViewController {
         output.isCreateButtonEnabled
             .drive(createButton.rx.isEnabled)
             .disposed(by: disposeBag)
+        
+        if let selectedBookInfo = selectedBookInfo{
+            bookTitleTextField.tf.placeholder = selectedBookInfo.1
+        }
         
         cancelButton.rx.tap
             .bind(with: self) { owner, _ in
