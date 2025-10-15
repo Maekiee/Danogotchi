@@ -117,6 +117,7 @@
 				765182C92E843A75005EE2F7 /* Resources */,
 				76C9E3772E966239001B37B2 /* Embed Frameworks */,
 				76BE05062E9FFC4600F80D8A /* Copy Firebase Config */,
+				76BE05C02EA00D3400F80D8A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -221,6 +222,28 @@
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nFIREBASE_DEV_PLIST=\"${PROJECT_DIR}/Danogotchi/App/Secret/Firebase/Debug/GoogleService-Info.plist\"\n\n# Release 환경용 .plist 파일 경로\nFIREBASE_PROD_PLIST=\"${PROJECT_DIR}/Danogotchi/App/Secret/Firebase/Release/GoogleService-Info.plist\"\n\n\n# --- 아래 부분은 수정할 필요 없습니다 ---\n\n# 최종적으로 앱 번들에 복사될 파일의 목적지 경로\nDESTINATION_PLIST=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\necho \"Build Configuration is ${CONFIGURATION}\"\n\n# Debug 구성일 경우 Dev용 파일을, Release 구성일 경우 Prod용 파일을 복사합니다.\nif [ \"${CONFIGURATION}\" == \"Debug\" ]; then\n    echo \"Using Dev Firebase config from: ${FIREBASE_DEV_PLIST}\"\n    cp \"${FIREBASE_DEV_PLIST}\" \"${DESTINATION_PLIST}\"\nelif [ \"${CONFIGURATION}\" == \"Release\" ]; then\n    echo \"Using Prod Firebase config from: ${FIREBASE_PROD_PLIST}\"\n    cp \"${FIREBASE_PROD_PLIST}\" \"${DESTINATION_PLIST}\"\nfi\n";
 		};
+		76BE05C02EA00D3400F80D8A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -258,6 +281,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-Objc";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.maekie.Danogotchi$(APP_BUNDLE_ID_SUFFIX)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -295,6 +319,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-Objc";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.maekie.Danogotchi$(APP_BUNDLE_ID_SUFFIX)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
