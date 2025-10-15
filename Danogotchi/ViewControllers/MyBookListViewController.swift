@@ -184,28 +184,27 @@ extension MyBookListViewController {
 // MARK: - 컬렉션 뷰
 extension MyBookListViewController {
     private func configDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBook> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<WordCardCollectionViewCell, WordBook> { [weak self]
+            cell, indexPath, item in
+            guard let self = self else { return }
             let isSelected = self.currentSelectedBook?.id == item.id
             cell.configure(with: item, isSelected: isSelected)
             
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
                     title: item.title,
-                    editAction: { [weak self] in
-                        guard let self = self else { return }
+                    editAction: {
                         let vc = CreateBookViewController(selectedBookInfo: (item.id, item.title))
                         vc.modalPresentationStyle = .overFullScreen
                         vc.modalTransitionStyle = .crossDissolve
                         
                         vc.bookCreated
                             .bind(to: owner.refreshTrigger)
-                            .disposed(by: disposeBag)
+                            .disposed(by: vc.disposeBag)
                         owner.present(vc, animated: true)
-                        print("수정수정")
                     },
-                    deleteAction: { [weak self] in
-                        guard let self = self else { return }
-                        deleteTrigger.accept(item)
+                    deleteAction: {
+                        owner.deleteTrigger.accept(item)
                     }
                 )
             }.disposed(by: cell.disposeBag)
