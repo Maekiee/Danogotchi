@@ -46,6 +46,8 @@
 		765182DD2E843A76005EE2F7 /* Exceptions for "Danogotchi" folder in "Danogotchi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"App/Secret/Firebase/Debug/GoogleService-Info.plist",
+				"App/Secret/Firebase/Release/GoogleService-Info.plist",
 				Info.plist,
 			);
 			target = 765182CA2E843A75005EE2F7 /* Danogotchi */;
@@ -114,6 +116,7 @@
 				765182C82E843A75005EE2F7 /* Frameworks */,
 				765182C92E843A75005EE2F7 /* Resources */,
 				76C9E3772E966239001B37B2 /* Embed Frameworks */,
+				76BE05062E9FFC4600F80D8A /* Copy Firebase Config */,
 			);
 			buildRules = (
 			);
@@ -195,6 +198,30 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		76BE05062E9FFC4600F80D8A /* Copy Firebase Config */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"$(PROJECT_DIR)/Danogotchi/App/Secret/Firebase/Release/GoogleService-Info.plist",
+			);
+			inputPaths = (
+				"$(PROJECT_DIR)/Danogotchi/App/Secret/Firebase/Debug/GoogleService-Info.plist",
+			);
+			name = "Copy Firebase Config";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME).app/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nFIREBASE_DEV_PLIST=\"${PROJECT_DIR}/Danogotchi/App/Secret/Firebase/Debug/GoogleService-Info.plist\"\n\n# Release 환경용 .plist 파일 경로\nFIREBASE_PROD_PLIST=\"${PROJECT_DIR}/Danogotchi/App/Secret/Firebase/Release/GoogleService-Info.plist\"\n\n\n# --- 아래 부분은 수정할 필요 없습니다 ---\n\n# 최종적으로 앱 번들에 복사될 파일의 목적지 경로\nDESTINATION_PLIST=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\necho \"Build Configuration is ${CONFIGURATION}\"\n\n# Debug 구성일 경우 Dev용 파일을, Release 구성일 경우 Prod용 파일을 복사합니다.\nif [ \"${CONFIGURATION}\" == \"Debug\" ]; then\n    echo \"Using Dev Firebase config from: ${FIREBASE_DEV_PLIST}\"\n    cp \"${FIREBASE_DEV_PLIST}\" \"${DESTINATION_PLIST}\"\nelif [ \"${CONFIGURATION}\" == \"Release\" ]; then\n    echo \"Using Prod Firebase config from: ${FIREBASE_PROD_PLIST}\"\n    cp \"${FIREBASE_PROD_PLIST}\" \"${DESTINATION_PLIST}\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		765182C72E843A75005EE2F7 /* Sources */ = {
