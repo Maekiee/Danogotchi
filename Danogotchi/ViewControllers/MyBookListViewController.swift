@@ -54,6 +54,21 @@ final class MyBookListViewController: BaseViewController {
         return button
     }()
     
+    private let closeButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "xmark"), for: .normal)
+        button.tintColor = .black
+        return button
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "내 단어장"
+        label.textColor = AppColor.textPrimaryColor
+        label.font = .systemFont(ofSize: 17, weight: .semibold)
+        return label
+    }()
+    
     private let deleteTrigger = PublishRelay<WordBook>()
     
     let selectedBook = PublishRelay<WordBook>()
@@ -72,6 +87,8 @@ final class MyBookListViewController: BaseViewController {
     
     override func configHierarchy() {
         [
+            closeButton,
+            titleLabel,
             changeButton,
             collectionView,
             addBookButton
@@ -79,13 +96,25 @@ final class MyBookListViewController: BaseViewController {
     }
     
     override func configLayout() {
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.centerX.equalToSuperview()
+        }
+        
+        closeButton.snp.makeConstraints { make in
+            make.centerY.equalTo(titleLabel).offset(2)
+            make.leading.equalToSuperview().offset(20)
+        }
+        
         changeButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.centerY.equalTo(titleLabel)
             make.trailing.equalToSuperview().offset(-16)
         }
         
+        // collectionView의 상단 기준을 titleLabel로 변경합니다.
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(changeButton.snp.bottom).offset(8)
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
