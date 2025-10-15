@@ -85,6 +85,15 @@ final class MyBookListViewController: BaseViewController {
         bind()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let currentBook = currentSelectedBook {
+            print(#function)
+            UserInfoManager.shared.selectedBookId = currentBook.id
+        }
+    }
+    
     override func configHierarchy() {
         [
             closeButton,
@@ -145,7 +154,11 @@ extension MyBookListViewController {
         changeButton.rx.tap
             .withLatestFrom(selectedBook)
             .bind(with: self) { owner, book in
-                UserInfoManager.shared.selectedBookId = book.id
+                owner.dismiss(animated: true)
+            }.disposed(by: disposeBag)
+        
+        closeButton.rx.tap
+            .bind(with: self) { owner, _ in
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         

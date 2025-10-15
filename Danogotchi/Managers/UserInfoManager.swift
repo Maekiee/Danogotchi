@@ -23,10 +23,19 @@ final class UserInfoManager: UserInfoProtocol {
         static let currentIncorrectWordIds = "currentIncorrectWordIds"
     }
     
+    private let wordBookRefreshRelay = PublishRelay<Void>()
     private let selectedBookIdRelay = BehaviorRelay<String?>(value: nil)
     
     var selectedBookIdObservable: Observable<String?> {
         return selectedBookIdRelay.asObservable()
+    }
+    
+    var wordBookRefreshObservable: Observable<Void> {
+        return wordBookRefreshRelay.asObservable()
+    }
+    
+    func notifyWordBookUpdate() {
+        wordBookRefreshRelay.accept(())
     }
     
     var username: String? {

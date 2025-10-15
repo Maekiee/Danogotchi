@@ -92,6 +92,8 @@ final class WordTabViewModel: BaseViewModel {
             hasLearningWordBook.accept(true)
         }
         
+        
+        
         userInfo.selectedBookIdObservable
             .compactMap { $0 } // nil 제거
             .distinctUntilChanged() // 중복 이벤트 방지
@@ -122,7 +124,6 @@ final class WordTabViewModel: BaseViewModel {
                         return (correct: correctCount, total: historyModels.count)
                     }
                     
-                    
                     let displayItems = wordList.map { word -> WordDisplayInfo in
                         if let stats = historyStats[word.id] {
                             let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
@@ -131,7 +132,6 @@ final class WordTabViewModel: BaseViewModel {
                             return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
                         }
                     }
-                    
                     
                     hasLearningWordBook.accept(false)
                     allWordItems.accept(Array(displayItems))
@@ -195,6 +195,16 @@ final class WordTabViewModel: BaseViewModel {
                 owner.wordRepo.delete(id: wordId)
                 owner.userInfo.clearQuizState()
             }.disposed(by: disposeBag)
+        
+        Observable.merge(
+            userInfo.selectedBookIdObservable.compactMap { $0 },
+            userInfo.wordBookRefreshObservable.withLatestFrom(userInfo.selectedBookIdObservable.compactMap { $0 })
+        ).bind(with: self) { owner, bookStrId in
+            guard let bookObjectId = try? ObjectId(string: bookStrId),
+                  let wordBook = owner.wordBookRepo.read(id: bookObjectId) else { return }
+            bookTitle.accept(wordBook.title)
+            
+        }.disposed(by: disposeBag)
         
         
         return Output(

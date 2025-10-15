@@ -268,7 +268,6 @@ extension WordTabViewController {
             .bind(with: self) { owner, _ in
                 let allWords = owner.allWordsInfo.map { $0.word }
                 
-                print( "안녕안녕")
                 guard !allWords.isEmpty else {
                     AlertUtils.showNotificationAlert(
                         on: owner,
