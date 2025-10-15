@@ -46,13 +46,14 @@ final class CompleteQuizViewController: BaseViewController {
     
     private let primaryButton = PrimaryFillButton(title: "")
     private let secondaryButton = PrimaryFillButton(title: "")
+    private let endLearningButton = PrimaryFillButton(title: "학습 끝내기")
     
     private lazy var buttonStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 12
         stack.distribution = .fillEqually
-        [primaryButton, secondaryButton].forEach { stack.addArrangedSubview($0) }
+        [primaryButton, secondaryButton, endLearningButton].forEach { stack.addArrangedSubview($0) }
         return stack
     }()
     
@@ -90,7 +91,10 @@ final class CompleteQuizViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(24)
         }
         
-        [primaryButton, secondaryButton].forEach {
+        [primaryButton,
+         secondaryButton,
+         endLearningButton
+        ].forEach {
             $0.snp.makeConstraints { make in
                 make.height.equalTo(48)
             }
@@ -106,7 +110,8 @@ extension CompleteQuizViewController {
     private func bind() {
         let input = CompleteQuizViewModel.Input(
             primaryButtonTap: primaryButton.rx.tap.asObservable(),
-            secondaryButtonTap: secondaryButton.rx.tap.asObservable()
+            secondaryButtonTap: secondaryButton.rx.tap.asObservable(),
+            endLearningButtonTap: endLearningButton.rx.tap.asObservable()
         )
         
         let output = viewModel.transform(input: input)
@@ -137,6 +142,15 @@ extension CompleteQuizViewController {
             .emit(with: self) { owner, action in
                 owner.handleAction(action)
             }
+            .disposed(by: disposeBag)
+        
+        output.endLearningAction
+            .emit(with: self) { owner, action in
+                owner.handleAction(action)
+            }.disposed(by: disposeBag)
+        
+        output.isEndLearningButtonHidden
+            .drive(endLearningButton.rx.isHidden)
             .disposed(by: disposeBag)
     }
 }

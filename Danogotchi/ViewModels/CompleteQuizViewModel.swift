@@ -23,20 +23,24 @@ final class CompleteQuizViewModel: BaseViewModel {
     struct Input {
         let primaryButtonTap: Observable<Void>
         let secondaryButtonTap: Observable<Void>
+        let endLearningButtonTap: Observable<Void>///////
     }
-    
+    /////
     struct Output {
         let scoreText: Driver<String>
         let primaryButtonTitle: Driver<String>
         let secondaryButtonTitle: Driver<String>
         let primaryAction: Signal<ActionType>
         let secondaryAction: Signal<ActionType>
+        let endLearningAction: Signal<ActionType>
+        let isEndLearningButtonHidden: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
         
         let primaryActionRelay = PublishRelay<ActionType>()
         let secondaryActionRelay = PublishRelay<ActionType>()
+        let endLearningActionRelay = PublishRelay<ActionType>()
         
         let incorrectCount = result.total - result.correct
         let scoreText = Driver.just("""
@@ -46,6 +50,10 @@ final class CompleteQuizViewModel: BaseViewModel {
                """)
         
         let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
+        
+        let isEndLearningButtonHidden = Driver.just(
+            result.incorrectWords.isEmpty
+          )
         
         input.primaryButtonTap
             .map { primaryAction }
@@ -57,12 +65,19 @@ final class CompleteQuizViewModel: BaseViewModel {
             .bind(to: secondaryActionRelay)
             .disposed(by: disposeBag)
         
+        input.endLearningButtonTap
+            .map { ActionType.finish }
+            .bind(to: endLearningActionRelay)
+            .disposed(by: disposeBag)
+        
         return Output(
             scoreText: scoreText,
             primaryButtonTitle: Driver.just(primaryTitle),
             secondaryButtonTitle: Driver.just(secondaryTitle),
             primaryAction: primaryActionRelay.asSignal(),
-            secondaryAction: secondaryActionRelay.asSignal()
+            secondaryAction: secondaryActionRelay.asSignal(),
+            endLearningAction: endLearningActionRelay.asSignal(),
+            isEndLearningButtonHidden: isEndLearningButtonHidden
         )
     }
     
