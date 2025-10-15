@@ -15,6 +15,10 @@
 		7651837A2E844257005EE2F7 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 765183792E844257005EE2F7 /* Kingfisher */; };
 		7651837D2E844260005EE2F7 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 7651837C2E844260005EE2F7 /* Toast */; };
 		76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */; };
+		76BE04FF2E9FF93600F80D8A /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE04FE2E9FF93600F80D8A /* FirebaseAnalyticsCore */; };
+		76BE05012E9FF93600F80D8A /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05002E9FF93600F80D8A /* FirebaseCrashlytics */; };
+		76BE05032E9FF93600F80D8A /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05022E9FF93600F80D8A /* FirebaseMessaging */; };
+		76BE05052E9FF93600F80D8A /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05042E9FF93600F80D8A /* FirebaseRemoteConfig */; };
 		76C9E3762E966239001B37B2 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; };
 /* End PBXBuildFile section */
@@ -67,10 +71,14 @@
 				76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */,
 				76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */,
 				7651837D2E844260005EE2F7 /* Toast in Frameworks */,
+				76BE05052E9FF93600F80D8A /* FirebaseRemoteConfig in Frameworks */,
 				765183742E844224005EE2F7 /* RxSwift in Frameworks */,
+				76BE04FF2E9FF93600F80D8A /* FirebaseAnalyticsCore in Frameworks */,
 				765183772E844241005EE2F7 /* Alamofire in Frameworks */,
 				765183722E844224005EE2F7 /* RxCocoa in Frameworks */,
+				76BE05012E9FF93600F80D8A /* FirebaseCrashlytics in Frameworks */,
 				7651836F2E84420E005EE2F7 /* SnapKit in Frameworks */,
+				76BE05032E9FF93600F80D8A /* FirebaseMessaging in Frameworks */,
 				7651837A2E844257005EE2F7 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,6 +132,10 @@
 				7651837C2E844260005EE2F7 /* Toast */,
 				76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */,
 				76D9D2742E8C11F500B8104A /* RealmSwift */,
+				76BE04FE2E9FF93600F80D8A /* FirebaseAnalyticsCore */,
+				76BE05002E9FF93600F80D8A /* FirebaseCrashlytics */,
+				76BE05022E9FF93600F80D8A /* FirebaseMessaging */,
+				76BE05042E9FF93600F80D8A /* FirebaseRemoteConfig */,
 			);
 			productName = Danogotchi;
 			productReference = 765182CB2E843A75005EE2F7 /* Danogotchi.app */;
@@ -161,6 +173,7 @@
 				7651837B2E844260005EE2F7 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
 				76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 				76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */,
+				76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 765182CC2E843A75005EE2F7 /* Products */;
@@ -453,6 +466,14 @@
 				minimumVersion = 8.0.1;
 			};
 		};
+		76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.4.0;
+			};
+		};
 		76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/realm-swift.git";
@@ -498,6 +519,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
+		};
+		76BE04FE2E9FF93600F80D8A /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		76BE05002E9FF93600F80D8A /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		76BE05022E9FF93600F80D8A /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		76BE05042E9FF93600F80D8A /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 		76D9D2742E8C11F500B8104A /* RealmSwift */ = {
 			isa = XCSwiftPackageProductDependency;
