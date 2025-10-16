@@ -152,7 +152,7 @@ final class WordTabViewController: BaseViewController {
             showCreateBookButton,
             collectionView,
             startLearningButton,
-            testButton, // x테스트
+//            testButton, // x테스트
             listSegmentedControl,
         ].forEach { view.addSubview($0) }
     }
@@ -185,11 +185,11 @@ final class WordTabViewController: BaseViewController {
         }
         
         /// 크레시 테스트
-        testButton.snp.makeConstraints { make in
-            make.bottom.equalTo(startLearningButton.snp.top).offset(10)
-            make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(44)
-        }
+//        testButton.snp.makeConstraints { make in
+//            make.bottom.equalTo(startLearningButton.snp.top).offset(10)
+//            make.horizontalEdges.equalToSuperview().inset(24)
+//            make.height.equalTo(44)
+//        }
 
         startLearningButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
@@ -360,11 +360,11 @@ extension WordTabViewController {
         
         
         // 크레시 테스트
-        testButton.rx.tap
-            .bind(with: self) { owner, _ in
-                let numbers = [0]
-                let _ = numbers[1]
-            }.disposed(by: disposeBag)
+//        testButton.rx.tap
+//            .bind(with: self) { owner, _ in
+//                let numbers = [0]
+//                let _ = numbers[1]
+//            }.disposed(by: disposeBag)
 
     }
 }
