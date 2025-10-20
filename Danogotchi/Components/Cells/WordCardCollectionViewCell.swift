@@ -121,6 +121,18 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             layer.borderWidth = 0
         }
         
+        // 발음 듣기 아이콘 상태
+        TTSManager.shared.currentSpeakingText
+            .map { $0 == item.cardTitle }
+            .bind(with: self) { owner, isPlayingThisCell in
+                // tts 플레이
+                var config = owner.trailingIconButton.configuration
+                config?.baseForegroundColor = isPlayingThisCell
+                ? AppColor.primaryColor
+                : UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0)
+                owner.trailingIconButton.configuration = config
+            }.disposed(by: disposeBag)
+        
         // --- 레이아웃 분기 처리 ---
         let hasThumbnail = item.cardThumbnail != nil
         thumbnail.isHidden = !hasThumbnail

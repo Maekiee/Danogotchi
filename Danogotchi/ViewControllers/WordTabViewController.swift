@@ -16,12 +16,8 @@ final class WordTabViewController: BaseViewController {
         case main
     }
 
-    private typealias DataSource = UICollectionViewDiffableDataSource<
-        Section, WordDisplayInfo
-    >
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<
-        Section, WordDisplayInfo
-    >
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordDisplayInfo>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordDisplayInfo>
 
     private var dataSource: DataSource!
 
@@ -67,15 +63,7 @@ final class WordTabViewController: BaseViewController {
         label.textColor = .black
         return label
     }()
-
-    //    private let noWordLabel: UILabel = {
-    //        let label = UILabel()
-    //        label.text = "학습할 단어를 추가해주세요"
-    //        label.font = .systemFont(ofSize: 16, weight: .semibold)
-    //        label.textColor = .black
-    //        return label
-    //    }()
-
+    
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
 
     private let testButton: UIButton = {
@@ -148,7 +136,6 @@ final class WordTabViewController: BaseViewController {
         [
 
             noWordBookLabel,
-            //            noWordLabel,
             showCreateBookButton,
             collectionView,
             startLearningButton,
@@ -162,18 +149,12 @@ final class WordTabViewController: BaseViewController {
             make.center.equalToSuperview()
         }
 
-        //        noWordLabel.snp.makeConstraints { make in
-        //            make.center.equalToSuperview()
-        //        }
-
         showCreateBookButton.snp.makeConstraints { make in
             make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
             make.horizontalEdges.equalToSuperview().inset(24)
             make.height.equalTo(40)
         }
         
-        
-
         listSegmentedControl.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
             make.horizontalEdges.equalToSuperview().inset(16)
@@ -250,10 +231,8 @@ extension WordTabViewController {
                 let selectedBook = owner.userInfo.selectedBookId
 
                 if selectedBook == nil && wordList.isEmpty {
-                    //                    owner.noWordLabel.isHidden = true
                     owner.collectionView.isHidden = true
                 } else if selectedBook != nil && wordList.isEmpty {
-                    //                    owner.noWordLabel.isHidden = false
                     owner.collectionView.isHidden = true
                 } else {
                     owner.collectionView.isHidden = false
@@ -372,13 +351,13 @@ extension WordTabViewController {
 // MARK: - CollectionView
 extension WordTabViewController {
     private func configDataSource() {
-        // 셀ㅜ
         let cellRegistration = UICollectionView.CellRegistration<
             WordCardCollectionViewCell, WordDisplayInfo
         > { cell, indexPath, item in
+            
             cell.configure(with: item)
+            
             cell.onTouchImageIcon.bind(with: self) { owner, _ in
-                print("이미지 아이콘 터치")
                 owner.showActionSheet(
                     title: item.word.word,
                     editAction: { [weak self] in
@@ -416,7 +395,8 @@ extension WordTabViewController {
             }.disposed(by: cell.disposeBag)
             
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                print("트레일링 아이콘 땃치")
+                // 음성 출력
+                TTSManager.shared.speak(item.cardTitle)
             }.disposed(by: cell.disposeBag)
         }
 
