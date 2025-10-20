@@ -9,27 +9,38 @@ final class MainTabViewController: UITabBarController {
         createTabBarController()
     }
     
-    let characterTabVm = CharacterTabViewModel()
+//    let characterTabVm = CharacterTabViewModel()
     let wordTabVm = WordTabViewModel()
     let settingVm = SettingTabViewModel()
 
     private func createTabBarController() {
         
-        let characterVC = CharacterTabViewController()
+//        let characterVC = CharacterTabViewController()
         let wordTabVC = WordTabViewController(viewModel: wordTabVm)
+        let libraryTabVC = LibraryTabViewController()
         let settingVC = SettingTabViewController()
         
-        let firstTabNav = UINavigationController(rootViewController: characterVC)
+//        let firstTabNav = UINavigationController(rootViewController: characterVC)
         let secondTabNav = UINavigationController(rootViewController: wordTabVC)
+        let libraryTabNav = UINavigationController(rootViewController: libraryTabVC)
         let thridTabNav = UINavigationController(rootViewController: settingVC)
         
-        firstTabNav.tabBarItem = UITabBarItem(title: "캐릭터", image: UIImage(systemName: "house.fill"), selectedImage: UIImage(systemName: ""))
-        secondTabNav.tabBarItem = UITabBarItem(title: "단어장", image: UIImage(systemName: "book.fill"), selectedImage: UIImage(systemName: ""))
-        thridTabNav.tabBarItem = UITabBarItem(title: "설정", image: UIImage(systemName: "person.fill"), selectedImage: UIImage(systemName: ""))
+//        firstTabNav.tabBarItem = UITabBarItem(title: "캐릭터", image: UIImage(systemName: "house.fill"), selectedImage: UIImage(systemName: ""))
+        secondTabNav.tabBarItem = UITabBarItem(title: "단어", image: UIImage(systemName: "book"), selectedImage: UIImage(systemName: "book.fill"))
+        libraryTabNav.tabBarItem = UITabBarItem(title: "라이브러리", image: UIImage(systemName: "character.book.closed"), selectedImage: UIImage(systemName: "character.book.closed.fill"))
+        thridTabNav.tabBarItem = UITabBarItem(title: "프로필", image: UIImage(systemName: "person"), selectedImage: UIImage(systemName: "person.fill"))
         
-        setViewControllers([firstTabNav, secondTabNav, thridTabNav], animated: false)
+        setViewControllers([
+//            firstTabNav,
+            secondTabNav,
+            libraryTabNav,
+            thridTabNav], animated: false)
         
-        [firstTabNav, secondTabNav, thridTabNav].forEach { nav in
+        [
+//            firstTabNav,
+            secondTabNav,
+            thridTabNav
+        ].forEach { nav in
             let navBarAppearance = UINavigationBarAppearance()
             navBarAppearance.configureWithTransparentBackground()
             navBarAppearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
