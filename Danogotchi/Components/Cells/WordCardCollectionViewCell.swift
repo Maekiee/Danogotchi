@@ -132,7 +132,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             thumbnail.kf.setImage(with: URL(string: item.cardThumbnail!))
             
             var topIconConfig = trailingIconButton.configuration
-            topIconConfig?.image = UIImage(systemName: "speaker.wave.3")
+            topIconConfig?.image = UIImage(systemName: "speaker.wave.2.fill")
             trailingIconButton.configuration = topIconConfig
             
             
