@@ -377,17 +377,18 @@ extension WordTabViewController {
             WordCardCollectionViewCell, WordDisplayInfo
         > { cell, indexPath, item in
             cell.configure(with: item)
-            cell.onTouchTopIcon.bind(with: self) { owner, _ in
+            cell.onTouchImageIcon.bind(with: self) { owner, _ in
+                print("이미지 아이콘 터치")
                 owner.showActionSheet(
                     title: item.word.word,
                     editAction: { [weak self] in
                         guard self != nil else { return }
-
+                        
                         guard
                             let bookObjectId = owner.userInfo.selectedBookId
                                 .flatMap({ try? ObjectId(string: $0) })
                         else { return }
-
+                        
                         let createWordModel = CreateWord(
                             wordBookId: bookObjectId,
                             wordId: try! ObjectId(string: item.word.id),
@@ -412,6 +413,10 @@ extension WordTabViewController {
                         deleteWordTrigger.accept(item.word)
                     }
                 )
+            }.disposed(by: cell.disposeBag)
+            
+            cell.onTouchTopIcon.bind(with: self) { owner, _ in
+                print("트레일링 아이콘 땃치")
             }.disposed(by: cell.disposeBag)
         }
 

@@ -12,11 +12,16 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         return trailingIconButton.rx.tap.asObservable()
     }
     
+    var onTouchImageIcon: Observable<Void> {
+        return imageIconButton.rx.tap.asObservable()
+    }
+    
     private let thumbnail: UIImageView = {
         let imageView = UIImageView()
         imageView.layer.cornerRadius = 16
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -29,18 +34,14 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
         config.background.backgroundColor = UIColor.white.withAlphaComponent(0.2)
         config.contentInsets = NSDirectionalEdgeInsets(
             top: 4, leading: 12, bottom: 4, trailing: 12)
-        
         config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
                 pointSize: 14,
                 weight: .regular
             )
-        
         config.background.cornerRadius = 16
         config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
         button.isHidden = false
         button.configuration = config
-        
-        
         return button
     }()
     
@@ -130,6 +131,11 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             // [이미지가 있는 경우]
             thumbnail.kf.setImage(with: URL(string: item.cardThumbnail!))
             
+            var topIconConfig = trailingIconButton.configuration
+            topIconConfig?.image = UIImage(systemName: "speaker.wave.3")
+            trailingIconButton.configuration = topIconConfig
+            
+            
             // titleLabel의 상단을 thumbnail의 하단에 연결
             titleLabel.snp.remakeConstraints { make in
                 make.top.equalTo(thumbnail.snp.bottom).offset(8)
@@ -149,12 +155,14 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
             chip.snp.makeConstraints { make in
                 make.bottom.equalToSuperview().inset(16)
             }
+            
             circleProgress.snp.makeConstraints { make in
                 make.bottom.equalToSuperview().inset(16)
             }
             
         } else {
             // [이미지가 없는 경우]
+            
             
             // titleLabel의 상단을 셀의 상단에 연결
             titleLabel.snp.remakeConstraints { make in
