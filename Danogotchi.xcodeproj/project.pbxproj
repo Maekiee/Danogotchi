@@ -21,6 +21,7 @@
 		76BE05052E9FF93600F80D8A /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05042E9FF93600F80D8A /* FirebaseRemoteConfig */; };
 		76C9E3762E966239001B37B2 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; };
+		76E1F07B2EA77E640087A4E6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 76E1F07A2EA77E640087A4E6 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -71,6 +72,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */,
+				76E1F07B2EA77E640087A4E6 /* FirebaseFirestore in Frameworks */,
 				76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */,
 				7651837D2E844260005EE2F7 /* Toast in Frameworks */,
 				76BE05052E9FF93600F80D8A /* FirebaseRemoteConfig in Frameworks */,
@@ -140,6 +142,7 @@
 				76BE05002E9FF93600F80D8A /* FirebaseCrashlytics */,
 				76BE05022E9FF93600F80D8A /* FirebaseMessaging */,
 				76BE05042E9FF93600F80D8A /* FirebaseRemoteConfig */,
+				76E1F07A2EA77E640087A4E6 /* FirebaseFirestore */,
 			);
 			productName = Danogotchi;
 			productReference = 765182CB2E843A75005EE2F7 /* Danogotchi.app */;
@@ -603,6 +606,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		76E1F07A2EA77E640087A4E6 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

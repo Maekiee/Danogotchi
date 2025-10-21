@@ -6,6 +6,7 @@ import RxCocoa
 
 final class LibraryTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
+    private let viewModel = LibraryTabViewModel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,6 +32,12 @@ final class LibraryTabViewController: BaseViewController {
 
 extension LibraryTabViewController {
     private func bind() {
+        let input = LibraryTabViewModel.Input(
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
+        )
+        
+        let ouput = viewModel.transform(input: input)
+        
         
     }
 }
