@@ -61,7 +61,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // 탭바 있는거
             window?.rootViewController = MainTabViewController()
         } else {
-            window?.rootViewController = SetUserNameViewController()
+//            window?.rootViewController = SetUserNameViewController()
+            window?.rootViewController = SearchThemeViewController()
         }
         
         
