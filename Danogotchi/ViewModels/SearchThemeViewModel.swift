@@ -28,6 +28,8 @@ final class SearchThemeViewModel: BaseViewModel {
         let currentSearchWord = BehaviorRelay<String>(value: "")
         let isLoading = BehaviorRelay<Bool>(value: false)
         
+        
+        // 초기값
         input.viewWillAppear
             .take(1)
             .withLatestFrom(nextPage.asObservable())
@@ -49,6 +51,8 @@ final class SearchThemeViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
         
+        
+        // 페이지 네이션
         input.loadNextPage
             .withLatestFrom(Observable.combineLatest(
                 currentSearchWord.asObservable(),
@@ -70,6 +74,29 @@ final class SearchThemeViewModel: BaseViewModel {
                     nextPage.accept(nextPage.value + 1)
                 case .failure(let error):
                     print("무한 스크롤 로직 에러: \(error)")
+                }
+            }.disposed(by: disposeBag)
+        
+        
+        // 검색
+        input.textEndTrigger
+            .withLatestFrom(input.searchText)
+            .distinctUntilChanged()
+            .flatMap { text in
+                self.repository.searchPhotos(query: text, page: 1)
+            }
+            .bind(with: self) { owner, result in
+                imageItems.accept([])
+                switch result {
+                case .success(let entity):
+                    let viewDataList = entity.results.map {
+                        ThemeImageViewData(from: $0)
+                    }
+                    imageItems.accept(viewDataList)
+                    totalImageCount.accept(entity.total)
+                    nextPage.accept(2)
+                case .failure(let error):
+                    print("검색 에러 \(error)")
                 }
             }.disposed(by: disposeBag)
         
