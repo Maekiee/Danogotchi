@@ -15,6 +15,11 @@ final class SearchThemeViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, ThemeImageViewData>
     
     private var dataSource: DataSource!
+    
+    // 추가 ----------------------------------
+    private var imageDataList: [ThemeImageViewData] = []
+    private let waterfallLayout = WaterfallLayout()
+    // ------------------------------------
 
     private let titleText: UILabel = {
         let label = UILabel()
@@ -32,10 +37,14 @@ final class SearchThemeViewController: BaseViewController {
         return tf
     }()
     
-    private let collectionView: UICollectionView = {
+    private lazy var collectionView: UICollectionView = {
+        // 추가
+        waterfallLayout.delegate = self
+        
         let view = UICollectionView(
             frame: .zero,
-            collectionViewLayout: SearchThemeViewController.layout()
+            collectionViewLayout: waterfallLayout // 추가
+//            collectionViewLayout: SearchThemeViewController.layout()
         )
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = AppColor.appBackgroundColor
@@ -111,6 +120,11 @@ extension SearchThemeViewController {
         
         output.themeImageList
             .drive(with: self) { owner, imageList in
+                // 추가된 부분 --------------
+                owner.imageDataList = imageList
+                owner.waterfallLayout.invalidateLayout()
+                // ----------------------
+                
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
         
@@ -126,6 +140,16 @@ extension SearchThemeViewController {
             .map { _ in () }
             .bind(to: loadNextPage)
             .disposed(by: disposeBag)
+    }
+}
+
+
+// MARK: - WaterfallLayoutDelegate
+extension SearchThemeViewController: WaterfallLayoutDelegate {
+    func collectionView(_ collectionView: UICollectionView, heightForItemAt indexPath: IndexPath, width: CGFloat) -> CGFloat {
+        guard indexPath.item < imageDataList.count else { return 200 }
+        let item = imageDataList[indexPath.item]
+        return width * item.aspectRatio
     }
 }
 
@@ -157,36 +181,36 @@ extension SearchThemeViewController {
     }
     
     
-    private static func layout() -> UICollectionViewLayout {
-        let item = NSCollectionLayoutItem(
-            layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1),
-                heightDimension: .estimated(250)
-            )
-        )
-
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(250)
-        )
-
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: groupSize,
-            subitems: [item]
-        )
-
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 16
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: 48,
-            leading: 16,
-            bottom: 80,
-            trailing: 16
-        )
-
-        let layout = UICollectionViewCompositionalLayout(section: section)
-
-        return layout
-    }
-    
+//    private static func layout() -> UICollectionViewLayout {
+//        // 2열 그리드 with estimated height
+//        let itemSize = NSCollectionLayoutSize(
+//            widthDimension: .fractionalWidth(0.5),
+//            heightDimension: .estimated(200)
+//        )
+//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+//        
+//        let groupSize = NSCollectionLayoutSize(
+//            widthDimension: .fractionalWidth(1.0),
+//            heightDimension: .estimated(200)
+//        )
+//        let group = NSCollectionLayoutGroup.horizontal(
+//            layoutSize: groupSize,
+//            repeatingSubitem: item,
+//            count: 2
+//        )
+//        group.interItemSpacing = .fixed(8)
+//        
+//        let section = NSCollectionLayoutSection(group: group)
+//        section.interGroupSpacing = 8
+//        section.contentInsets = NSDirectionalEdgeInsets(
+//            top: 12,
+//            leading: 16,
+//            bottom: 80,
+//            trailing: 16
+//        )
+//        
+//        let layout = UICollectionViewCompositionalLayout(section: section)
+//        return layout
+//    }
+//    
 }

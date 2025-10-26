@@ -10,6 +10,7 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
     private let thumbnail: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
         return view
     }()
     
@@ -23,6 +24,7 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
+        thumbnail.image = nil
     }
     
     required init?(coder: NSCoder) {
@@ -44,9 +46,11 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
     }
     
     private func configView() {
-        backgroundColor = .systemBlue
-        layer.cornerRadius = 20
+        backgroundColor = .systemGray5
+        layer.cornerRadius = 12
         clipsToBounds = true
+//        contentView.layer.borderWidth = 2
+//        contentView.layer.borderColor = UIColor.systemBlue.cgColor
     }
     
 }
