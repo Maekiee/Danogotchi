@@ -24,7 +24,6 @@ enum ApiRouter {
             return [:]
         case .translate(text: _):
             let accessKey = Secret.deeplApiKeys.randomElement()!
-            print("번역 api 키 \(accessKey)")
             return [
                 "Authorization": "DeepL-Auth-Key \(accessKey)",
                 "Content-Type": "application/json"

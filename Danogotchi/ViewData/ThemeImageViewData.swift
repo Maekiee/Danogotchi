@@ -4,11 +4,13 @@ import Foundation
 struct ThemeImageViewData: Hashable {
     let id: String
     let thumbnailUrl: String
+    let themeImageUrl: String
     let aspectRatio: CGFloat
     
     init(from entity: PhotoEntity) {
         self.id = entity.id
         self.thumbnailUrl = entity.urls.thumb
+        self.themeImageUrl = entity.urls.regular
         self.aspectRatio = CGFloat(entity.height) / CGFloat(entity.width)
     }
     

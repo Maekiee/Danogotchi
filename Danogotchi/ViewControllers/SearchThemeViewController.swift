@@ -6,6 +6,15 @@ import UIKit
 final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SearchThemeViewModel()
+    
+    private enum Section {
+        case main
+    }
+    
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, ThemeImageViewData>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, ThemeImageViewData>
+    
+    private var dataSource: DataSource!
 
     private let titleText: UILabel = {
         let label = UILabel()
@@ -23,6 +32,16 @@ final class SearchThemeViewController: BaseViewController {
         return tf
     }()
     
+    private let collectinView: UICollectionView = {
+        let view = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: SearchThemeViewController.layout()
+        )
+        view.showsVerticalScrollIndicator = false
+        view.backgroundColor = AppColor.appBackgroundColor
+        return view
+    }()
+    
     private let submitButton = PrimaryFillButton(title: "시작하기")
 
     override func viewDidLoad() {
@@ -30,7 +49,8 @@ final class SearchThemeViewController: BaseViewController {
         configHierarchy()
         configLayout()
         configView()
-
+        configDataSource()
+        
         bind()
     }
 
@@ -38,6 +58,7 @@ final class SearchThemeViewController: BaseViewController {
         [
             titleText,
             textField,
+            collectinView,
             submitButton,
         ].forEach { view.addSubview($0) }
     }
@@ -52,6 +73,12 @@ final class SearchThemeViewController: BaseViewController {
             make.top.equalTo(titleText.snp.bottom).offset(12)
             make.horizontalEdges.equalToSuperview().inset(20)
             make.height.equalTo(40)
+        }
+        
+        collectinView.snp.makeConstraints { make in
+            make.top.equalTo(textField.snp.bottom).offset(4)
+            make.horizontalEdges.equalToSuperview()
+            make.bottom.equalToSuperview()
         }
         
         submitButton.snp.makeConstraints { make in
@@ -70,7 +97,79 @@ final class SearchThemeViewController: BaseViewController {
 
 extension SearchThemeViewController {
     private func bind() {
-        let input = SearchThemeViewModel.Input()
+        let input = SearchThemeViewModel.Input(
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
+                _ in
+            },
+            searchText: textField.tf.rx.text.orEmpty.asObservable()
+        )
         let output = viewModel.transform(input: input)
+        
+        output.themeImageList
+            .drive(with: self) { owner, imageList in
+                owner.applySnapshot(items: imageList)
+            }.disposed(by: disposeBag)
     }
+}
+
+
+//MARK: - 컬렉션 뷰
+extension SearchThemeViewController {
+    private func configDataSource() {
+        let cellRegistration = UICollectionView.CellRegistration<ThemeImageCollectionViewCell, ThemeImageViewData> {
+            cell, indexPath, item in
+            cell.configBind(with: item)
+        }
+        
+        dataSource = DataSource(collectionView: collectinView) {
+            collectionView,
+            indexPath,
+            itemIdentifier in
+            return collectionView.dequeueConfiguredReusableCell(
+                using: cellRegistration,
+                for: indexPath,
+                item: itemIdentifier)
+        }
+    }
+    
+    private func applySnapshot(items: [ThemeImageViewData]) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(items)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    
+    private static func layout() -> UICollectionViewLayout {
+        let item = NSCollectionLayoutItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .estimated(250)
+            )
+        )
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(250)
+        )
+
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 16
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: 48,
+            leading: 16,
+            bottom: 80,
+            trailing: 16
+        )
+
+        let layout = UICollectionViewCompositionalLayout(section: section)
+
+        return layout
+    }
+    
 }
