@@ -93,7 +93,7 @@ extension WordImageListViewController {
     private func bind() {
         
         let selectedImageUrl = BehaviorRelay<String?>(value: nil)
-        let loadNextPage = PublishRelay<Void>() //추가
+        let loadNextPage = PublishRelay<Void>()
         
         selectedImage
             .take(1)

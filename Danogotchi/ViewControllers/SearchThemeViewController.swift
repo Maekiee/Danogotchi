@@ -32,7 +32,7 @@ final class SearchThemeViewController: BaseViewController {
         return tf
     }()
     
-    private let collectinView: UICollectionView = {
+    private let collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: SearchThemeViewController.layout()
@@ -58,7 +58,7 @@ final class SearchThemeViewController: BaseViewController {
         [
             titleText,
             textField,
-            collectinView,
+            collectionView,
             submitButton,
         ].forEach { view.addSubview($0) }
     }
@@ -75,7 +75,7 @@ final class SearchThemeViewController: BaseViewController {
             make.height.equalTo(40)
         }
         
-        collectinView.snp.makeConstraints { make in
+        collectionView.snp.makeConstraints { make in
             make.top.equalTo(textField.snp.bottom).offset(4)
             make.horizontalEdges.equalToSuperview()
             make.bottom.equalToSuperview()
@@ -97,11 +97,15 @@ final class SearchThemeViewController: BaseViewController {
 
 extension SearchThemeViewController {
     private func bind() {
+        let loadNextPage = PublishRelay<Void>()
+        
         let input = SearchThemeViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
             },
-            searchText: textField.tf.rx.text.orEmpty.asObservable()
+            searchText: textField.tf.rx.text.orEmpty.asObservable(),
+            loadNextPage: loadNextPage.asObservable(),
+            textEndTrigger: textField.tf.rx.controlEvent(.editingDidEndOnExit).asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -109,6 +113,19 @@ extension SearchThemeViewController {
             .drive(with: self) { owner, imageList in
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
+        
+        collectionView.rx.contentOffset
+            .map { [weak self] offset in
+                guard let self = self else { return false }
+                let contentHeight = collectionView.contentSize.height
+                let scrollViewHeight = collectionView.frame.height
+                let offsetY = offset.y
+                return offsetY > contentHeight - scrollViewHeight - 100
+            }.distinctUntilChanged()
+            .filter { $0 }
+            .map { _ in () }
+            .bind(to: loadNextPage)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -121,7 +138,7 @@ extension SearchThemeViewController {
             cell.configBind(with: item)
         }
         
-        dataSource = DataSource(collectionView: collectinView) {
+        dataSource = DataSource(collectionView: collectionView) {
             collectionView,
             indexPath,
             itemIdentifier in

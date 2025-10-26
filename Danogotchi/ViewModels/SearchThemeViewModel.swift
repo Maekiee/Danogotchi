@@ -13,6 +13,8 @@ final class SearchThemeViewModel: BaseViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let searchText: Observable<String>
+        let loadNextPage: Observable<Void>
+        let textEndTrigger: Observable<()>
     }
     
     struct Output {
@@ -27,6 +29,7 @@ final class SearchThemeViewModel: BaseViewModel {
         let isLoading = BehaviorRelay<Bool>(value: false)
         
         input.viewWillAppear
+            .take(1)
             .withLatestFrom(nextPage.asObservable())
             .flatMapLatest{ page in
                 self.repository.searchPhotos(query: "library", page: page)
@@ -38,8 +41,35 @@ final class SearchThemeViewModel: BaseViewModel {
                         ThemeImageViewData(from: photoEntity)
                     }
                     imageItems.accept(viewDataList)
+                    totalImageCount.accept(entity.total)
+                    nextPage.accept(2)
+                    currentSearchWord.accept("library")
                 case .failure(let error):
                     print("네트워크 통신 에러: \(error)")
+                }
+            }.disposed(by: disposeBag)
+        
+        input.loadNextPage
+            .withLatestFrom(Observable.combineLatest(
+                currentSearchWord.asObservable(),
+                nextPage.asObservable(),
+                imageItems.asObservable(),
+                totalImageCount.asObservable(),
+            ))
+            .filter { (_, _, currentImages, total) in
+                return currentImages.count < total && total > 0
+            }.flatMapLatest { (searchWrod, page, _, Int) in
+                self.repository.searchPhotos(query: searchWrod, page: page)
+            }.bind(with: self) { owner, result in
+                switch result {
+                case .success(let entity):
+                    let newViewDataList = entity.results.map { ThemeImageViewData(from: $0) }
+                    var currentList = imageItems.value
+                    currentList.append(contentsOf: newViewDataList)
+                    imageItems.accept(currentList)
+                    nextPage.accept(nextPage.value + 1)
+                case .failure(let error):
+                    print("무한 스크롤 로직 에러: \(error)")
                 }
             }.disposed(by: disposeBag)
         
