@@ -12,10 +12,47 @@ struct PhotoDTO: Decodable {
     let width: Int
     let height: Int
     let urls: ImageURLDTO
-
+    
 }
 
 struct ImageURLDTO: Decodable {
-    let raw: String // 원본 이미지 링크
-    let small: String // 작은 이미지 링크
+    let raw: String
+    let small: String
+    let full: String
+    let regular: String
+    let thumb: String
+}
+
+extension SearchPhotoDTO {
+    func toEntity() -> SearchPhotoEntity {
+        return SearchPhotoEntity(
+            total: total,
+            total_pages: total_pages,
+            results: results.map { $0.toEntity() }
+        )
+    }
+}
+
+
+extension PhotoDTO {
+    func toEntity() -> PhotoEntity {
+        return PhotoEntity(
+            id: id,
+            width: width,
+            height: height,
+            urls: urls.toEntity()
+        )
+    }
+}
+
+extension ImageURLDTO {
+    func toEntity() -> ImageURLEntity {
+        return ImageURLEntity(
+            raw: raw,
+            small: small,
+            full: full,
+            regular: regular,
+            thumb: thumb
+        )
+    }
 }
