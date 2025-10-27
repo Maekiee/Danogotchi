@@ -37,58 +37,73 @@ final class WordTabViewController: BaseViewController {
         return view
     }()
     
-    private let listSegmentedControl: UISegmentedControl = {
-        let control = UISegmentedControl(items: ["전체", "완료"])
-        control.selectedSegmentIndex = 0
-        control.backgroundColor = .systemGray5
-        return control
+//    private let listSegmentedControl: UISegmentedControl = {
+//        let control = UISegmentedControl(items: ["전체", "완료"])
+//        control.selectedSegmentIndex = 0
+//        control.backgroundColor = .systemGray5
+//        return control
+//    }()
+
+    private let profileTabButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
+        config.image = UIImage(systemName: "person", withConfiguration: symbolConfig)
+        config.baseForegroundColor = .black
+        config.baseForegroundColor = .white
+        // 어두운 반투명
+        config.background.backgroundColor = .black.withAlphaComponent(
+            0.25
+        )
+        config.background.cornerRadius = 24
+        config.background.visualEffect = UIBlurEffect(
+            style: .systemMaterialDark
+        )
+        let button = UIButton(configuration: config)
+        return button
     }()
-
+    
     private let addWordButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
-        button.tintColor = UIColor.black.withAlphaComponent(0.8)
-
+        var config = UIButton.Configuration.filled()
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
+        config.image = UIImage(systemName: "plus", withConfiguration: symbolConfig)
+        config.baseForegroundColor = .black
+        config.baseForegroundColor = .white
+        // 어두운 반투명
+        config.background.backgroundColor = .black.withAlphaComponent(
+            0.25
+        )
+        config.background.cornerRadius = 24
+        config.background.visualEffect = UIBlurEffect(
+            style: .systemMaterialDark
+        )
+        let button = UIButton(configuration: config)
         return button
     }()
 
     private let showWordBookButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(
-            UIImage(systemName: "rectangle.stack.fill"),
-            for: .normal
+        var config = UIButton.Configuration.filled()
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
+        config.image = UIImage(systemName: "square.grid.2x2", withConfiguration: symbolConfig)
+        config.baseForegroundColor = .black
+        config.baseForegroundColor = .white
+
+        // 어두운 반투명
+        config.background.backgroundColor = .black.withAlphaComponent(0.25)
+        config.background.cornerRadius = 24
+        config.background.visualEffect = UIBlurEffect(
+            style: .systemMaterialDark
         )
-        button.tintColor = UIColor.black.withAlphaComponent(0.8)
+        let button = UIButton(configuration: config)
         return button
     }()
     
     
     private let noBookInfoContainer: UIVisualEffectView = {
-//        UIVisualEffectView
         let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
         let view = UIVisualEffectView(effect: blurEffect)
         view.layer.cornerRadius = 20
         view.layer.masksToBounds = true
         return view
-        
-//        // 1. 최종적으로 반환될 컨테이너 뷰
-//        let containerView = UIView()
-//        containerView.layer.cornerRadius = 20
-//        containerView.clipsToBounds = true
-//        
-//        // 2. 블러 효과를 담당할 UIVisualEffectView
-//        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-//        let visualEffectView = UIVisualEffectView(effect: blurEffect)
-//        
-//        // ✨ 블러 뷰에만 alpha 값을 적용합니다.
-//        visualEffectView.alpha = 1.0
-//        
-//        // 3. 컨테이너에 블러 뷰를 추가하고 꽉 채웁니다.
-//        containerView.addSubview(visualEffectView)
-//        visualEffectView.snp.makeConstraints { make in
-//            make.edges.equalToSuperview()
-//        }
-//        return containerView
     }()
     
     private let noWordBookLabel: UILabel = {
@@ -101,46 +116,43 @@ final class WordTabViewController: BaseViewController {
     
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
 
-    private let testButton: UIButton = {
-        let button = UIButton(type: .roundedRect)
-        button.frame = CGRect(x: 20, y: 50, width: 100, height: 30)
-        button.setTitle("Test Crash", for: [])
-        return button
-    }()
+//    private let testButton: UIButton = {
+//        let button = UIButton(type: .roundedRect)
+//        button.frame = CGRect(x: 20, y: 50, width: 100, height: 30)
+//        button.setTitle("Test Crash", for: [])
+//        return button
+//    }()
 
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
 
         // 텍스트 설정
         config.title = "학습하기"
-        config.baseForegroundColor = .black
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium, scale: .default)
+        config.image = UIImage(systemName: "graduationcap", withConfiguration: symbolConfig)
+        config.imagePadding = 4
+        config.baseForegroundColor = .white
 
         // 하얀색 유리 효과 배경 설정
-        config.background.backgroundColor = UIColor.white.withAlphaComponent(
+        config.background.backgroundColor = UIColor.black.withAlphaComponent(
             0.25
         )
-        config.background.cornerRadius = 22
+        config.background.cornerRadius = 24
         config.background.visualEffect = UIBlurEffect(
-            style: .systemUltraThinMaterialLight
+            style: .systemMaterialDark
         )
         config.contentInsets = NSDirectionalEdgeInsets(
             top: 12,
-            leading: 24,
+            leading: 12,
             bottom: 12,
-            trailing: 24
+            trailing: 16
         )
-
-        // 테두리 추가 (유리 느낌 강화)
-        config.background.strokeColor = UIColor.white.withAlphaComponent(0.8)
-        config.background.strokeWidth = 1
-
         let button = UIButton(configuration: config)
-
         // 폰트 설정
         button.configuration?.titleTextAttributesTransformer =
             UIConfigurationTextAttributesTransformer { incoming in
                 var outgoing = incoming
-                outgoing.font = .systemFont(ofSize: 15, weight: .semibold)
+                outgoing.font = .systemFont(ofSize: 14, weight: .semibold)
                 return outgoing
             }
         return button
@@ -171,6 +183,9 @@ final class WordTabViewController: BaseViewController {
         [
             themeBackgroundImage,
             noBookInfoContainer,
+            showWordBookButton,
+            addWordButton,
+            profileTabButton,
             collectionView,
             startLearningButton,
 //            testButton, // x테스트
@@ -206,30 +221,52 @@ final class WordTabViewController: BaseViewController {
             make.height.equalTo(40)
         }
         
+//        showWordBookButton.snp.makeConstraints { make in
+//            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+//            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
+//            make.size.equalTo(40)
+//        }
+        
+        showWordBookButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.size.equalTo(48)
+        }
+        
+        addWordButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+//            make.trailing.equalTo(showWordBookButton.snp.leading).offset(-8)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.size.equalTo(48)
+        }
+    
+        collectionView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        startLearningButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.centerX.equalToSuperview()
+            make.height.equalTo(48)
+        }
+        
+        profileTabButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.size.equalTo(48)
+        }
+        
 //        listSegmentedControl.snp.makeConstraints { make in
 //            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
 //            make.horizontalEdges.equalToSuperview().inset(16)
 //            make.height.equalTo(32)  // 적절한 높이 설정
 //        }
-
-        collectionView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
         /// 크레시 테스트
-//        testButton.snp.makeConstraints { make in
-//            make.bottom.equalTo(startLearningButton.snp.top).offset(10)
-//            make.horizontalEdges.equalToSuperview().inset(24)
-//            make.height.equalTo(44)
-//        }
-
-        startLearningButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(44)
-        }
-        
-        
+        //        testButton.snp.makeConstraints { make in
+        //            make.bottom.equalTo(startLearningButton.snp.top).offset(10)
+        //            make.horizontalEdges.equalToSuperview().inset(24)
+        //            make.height.equalTo(44)
+        //        }
     }
 
     override func configView() {
@@ -250,16 +287,16 @@ extension WordTabViewController {
                 _ in
             },
             selectedWordCard: deleteWordTrigger.asObservable(),
-            segmentChanged: listSegmentedControl.rx.selectedSegmentIndex
-                .asObservable()
+//            segmentChanged: listSegmentedControl.rx.selectedSegmentIndex
+//                .asObservable()
         )
 
         let output = viewModel.transform(input: input)
 
-        listSegmentedControl.rx.selectedSegmentIndex
-            .bind(with: self) { owner, index in
-                owner.startLearningButton.isHidden = index == 1 ? true : false
-            }.disposed(by: disposeBag)
+//        listSegmentedControl.rx.selectedSegmentIndex
+//            .bind(with: self) { owner, index in
+//                owner.startLearningButton.isHidden = index == 1 ? true : false
+//            }.disposed(by: disposeBag)
 
         output.bookTitle
             .drive(with: self) { owner, title in

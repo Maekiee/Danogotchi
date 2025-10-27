@@ -25,7 +25,7 @@ final class WordTabViewModel: BaseViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let selectedWordCard: Observable<Word>
-        let segmentChanged: Observable<Int>
+//        let segmentChanged: Observable<Int>
     }
     
     struct Output {
@@ -40,20 +40,20 @@ final class WordTabViewModel: BaseViewModel {
         let wordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
         let allWordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
         
-        Observable.combineLatest(
-            input.segmentChanged.startWith(0),
-            allWordItems.asObservable()
-        ).map { segmentIndex, allWordItems -> [WordDisplayInfo] in
-            switch segmentIndex {
-            case 0:
-                return allWordItems.sorted { $0.accuracy < $1.accuracy }
-            case 1:
-                return allWordItems.filter { $0.accuracy >= 0.80 }
-            default:
-                return allWordItems
-            }
-        }.bind(to: wordItems)
-            .disposed(by: disposeBag)
+//        Observable.combineLatest(
+//            input.segmentChanged.startWith(0),
+//            allWordItems.asObservable()
+//        ).map { segmentIndex, allWordItems -> [WordDisplayInfo] in
+//            switch segmentIndex {
+//            case 0:
+//                return allWordItems.sorted { $0.accuracy < $1.accuracy }
+//            case 1:
+//                return allWordItems.filter { $0.accuracy >= 0.80 }
+//            default:
+//                return allWordItems
+//            }
+//        }.bind(to: wordItems)
+//            .disposed(by: disposeBag)
         
         
         // viewDidLoad
