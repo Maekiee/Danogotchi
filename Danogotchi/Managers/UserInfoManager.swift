@@ -21,6 +21,7 @@ final class UserInfoManager: UserInfoProtocol {
         static let currentQuizIndex = "currentQuizIndex"
         static let currentCorrectCount = "currentCorrectCount"
         static let currentIncorrectWordIds = "currentIncorrectWordIds"
+        static let themeUrl = "themeUrl"
     }
     
     private let wordBookRefreshRelay = PublishRelay<Void>()
@@ -36,6 +37,17 @@ final class UserInfoManager: UserInfoProtocol {
     
     func notifyWordBookUpdate() {
         wordBookRefreshRelay.accept(())
+    }
+    
+    var currentThemeUrl: String? {
+        get {
+            guard let selectedThemeUrl = UserDefaults.standard.string(forKey: Keys.themeUrl) else { return nil }
+            return selectedThemeUrl
+        }
+        
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.themeUrl)
+        }
     }
     
     var username: String? {

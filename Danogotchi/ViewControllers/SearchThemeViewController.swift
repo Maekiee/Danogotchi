@@ -173,7 +173,8 @@ extension SearchThemeViewController {
         submitButton.rx.tap
             .bind(with: self) { owner, _ in
                 if let selectedTheme = owner.selectedThemeUrl.value {
-                    
+                    UserInfoManager.shared.currentThemeUrl = selectedTheme
+                    Coordinator.switchToMainVieWController()
                 }
             }.disposed(by: disposeBag)
     }
