@@ -31,6 +31,12 @@ final class WordTabViewController: BaseViewController {
     }
 
     // MARK: - UI 프로퍼티
+    private let themeBackgroundImage: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFill
+        return view
+    }()
+    
     private let listSegmentedControl: UISegmentedControl = {
         let control = UISegmentedControl(items: ["전체", "완료"])
         control.selectedSegmentIndex = 0
@@ -55,7 +61,22 @@ final class WordTabViewController: BaseViewController {
         button.tintColor = UIColor.black.withAlphaComponent(0.8)
         return button
     }()
-
+    
+    
+    private let noBookInfoContainer: UIView = {
+        let blurEffect = UIBlurEffect(style: .systemMaterial)
+        let visualEffectView = UIVisualEffectView(effect: blurEffect)
+        
+        let view = UIView()
+        view.backgroundColor = .systemBackground
+        view.layer.cornerRadius = 12
+        
+//        view.insertSubview(visualEffectView, at: 0)
+        view.backgroundColor = UIColor.white.withAlphaComponent(0.4)
+        view.clipsToBounds = true
+        return view
+    }()
+    
     private let noWordBookLabel: UILabel = {
         let label = UILabel()
         label.text = "학습할 단어장을 만들어 주세요"
@@ -134,17 +155,32 @@ final class WordTabViewController: BaseViewController {
 
     override func configHierarchy() {
         [
-
-            noWordBookLabel,
-            showCreateBookButton,
+            themeBackgroundImage,
+            noBookInfoContainer,
             collectionView,
             startLearningButton,
 //            testButton, // x테스트
-            listSegmentedControl,
+//            listSegmentedControl,
         ].forEach { view.addSubview($0) }
+        
+        [
+            showCreateBookButton,
+            noWordBookLabel
+        ].forEach { noBookInfoContainer.addSubview($0) }
     }
 
     override func configLayout() {
+        
+        themeBackgroundImage.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        noBookInfoContainer.snp.makeConstraints { make in
+            make.horizontalEdges.equalToSuperview().inset(32)
+            make.center.equalToSuperview().offset(-40)
+            make.height.equalTo(144)
+        }
+        
         noWordBookLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
@@ -155,11 +191,11 @@ final class WordTabViewController: BaseViewController {
             make.height.equalTo(40)
         }
         
-        listSegmentedControl.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.horizontalEdges.equalToSuperview().inset(16)
-            make.height.equalTo(32)  // 적절한 높이 설정
-        }
+//        listSegmentedControl.snp.makeConstraints { make in
+//            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+//            make.horizontalEdges.equalToSuperview().inset(16)
+//            make.height.equalTo(32)  // 적절한 높이 설정
+//        }
 
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -182,9 +218,13 @@ final class WordTabViewController: BaseViewController {
     }
 
     override func configView() {
-        let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
-        let secondBarButton = UIBarButtonItem(customView: addWordButton)
-        navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
+//        let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
+//        let secondBarButton = UIBarButtonItem(customView: addWordButton)
+//        navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
+        
+        if let themeUrl = userInfo.currentThemeUrl {
+            themeBackgroundImage.kf.setImage(with: URL(string: themeUrl))
+        }
     }
 }
 

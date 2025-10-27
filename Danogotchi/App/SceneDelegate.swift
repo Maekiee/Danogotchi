@@ -7,12 +7,14 @@ enum Coordinator {
               let sceneDelegate = windowScene.delegate as? SceneDelegate else { return }
   
         let vm = WordTabViewModel()
-        let NavVC = UINavigationController(rootViewController: WordTabViewController(viewModel: vm))
+        let vc = WordTabViewController(viewModel: vm)
+        sceneDelegate.changeRootVC(vc)
         
+//        let NavVC = UINavigationController(rootViewController: WordTabViewController(viewModel: vm))
 //        configureNavigationBar(NavVC)
 //        sceneDelegate.changeRootVC(NavVC)
 //        
-        sceneDelegate.changeRootVC(MainTabViewController())
+//        sceneDelegate.changeRootVC(MainTabViewController())
     }
     
     
@@ -50,16 +52,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         print("Realm is located at:", realm!.configuration.fileURL!)
         
-        if UserInfoManager.shared.username != nil {
+        if UserInfoManager.shared.currentThemeUrl != nil {
             // 탭바 없는거
-//            let vm = WordTabViewModel()
-//            let vc = WordTabViewController(viewModel: vm)
+            let vm = WordTabViewModel()
+            let vc = WordTabViewController(viewModel: vm)
 //            let navVC = UINavigationController(rootViewController: vc)
 //            Coordinator.configureNavigationBar(navVC)
-//            window?.rootViewController = navVC
+            window?.rootViewController = vc
             
             // 탭바 있는거
-            window?.rootViewController = MainTabViewController()
+//            window?.rootViewController = MainTabViewController()
         } else {
 //            window?.rootViewController = SetUserNameViewController()
             window?.rootViewController = SearchThemeViewController()
