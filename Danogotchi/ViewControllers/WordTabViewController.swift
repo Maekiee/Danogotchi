@@ -95,7 +95,7 @@ final class WordTabViewController: BaseViewController {
         let label = UILabel()
         label.text = "학습할 단어장을 만들어 주세요"
         label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = .black
+        label.textColor = .white
         return label
     }()
     
@@ -196,7 +196,8 @@ final class WordTabViewController: BaseViewController {
         }
         
         noWordBookLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.top.equalToSuperview().offset(40)
+            make.centerX.equalToSuperview()
         }
 
         showCreateBookButton.snp.makeConstraints { make in
