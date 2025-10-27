@@ -6,7 +6,7 @@ import UIKit
 final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SearchThemeViewModel()
-    
+    private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
     private enum Section {
         case main
     }
@@ -20,7 +20,8 @@ final class SearchThemeViewController: BaseViewController {
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()
     // ------------------------------------
-
+    
+    
     private let titleText: UILabel = {
         let label = UILabel()
         label.text = "배경 테마를 골라주세요"
@@ -28,7 +29,7 @@ final class SearchThemeViewController: BaseViewController {
         label.textColor = .black
         return label
     }()
-
+    
     private let textField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.placeholder = "이미지를 검색해주세요"
@@ -44,7 +45,7 @@ final class SearchThemeViewController: BaseViewController {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: waterfallLayout // 추가
-//            collectionViewLayout: SearchThemeViewController.layout()
+            //            collectionViewLayout: SearchThemeViewController.layout()
         )
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = AppColor.appBackgroundColor
@@ -52,7 +53,7 @@ final class SearchThemeViewController: BaseViewController {
     }()
     
     private let submitButton = PrimaryFillButton(title: "시작하기")
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -62,7 +63,7 @@ final class SearchThemeViewController: BaseViewController {
         
         bind()
     }
-
+    
     override func configHierarchy() {
         [
             titleText,
@@ -71,13 +72,13 @@ final class SearchThemeViewController: BaseViewController {
             submitButton,
         ].forEach { view.addSubview($0) }
     }
-
+    
     override func configLayout() {
         titleText.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
-
+        
         textField.snp.makeConstraints { make in
             make.top.equalTo(titleText.snp.bottom).offset(12)
             make.horizontalEdges.equalToSuperview().inset(20)
@@ -95,18 +96,19 @@ final class SearchThemeViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(20)
             make.height.equalTo(44)
         }
-
+        
     }
-
+    
     override func configView() {
-
+        
     }
-
+    
 }
 
 extension SearchThemeViewController {
     private func bind() {
         let loadNextPage = PublishRelay<Void>()
+        
         
         let input = SearchThemeViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
@@ -114,7 +116,8 @@ extension SearchThemeViewController {
             },
             searchText: textField.tf.rx.text.orEmpty.asObservable(),
             loadNextPage: loadNextPage.asObservable(),
-            textEndTrigger: textField.tf.rx.controlEvent(.editingDidEndOnExit).asObservable()
+            textEndTrigger: textField.tf.rx.controlEvent(.editingDidEndOnExit).asObservable(),
+            selectedTheme: selectedThemeUrl.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -128,6 +131,7 @@ extension SearchThemeViewController {
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
         
+        // 스크롤 하단 체크
         collectionView.rx.contentOffset
             .map { [weak self] offset in
                 guard let self = self else { return false }
@@ -140,6 +144,26 @@ extension SearchThemeViewController {
             .map { _ in () }
             .bind(to: loadNextPage)
             .disposed(by: disposeBag)
+        
+        collectionView.rx.itemSelected
+            .bind(with: self) { owner, indexPath in
+                guard let selectedItem = owner.dataSource.itemIdentifier(for: indexPath) else {
+                    return
+                }
+                
+                let newUrl = (owner.selectedThemeUrl.value == selectedItem.themeImageUrl) ? nil : selectedItem.themeImageUrl
+                owner.selectedThemeUrl.accept(newUrl)
+            }.disposed(by: disposeBag)
+        
+        
+        selectedThemeUrl
+            .distinctUntilChanged()
+            .bind(with: self) { owner, _ in
+                var currentSnapshot = owner.dataSource.snapshot()
+                let allItems = currentSnapshot.itemIdentifiers
+                currentSnapshot.reconfigureItems(allItems)
+                owner.dataSource.apply(currentSnapshot, animatingDifferences: false)
+            }.disposed(by: disposeBag)
     }
 }
 
@@ -158,8 +182,9 @@ extension SearchThemeViewController: WaterfallLayoutDelegate {
 extension SearchThemeViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<ThemeImageCollectionViewCell, ThemeImageViewData> {
-            cell, indexPath, item in
-            cell.configBind(with: item)
+            [weak self] cell, indexPath, item in
+            guard let self = self else { return }
+            cell.configBind(with: item, isSelected: item.themeImageUrl == selectedThemeUrl.value)
         }
         
         dataSource = DataSource(collectionView: collectionView) {
@@ -179,38 +204,4 @@ extension SearchThemeViewController {
         snapshot.appendItems(items)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
-    
-    
-//    private static func layout() -> UICollectionViewLayout {
-//        // 2열 그리드 with estimated height
-//        let itemSize = NSCollectionLayoutSize(
-//            widthDimension: .fractionalWidth(0.5),
-//            heightDimension: .estimated(200)
-//        )
-//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-//        
-//        let groupSize = NSCollectionLayoutSize(
-//            widthDimension: .fractionalWidth(1.0),
-//            heightDimension: .estimated(200)
-//        )
-//        let group = NSCollectionLayoutGroup.horizontal(
-//            layoutSize: groupSize,
-//            repeatingSubitem: item,
-//            count: 2
-//        )
-//        group.interItemSpacing = .fixed(8)
-//        
-//        let section = NSCollectionLayoutSection(group: group)
-//        section.interGroupSpacing = 8
-//        section.contentInsets = NSDirectionalEdgeInsets(
-//            top: 12,
-//            leading: 16,
-//            bottom: 80,
-//            trailing: 16
-//        )
-//        
-//        let layout = UICollectionViewCompositionalLayout(section: section)
-//        return layout
-//    }
-//    
 }

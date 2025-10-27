@@ -14,6 +14,24 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
+    private let selectionOverlay: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        view.isHidden = true
+        return view
+    }()
+    
+    private let checkmarkIcon: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(systemName: "checkmark.circle.fill")
+        view.tintColor = AppColor.testPrimaryColor
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 12
+        view.clipsToBounds = true
+        view.isHidden = true
+        return view
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: .zero)
         configHierarchy()
@@ -25,23 +43,38 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         disposeBag = DisposeBag()
         thumbnail.image = nil
+        setSelected(false)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configBind(with item: ThemeImageViewData) {
+    func configBind(with item: ThemeImageViewData, isSelected: Bool) {
         thumbnail.kf.setImage(with: URL(string: item.thumbnailUrl))
+        setSelected(isSelected)
     }
     
     private func configHierarchy() {
-        contentView.addSubview(thumbnail)
+        [
+            thumbnail,
+            selectionOverlay,
+            checkmarkIcon,
+        ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
         thumbnail.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+        
+        selectionOverlay.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        checkmarkIcon.snp.makeConstraints { make in
+            make.trailing.bottom.equalToSuperview().inset(8)
+            make.size.equalTo(24)
         }
     }
     
@@ -49,8 +82,17 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         backgroundColor = .systemGray5
         layer.cornerRadius = 12
         clipsToBounds = true
-//        contentView.layer.borderWidth = 2
-//        contentView.layer.borderColor = UIColor.systemBlue.cgColor
+        
+        contentView.layer.cornerRadius = 12
+        contentView.clipsToBounds = true //
+
     }
     
+    
+    func setSelected(_ selected: Bool) {
+        contentView.layer.borderWidth = selected ? 3 : 0
+        contentView.layer.borderColor = selected ? AppColor.testPrimaryColor.cgColor : UIColor.clear.cgColor
+        selectionOverlay.isHidden = !selected
+        checkmarkIcon.isHidden = !selected
+    }
 }

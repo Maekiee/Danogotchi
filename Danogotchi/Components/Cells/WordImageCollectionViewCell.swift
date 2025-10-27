@@ -19,14 +19,14 @@ final class WordImageCollectionViewCell: UICollectionViewCell {
     }()
     
     private let checkmarkIcon: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(systemName: "checkmark.circle.fill")
-        iv.tintColor = .systemBlue
-        iv.backgroundColor = .white
-        iv.layer.cornerRadius = 12
-        iv.clipsToBounds = true
-        iv.isHidden = true
-        return iv
+        let view = UIImageView()
+        view.image = UIImage(systemName: "checkmark.circle.fill")
+        view.tintColor = .systemBlue
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 12
+        view.clipsToBounds = true
+        view.isHidden = true
+        return view
     }()
     
     override init(frame: CGRect) {

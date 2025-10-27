@@ -15,10 +15,12 @@ final class SearchThemeViewModel: BaseViewModel {
         let searchText: Observable<String>
         let loadNextPage: Observable<Void>
         let textEndTrigger: Observable<()>
+        let selectedTheme: Observable<String?>
     }
     
     struct Output {
         let themeImageList: Driver<[ThemeImageViewData]>
+//        let selectedThemeUrl: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
@@ -98,6 +100,10 @@ final class SearchThemeViewModel: BaseViewModel {
                 case .failure(let error):
                     print("검색 에러 \(error)")
                 }
+            }.disposed(by: disposeBag)
+        
+        input.selectedTheme
+            .bind(with: self) { owner, selectedThemeUrl in
             }.disposed(by: disposeBag)
         
         
