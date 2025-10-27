@@ -63,18 +63,32 @@ final class WordTabViewController: BaseViewController {
     }()
     
     
-    private let noBookInfoContainer: UIView = {
-        let blurEffect = UIBlurEffect(style: .systemMaterial)
-        let visualEffectView = UIVisualEffectView(effect: blurEffect)
-        
-        let view = UIView()
-        view.backgroundColor = .systemBackground
-        view.layer.cornerRadius = 12
-        
-//        view.insertSubview(visualEffectView, at: 0)
-        view.backgroundColor = UIColor.white.withAlphaComponent(0.4)
-        view.clipsToBounds = true
+    private let noBookInfoContainer: UIVisualEffectView = {
+//        UIVisualEffectView
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let view = UIVisualEffectView(effect: blurEffect)
+        view.layer.cornerRadius = 20
+        view.layer.masksToBounds = true
         return view
+        
+//        // 1. 최종적으로 반환될 컨테이너 뷰
+//        let containerView = UIView()
+//        containerView.layer.cornerRadius = 20
+//        containerView.clipsToBounds = true
+//        
+//        // 2. 블러 효과를 담당할 UIVisualEffectView
+//        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+//        let visualEffectView = UIVisualEffectView(effect: blurEffect)
+//        
+//        // ✨ 블러 뷰에만 alpha 값을 적용합니다.
+//        visualEffectView.alpha = 1.0
+//        
+//        // 3. 컨테이너에 블러 뷰를 추가하고 꽉 채웁니다.
+//        containerView.addSubview(visualEffectView)
+//        visualEffectView.snp.makeConstraints { make in
+//            make.edges.equalToSuperview()
+//        }
+//        return containerView
     }()
     
     private let noWordBookLabel: UILabel = {
@@ -166,7 +180,7 @@ final class WordTabViewController: BaseViewController {
         [
             showCreateBookButton,
             noWordBookLabel
-        ].forEach { noBookInfoContainer.addSubview($0) }
+        ].forEach { noBookInfoContainer.contentView.addSubview($0) }
     }
 
     override func configLayout() {
