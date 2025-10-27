@@ -20,7 +20,7 @@ final class SearchThemeViewModel: BaseViewModel {
     
     struct Output {
         let themeImageList: Driver<[ThemeImageViewData]>
-//        let selectedThemeUrl: Driver<Bool>
+        let buttonEnable: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
@@ -29,6 +29,8 @@ final class SearchThemeViewModel: BaseViewModel {
         let totalImageCount = BehaviorRelay<Int>(value: 0)
         let currentSearchWord = BehaviorRelay<String>(value: "")
         let isLoading = BehaviorRelay<Bool>(value: false)
+        
+        let buttonEnable = BehaviorRelay<Bool>(value: false)
         
         
         // 초기값
@@ -104,12 +106,19 @@ final class SearchThemeViewModel: BaseViewModel {
         
         input.selectedTheme
             .bind(with: self) { owner, selectedThemeUrl in
+                if selectedThemeUrl != nil {
+                    buttonEnable.accept(true)
+                } else {
+                    buttonEnable.accept(false)
+                }
             }.disposed(by: disposeBag)
         
         
         
+        
         return Output(
-            themeImageList: imageItems.asDriver(onErrorJustReturn: [])
+            themeImageList: imageItems.asDriver(onErrorJustReturn: []),
+            buttonEnable: buttonEnable.asDriver()
         )
     }
 }

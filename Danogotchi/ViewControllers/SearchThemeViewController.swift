@@ -7,6 +7,7 @@ final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SearchThemeViewModel()
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
+    
     private enum Section {
         case main
     }
@@ -117,7 +118,7 @@ extension SearchThemeViewController {
             searchText: textField.tf.rx.text.orEmpty.asObservable(),
             loadNextPage: loadNextPage.asObservable(),
             textEndTrigger: textField.tf.rx.controlEvent(.editingDidEndOnExit).asObservable(),
-            selectedTheme: selectedThemeUrl.asObservable()
+            selectedTheme: selectedThemeUrl.asObservable(),
         )
         let output = viewModel.transform(input: input)
         
@@ -163,6 +164,17 @@ extension SearchThemeViewController {
                 let allItems = currentSnapshot.itemIdentifiers
                 currentSnapshot.reconfigureItems(allItems)
                 owner.dataSource.apply(currentSnapshot, animatingDifferences: false)
+            }.disposed(by: disposeBag)
+        
+        output.buttonEnable
+            .drive(submitButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        submitButton.rx.tap
+            .bind(with: self) { owner, _ in
+                if let selectedTheme = owner.selectedThemeUrl.value {
+                    
+                }
             }.disposed(by: disposeBag)
     }
 }
