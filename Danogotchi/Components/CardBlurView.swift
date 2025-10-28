@@ -9,8 +9,7 @@ struct CardBlurView: View {
             TransparentBlurView(removeAllFilters: true)
                 .blur(radius: 6, opaque: true)
                 .background(.white.opacity(0.15))
-        }
-        .cornerRadius(20)
+        }.clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 
