@@ -167,6 +167,8 @@ final class WordTabViewController: BaseViewController {
         view.isPagingEnabled = true
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = .clear
+        view.decelerationRate = .fast
+        view.contentInsetAdjustmentBehavior = .never
         return view
     }()
 
@@ -531,21 +533,18 @@ extension WordTabViewController {
             heightDimension: .fractionalHeight(1.0)
         )
 
-        let group = NSCollectionLayoutGroup.horizontal(
+        let group = NSCollectionLayoutGroup.vertical(
             layoutSize: groupSize,
             subitems: [item]
         )
 
         let section = NSCollectionLayoutSection(group: group)
-//        section.interGroupSpacing = 16
-//        section.contentInsets = NSDirectionalEdgeInsets(
-//            top: 48,
-//            leading: 16,
-//            bottom: 80,
-//            trailing: 16
-//        )
+        section.orthogonalScrollingBehavior = .none
+        
+        let config = UICollectionViewCompositionalLayoutConfiguration()
+        config.scrollDirection = .vertical
 
-        let layout = UICollectionViewCompositionalLayout(section: section)
+        let layout = UICollectionViewCompositionalLayout(section: section, configuration: config)
 
         return layout
     }
