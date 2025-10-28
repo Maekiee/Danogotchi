@@ -103,6 +103,7 @@ final class WordTabViewController: BaseViewController {
         let view = UIVisualEffectView(effect: blurEffect)
         view.layer.cornerRadius = 20
         view.layer.masksToBounds = true
+//        view.alpha = 0.
         return view
     }()
     
@@ -163,8 +164,9 @@ final class WordTabViewController: BaseViewController {
             frame: .zero,
             collectionViewLayout: WordTabViewController.layout()
         )
+        view.isPagingEnabled = true
         view.showsVerticalScrollIndicator = false
-        view.backgroundColor = AppColor.appBackgroundColor
+        view.backgroundColor = .clear
         return view
     }()
 
@@ -188,6 +190,7 @@ final class WordTabViewController: BaseViewController {
             profileTabButton,
             collectionView,
             startLearningButton,
+            
 //            testButton, // x테스트
 //            listSegmentedControl,
         ].forEach { view.addSubview($0) }
@@ -307,14 +310,16 @@ extension WordTabViewController {
         output.currentWordbook
             .drive(with: self) { owner, hasWordBook in
                 // 단어장 1개 이상
-                owner.addWordButton.isHidden = hasWordBook
-                owner.showWordBookButton.isHidden = hasWordBook
-                //                owner.collectionView.isHidden = hasWordBook
-                owner.startLearningButton.isHidden = hasWordBook
+                owner.noBookInfoContainer.isHidden = !hasWordBook
+//                owner.addWordButton.isHidden = hasWordBook
+//                owner.showWordBookButton.isHidden = hasWordBook
+//                owner.collectionView.isHidden = hasWordBook
+//                owner.startLearningButton.isHidden = hasWordBook
 
                 // 단어장 0개
-                owner.noWordBookLabel.isHidden = !hasWordBook
-                owner.showCreateBookButton.isHidden = !hasWordBook
+//                owner.noBookInfoContainer.isHidden = !hasWordBook
+//                owner.noWordBookLabel.isHidden = !hasWordBook
+//                owner.showCreateBookButton.isHidden = !hasWordBook
             }
             .disposed(by: disposeBag)
 
@@ -444,9 +449,10 @@ extension WordTabViewController {
 extension WordTabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
-            WordCardCollectionViewCell, WordDisplayInfo
+            MainWordCardCollectionViewCell, WordDisplayInfo
         > { cell, indexPath, item in
             
+            cell.setupHostingController(with: self)
             cell.configure(with: item)
             
             cell.onTouchImageIcon.bind(with: self) { owner, _ in
@@ -515,14 +521,14 @@ extension WordTabViewController {
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(
             layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1),
-                heightDimension: .estimated(250)
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .fractionalHeight(1.0)
             )
         )
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(250)
+            heightDimension: .fractionalHeight(1.0)
         )
 
         let group = NSCollectionLayoutGroup.horizontal(
@@ -531,13 +537,13 @@ extension WordTabViewController {
         )
 
         let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 16
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: 48,
-            leading: 16,
-            bottom: 80,
-            trailing: 16
-        )
+//        section.interGroupSpacing = 16
+//        section.contentInsets = NSDirectionalEdgeInsets(
+//            top: 48,
+//            leading: 16,
+//            bottom: 80,
+//            trailing: 16
+//        )
 
         let layout = UICollectionViewCompositionalLayout(section: section)
 

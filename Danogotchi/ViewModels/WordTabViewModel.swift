@@ -210,7 +210,8 @@ final class WordTabViewModel: BaseViewModel {
         return Output(
             currentWordbook: hasLearningWordBook.asDriver(),
             bookTitle: bookTitle.asDriver(onErrorJustReturn: ""),
-            wordItems: wordItems.asDriver()
+            wordItems: allWordItems.asDriver(),
+//            wordItems: wordItems.asDriver()
         )
     }
     
