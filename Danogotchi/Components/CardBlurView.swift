@@ -12,17 +12,26 @@ struct CardBlurView: View {
     var body: some View {
         VStack {
             Button {
-                onModifyTap?()
-                print("다다다다")
+                // 액션
+                print("다다다다닫")
             } label: {
-                Text("sdlkfjalskd")
-                Image(systemName: "person")
-//                Image(systemName: "ellipsis")
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.black.opacity(0.8))
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 12)
+                    .background(
+                        Color.white.opacity(0.2)
+                            .background(.ultraThinMaterial)
+                    )
+                    .cornerRadius(16)
             }
-
+            .buttonStyle(.plain)
+            
             VStack {
                 HStack {
                     Text(title)
+                        .font(.title)
                     Button {
                         onSpeakerTap?()
                         print("버튼 버튼")
@@ -43,11 +52,15 @@ struct CardBlurView: View {
                     .blur(radius: 6, opaque: true)
                     .background(.white.opacity(0.15))
             }.clipShape(RoundedRectangle(cornerRadius: 20))
-        }.background(.red)
+        }
     }
 }
 
 
+
+
+
+// MARK: 투평도 조절
 struct TransparentBlurView: UIViewRepresentable {
     var removeAllFilters: Bool = false
     func makeUIView(context: Context) -> UIVisualEffectView {

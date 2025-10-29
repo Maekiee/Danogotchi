@@ -452,10 +452,10 @@ extension WordTabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
             MainWordCardCollectionViewCell, WordDisplayInfo
-        > { cell, indexPath, item in
+        > { [weak self] cell, indexPath, item in
+            guard let self = self else { return }
             
-            cell.setupHostingController(with: self)
-            cell.configure(with: item)
+            cell.configure(with: item, parentVC: self)
             
             cell.onTouchImageIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
