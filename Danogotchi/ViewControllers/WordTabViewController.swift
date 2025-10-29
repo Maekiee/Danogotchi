@@ -495,6 +495,8 @@ extension WordTabViewController {
             }.disposed(by: cell.disposeBag)
             
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
+                print("dfdf")
+                
                 // 음성 출력
                 TTSManager.shared.speak(item.cardTitle)
             }.disposed(by: cell.disposeBag)

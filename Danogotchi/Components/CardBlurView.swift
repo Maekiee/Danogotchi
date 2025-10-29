@@ -11,7 +11,7 @@ struct CardBlurView: View {
     
     var body: some View {
         VStack {
-            Spacer().frame(height: 28)
+            Spacer().frame(height: 32)
             HStack(alignment: .lastTextBaseline) {
                 Text(title)
                     .font(.title)
@@ -43,9 +43,9 @@ struct CardBlurView: View {
             
             Spacer()
             HStack {
-                SimpleGaugeBar(progress: 0.7)
+                SimpleGaugeBar(progress: progress)
     
-                Text("\(progress)%")
+                Text("\(Int(progress * 100))%")
                     .font(.caption)
                     .foregroundStyle(.white)
                     .fontWeight(.regular)
@@ -63,7 +63,7 @@ struct CardBlurView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(alignment: .topTrailing) {
             Button {
-                print("다다다다닫")
+                onModifyTap?()
             } label: {
                 Image(systemName: "ellipsis")
                     .padding(.vertical, 8)
