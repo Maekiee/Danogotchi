@@ -373,7 +373,8 @@ extension WordTabViewController {
 
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = MyBookListViewController()
+//                let vc = MyBookListViewController()
+                let vc = BookListViewController()
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
 
@@ -496,8 +497,6 @@ extension WordTabViewController {
             }.disposed(by: cell.disposeBag)
             
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                print("dfdf")
-                
                 // 음성 출력
                 TTSManager.shared.speak(item.cardTitle)
             }.disposed(by: cell.disposeBag)
