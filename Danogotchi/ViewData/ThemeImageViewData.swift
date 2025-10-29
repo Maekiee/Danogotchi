@@ -10,7 +10,7 @@ struct ThemeImageViewData: Hashable {
     init(from entity: PhotoEntity) {
         self.id = entity.id
         self.thumbnailUrl = entity.urls.small
-        self.themeImageUrl = entity.urls.regular
+        self.themeImageUrl = entity.urls.full
         self.aspectRatio = CGFloat(entity.height) / CGFloat(entity.width)
     }
     

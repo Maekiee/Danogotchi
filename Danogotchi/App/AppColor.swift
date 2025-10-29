@@ -10,6 +10,7 @@ enum AppColor {
     
     static let testPrimaryColor = UIColor(red: 0.9961, green: 0.498, blue: 0.1765, alpha: 1)
     
+    static let oxfordBlue = UIColor(red: 0, green: 0.1294, blue: 0.2784, alpha: 1.0)
     
 }
 

@@ -313,6 +313,7 @@ extension WordTabViewController {
             .drive(with: self) { owner, hasWordBook in
                 // 단어장 1개 이상
                 owner.noBookInfoContainer.isHidden = !hasWordBook
+                owner.addWordButton.isHidden = hasWordBook
 //                owner.addWordButton.isHidden = hasWordBook
 //                owner.showWordBookButton.isHidden = hasWordBook
 //                owner.collectionView.isHidden = hasWordBook
