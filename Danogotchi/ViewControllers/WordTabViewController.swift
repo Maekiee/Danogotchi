@@ -187,10 +187,10 @@ final class WordTabViewController: BaseViewController {
         [
             themeBackgroundImage,
             noBookInfoContainer,
+            collectionView,
             showWordBookButton,
             addWordButton,
             profileTabButton,
-            collectionView,
             startLearningButton,
             
 //            testButton, // x테스트
