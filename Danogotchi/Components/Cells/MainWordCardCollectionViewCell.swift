@@ -60,8 +60,8 @@ final class MainWordCardCollectionViewCell: UICollectionViewCell {
     private func configView() {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
-        layer.borderWidth = 2
-        layer.borderColor = UIColor.systemGreen.cgColor
+//        layer.borderWidth = 2
+//        layer.borderColor = UIColor.systemGreen.cgColor
     }
     
     required init?(coder: NSCoder) {

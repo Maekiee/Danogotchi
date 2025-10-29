@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 
 enum AppColor {
     static let appBackgroundColor = UIColor(red: 0.949, green: 0.9529, blue: 0.9608, alpha: 1.0)
@@ -8,6 +9,12 @@ enum AppColor {
     static let primaryColor = UIColor(red: 0.17, green: 0.24, blue: 0.31, alpha: 0.95)
     
     static let testPrimaryColor = UIColor(red: 0.9961, green: 0.498, blue: 0.1765, alpha: 1)
+    
+    
+}
+
+enum SwiftUIAppColor {
+    static let oxfordBlue = Color(red: 0, green: 0.1294, blue: 0.2784)
 }
 
  

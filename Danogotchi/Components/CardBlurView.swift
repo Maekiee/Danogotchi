@@ -11,53 +11,98 @@ struct CardBlurView: View {
     
     var body: some View {
         VStack {
+            Spacer().frame(height: 28)
+            HStack(alignment: .lastTextBaseline) {
+                Text(title)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                
+                Button {
+                    onSpeakerTap?()
+                } label: {
+                    Image(systemName: "speaker.wave.2.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                }
+            }
+            Spacer().frame(height: 4)
+            Text(subtitle)
+                .font(.body)
+                .foregroundStyle(.white)
+                .fontWeight(.medium)
+            
+            Text("\(learningCount)번 학습")
+                .font(.caption)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .fontWeight(.regular)
+                .background(.black.opacity(0.4))
+                .clipShape(Capsule())
+            
+            Spacer()
+            HStack {
+                SimpleGaugeBar(progress: 0.7)
+    
+                Text("\(progress)%")
+                    .font(.caption)
+                    .foregroundStyle(.white)
+                    .fontWeight(.regular)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 8)
+        }
+        .frame(height: 180)
+        .frame(maxWidth: .infinity)
+        .background {
+            TransparentBlurView(removeAllFilters: true)
+                .blur(radius: 5, opaque: true)
+                .background(.white.opacity(0.15))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(alignment: .topTrailing) {
             Button {
-                // 액션
                 print("다다다다닫")
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.black.opacity(0.8))
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 8)
                     .padding(.horizontal, 12)
                     .background(
                         Color.white.opacity(0.2)
                             .background(.ultraThinMaterial)
                     )
                     .cornerRadius(16)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            
-            VStack {
-                HStack {
-                    Text(title)
-                        .font(.title)
-                    Button {
-                        onSpeakerTap?()
-                        print("버튼 버튼")
-                    } label: {
-                        Image(systemName: "speaker.wave.2.fill")
-                    }
-                }
-                Text(subtitle)
-                Text("\(learningCount)번 학습")
-                Gauge(value: 0.7) {
-                    
-                }
-            }
-            .frame(height: 180)
-            .frame(maxWidth: .infinity)
-            .background {
-                TransparentBlurView(removeAllFilters: true)
-                    .blur(radius: 6, opaque: true)
-                    .background(.white.opacity(0.15))
-            }.clipShape(RoundedRectangle(cornerRadius: 20))
+            .padding(12)
         }
     }
 }
 
 
 
+
+struct SimpleGaugeBar: View {
+    var progress: Double // 0.0 ~ 1.0
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // 배경
+                Capsule()
+                    .fill(Color.white.opacity(0.2))
+                
+                // 진행 바
+                Capsule()
+                    .fill(SwiftUIAppColor.oxfordBlue)
+                    .frame(width: geometry.size.width * progress)
+            }
+        }
+        .frame(height: 8)
+    }
+}
 
 
 // MARK: 투평도 조절
