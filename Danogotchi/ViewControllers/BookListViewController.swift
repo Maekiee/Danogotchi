@@ -47,6 +47,33 @@ final class BookListViewController: BaseViewController {
         let button = UIButton()
         button.setTitle("닫기", for: .normal)
         button.setTitleColor(.black, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        return button
+    }()
+    private let moreButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.title = "단어 보기"
+        config.baseForegroundColor = AppColor.pointDarkGray
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+            pointSize: 10,
+            weight: .semibold
+        )
+        config.image = UIImage(systemName: "chevron.right")
+        config.imagePlacement = .trailing
+        config.imagePadding = 8
+        
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = .systemFont(ofSize: 13, weight: .semibold)
+            return outgoing
+        }
+        
+        
+        button.configuration = config
+//        button.setTitle("ejqh", for: .normal)
+//        button.setTitleColor(.black, for: .normal)
+//        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
     private lazy var collectionView: UICollectionView = {
@@ -74,6 +101,7 @@ final class BookListViewController: BaseViewController {
     override func configHierarchy() {
         [
             closeButton,
+            moreButton,
             collectionView,
         ].forEach { view.addSubview($0) }
     }
@@ -84,9 +112,14 @@ final class BookListViewController: BaseViewController {
             make.leading.equalToSuperview().offset(20)
         }
         
+        moreButton.snp.makeConstraints { make in
+            make.top.equalTo(closeButton.snp.bottom).offset(8)
+            make.trailing.equalToSuperview().offset(-20)
+        }
+        
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(closeButton.snp.bottom).offset(20)
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.top.equalTo(moreButton.snp.bottom).offset(2)
+            make.horizontalEdges.equalToSuperview().inset(16)
             make.bottom.equalToSuperview()
         }
     }
@@ -110,6 +143,7 @@ final class BookListViewController: BaseViewController {
             var config = supplementaryView.defaultContentConfiguration()
             config.text = "여행 단어장"
             config.textProperties.font = .boldSystemFont(ofSize: 20)
+            config.textProperties.color = .black
             supplementaryView.contentConfiguration = config
         }
     }
@@ -123,13 +157,13 @@ final class BookListViewController: BaseViewController {
             case .myBook:
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(120)
+                    heightDimension: .absolute(100)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(120)
+                    heightDimension: .absolute(100)
                 )
                 let group = NSCollectionLayoutGroup.horizontal(
                     layoutSize: groupSize,
@@ -145,16 +179,16 @@ final class BookListViewController: BaseViewController {
                 // 2열 그리드
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(0.5),
-                    heightDimension: .absolute(160)
+                    heightDimension: .absolute(200)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 item.contentInsets = NSDirectionalEdgeInsets(
-                    top: 4, leading: 4, bottom: 4, trailing: 4
+                    top: 6, leading: 6, bottom: 6, trailing: 6
                 )
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(160)
+                    heightDimension: .absolute(200)
                 )
                 let group = NSCollectionLayoutGroup.horizontal(
                     layoutSize: groupSize,
@@ -162,7 +196,7 @@ final class BookListViewController: BaseViewController {
                 )
                 let headerSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(50)
+                    heightDimension: .absolute(40)
                 )
                 let header = NSCollectionLayoutBoundarySupplementaryItem(
                     layoutSize: headerSize,
@@ -173,7 +207,7 @@ final class BookListViewController: BaseViewController {
                 let section = NSCollectionLayoutSection(group: group)
                 section.boundarySupplementaryItems = [header]
                 section.contentInsets = NSDirectionalEdgeInsets(
-                    top: 0, leading: 0, bottom: 8, trailing: 0
+                    top: 0, leading: 0, bottom: 4, trailing: 0
                 )
                 return section
             }
@@ -215,7 +249,7 @@ final class BookListViewController: BaseViewController {
         snapshot.appendSections([.myBook, .recommend])
         
         // 임시 데이터
-         snapshot.appendItems([.currentBook(MyBook(title: "나의 단어장"))], toSection: .myBook)
+        snapshot.appendItems([.currentBook(MyBook(title: "나의 단어장"))], toSection: .myBook)
         snapshot.appendItems([
             .recommend(Recommend(title: "여행 필수 1")),
             .recommend(Recommend(title: "여행 필수 2")),
@@ -234,5 +268,14 @@ extension BookListViewController {
         let input = BookListViewModel.Input()
         let output = viewModel.transform(input: input)
         
+        closeButton.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.dismiss(animated: true)
+            }.disposed(by: disposeBag)
+        
+        moreButton.rx.tap
+            .bind(with: self) { owner, _ in
+                print("내 단어들 보기 화면으로 이동")
+            }.disposed(by: disposeBag)
     }
 }

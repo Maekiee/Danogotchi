@@ -7,6 +7,13 @@ import RxCocoa
 final class RecommendBookCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .black
+        label.font = .boldSystemFont(ofSize: 18)
+        return label
+    }()
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
@@ -24,20 +31,31 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     }
     
     private func configHierarchy() {
-        
+        contentView.addSubview(titleLabel)
     }
     
     private func configLayout() {
-        
+        titleLabel.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().offset(-20)
+            make.leading.equalToSuperview().offset(20)
+        }
     }
     
     private func configView() {
-        layer.borderWidth = 2
-        layer.borderColor = UIColor.systemGreen.cgColor
+        backgroundColor = AppColor.backgroundBeige2
+        layer.borderWidth = 1.5
+        layer.borderColor = AppColor.pointDarkGray.cgColor
+        layer.cornerRadius = 20
+        
+        // 그림자 (cell의 layer에 적용)
+        layer.shadowColor = AppColor.pointDarkGray.cgColor
+        layer.shadowOpacity = 1
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 0
     }
     
-    func binding(with: Recommend) {
-        
+    func binding(with item: Recommend) {
+        titleLabel.text = item.title
     }
 }
 

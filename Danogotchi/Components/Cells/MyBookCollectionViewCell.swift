@@ -6,6 +6,14 @@ import RxCocoa
 final class MyBookCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "나의 단어장"
+        label.textColor = .black
+        label.font = .boldSystemFont(ofSize: 24)
+        return label
+    }()
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
@@ -23,17 +31,30 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     }
     
     private func configHierarchy() {
-        
+        [
+            titleLabel
+        ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
-        
+        titleLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
     }
     
     private func configView() {
-        layer.borderWidth = 2
-        layer.borderColor = UIColor.systemGreen.cgColor
+        backgroundColor = AppColor.backgroundBeige2
+        layer.borderWidth = 1.5
+        layer.borderColor = AppColor.pointDarkGray.cgColor
+        layer.cornerRadius = 20
+        
+        // 그림자 (cell의 layer에 적용)
+        layer.shadowColor = AppColor.pointDarkGray.cgColor
+        layer.shadowOpacity = 1
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 0
     }
+    
     
     func binding(with: MyBook) {
         
