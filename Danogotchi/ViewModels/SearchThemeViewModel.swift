@@ -86,6 +86,9 @@ final class SearchThemeViewModel: BaseViewModel {
         input.textEndTrigger
             .withLatestFrom(input.searchText)
             .distinctUntilChanged()
+            .do { text in
+                currentSearchWord.accept(text)
+            }
             .flatMap { text in
                 self.repository.searchPhotos(query: text, page: 1)
             }
