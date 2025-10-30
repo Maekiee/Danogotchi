@@ -4,9 +4,14 @@ import RxSwift
 import RxCocoa
 
 
-struct Recommend: Hashable {
+struct MyBook: Hashable, Identifiable {
+    let id = UUID()
     let title: String
-    let isStudying: Bool
+}
+
+struct Recommend: Hashable, Identifiable {
+    let id = UUID()
+    let title: String
 }
 
 
@@ -20,13 +25,22 @@ final class BookListViewController: BaseViewController {
     }
     
     private enum Item: Hashable {
-        case currentBook(WordBook)
+        case currentBook(MyBook)
         case recommend(Recommend)
     }
     
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Item>
     private var dataSource: DataSource!
+    
+    // MARK: Cell Registration
+    private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, MyBook>!
+    
+    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, Recommend>!
+    
+    private var headerRegistration: UICollectionView.SupplementaryRegistration<UICollectionViewListCell>!
+
+    
     
     // MARK: UI 프로퍼티
     private let closeButton: UIButton = {
@@ -35,32 +49,32 @@ final class BookListViewController: BaseViewController {
         button.setTitleColor(.black, for: .normal)
         return button
     }()
-    private let myBookSectionTitle: UILabel = {
-        let label = UILabel()
-        label.text = "내 단어장"
-        label.font = .boldSystemFont(ofSize: 20)
-        return label
+    private lazy var collectionView: UICollectionView = {
+        let view = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout()
+        )
+        view.alwaysBounceVertical = false
+        view.backgroundColor = AppColor.backgroundBeige
+        return view
     }()
-//    private let collectionView: UICollectionView = {
-//        let view = UICollectionView(
-//            frame: .zero,
-//            collectionViewLayout: layout()
-//        )
-//        return view
-//    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupCellRegistrations()
+        
         configHierarchy()
         configLayout()
         configView()
+        configDataSource()
+        applySnapshot()
         bind()
     }
     
     override func configHierarchy() {
         [
             closeButton,
-            myBookSectionTitle,
+            collectionView,
         ].forEach { view.addSubview($0) }
     }
     
@@ -70,9 +84,10 @@ final class BookListViewController: BaseViewController {
             make.leading.equalToSuperview().offset(20)
         }
         
-        myBookSectionTitle.snp.makeConstraints { make in
-            make.top.equalTo(closeButton.snp.bottom).offset(24)
-            make.leading.equalToSuperview().offset(20)
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(closeButton.snp.bottom).offset(20)
+            make.horizontalEdges.equalToSuperview().inset(20)
+            make.bottom.equalToSuperview()
         }
     }
     
@@ -80,14 +95,144 @@ final class BookListViewController: BaseViewController {
         view.backgroundColor = AppColor.backgroundBeige
     }
     
-//    private func layout() -> UICollectionViewLayout {
-//        
-//    }
+    private func setupCellRegistrations() {
+        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, MyBook> { cell, indexPath, item in
+            cell.binding(with: item)
+        }
+        
+        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, Recommend> { cell, indexPath, item in
+            cell.binding(with: item)
+        }
+        
+        headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { supplementaryView, elementKind, indexPath in
+            var config = supplementaryView.defaultContentConfiguration()
+            config.text = "여행 단어장"
+            config.textProperties.font = .boldSystemFont(ofSize: 20)
+            supplementaryView.contentConfiguration = config
+        }
+    }
+    
+    private func layout() -> UICollectionViewLayout {
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, environment in
+            guard let self = self else { return nil }
+            let section = self.dataSource.snapshot().sectionIdentifiers[sectionIndex]
+            
+            switch section {
+            case .myBook:
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(120)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(120)
+                )
+                let group = NSCollectionLayoutGroup.horizontal(
+                    layoutSize: groupSize,
+                    subitems: [item]
+                )
+                
+                let section = NSCollectionLayoutSection(group: group)
+                section.contentInsets = NSDirectionalEdgeInsets(
+                    top: 0, leading: 0, bottom: 16, trailing: 0
+                )
+                return section
+            case .recommend:
+                // 2열 그리드
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(0.5),
+                    heightDimension: .absolute(160)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(
+                    top: 4, leading: 4, bottom: 4, trailing: 4
+                )
+                
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(160)
+                )
+                let group = NSCollectionLayoutGroup.horizontal(
+                    layoutSize: groupSize,
+                    subitems: [item, item]
+                )
+                let headerSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(50)
+                )
+                let header = NSCollectionLayoutBoundarySupplementaryItem(
+                    layoutSize: headerSize,
+                    elementKind: UICollectionView.elementKindSectionHeader,
+                    alignment: .top
+                )
+                
+                let section = NSCollectionLayoutSection(group: group)
+                section.boundarySupplementaryItems = [header]
+                section.contentInsets = NSDirectionalEdgeInsets(
+                    top: 0, leading: 0, bottom: 8, trailing: 0
+                )
+                return section
+            }
+        }
+    }
+    
+    private func configDataSource() {
+        dataSource = DataSource(collectionView: collectionView) { [weak self]
+            collectionView, indexPath, itemIdentifier in
+            guard let self = self else { return UICollectionViewCell() }
+            
+            switch itemIdentifier {
+            case .currentBook(let wordBook):
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: myBookCellRegistration,
+                    for: indexPath,
+                    item: wordBook)
+            case .recommend(let recommend):
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: recommendCellRegistration,
+                    for: indexPath,
+                    item: recommend)
+            }
+            
+        }
+        
+        dataSource.supplementaryViewProvider = { [weak self]
+            collectionView, kind, indexPath in
+            guard let self = self else { return nil }
+            return collectionView.dequeueConfiguredReusableSupplementary(
+                using: headerRegistration,
+                for: indexPath
+            )
+        }
+    }
+    
+    private func applySnapshot() {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.myBook, .recommend])
+        
+        // 임시 데이터
+         snapshot.appendItems([.currentBook(MyBook(title: "나의 단어장"))], toSection: .myBook)
+        snapshot.appendItems([
+            .recommend(Recommend(title: "여행 필수 1")),
+            .recommend(Recommend(title: "여행 필수 2")),
+            .recommend(Recommend(title: "여행 필수 3")),
+            .recommend(Recommend(title: "여행 필수 4"))
+        ])
+        
+        dataSource.apply(snapshot, animatingDifferences: false)
+    }
+    
 }
 
 
 extension BookListViewController {
     private func bind() {
+        let input = BookListViewModel.Input()
+        let output = viewModel.transform(input: input)
         
     }
 }
