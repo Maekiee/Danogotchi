@@ -7,6 +7,8 @@ final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SearchThemeViewModel()
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
+    private let wordBookRepo = WordBookRepository()
+    private let userInfo = UserInfoManager.shared
     
     private enum Section {
         case main
@@ -30,7 +32,6 @@ final class SearchThemeViewController: BaseViewController {
         label.textColor = .black
         return label
     }()
-    
     private let textField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.placeholder = "이미지를 검색해주세요"
@@ -38,11 +39,8 @@ final class SearchThemeViewController: BaseViewController {
         tf.isUserInteractionEnabled = true
         return tf
     }()
-    
     private lazy var collectionView: UICollectionView = {
-        // 추가
         waterfallLayout.delegate = self
-        
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: waterfallLayout // 추가
@@ -172,9 +170,17 @@ extension SearchThemeViewController {
         
         submitButton.rx.tap
             .bind(with: self) { owner, _ in
+                owner.wordBookRepo.create(title: "나의 단어장")
+                guard let myBook = owner.wordBookRepo.readAll().last else { return }
+                
+                // 배경 사진이 유저디폴트에 저장되었는지 확인
                 if let selectedTheme = owner.selectedThemeUrl.value {
                     UserInfoManager.shared.currentThemeUrl = selectedTheme
-                    Coordinator.switchToMainVieWController()
+                    // 생성된 단어장 유저 인포에 넣기
+                    if owner.userInfo.selectedBookId == nil {
+                        owner.userInfo.selectedBookId = myBook.id
+                        Coordinator.switchToMainVieWController()
+                    }
                 }
             }.disposed(by: disposeBag)
     }
