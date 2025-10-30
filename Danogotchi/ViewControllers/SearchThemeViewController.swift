@@ -165,7 +165,7 @@ extension SearchThemeViewController {
             }.disposed(by: disposeBag)
         
         output.buttonEnable
-            .drive(submitButton.rx.isEnabled)
+            .drive(submitButton.rx.isHidden)
             .disposed(by: disposeBag)
         
         submitButton.rx.tap

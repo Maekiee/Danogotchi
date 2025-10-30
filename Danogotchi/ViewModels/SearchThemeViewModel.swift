@@ -30,7 +30,7 @@ final class SearchThemeViewModel: BaseViewModel {
         let currentSearchWord = BehaviorRelay<String>(value: "")
         let isLoading = BehaviorRelay<Bool>(value: false)
         
-        let buttonEnable = BehaviorRelay<Bool>(value: false)
+        let submitButtonIsHidden = BehaviorRelay<Bool>(value: true)
         
         
         // 초기값
@@ -110,9 +110,9 @@ final class SearchThemeViewModel: BaseViewModel {
         input.selectedTheme
             .bind(with: self) { owner, selectedThemeUrl in
                 if selectedThemeUrl != nil {
-                    buttonEnable.accept(true)
+                    submitButtonIsHidden.accept(false)
                 } else {
-                    buttonEnable.accept(false)
+                    submitButtonIsHidden.accept(true)
                 }
             }.disposed(by: disposeBag)
         
@@ -121,7 +121,7 @@ final class SearchThemeViewModel: BaseViewModel {
         
         return Output(
             themeImageList: imageItems.asDriver(onErrorJustReturn: []),
-            buttonEnable: buttonEnable.asDriver()
+            buttonEnable: submitButtonIsHidden.asDriver()
         )
     }
 }
