@@ -9,9 +9,31 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
-        label.font = .boldSystemFont(ofSize: 24)
+        label.font = .boldSystemFont(ofSize: 20)
         return label
     }()
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = AppColor.pointDarkGray
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        return label
+    }()
+    private let iconButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "ellipsis")
+        config.baseForegroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0)
+        button.configuration = config
+        return button
+    }()
+    private let chip: UIChip = {
+        let view = UIChip(text: "")
+        view.layer.cornerRadius = 10
+        view.setFont(.systemFont(ofSize: 10))
+        return view
+    }()
+    private let circleProgress = UICircleProgress()
+    
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -31,14 +53,39 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     
     private func configHierarchy() {
         [
-            titleLabel
+            titleLabel,
+            subtitleLabel,
+            iconButton,
+            chip,
+            circleProgress,
         ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.top.equalToSuperview().inset(12)
+            make.horizontalEdges.equalToSuperview().inset(18)
         }
+        
+        subtitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(6)
+            make.horizontalEdges.equalToSuperview().inset(18)
+        }
+        
+        iconButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(10)
+            make.trailing.equalToSuperview().offset(-18)
+        }
+        
+        chip.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().inset(10)
+            make.leading.equalToSuperview().inset(18)
+        }
+        
+//        circleProgress.snp.makeConstraints { make in
+//            make.bottom.equalToSuperview().offset(10)
+//            make.trailing.equalToSuperview().inset(-18)
+//        }
     }
     
     private func configView() {
@@ -57,6 +104,21 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     
     func binding(with item: CardDisplayable) {
         titleLabel.text = item.cardTitle
+        subtitleLabel.text = item.cardSubtitle
+        
+        if let learningCount = item.cardChipText {
+            chip.setText("\(learningCount)번 학습")
+        }
+        
+        if let accuracyValue = item.cardAccuracy {
+            circleProgress.setProgress(accuracyValue, animated: false)
+        }
+        
+        circleProgress.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().inset(10)
+            make.trailing.equalToSuperview().inset(18)
+            make.size.equalTo(40)
+        }
     }
 }
 
