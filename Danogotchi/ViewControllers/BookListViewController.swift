@@ -272,9 +272,15 @@ extension BookListViewController {
         
         moreButton.rx.tap
             .bind(with: self) { owner, _ in
-//                let vc = MyBookListViewController()
                 let vc = MyBookDetailViewController()
                 owner.navigationController?.pushViewController(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
+        collectionView.rx.itemSelected
+            .bind(with: self) { owner, indexPath in
+                guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
+                
+                print(selectedCell)
             }.disposed(by: disposeBag)
     }
 }

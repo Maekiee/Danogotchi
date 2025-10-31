@@ -68,7 +68,6 @@ final class AddWordViewModel: BaseViewModel {
                     .subscribe { result in
                         switch result {
                         case .success(let value):
-                            print("여기 \(value)")
                             wordImageItems.accept(value)
                         case .failure:
                             print("이미지 검색 실패")
