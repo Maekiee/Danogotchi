@@ -69,11 +69,7 @@ final class BookListViewController: BaseViewController {
             return outgoing
         }
         
-        
         button.configuration = config
-//        button.setTitle("ejqh", for: .normal)
-//        button.setTitleColor(.black, for: .normal)
-//        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
     private lazy var collectionView: UICollectionView = {
@@ -88,6 +84,7 @@ final class BookListViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.setNavigationBarHidden(true, animated: false)
         setupCellRegistrations()
         
         configHierarchy()
@@ -113,7 +110,7 @@ final class BookListViewController: BaseViewController {
         }
         
         moreButton.snp.makeConstraints { make in
-            make.top.equalTo(closeButton.snp.bottom).offset(8)
+            make.top.equalTo(closeButton.snp.bottom)
             make.trailing.equalToSuperview().offset(-20)
         }
         
@@ -275,7 +272,9 @@ extension BookListViewController {
         
         moreButton.rx.tap
             .bind(with: self) { owner, _ in
-                print("내 단어들 보기 화면으로 이동")
+//                let vc = MyBookListViewController()
+                let vc = MyBookDetailViewController()
+                owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
     }
 }

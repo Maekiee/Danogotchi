@@ -375,7 +375,8 @@ extension WordTabViewController {
             .bind(with: self) { owner, _ in
 //                let vc = MyBookListViewController()
                 let vc = BookListViewController()
-                owner.present(vc, animated: true)
+                let navVC = UINavigationController(rootViewController: vc)
+                owner.present(navVC, animated: true)
             }.disposed(by: disposeBag)
 
         // 단어장 생성
