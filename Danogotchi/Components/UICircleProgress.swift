@@ -63,7 +63,7 @@ final class UICircleProgress: UIView {
         
         // 프로그레스 레이어 설정
         layer.addSublayer(progressLayer)
-        progressLayer.strokeColor = UIColor.systemGreen.cgColor
+        progressLayer.strokeColor = AppColor.oxfordBlue.cgColor
         progressLayer.fillColor = UIColor.clear.cgColor
         progressLayer.lineWidth = lineWidth
         progressLayer.lineCap = .round // 끝부분을 둥글게

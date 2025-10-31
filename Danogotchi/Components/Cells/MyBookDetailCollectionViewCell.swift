@@ -6,6 +6,10 @@ import RxCocoa
 final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     
+    var onTouchIcon: Observable<Void> {
+        return iconButton.rx.tap.asObservable()
+    }
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
@@ -81,11 +85,6 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
             make.bottom.equalToSuperview().inset(10)
             make.leading.equalToSuperview().inset(18)
         }
-        
-//        circleProgress.snp.makeConstraints { make in
-//            make.bottom.equalToSuperview().offset(10)
-//            make.trailing.equalToSuperview().inset(-18)
-//        }
     }
     
     private func configView() {
@@ -94,7 +93,6 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
         layer.borderColor = AppColor.pointDarkGray.cgColor
         layer.cornerRadius = 20
         
-        // 그림자 (cell의 layer에 적용)
         layer.shadowColor = AppColor.pointDarkGray.cgColor
         layer.shadowOpacity = 1
         layer.shadowOffset = CGSize(width: 0, height: 4)

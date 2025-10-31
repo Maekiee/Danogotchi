@@ -7,11 +7,13 @@ final class MyBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     private let wordBookRepo = WordBookRepository()
+    private let wordRepo = WordRepository()
     private let learningHistoryRepo = LearningHistoryRepository()
     
     
     struct Input {
         let viewWillAppear: Observable<Void>
+        let deleteWordTrigger: Observable<Word>
     }
     
     struct Output {
@@ -42,6 +44,21 @@ final class MyBookDetailViewModel: BaseViewModel {
             wordList.accept(Array(displayItems))
             
         }
+        
+        input.deleteWordTrigger
+            .bind(with: self) { owner, wordItem in
+                // UI에서 지우기
+                let filteredList = wordList.value.filter { $0.word.id != wordItem.id }
+                wordList.accept(filteredList)
+                
+                // 디비에서 지우기
+                let wordId = try! ObjectId(string: wordItem.id)
+                owner.wordRepo.delete(id: wordId)
+                
+                
+                // 학습중인 단어장이 나의 단어장 일때 동작
+                owner.userInfo.clearQuizState()
+            }.disposed(by: disposeBag)
         
         
         return Output(

@@ -2,10 +2,13 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
+import RealmSwift
 
 final class MyBookDetailViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = MyBookDetailViewModel()
+    private let userInfo = UserInfoManager.shared
+    private let deleteWordTrigger = PublishRelay<Word>()
     
     private enum Section {
         case main
@@ -15,7 +18,7 @@ final class MyBookDetailViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordDisplayInfo>
     private var dataSource: DataSource!
     
-    // MARK:
+    // MARK: UI 프로퍼티
     private let backButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
@@ -71,7 +74,8 @@ final class MyBookDetailViewController: BaseViewController {
 extension MyBookDetailViewController {
     private func bind() {
         let input = MyBookDetailViewModel.Input(
-            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
+            deleteWordTrigger: deleteWordTrigger.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -92,9 +96,45 @@ extension MyBookDetailViewController {
     private func configDataSource() {
         let cellregistration = UICollectionView.CellRegistration<MyBookDetailCollectionViewCell, WordDisplayInfo> { [weak self]
             cell, indexPath, item in
-            guard let _ = self else { return }
+            guard let self = self else { return }
             cell.binding(with: item)
             
+            cell.onTouchIcon.bind(with: self) { owner, _ in
+                owner.showActionSheet(
+                    title: item.word.word,
+                    editAction: { [weak self] in
+                        guard self != nil else { return }
+                        
+                        guard
+                            let bookObjectId = owner.userInfo.selectedBookId
+                                .flatMap({ try? ObjectId(string: $0) })
+                        else { return }
+                        
+                        let createWordModel = CreateWord(
+                            wordBookId: bookObjectId,
+                            wordId: try! ObjectId(string: item.word.id),
+                            thumbnail: item.word.thumbnail,
+                            bookTitle: "",
+                            word: item.word.word,
+                            meaning: item.word.meaning,
+                            actionType: .edit
+                        )
+                        let vm = AddWordViewModel(wordItem: createWordModel)
+                        let vc = UINavigationController(
+                            rootViewController: AddWordViewController(
+                                viewModel: vm,
+                                entryPoint: .edit
+                            )
+                        )
+                        vc.modalPresentationStyle = .fullScreen
+                        owner.present(vc, animated: true)
+                    },
+                    deleteAction: { [weak self] in
+                        guard let _ = self else { return }
+                        owner.deleteWordTrigger.accept(item.word)
+                    }
+                )
+            }.disposed(by: cell.disposeBag)
         }
         
         dataSource = DataSource(collectionView: collectionView) {
