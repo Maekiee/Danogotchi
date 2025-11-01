@@ -20,7 +20,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         view.backgroundColor = AppColor.backgroundBeige2
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
-//        view.isHidden = true
+        view.isHidden = true
         return view
     }()
     
@@ -72,7 +72,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with: WordBook) {
-        
+    func binding(with: WordBook, isSelected: Bool) {
+        checkIcon.isHidden = !isSelected
     }
 }

@@ -19,6 +19,9 @@ final class BookListViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = BookListViewModel()
     
+    private var selectedBookId: String?
+
+    
     private enum Section {
         case myBook
         case recommend
@@ -127,12 +130,16 @@ final class BookListViewController: BaseViewController {
     }
     
     private func setupCellRegistrations() {
-        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook> { cell, indexPath, item in
-            cell.binding(with: item)
+        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook> { [weak self] cell, indexPath, item in
+            guard let self = self else { return }
+            let isSelected = selectedBookId == item.id
+            cell.binding(with: item, isSelected: isSelected)
         }
         
-        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook> { cell, indexPath, item in
-            cell.binding(with: item)
+        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook> { [weak self] cell, indexPath, item in
+            guard let self = self else { return }
+            let isSelected = selectedBookId == item.id
+            cell.binding(with: item, isSelected: isSelected)
         }
         
         headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
@@ -243,6 +250,7 @@ final class BookListViewController: BaseViewController {
     }
     
     private func applySnapshot(myBook: WordBook?, recommendBooks: [WordBook]) {
+        
         var snapshot = Snapshot()
         
         // 1. '내 단어장' 섹션은 항상 추가 (요구사항 1, 3)
@@ -266,14 +274,20 @@ final class BookListViewController: BaseViewController {
 
 extension BookListViewController {
     private func bind() {
+        
+        selectedBookId = ActiveLearningManager.shared.activeBook.value?.id
+        
+        ActiveLearningManager.shared.activeBook
+            .compactMap { $0?.id }
+            .bind(with: self) { owner, bookId in
+                owner.selectedBookId = bookId
+            }.disposed(by: disposeBag)
+        
+        
         let input = BookListViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
         )
         let output = viewModel.transform(input: input)
-        
-//        let myBookStream = output.myBook.compactMap { $0 }
-//        
-//        let recommendStream = output.recommendBooks
         
         Driver.combineLatest(output.myBook, output.recommendBooks)
             .drive(with: self) { owner, data in
@@ -297,16 +311,23 @@ extension BookListViewController {
             .bind(with: self) { owner, indexPath in
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
                 
-                
+                let wordBook: WordBook
                 switch selectedCell {
-                case .currentBook(let wordBook):
-                    // '내 단어장'을 ActiveLearningManager에 설정
-                    ActiveLearningManager.shared.setActiveBook(wordBook, source: .realm(id: wordBook.id))
-                case .recommend(let wordBook):
-                    // '추천 단어장'을 ActiveLearningManager에 설정
-                    ActiveLearningManager.shared.setActiveBook(wordBook, source: .recommended(id: wordBook.id))
+                case .currentBook(let book):
+                    wordBook = book
+                    ActiveLearningManager.shared.setActiveBook(book, source: .realm(id: book.id))
+                case .recommend(let book):
+                    wordBook = book
+                    ActiveLearningManager.shared.setActiveBook(book, source: .recommended(id: book.id))
                 }
-                print(selectedCell)
+                
+                owner.selectedBookId = wordBook.id
+            
+                var snapshot = owner.dataSource.snapshot()
+                let sections = snapshot.sectionIdentifiers
+                snapshot.reloadSections(sections)
+                owner.dataSource.apply(snapshot, animatingDifferences: false)
+//                print(selectedCell)
             }.disposed(by: disposeBag)
     }
 }

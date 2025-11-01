@@ -20,7 +20,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         view.backgroundColor = AppColor.backgroundBeige2
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
-//        view.isHidden = true
+        view.isHidden = true
         return view
     }()
     
@@ -72,8 +72,9 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         layer.shadowRadius = 0
     }
     
-    func binding(with item: WordBook) {
+    func binding(with item: WordBook, isSelected: Bool) {
         titleLabel.text = item.title
+        checkIcon.isHidden = !isSelected
     }
 }
 
