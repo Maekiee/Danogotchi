@@ -26,7 +26,7 @@ final class BookListViewController: BaseViewController {
     
     private enum Item: Hashable {
         case currentBook(MyBook)
-        case recommend(Recommend)
+        case recommend(WordBook)
     }
     
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
@@ -36,7 +36,7 @@ final class BookListViewController: BaseViewController {
     // MARK: Cell Registration
     private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, MyBook>!
     
-    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, Recommend>!
+    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook>!
     
     private var headerRegistration: UICollectionView.SupplementaryRegistration<UICollectionViewListCell>!
 
@@ -90,8 +90,10 @@ final class BookListViewController: BaseViewController {
         configHierarchy()
         configLayout()
         configView()
+        
         configDataSource()
-        applySnapshot()
+//        applySnapshot()
+        
         bind()
     }
     
@@ -130,7 +132,7 @@ final class BookListViewController: BaseViewController {
             cell.binding(with: item)
         }
         
-        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, Recommend> { cell, indexPath, item in
+        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook> { cell, indexPath, item in
             cell.binding(with: item)
         }
         
@@ -138,7 +140,7 @@ final class BookListViewController: BaseViewController {
             elementKind: UICollectionView.elementKindSectionHeader
         ) { supplementaryView, elementKind, indexPath in
             var config = supplementaryView.defaultContentConfiguration()
-            config.text = "여행 단어장"
+            config.text = "추천 단어장"
             config.textProperties.font = .boldSystemFont(ofSize: 20)
             config.textProperties.color = .black
             supplementaryView.contentConfiguration = config
@@ -222,11 +224,11 @@ final class BookListViewController: BaseViewController {
                     using: myBookCellRegistration,
                     for: indexPath,
                     item: wordBook)
-            case .recommend(let recommend):
+            case .recommend(let wordBook):
                 return collectionView.dequeueConfiguredReusableCell(
                     using: recommendCellRegistration,
                     for: indexPath,
-                    item: recommend)
+                    item: wordBook)
             }
             
         }
@@ -241,18 +243,13 @@ final class BookListViewController: BaseViewController {
         }
     }
     
-    private func applySnapshot() {
+    private func applySnapshot(recommendBooks: [WordBook]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.myBook, .recommend])
         
         // 임시 데이터
         snapshot.appendItems([.currentBook(MyBook(title: "나의 단어장"))], toSection: .myBook)
-        snapshot.appendItems([
-            .recommend(Recommend(title: "여행 필수 1")),
-            .recommend(Recommend(title: "여행 필수 2")),
-            .recommend(Recommend(title: "여행 필수 3")),
-            .recommend(Recommend(title: "여행 필수 4"))
-        ])
+        snapshot.appendItems(recommendBooks.map { .recommend($0) }, toSection: .recommend)
         
         dataSource.apply(snapshot, animatingDifferences: false)
     }
@@ -262,8 +259,16 @@ final class BookListViewController: BaseViewController {
 
 extension BookListViewController {
     private func bind() {
-        let input = BookListViewModel.Input()
+        let input = BookListViewModel.Input(
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+        )
         let output = viewModel.transform(input: input)
+        
+        
+        output.recommendBooks
+            .drive(with: self) { owner, books in
+                owner.applySnapshot(recommendBooks: books)
+            }.disposed(by: disposeBag)
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in

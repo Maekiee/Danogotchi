@@ -1,9 +1,9 @@
 import Foundation
 import RxSwift
 
-protocol SearchThemeRepoProtocol {
-    func searchPhotos(query: String, page: Int) -> Single<Result<SearchPhotoEntity, Error>>
-}
+//protocol SearchThemeRepoProtocol {
+//    func searchPhotos(query: String, page: Int) -> Single<Result<SearchPhotoEntity, Error>>
+//}
 
 final class SearchThemeRepository: SearchThemeRepoProtocol {
     func searchPhotos(query: String, page: Int) -> RxSwift.Single<Result<SearchPhotoEntity, Error>> {

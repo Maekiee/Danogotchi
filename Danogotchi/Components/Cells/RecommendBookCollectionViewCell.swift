@@ -54,7 +54,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         layer.shadowRadius = 0
     }
     
-    func binding(with item: Recommend) {
+    func binding(with item: WordBook) {
         titleLabel.text = item.title
     }
 }

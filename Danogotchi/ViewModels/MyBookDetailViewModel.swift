@@ -23,27 +23,32 @@ final class MyBookDetailViewModel: BaseViewModel {
     func transform(input: Input) -> Output {
         let wordList = BehaviorRelay<[WordDisplayInfo]>(value: [])
         
-        if let wordBookId = userInfo.selectedBookId,
-           let bookId = try? ObjectId(string: wordBookId) {
-            
-            let myWordList = wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
-            let histories = learningHistoryRepo.fetchAllHistory()
-            let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
-            let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
-                let correctCount = historyModels.filter { $0.isCorrect }.count
-                return (correct: correctCount, total: historyModels.count)
-            }
-            let displayItems = myWordList.map { word -> WordDisplayInfo in
-                if let stats = historyStats[word.id] {
-                    let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
-                    return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
-                } else {
-                    return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+        input.viewWillAppear
+            .take(1)
+            .bind(with: self) { owner, _ in
+                if let wordBookId = owner.userInfo.selectedBookId,
+                   let bookId = try? ObjectId(string: wordBookId) {
+                    
+                    let myWordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
+                    let histories = owner.learningHistoryRepo.fetchAllHistory()
+                    let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
+                    let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
+                        let correctCount = historyModels.filter { $0.isCorrect }.count
+                        return (correct: correctCount, total: historyModels.count)
+                    }
+                    let displayItems = myWordList.map { word -> WordDisplayInfo in
+                        if let stats = historyStats[word.id] {
+                            let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
+                            return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
+                        } else {
+                            return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+                        }
+                    }
+                    wordList.accept(Array(displayItems))
                 }
-            }
-            wordList.accept(Array(displayItems))
-            
-        }
+            }.disposed(by: disposeBag)
+        
+        
         
         input.deleteWordTrigger
             .bind(with: self) { owner, wordItem in
