@@ -388,6 +388,7 @@ extension WordTabViewController {
                 owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
 
+        // 학습 시작하기
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
                 let allWords = owner.allWordsInfo.map { $0.word }
