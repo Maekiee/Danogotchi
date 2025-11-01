@@ -13,6 +13,16 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         label.font = .boldSystemFont(ofSize: 24)
         return label
     }()
+    private let checkIcon: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(systemName: "checkmark.circle.fill")
+        view.tintColor = AppColor.oxfordBlue
+        view.backgroundColor = AppColor.backgroundBeige2
+        view.layer.cornerRadius = 12
+        view.clipsToBounds = true
+//        view.isHidden = true
+        return view
+    }()
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -32,13 +42,19 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     
     private func configHierarchy() {
         [
-            titleLabel
+            titleLabel,
+            checkIcon
         ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
         titleLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
+        }
+        
+        checkIcon.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(12)
+            make.trailing.equalToSuperview().inset(12)
         }
     }
     
