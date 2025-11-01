@@ -56,7 +56,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with: MyBook) {
+    func binding(with: WordBook) {
         
     }
 }

@@ -25,7 +25,7 @@ final class BookListViewController: BaseViewController {
     }
     
     private enum Item: Hashable {
-        case currentBook(MyBook)
+        case currentBook(WordBook)
         case recommend(WordBook)
     }
     
@@ -34,7 +34,7 @@ final class BookListViewController: BaseViewController {
     private var dataSource: DataSource!
     
     // MARK: Cell Registration
-    private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, MyBook>!
+    private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook>!
     
     private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook>!
     
@@ -92,7 +92,6 @@ final class BookListViewController: BaseViewController {
         configView()
         
         configDataSource()
-//        applySnapshot()
         
         bind()
     }
@@ -128,7 +127,7 @@ final class BookListViewController: BaseViewController {
     }
     
     private func setupCellRegistrations() {
-        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, MyBook> { cell, indexPath, item in
+        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook> { cell, indexPath, item in
             cell.binding(with: item)
         }
         
@@ -243,12 +242,12 @@ final class BookListViewController: BaseViewController {
         }
     }
     
-    private func applySnapshot(recommendBooks: [WordBook]) {
+    private func applySnapshot(myBook: WordBook, recommendBooks: [WordBook]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.myBook, .recommend])
         
         // 임시 데이터
-        snapshot.appendItems([.currentBook(MyBook(title: "나의 단어장"))], toSection: .myBook)
+        snapshot.appendItems([.currentBook(myBook)], toSection: .myBook)
         snapshot.appendItems(recommendBooks.map { .recommend($0) }, toSection: .recommend)
         
         dataSource.apply(snapshot, animatingDifferences: false)
@@ -265,9 +264,10 @@ extension BookListViewController {
         let output = viewModel.transform(input: input)
         
         
-        output.recommendBooks
-            .drive(with: self) { owner, books in
-                owner.applySnapshot(recommendBooks: books)
+        Driver.combineLatest(output.myBook, output.recommendBooks)
+            .drive(with: self) { owner, data in
+                let (myBook, recommendBooks) = data
+                owner.applySnapshot(myBook: myBook, recommendBooks: recommendBooks)
             }.disposed(by: disposeBag)
         
         closeButton.rx.tap
