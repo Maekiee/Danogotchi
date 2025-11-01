@@ -125,9 +125,9 @@ final class AddWordViewModel: BaseViewModel {
                 case .success(let value):
                     print("여기 검색: \(value)")
                     wordImageItems.accept(value)
-                    if let firstImageUrl = value.results.first?.urls.raw {
-                        wordImageUrl.accept(firstImageUrl)
-                    } 
+//                    if let firstImageUrl = value.results.first?.urls.raw {
+//                        wordImageUrl.accept(firstImageUrl)
+//                    } 
                 case .failure(_):
                     print("네트워크 에러")
                 }
@@ -148,16 +148,18 @@ final class AddWordViewModel: BaseViewModel {
         
         // 단어장 유효성 검사
         let allInputData = Observable.combineLatest(
-            wordImageUrl,
+//            wordImageUrl,
             validWord,
-            wordBookTitle,
+//            wordBookTitle,
             meanText,
             translatedWord)
         
         allInputData
-            .map { title, url, word, mean, translate in
+            .map {  word, mean, translate in
                 let hasMeaning = !mean.isEmpty || !translate.isEmpty
-                return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
+                let hasWord = !word.isEmpty
+                return hasWord && hasMeaning
+//                return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
             }.bind(to: isValidSaved)
             .disposed(by: disposeBag)
         
@@ -165,21 +167,25 @@ final class AddWordViewModel: BaseViewModel {
         input.savedButtonTapped
             .withLatestFrom(allInputData)
             .bind(with: self) { owner, validData in
-                let (imageUrl, word, bookTitle, mean, translate) = validData
+//                let (imageUrl, word, bookTitle, mean, translate) = validData
+//                let finalMeaning = !mean.isEmpty ? mean : translate
+                
+                let (word, mean, translate) = validData
                 let finalMeaning = !mean.isEmpty ? mean : translate
              
                 let actionType = actionType.value
                 
                 owner.saveWord(
                     actionType: actionType,
-                    wordBookTitle: bookTitle,
-                    url: imageUrl,
+                    wordBookTitle: "나의 단어장",
+                    url: "",
                     word: word,
                     meaning: finalMeaning)
                 
                 meanText.accept("")
                 translatedWord.accept("")
                 resetTrigger.accept(())
+                wordImageUrl.accept("")
             }.disposed(by: disposeBag)
         
         return Output(
@@ -200,17 +206,23 @@ final class AddWordViewModel: BaseViewModel {
         
         if let bookId = wordItem?.wordBookId {
             // 기존 단어장 타이틀 업데이트
-            wordBookRepo.update(id: bookId, title: wordBookTitle)
+//            wordBookRepo.update(id: bookId, title: wordBookTitle)
             bookObjectId = bookId
         } else {
-            // 신규 단어장 생성
-            wordBookRepo.create(title: wordBookTitle)
-            // 새 단어장 불러오기
-            guard let newBook = wordBookRepo.readAll().last else { return }
+//            // 신규 단어장 생성
+//            wordBookRepo.create(title: wordBookTitle)
+//            // 새 단어장 불러오기
+//            guard let newBook = wordBookRepo.readAll().last else { return }
+//            
+//            bookObjectId = try! ObjectId(string: newBook.id) // ObjectId로 변경해서 값 할당
+//            self.isWordBookId = bookObjectId
+//            userInfoManager.selectedBookId = newBook.id
             
-            bookObjectId = try! ObjectId(string: newBook.id) // ObjectId로 변경해서 값 할당
-            self.isWordBookId = bookObjectId
-            userInfoManager.selectedBookId = newBook.id
+            guard let bookId = wordItem?.wordBookId else {
+                print("Error: wordBookId가 없습니다.")
+                return
+            }
+            bookObjectId = bookId
         }
         
         switch actionType {
@@ -218,11 +230,13 @@ final class AddWordViewModel: BaseViewModel {
         case .add:
             let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
             wordBookRepo.addWord(bookId: bookObjectId, word: newWord)
+            userInfoManager.notifyWordBookUpdate()
             // 단어 수정 ㅇ로직
         case .edit:
             // 단어 수정
             guard let wordId = wordItem?.wordId else { return }
             wordRepo.update(id: wordId, thumbnail: url, word: word, meaning: meaning)
+            userInfoManager.notifyWordBookUpdate()
         }
         
         

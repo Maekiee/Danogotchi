@@ -39,7 +39,7 @@ final class BookListViewController: BaseViewController {
     private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook>!
     
     private var headerRegistration: UICollectionView.SupplementaryRegistration<UICollectionViewListCell>!
-
+    
     
     
     // MARK: UI 프로퍼티
@@ -242,13 +242,21 @@ final class BookListViewController: BaseViewController {
         }
     }
     
-    private func applySnapshot(myBook: WordBook, recommendBooks: [WordBook]) {
+    private func applySnapshot(myBook: WordBook?, recommendBooks: [WordBook]) {
         var snapshot = Snapshot()
-        snapshot.appendSections([.myBook, .recommend])
         
-        // 임시 데이터
-        snapshot.appendItems([.currentBook(myBook)], toSection: .myBook)
-        snapshot.appendItems(recommendBooks.map { .recommend($0) }, toSection: .recommend)
+        // 1. '내 단어장' 섹션은 항상 추가 (요구사항 1, 3)
+        snapshot.appendSections([.myBook])
+        if let myBook = myBook {
+            snapshot.appendItems([.currentBook(myBook)], toSection: .myBook)
+        }
+        // myBook이 nil이어도 섹션은 존재하므로, 비어있는 섹션으로 보임 (오류 방지)
+        
+        // 2. '추천 단어장' 섹션 (요구사항 2, 3)
+        if !recommendBooks.isEmpty {
+            snapshot.appendSections([.recommend])
+            snapshot.appendItems(recommendBooks.map { .recommend($0) }, toSection: .recommend)
+        }
         
         dataSource.apply(snapshot, animatingDifferences: false)
     }
@@ -263,10 +271,14 @@ extension BookListViewController {
         )
         let output = viewModel.transform(input: input)
         
+//        let myBookStream = output.myBook.compactMap { $0 }
+//        
+//        let recommendStream = output.recommendBooks
         
         Driver.combineLatest(output.myBook, output.recommendBooks)
             .drive(with: self) { owner, data in
                 let (myBook, recommendBooks) = data
+                // 이제 myBook은 nil이 아님이 보장됨
                 owner.applySnapshot(myBook: myBook, recommendBooks: recommendBooks)
             }.disposed(by: disposeBag)
         
@@ -285,6 +297,15 @@ extension BookListViewController {
             .bind(with: self) { owner, indexPath in
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
                 
+                
+                switch selectedCell {
+                case .currentBook(let wordBook):
+                    // '내 단어장'을 ActiveLearningManager에 설정
+                    ActiveLearningManager.shared.setActiveBook(wordBook, source: .realm(id: wordBook.id))
+                case .recommend(let wordBook):
+                    // '추천 단어장'을 ActiveLearningManager에 설정
+                    ActiveLearningManager.shared.setActiveBook(wordBook, source: .recommended(id: wordBook.id))
+                }
                 print(selectedCell)
             }.disposed(by: disposeBag)
     }

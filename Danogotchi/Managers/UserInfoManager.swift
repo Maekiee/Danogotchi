@@ -4,19 +4,29 @@ import RxCocoa
 
 
 final class UserInfoManager: UserInfoProtocol {
-    private init() {
-        // UserDefaults에서 초기값 로드
-        if let savedId = UserDefaults.standard.string(forKey: Keys.wordBookId) {
-            selectedBookIdRelay.accept(savedId)
-        }
+    
+    
+    enum ActiveBookType: String {
+        case realm
+        case recommended
     }
     
-    static let shared = UserInfoManager()
+    // 활성 단어장 식별자 구조체
+    struct ActiveBookIdentifier {
+        let id: String
+        let type: ActiveBookType
+    }
     
     private enum Keys {
         static let username = "username"
         static let userId = "userId"
-        static let wordBookId = "WordBookId"
+        
+        static let defaultRealmBookIdKey = "WordBookId"
+        
+        static let activeBookId = "activeBookId"
+        static let activeBookType = "activeBookType"
+        
+        
         static let currentQuizWordIds = "currentQuizWordIds"
         static let currentQuizIndex = "currentQuizIndex"
         static let currentCorrectCount = "currentCorrectCount"
@@ -24,12 +34,10 @@ final class UserInfoManager: UserInfoProtocol {
         static let themeUrl = "themeUrl"
     }
     
-    private let wordBookRefreshRelay = PublishRelay<Void>()
-    private let selectedBookIdRelay = BehaviorRelay<String?>(value: nil)
+    // `ActiveLearningManager`가 구독할 Relay
+    let activeBookIdentifierRelay: BehaviorRelay<ActiveBookIdentifier?>
     
-    var selectedBookIdObservable: Observable<String?> {
-        return selectedBookIdRelay.asObservable()
-    }
+    private let wordBookRefreshRelay = PublishRelay<Void>()
     
     var wordBookRefreshObservable: Observable<Void> {
         return wordBookRefreshRelay.asObservable()
@@ -38,6 +46,96 @@ final class UserInfoManager: UserInfoProtocol {
     func notifyWordBookUpdate() {
         wordBookRefreshRelay.accept(())
     }
+    
+    static let shared = UserInfoManager()
+
+    
+    private init () {
+        // 1. (Static) 마이그레이션 실행
+        UserInfoManager.migrateOldKey()
+        
+        // 2. UserDefaults에서 직접 초기값 로드 (self 사용 안함)
+        let initialIdentifier: ActiveBookIdentifier?
+        if let id = UserDefaults.standard.string(forKey: Keys.activeBookId),
+           let typeRaw = UserDefaults.standard.string(forKey: Keys.activeBookType),
+           let type = ActiveBookType(rawValue: typeRaw) {
+            initialIdentifier = ActiveBookIdentifier(id: id, type: type)
+        } else {
+            initialIdentifier = nil
+        }
+        
+        // 3. 저장 프로퍼티(Relay) 초기화
+        self.activeBookIdentifierRelay = BehaviorRelay<ActiveBookIdentifier?>(value: initialIdentifier)
+    }
+    
+    
+    
+    // 영구 저장소(UserDefaults)에 접근하는 computed property
+    var activeBookIdentifier: ActiveBookIdentifier? {
+        get {
+            guard let id = UserDefaults.standard.string(forKey: Keys.activeBookId),
+                  let typeRaw = UserDefaults.standard.string(forKey: Keys.activeBookType),
+                  let type = ActiveBookType(rawValue: typeRaw) else {
+                return nil
+            }
+            return ActiveBookIdentifier(id: id, type: type)
+        }
+        set {
+            if let newValue = newValue {
+                UserDefaults.standard.set(newValue.id, forKey: Keys.activeBookId)
+                UserDefaults.standard.set(newValue.type.rawValue, forKey: Keys.activeBookType)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Keys.activeBookId)
+                UserDefaults.standard.removeObject(forKey: Keys.activeBookType)
+            }
+            // 변경 사항을 Relay에 즉시 반영
+            activeBookIdentifierRelay.accept(newValue)
+        }
+    }
+    
+    // 기존 selectedBookId 사용 코드를 위한 호환성 유지 (get/set 수정)
+    var selectedBookId: String? {
+        get {
+            return UserDefaults.standard.string(forKey: Keys.defaultRealmBookIdKey)
+        }
+        set {
+            // 'activeBookIdentifier'가 아닌 'defaultRealmBookIdKey'에 값을 씀
+            UserDefaults.standard.set(newValue, forKey: Keys.defaultRealmBookIdKey)
+            
+            // --- 중요 ---
+            // '기본 내 단어장'이 '활성 단어장'이기도 하다면, '활성' 상태도 같이 업데이트
+            if let newValue = newValue {
+                activeBookIdentifier = ActiveBookIdentifier(id: newValue, type: .realm)
+            } else {
+                // '기본'이 삭제되면 '활성'도 nil로 (앱 정책에 따라 변경 가능)
+                if activeBookIdentifier?.type == .realm {
+                    activeBookIdentifier = nil
+                }
+            }
+        }
+    }
+    
+    // --- 마이그레이션 로직 (Static으로 변경) ---
+    private static func migrateOldKey() {
+        let defaults = UserDefaults.standard
+        
+        // 1. 기존 'WordBookId' 키를 'defaultRealmBookIdKey'로 유지 (이름만 명확히 함)
+        // (별도 마이그레이션 불필요. 키 이름이 동일)
+        
+        // 2. 'activeBookId'가 비어있을 때만 마이그레이션 실행
+        guard defaults.string(forKey: Keys.activeBookId) == nil else {
+            return
+        }
+        
+        // 3. '활성' 키가 비어있고 '기본' 키가 존재하면, '기본'을 '활성'의 초기값으로 복사
+        if let defaultRealmId = defaults.string(forKey: Keys.defaultRealmBookIdKey) {
+            defaults.set(defaultRealmId, forKey: Keys.activeBookId)
+            defaults.set(ActiveBookType.realm.rawValue, forKey: Keys.activeBookType)
+        }
+    }
+    
+    
+    
     
     var currentThemeUrl: String? {
         get {
@@ -70,17 +168,6 @@ final class UserInfoManager: UserInfoProtocol {
         
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.userId)
-        }
-    }
-    
-    var selectedBookId: String? {
-        get {
-            return selectedBookIdRelay.value
-        }
-        
-        set {
-            UserDefaults.standard.set(newValue, forKey: Keys.wordBookId)
-            selectedBookIdRelay.accept(newValue)
         }
     }
     
@@ -125,10 +212,13 @@ final class UserInfoManager: UserInfoProtocol {
     
     // 아직 사용 안함
     func removeUserInfo() {
+        activeBookIdentifier = nil
+        
+        // '기본 내 단어장' ID도 함께 삭제
+        UserDefaults.standard.removeObject(forKey: Keys.defaultRealmBookIdKey)
+        
         UserDefaults.standard.removeObject(forKey: Keys.username)
         UserDefaults.standard.removeObject(forKey: Keys.userId)
-        UserDefaults.standard.removeObject(forKey: Keys.wordBookId)
-        selectedBookIdRelay.accept(nil)
     }
     
     func clearQuizState() {

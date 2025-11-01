@@ -186,7 +186,7 @@ final class WordTabViewController: BaseViewController {
     override func configHierarchy() {
         [
             themeBackgroundImage,
-            noBookInfoContainer,
+//            noBookInfoContainer,
             collectionView,
             showWordBookButton,
             addWordButton,
@@ -197,10 +197,10 @@ final class WordTabViewController: BaseViewController {
 //            listSegmentedControl,
         ].forEach { view.addSubview($0) }
         
-        [
-            showCreateBookButton,
-            noWordBookLabel
-        ].forEach { noBookInfoContainer.contentView.addSubview($0) }
+//        [
+//            showCreateBookButton,
+//            noWordBookLabel
+//        ].forEach { noBookInfoContainer.contentView.addSubview($0) }
     }
 
     override func configLayout() {
@@ -209,22 +209,22 @@ final class WordTabViewController: BaseViewController {
             make.edges.equalToSuperview()
         }
         
-        noBookInfoContainer.snp.makeConstraints { make in
-            make.horizontalEdges.equalToSuperview().inset(32)
-            make.center.equalToSuperview().offset(-40)
-            make.height.equalTo(144)
-        }
-        
-        noWordBookLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(40)
-            make.centerX.equalToSuperview()
-        }
-
-        showCreateBookButton.snp.makeConstraints { make in
-            make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
-            make.horizontalEdges.equalToSuperview().inset(24)
-            make.height.equalTo(40)
-        }
+//        noBookInfoContainer.snp.makeConstraints { make in
+//            make.horizontalEdges.equalToSuperview().inset(32)
+//            make.center.equalToSuperview().offset(-40)
+//            make.height.equalTo(144)
+//        }
+//        
+//        noWordBookLabel.snp.makeConstraints { make in
+//            make.top.equalToSuperview().offset(40)
+//            make.centerX.equalToSuperview()
+//        }
+//
+//        showCreateBookButton.snp.makeConstraints { make in
+//            make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
+//            make.horizontalEdges.equalToSuperview().inset(24)
+//            make.height.equalTo(40)
+//        }
         
 //        showWordBookButton.snp.makeConstraints { make in
 //            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
@@ -303,40 +303,41 @@ extension WordTabViewController {
 //                owner.startLearningButton.isHidden = index == 1 ? true : false
 //            }.disposed(by: disposeBag)
 
-        output.bookTitle
-            .drive(with: self) { owner, title in
-                owner.bookTitle = title
-                owner.navigationItem.title = title
-            }.disposed(by: disposeBag)
+//        output.bookTitle
+//            .drive(with: self) { owner, title in
+//                owner.bookTitle = title
+//                owner.navigationItem.title = title
+//            }.disposed(by: disposeBag)
 
-        output.currentWordbook
-            .drive(with: self) { owner, hasWordBook in
-                // 단어장 1개 이상
-                owner.noBookInfoContainer.isHidden = !hasWordBook
-                owner.addWordButton.isHidden = hasWordBook
-//                owner.addWordButton.isHidden = hasWordBook
-//                owner.showWordBookButton.isHidden = hasWordBook
-//                owner.collectionView.isHidden = hasWordBook
-//                owner.startLearningButton.isHidden = hasWordBook
-
-                // 단어장 0개
+//        output.currentWordbook
+//            .drive(with: self) { owner, hasWordBook in
+//                // 단어장 1개 이상
 //                owner.noBookInfoContainer.isHidden = !hasWordBook
-//                owner.noWordBookLabel.isHidden = !hasWordBook
-//                owner.showCreateBookButton.isHidden = !hasWordBook
-            }
-            .disposed(by: disposeBag)
+//                owner.addWordButton.isHidden = hasWordBook
+////                owner.addWordButton.isHidden = hasWordBook
+////                owner.showWordBookButton.isHidden = hasWordBook
+////                owner.collectionView.isHidden = hasWordBook
+////                owner.startLearningButton.isHidden = hasWordBook
+//
+//                // 단어장 0개
+////                owner.noBookInfoContainer.isHidden = !hasWordBook
+////                owner.noWordBookLabel.isHidden = !hasWordBook
+////                owner.showCreateBookButton.isHidden = !hasWordBook
+//            }
+//            .disposed(by: disposeBag)
 
         output.wordItems
             .drive(with: self) { owner, wordList in
-                let selectedBook = owner.userInfo.selectedBookId
-
-                if selectedBook == nil && wordList.isEmpty {
-                    owner.collectionView.isHidden = true
-                } else if selectedBook != nil && wordList.isEmpty {
-                    owner.collectionView.isHidden = true
-                } else {
-                    owner.collectionView.isHidden = false
-                }
+                owner.collectionView.isHidden = wordList.isEmpty
+//                let selectedBook = owner.userInfo.selectedBookId
+//
+//                if selectedBook == nil && wordList.isEmpty {
+//                    owner.collectionView.isHidden = true
+//                } else if selectedBook != nil && wordList.isEmpty {
+//                    owner.collectionView.isHidden = true
+//                } else {
+//                    owner.collectionView.isHidden = false
+//                }
 
                 owner.allWordsInfo = wordList
                 owner.applySnapshot(items: wordList)
