@@ -16,6 +16,7 @@ enum AppColor {
     static let backgroundBeige = UIColor(red: 0.8039, green: 0.7216, blue: 0.6157, alpha: 1.0)
     static let backgroundBeige2 = UIColor(red: 0.7725, green: 0.7294, blue: 0.6667, alpha: 1.0)
     static let pointDarkGray = UIColor(red: 0.251, green: 0.251, blue: 0.251, alpha: 1.0)
+    static let appWhite = UIColor(red: 0.9608, green: 0.949, blue: 0.9216, alpha: 1.0)
 }
 
 enum SwiftUIAppColor {

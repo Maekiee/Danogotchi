@@ -31,43 +31,43 @@ final class AddWordViewController: BaseViewController {
     
     private let contentView = UIView()
     
-    private let thumbnail: UIImageView = {
-        let view = UIImageView()
-        view.backgroundColor = .systemGray5
-        view.layer.cornerRadius = 12
-        view.clipsToBounds = true
-        view.contentMode = .scaleAspectFill
-        view.isUserInteractionEnabled = true
-        return view
-    }()
+//    private let thumbnail: UIImageView = {
+//        let view = UIImageView()
+//        view.backgroundColor = .systemGray5
+//        view.layer.cornerRadius = 12
+//        view.clipsToBounds = true
+//        view.contentMode = .scaleAspectFill
+//        view.isUserInteractionEnabled = true
+//        return view
+//    }()
     
-    private let emptyImageIcon: UIImageView = {
-        let view = UIImageView()
-//        view.image = UIImage(systemName: "photo.stack.fill")
-        view.image = UIImage(systemName: "photo.on.rectangle")
-        view.tintColor = .systemGray3
-        return view
-    }()
+//    private let emptyImageIcon: UIImageView = {
+//        let view = UIImageView()
+////        view.image = UIImage(systemName: "photo.stack.fill")
+//        view.image = UIImage(systemName: "photo.on.rectangle")
+//        view.tintColor = .systemGray3
+//        return view
+//    }()
     
-    private let showMoreImagesButton: UIButton = {
-        let button = UIButton()
-        var config = UIButton.Configuration.gray()
-        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
-                pointSize: 14,
-                weight: .regular
-            )
-        config.image = UIImage(systemName: "photo.stack.fill")
-//        config.image = UIImage(systemName: "photo.on.rectangle")
-        config.baseForegroundColor = UIColor.black.withAlphaComponent(0.8)
-        config.background.backgroundColor = UIColor.white.withAlphaComponent(0.2)
-        
-        
-        config.background.cornerRadius = 20 // 원형을 위한 반지름 (버튼 크기의 절반)
-        config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
-        button.isHidden = true
-        button.configuration = config
-        return button
-    }()
+//    private let showMoreImagesButton: UIButton = {
+//        let button = UIButton()
+//        var config = UIButton.Configuration.gray()
+//        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+//                pointSize: 14,
+//                weight: .regular
+//            )
+//        config.image = UIImage(systemName: "photo.stack.fill")
+////        config.image = UIImage(systemName: "photo.on.rectangle")
+//        config.baseForegroundColor = UIColor.black.withAlphaComponent(0.8)
+//        config.background.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+//        
+//        
+//        config.background.cornerRadius = 20 // 원형을 위한 반지름 (버튼 크기의 절반)
+//        config.background.visualEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
+//        button.isHidden = true
+//        button.configuration = config
+//        return button
+//    }()
     
     private let wordBookTitleTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
@@ -80,6 +80,7 @@ final class AddWordViewController: BaseViewController {
     private let wordTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어"
+        tf.placeholder = "단어를 입력해 주세요"
         tf.font = .systemFont(ofSize: 16, weight: .regular)
         tf.isUserInteractionEnabled = true
         return tf
@@ -88,18 +89,19 @@ final class AddWordViewController: BaseViewController {
     private let meanTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "뜻"
+        tf.placeholder = "단어의 뜻을 입력해 주세요"
         tf.font = .systemFont(ofSize: 16, weight: .regular)
         tf.isUserInteractionEnabled = true
         return tf
     }()
     
-    private let noImageLabel: UILabel = {
-        let label = UILabel()
-        label.text = "단어를 입력하면 이미지를 추천해 줍니다"
-        label.textColor = .systemGray2
-        label.font = .systemFont(ofSize: 13, weight: .medium)
-        return label
-    }()
+//    private let noImageLabel: UILabel = {
+//        let label = UILabel()
+//        label.text = "단어를 입력하면 이미지를 추천해 줍니다"
+//        label.textColor = .systemGray2
+//        label.font = .systemFont(ofSize: 13, weight: .medium)
+//        return label
+//    }()
     
     private lazy var addWordButton = PrimaryFillButton(title: self.entryPoint == .add ? "저장" : "수정")
     
@@ -118,16 +120,16 @@ final class AddWordViewController: BaseViewController {
         VScrollView.addSubview(contentView)
         
         [
-            thumbnail,
+//            thumbnail,
 //            wordBookTitleTextField,
             wordTextField,
             meanTextField,
             addWordButton
         ].forEach { contentView.addSubview($0) }
         
-        thumbnail.addSubview(emptyImageIcon)
-        thumbnail.addSubview(noImageLabel)
-        thumbnail.addSubview(showMoreImagesButton)
+//        thumbnail.addSubview(emptyImageIcon)
+//        thumbnail.addSubview(noImageLabel)
+//        thumbnail.addSubview(showMoreImagesButton)
     }
     
     override func configLayout() {
@@ -140,37 +142,37 @@ final class AddWordViewController: BaseViewController {
             make.width.equalToSuperview()
         }
         
-        thumbnail.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(8)
-            make.horizontalEdges.equalToSuperview().inset(16)
-            make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
-        }
-        
-        emptyImageIcon.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.width.equalTo(40)
-            make.height.equalTo(32)
-        }
-        
-        noImageLabel.snp.makeConstraints { make in
-            make.top.equalTo(emptyImageIcon.snp.bottom).offset(8)
-            make.centerX.equalToSuperview()
-        }
-        
-        showMoreImagesButton.snp.makeConstraints { make in
-//            make.top.equalToSuperview().offset(12)
-            make.bottom.equalToSuperview().offset(-12)
-            make.trailing.equalToSuperview().offset(-12)
-            make.size.equalTo(40)
-        }
-        
+//        thumbnail.snp.makeConstraints { make in
+//            make.top.equalToSuperview().offset(8)
+//            make.horizontalEdges.equalToSuperview().inset(16)
+//            make.height.equalTo(thumbnail.snp.width).multipliedBy(1.0/2.0)
+//        }
+//        
+//        emptyImageIcon.snp.makeConstraints { make in
+//            make.center.equalToSuperview()
+//            make.width.equalTo(40)
+//            make.height.equalTo(32)
+//        }
+//        
+//        noImageLabel.snp.makeConstraints { make in
+//            make.top.equalTo(emptyImageIcon.snp.bottom).offset(8)
+//            make.centerX.equalToSuperview()
+//        }
+//        
+//        showMoreImagesButton.snp.makeConstraints { make in
+////            make.top.equalToSuperview().offset(12)
+//            make.bottom.equalToSuperview().offset(-12)
+//            make.trailing.equalToSuperview().offset(-12)
+//            make.size.equalTo(40)
+//        }
+//        
 //        wordBookTitleTextField.snp.makeConstraints { make in
 //            make.top.equalTo(thumbnail.snp.bottom).offset(20)
 //            make.horizontalEdges.equalToSuperview().inset(20)
 //        }
         
         wordTextField.snp.makeConstraints { make in
-            make.top.equalTo(thumbnail.snp.bottom).offset(8)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
@@ -205,6 +207,8 @@ final class AddWordViewController: BaseViewController {
             target: nil,
             action: nil)
         
+        view.backgroundColor = AppColor.backgroundBeige
+        
     }
 }
 
@@ -227,20 +231,20 @@ extension AddWordViewController {
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         
-        showMoreImagesButton.rx.tap
-            .withLatestFrom(output.itemSet)
-            .bind(with: self) { owner, item in
-                let (items, text) = item
-                let selectedImage = selectedImage
-                let vm = WordImageListViewModel(imageItems: items, wordText: text)
-                let vc = WordImageListViewController(
-                    viewModel: vm,
-                    selectedImage: Observable.just(currentImageUrl))
-                vc.onChangedImage = { selectedUrl in
-                    selectedImage.accept(selectedUrl)
-                }
-                owner.navigationController?.pushViewController(vc, animated: true)
-            }.disposed(by: disposeBag)
+//        showMoreImagesButton.rx.tap
+//            .withLatestFrom(output.itemSet)
+//            .bind(with: self) { owner, item in
+//                let (items, text) = item
+//                let selectedImage = selectedImage
+//                let vm = WordImageListViewModel(imageItems: items, wordText: text)
+//                let vc = WordImageListViewController(
+//                    viewModel: vm,
+//                    selectedImage: Observable.just(currentImageUrl))
+//                vc.onChangedImage = { selectedUrl in
+//                    selectedImage.accept(selectedUrl)
+//                }
+//                owner.navigationController?.pushViewController(vc, animated: true)
+//            }.disposed(by: disposeBag)
         
         
         output.wordImageUrl
@@ -249,10 +253,10 @@ extension AddWordViewController {
                 
              
                 if url != "" {
-                    owner.thumbnail.kf.setImage(with: URL(string: url))
-                    owner.emptyImageIcon.isHidden = true
-                    owner.noImageLabel.isHidden = true
-                    owner.showMoreImagesButton.isHidden = false
+//                    owner.thumbnail.kf.setImage(with: URL(string: url))
+//                    owner.emptyImageIcon.isHidden = true
+//                    owner.noImageLabel.isHidden = true
+//                    owner.showMoreImagesButton.isHidden = false
                 }
             }.disposed(by: disposeBag)
         
@@ -281,6 +285,9 @@ extension AddWordViewController {
         
         
         output.translateWord
+            .map { valueText in
+                return valueText.isEmpty ? "단어의 뜻을 입력해 주세요" : valueText
+            }
             .drive(meanTextField.rx.placeholder)
             .disposed(by: disposeBag)
         
@@ -295,12 +302,12 @@ extension AddWordViewController {
                 owner.wordTextField.text = ""
                 owner.meanTextField.text = ""
                 currentImageUrl = ""
-                owner.thumbnail.image = nil
-                if owner.thumbnail.image == nil {
-                    owner.emptyImageIcon.isHidden = false
-                    owner.noImageLabel.isHidden = false
-                    owner.showMoreImagesButton.isHidden = true
-                }
+//                owner.thumbnail.image = nil
+//                if owner.thumbnail.image == nil {
+//                    owner.emptyImageIcon.isHidden = false
+//                    owner.noImageLabel.isHidden = false
+//                    owner.showMoreImagesButton.isHidden = true
+//                }
                 
                 let message = owner.entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
                 owner.showToast(message, duration: .short)

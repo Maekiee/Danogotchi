@@ -17,9 +17,9 @@ final class PrimaryFillButton: UIButton {
             
             // 버튼 활성화 상태 여부
             if button.state == .disabled {
-                button.configuration?.baseBackgroundColor = .lightGray
+                button.configuration?.baseBackgroundColor = .gray
             } else {
-                button.configuration?.baseBackgroundColor = AppColor.primaryColor
+                button.configuration?.baseBackgroundColor = AppColor.oxfordBlue
             }
             
             
