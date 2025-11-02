@@ -7,6 +7,10 @@ import RxCocoa
 final class RecommendBookCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     
+    var onTouchDownload: Observable<Void> {
+        return downloadButton.rx.tap.asObservable()
+    }
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
@@ -23,10 +27,29 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         view.isHidden = true
         return view
     }()
+    private let downloadButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        // 아이콘을 크고 굵게 설정
+        config.image = UIImage(systemName: "arrow.down.circle.fill")
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+            pointSize: 40, // 아이콘 크기
+            weight: .medium
+        )
+        config.baseForegroundColor = AppColor.oxfordBlue.withAlphaComponent(0.8)
+        button.configuration = config
+        button.isHidden = true // 기본값은 숨김
+        return button
+    }()
     
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
+        
+        checkIcon.isHidden = true
+        downloadButton.isHidden = true
+        titleLabel.isHidden = false
+        titleLabel.text = nil
     }
     
     override init(frame: CGRect) {
@@ -44,6 +67,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         [
             titleLabel,
             checkIcon,
+            downloadButton
         ].forEach { contentView.addSubview($0)
         }
     }
@@ -53,9 +77,14 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
             make.bottom.equalToSuperview().offset(-20)
             make.leading.equalToSuperview().offset(20)
         }
+        
         checkIcon.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(12)
             make.trailing.equalToSuperview().inset(12)
+        }
+        
+        downloadButton.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -72,9 +101,30 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         layer.shadowRadius = 0
     }
     
-    func binding(with item: WordBook, isSelected: Bool) {
-        titleLabel.text = item.title
-        checkIcon.isHidden = !isSelected
+    
+    func binding(with item: BookListViewModel.RecommendItem, isSelected: Bool) {
+        switch item {
+        case .downloaded(let realmBook):
+            // 1. 이미 Realm에 있는 경우 (기존 로직)
+            titleLabel.text = realmBook.title
+            checkIcon.isHidden = !isSelected
+            downloadButton.isHidden = true
+            titleLabel.isHidden = false
+            
+        case .notDownloaded(let mockBook):
+            // 2. Realm에 없는 경우 (다운로드 UI)
+            titleLabel.text = mockBook.title // 제목은 흐리게 표시
+            titleLabel.isHidden = false
+            checkIcon.isHidden = true
+            downloadButton.isHidden = false
+            
+            // 다운로드 버튼이 보일 때 제목을 흐리게 처리 (선택 사항)
+            titleLabel.textColor = .black.withAlphaComponent(0.4)
+        }
     }
+//    func binding(with item: WordBook, isSelected: Bool) {
+//        titleLabel.text = item.title
+//        checkIcon.isHidden = !isSelected
+//    }
 }
 

@@ -29,7 +29,7 @@ final class BookListViewController: BaseViewController {
     
     private enum Item: Hashable {
         case currentBook(WordBook)
-        case recommend(WordBook)
+        case recommend(BookListViewModel.RecommendItem)
     }
     
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
@@ -39,7 +39,7 @@ final class BookListViewController: BaseViewController {
     // MARK: Cell Registration
     private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook>!
     
-    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook>!
+    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, BookListViewModel.RecommendItem>!
     
     private var headerRegistration: UICollectionView.SupplementaryRegistration<UICollectionViewListCell>!
     
@@ -136,10 +136,26 @@ final class BookListViewController: BaseViewController {
             cell.binding(with: item, isSelected: isSelected)
         }
         
-        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, WordBook> { [weak self] cell, indexPath, item in
+        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, BookListViewModel.RecommendItem> { [weak self] cell, indexPath, item in
             guard let self = self else { return }
-            let isSelected = selectedBookId == item.id
+            // 4-1. 선택 상태 확인 (downloaded 상태일 때만)
+            var isSelected = false
+            if case .downloaded(let realmBook) = item {
+                isSelected = (self.selectedBookId == realmBook.id)
+            }
+            
+            // 4-2. 새로운 binding 함수 호출
             cell.binding(with: item, isSelected: isSelected)
+            
+            // 4-3. 💡 다운로드 버튼 탭 이벤트 구독
+            cell.onTouchDownload
+                .bind(with: self) { owner, _ in
+                    // .notDownloaded 상태일 때만 트리거 발생
+                    if case .notDownloaded(let mockBook) = item {
+                        // ViewModel의 트리거로 mockBook 전달
+                        owner.viewModel.downloadBookTrigger.accept(mockBook)
+                    }
+                }.disposed(by: cell.disposeBag)
         }
         
         headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
@@ -230,11 +246,11 @@ final class BookListViewController: BaseViewController {
                     using: myBookCellRegistration,
                     for: indexPath,
                     item: wordBook)
-            case .recommend(let wordBook):
+            case .recommend(let recommendItem):
                 return collectionView.dequeueConfiguredReusableCell(
                     using: recommendCellRegistration,
                     for: indexPath,
-                    item: wordBook)
+                    item: recommendItem)
             }
             
         }
@@ -249,24 +265,25 @@ final class BookListViewController: BaseViewController {
         }
     }
     
-    private func applySnapshot(myBook: WordBook?, recommendBooks: [WordBook]) {
+    private func applySnapshot(myBook: WordBook?, recommendItems: [BookListViewModel.RecommendItem]) {
         
         var snapshot = Snapshot()
         
-        // 1. '내 단어장' 섹션은 항상 추가 (요구사항 1, 3)
+        // 1. '내 단어장' 섹션
         snapshot.appendSections([.myBook])
         if let myBook = myBook {
             snapshot.appendItems([.currentBook(myBook)], toSection: .myBook)
         }
-        // myBook이 nil이어도 섹션은 존재하므로, 비어있는 섹션으로 보임 (오류 방지)
         
-        // 2. '추천 단어장' 섹션 (요구사항 2, 3)
-        if !recommendBooks.isEmpty {
+        // 2. '추천 단어장' 섹션
+        if !recommendItems.isEmpty {
             snapshot.appendSections([.recommend])
-            snapshot.appendItems(recommendBooks.map { .recommend($0) }, toSection: .recommend)
+            // 💡 7. RecommendItem을 .recommend()로 래핑하여 추가
+            snapshot.appendItems(recommendItems.map { .recommend($0) }, toSection: .recommend)
         }
         
-        dataSource.apply(snapshot, animatingDifferences: false)
+        // 💡 8. animatingDifferences: true로 변경 (다운로드 후 자연스러운 갱신)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
 }
@@ -289,12 +306,21 @@ extension BookListViewController {
         )
         let output = viewModel.transform(input: input)
         
-        Driver.combineLatest(output.myBook, output.recommendBooks)
+        Driver.combineLatest(output.myBook, output.recommendItems) // recommendItems 구독
             .drive(with: self) { owner, data in
-                let (myBook, recommendBooks) = data
-                // 이제 myBook은 nil이 아님이 보장됨
-                owner.applySnapshot(myBook: myBook, recommendBooks: recommendBooks)
+                let (myBook, recommendItems) = data
+                owner.applySnapshot(myBook: myBook, recommendItems: recommendItems) // 수정된 함수 호출
             }.disposed(by: disposeBag)
+        
+        // 9-4. 💡 다운로드 완료 시 (옵션: 선택 상태 새로고침 - 필요 시)
+        // (현재 applySnapshot이 전체를 갱신하므로 별도 처리는 불필요)
+        output.downloadComplete
+            .emit(with: self) { owner, _ in
+                // 다운로드가 완료되면 ActiveLearningManager의 캐시된 ID를 다시 확인함
+                // (선택 사항: 사용성을 더 좋게 하려면 여기서 selectedBookId를 갱신할 수 있음)
+                print("Download complete, snapshot refreshed.")
+            }
+            .disposed(by: disposeBag)
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
@@ -312,22 +338,38 @@ extension BookListViewController {
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
                 
                 let wordBook: WordBook
+                let source: WordBookSource
+                
                 switch selectedCell {
                 case .currentBook(let book):
+                    // '내 단어장' 선택 (기존 로직)
                     wordBook = book
-                    ActiveLearningManager.shared.setActiveBook(book, source: .realm(id: book.id))
-                case .recommend(let book):
-                    wordBook = book
-                    ActiveLearningManager.shared.setActiveBook(book, source: .recommended(id: book.id))
+                    source = .realm(id: book.id)
+                    
+                case .recommend(let item):
+                    switch item {
+                    case .downloaded(let realmBook):
+                        // 10-1. 💡 다운로드된 추천 단어장 선택
+                        // Mock 데이터가 아닌 Realm 데이터를 사용
+                        wordBook = realmBook
+                        source = .realm(id: realmBook.id)
+                        
+                    case .notDownloaded:
+                        // 10-2. 💡 다운로드 안된 셀은 탭해도 아무 동작 안함
+                        return
+                    }
                 }
                 
+                // 10-3. ActiveLearningManager 호출 (Realm 데이터로)
+                ActiveLearningManager.shared.setActiveBook(wordBook, source: source)
+                
                 owner.selectedBookId = wordBook.id
-            
+                
+                // 10-4. UI 갱신
                 var snapshot = owner.dataSource.snapshot()
                 let sections = snapshot.sectionIdentifiers
                 snapshot.reloadSections(sections)
                 owner.dataSource.apply(snapshot, animatingDifferences: false)
-//                print(selectedCell)
-            }.disposed(by: disposeBag)
-    }
+                
+            }.disposed(by: disposeBag)    }
 }
