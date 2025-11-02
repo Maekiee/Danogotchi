@@ -24,28 +24,40 @@ final class MyBookDetailViewModel: BaseViewModel {
         let wordList = BehaviorRelay<[WordDisplayInfo]>(value: [])
         
         input.viewWillAppear
-            .take(1)
+        // 💡 화면에 진입할 때마다 데이터 갱신 (take(1) 제거)
             .bind(with: self) { owner, _ in
-                if let wordBookId = owner.userInfo.selectedBookId,
-                   let bookId = try? ObjectId(string: wordBookId) {
-                    
-                    let myWordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
-                    let histories = owner.learningHistoryRepo.fetchAllHistory()
-                    let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
-                    let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
-                        let correctCount = historyModels.filter { $0.isCorrect }.count
-                        return (correct: correctCount, total: historyModels.count)
-                    }
-                    let displayItems = myWordList.map { word -> WordDisplayInfo in
-                        if let stats = historyStats[word.id] {
-                            let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
-                            return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
-                        } else {
-                            return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
-                        }
-                    }
-                    wordList.accept(Array(displayItems))
+                
+                // 💡 2. "나의 단어장" Struct를 제목으로 직접 검색
+                guard let myBookStruct = owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" }) else {
+                    // "나의 단어장"이 없는 경우 빈 배열 처리
+                    wordList.accept([])
+                    return
                 }
+                
+                // 💡 3. 찾은 "나의 단어장"의 ID(String)로 ObjectId 생성
+                guard let bookId = try? ObjectId(string: myBookStruct.id) else {
+                    wordList.accept([])
+                    return
+                }
+                
+                // 💡 4. "나의 단어장" ID를 사용해 단어 목록 조회 (기존 로직 동일)
+                let myWordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
+                let histories = owner.learningHistoryRepo.fetchAllHistory()
+                let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
+                let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
+                    let correctCount = historyModels.filter { $0.isCorrect }.count
+                    return (correct: correctCount, total: historyModels.count)
+                }
+                let displayItems = myWordList.map { word -> WordDisplayInfo in
+                    if let stats = historyStats[word.id] {
+                        let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
+                        return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
+                    } else {
+                        return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+                    }
+                }
+                wordList.accept(Array(displayItems))
+                
             }.disposed(by: disposeBag)
         
         
@@ -61,8 +73,13 @@ final class MyBookDetailViewModel: BaseViewModel {
                 owner.wordRepo.delete(id: wordId)
                 
                 
-                // 학습중인 단어장이 나의 단어장 일때 동작
-                owner.userInfo.clearQuizState()
+                if let activeBookId = owner.userInfo.activeBookIdentifier?.id,
+                   let myBookId = try? owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" })?.id {
+                    
+                    if activeBookId == myBookId {
+                        owner.userInfo.clearQuizState()
+                    }
+                }
             }.disposed(by: disposeBag)
         
         
