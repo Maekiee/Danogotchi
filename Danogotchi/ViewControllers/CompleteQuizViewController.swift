@@ -102,7 +102,7 @@ final class CompleteQuizViewController: BaseViewController {
     }
     
     override func configView() {
-        
+        view.backgroundColor = AppColor.backgroundBeige
     }
 }
 

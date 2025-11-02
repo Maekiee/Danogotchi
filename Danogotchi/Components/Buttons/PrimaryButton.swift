@@ -9,7 +9,6 @@ final class PrimaryFillButton: UIButton {
         config.attributedTitle?.font = .systemFont(ofSize: 15, weight: .bold)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = AppColor.oxfordBlue
-//        config.background.cornerRadius = 8
         config.background.cornerRadius = 24
         self.configuration = config
         
