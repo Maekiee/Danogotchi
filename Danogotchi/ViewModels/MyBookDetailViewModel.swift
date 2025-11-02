@@ -6,10 +6,12 @@ import RealmSwift
 final class MyBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
+    
     private let wordBookRepo = WordBookRepository()
     private let wordRepo = WordRepository()
     private let learningHistoryRepo = LearningHistoryRepository()
     
+    private let myBookObjectId = BehaviorRelay<ObjectId?>(value: nil)
     
     struct Input {
         let viewWillAppear: Observable<Void>
@@ -18,6 +20,7 @@ final class MyBookDetailViewModel: BaseViewModel {
     
     struct Output {
         let wordList: Driver<[WordDisplayInfo]>
+        let myBookObjectId: Observable<ObjectId?>
     }
     
     func transform(input: Input) -> Output {
@@ -31,14 +34,18 @@ final class MyBookDetailViewModel: BaseViewModel {
                 guard let myBookStruct = owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" }) else {
                     // "나의 단어장"이 없는 경우 빈 배열 처리
                     wordList.accept([])
+                    owner.myBookObjectId.accept(nil)
                     return
                 }
                 
                 // 💡 3. 찾은 "나의 단어장"의 ID(String)로 ObjectId 생성
                 guard let bookId = try? ObjectId(string: myBookStruct.id) else {
                     wordList.accept([])
+                    owner.myBookObjectId.accept(nil)
                     return
                 }
+                
+                owner.myBookObjectId.accept(bookId)
                 
                 // 💡 4. "나의 단어장" ID를 사용해 단어 목록 조회 (기존 로직 동일)
                 let myWordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
@@ -73,18 +80,19 @@ final class MyBookDetailViewModel: BaseViewModel {
                 owner.wordRepo.delete(id: wordId)
                 
                 
-                if let activeBookId = owner.userInfo.activeBookIdentifier?.id,
-                   let myBookId = try? owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" })?.id {
+                if let activeBookId = UserInfoManager.shared.activeBookIdentifier?.id,
+                   let myBookId = owner.myBookObjectId.value?.stringValue {
                     
                     if activeBookId == myBookId {
-                        owner.userInfo.clearQuizState()
+                        UserInfoManager.shared.clearQuizState()
                     }
                 }
             }.disposed(by: disposeBag)
         
         
         return Output(
-            wordList: wordList.asDriver()
+            wordList: wordList.asDriver(),
+            myBookObjectId: myBookObjectId.asObservable()
         )
     }
 }

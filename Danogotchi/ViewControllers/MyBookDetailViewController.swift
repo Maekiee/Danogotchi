@@ -7,8 +7,11 @@ import RealmSwift
 final class MyBookDetailViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = MyBookDetailViewModel()
+    
     private let userInfo = UserInfoManager.shared
+    
     private let deleteWordTrigger = PublishRelay<Word>()
+    private let myBookObjectId = BehaviorRelay<ObjectId?>(value: nil)
     
     private enum Section {
         case main
@@ -112,36 +115,29 @@ extension MyBookDetailViewController {
                 owner.applaySnapshot(items: items)
             }.disposed(by: disposeBag)
         
+        output.myBookObjectId
+            .bind(to: myBookObjectId)
+            .disposed(by: disposeBag)
+        
         addBookButton.rx.tap
-            .bind(with: self) { owner, _ in
-                guard
-                    let bookObjectId = owner.userInfo.selectedBookId
-                        .flatMap({ try? ObjectId(string: $0) })
-                else { return }
-
+            .withLatestFrom(myBookObjectId)
+            .compactMap{ $0 }
+            .bind(with: self) { owner, bookObjectId in
                 let createWordModel = CreateWord(
-                    wordBookId: bookObjectId,
+                    wordBookId: bookObjectId, // 💡 전달받은 ID 사용
                     wordId: nil,
                     thumbnail: "",
                     bookTitle: "나의 단어장",
                     word: "",
                     meaning: "",
-                    actionType: .add
+                    actionType: .add // 💡 .add 액션
                 )
                 let vm = AddWordViewModel(wordItem: createWordModel)
                 let vc = AddWordViewController(
                     viewModel: vm,
-                    entryPoint: .edit
+                    entryPoint: .add // 💡 .add 액션
                 )
-//                let vc = UINavigationController(
-//                    rootViewController: AddWordViewController(
-//                        viewModel: vm,
-//                        entryPoint: .edit
-//                    )
-//                )
                 owner.navigationController?.pushViewController(vc, animated: true)
-//                vc.modalPresentationStyle = .fullScreen
-//                owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
     }
 }
@@ -158,15 +154,18 @@ extension MyBookDetailViewController {
                 owner.showActionSheet(
                     title: item.word.word,
                     editAction: { [weak self] in
-                        guard self != nil else { return }
+                        guard let owner = self else { return }
                         
-                        guard
-                            let bookObjectId = owner.userInfo.selectedBookId
-                                .flatMap({ try? ObjectId(string: $0) })
-                        else { return }
+                        // --- 💡 5. '단어 수정' (연필) 로직 수정 ---
+                        
+                        // 💡 5-1. ViewModel에서 받은 ID를 .value로 즉시 사용
+                        guard let bookObjectId = owner.myBookObjectId.value else {
+                            print("Error: '나의 단어장' ID가 없습니다.")
+                            return
+                        }
                         
                         let createWordModel = CreateWord(
-                            wordBookId: bookObjectId,
+                            wordBookId: bookObjectId, // 💡 전달받은 ID 사용
                             wordId: try! ObjectId(string: item.word.id),
                             thumbnail: item.word.thumbnail,
                             bookTitle: "",
@@ -175,21 +174,22 @@ extension MyBookDetailViewController {
                             actionType: .edit
                         )
                         let vm = AddWordViewModel(wordItem: createWordModel)
-//                        let vc = AddWordViewController(
-//                            viewModel: vm,
-//                            entryPoint: .edit
-//                        )
-                        let vc = UINavigationController(
-                            rootViewController: AddWordViewController(
-                                viewModel: vm,
-                                entryPoint: .edit
-                            )
+                        let vc = AddWordViewController(
+                            viewModel: vm,
+                            entryPoint: .edit
                         )
-                        vc.modalPresentationStyle = .fullScreen
-                        owner.present(vc, animated: true)
+                        owner.navigationController?.pushViewController(vc, animated: true)
+//                        let vc = UINavigationController(
+//                            rootViewController: AddWordViewController(
+//                                viewModel: vm,
+//                                entryPoint: .edit
+//                            )
+//                        )
+//                        vc.modalPresentationStyle = .fullScreen
+//                        owner.present(vc, animated: true)
                     },
                     deleteAction: { [weak self] in
-                        guard let _ = self else { return }
+                        guard let owner = self else { return }
                         owner.deleteWordTrigger.accept(item.word)
                     }
                 )
