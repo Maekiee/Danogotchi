@@ -96,7 +96,7 @@ final class ActiveLearningManager {
         switch source {
         case .realm(let id):
             identifier = .init(id: id, type: .realm)
-            userInfo.selectedBookId = id
+//            userInfo.selectedBookId = id
         case .recommended(let id):
             identifier = .init(id: id, type: .recommended)
         }

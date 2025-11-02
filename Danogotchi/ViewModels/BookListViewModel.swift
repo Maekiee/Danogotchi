@@ -35,57 +35,62 @@ final class BookListViewModel: BaseViewModel {
         let downloadCompleteRelay = PublishRelay<Void>()
         
         let refreshTrigger = Observable.merge(
-            input.viewWillAppear.map { _ in () }, // .take(1) 제거하여 화면 진입 시마다 갱신
+            input.viewWillAppear,
             downloadCompleteRelay.asObservable()
         ).startWith(())
         
         refreshTrigger.bind(with: self) { owner, _ in
-            // 1. 'activeBookIdentifier'가 아닌 'selectedBookId' (기본 Realm ID)를 사용
-            if let wordBookId = owner.userInfo.selectedBookId,
-               let bookId = try? ObjectId(string: wordBookId) {
             
-                if let bookObject = owner.wordBookRepo.read(id: bookId) {
-                    let words = owner.wordBookRepo.fetchWordsInWordBook(id: bookId)
-                    
-                    let book = WordBook(
-                        id: bookObject.id.stringValue,
-                        title: bookObject.title,
-                        wordList: words,
-                        createAt: bookObject.createAt
-                    )
-                    myBookRelay.accept(book)
-                } else {
-                    myBookRelay.accept(nil)
-                }
-            } else {
+            // 1-1. Realm에서 "나의 단어장" *Struct*를 찾습니다.
+            guard let myBookStruct = owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" }) else {
+                
+                // "나의 단어장"이 없는 경우 (앱 초기 설치 등)
+                // (SearchThemeViewController에서 생성되므로, 여기서는 nil 처리)
                 myBookRelay.accept(nil)
+                return
             }
+            
+            // 1-2. (불필요한 로직 삭제)
+            // myBookStruct는 WordBook struct이며,
+            // readAll()을 통해 생성될 때 이미 wordList를 포함하고 있습니다.
+            
+            // 1-3. myBookRelay.accept()에 완전한 struct를 바로 전달합니다.
+            myBookRelay.accept(myBookStruct)
+            
         }.disposed(by: disposeBag)
         
         
         
-        // 추천 단어장 불러오기
         refreshTrigger
             .flatMapLatest { [weak self] _ -> Observable<[RecommendItem]> in
                 guard let self = self else { return .just([]) }
+                
+                // 1. Realm에 저장된 모든 단어장 목록을 가져옴
                 let myBooks = self.wordBookRepo.readAll()
                 
                 // 2. Mock 추천 단어장 목록을 가져옴
                 return self.recommendBookRepo.fetchRecommendBooks()
                     .map { mockBooks in
-                        // 3. Mock 단어장 목록을 순회하며 Realm 목록과 비교
                         mockBooks.map { mockBook in
                             // Realm에 Mock 단어장과 "제목"이 같은 단어장이 있는지 확인
                             if let matchingRealmBook = myBooks.first(where: { $0.title == mockBook.title }) {
-                                // 4. 있으면 .downloaded 상태 (Realm 데이터 전달)
-                                return .downloaded(matchingRealmBook)
+                                // ⭐️ "나의 단어장"은 추천 목록에 표시되면 안 되므로 필터링
+                                if matchingRealmBook.title == "나의 단어장" {
+                                    // 이 경우는 없어야 하지만, 만약을 위한 방어 코드
+                                    return nil
+                                } else {
+                                    // Realm에 복사본이 있으면 .downloaded
+                                    return .downloaded(matchingRealmBook)
+                                }
                             } else {
-                                // 5. 없으면 .notDownloaded 상태 (Mock 데이터 전달)
+                                // Realm에 없으면 .notDownloaded
                                 return .notDownloaded(mockBook)
                             }
                         }
+                        .compactMap { $0 } // nil 제거
                     }
-            }.bind(to: recommendItemsRelay) // 결과를 recommendItemsRelay에 바인딩
+            }
+            .bind(to: recommendItemsRelay)
             .disposed(by: disposeBag)
         
         
