@@ -44,10 +44,10 @@ final class WordTabViewController: BaseViewController {
 //        return control
 //    }()
 
-    private let profileTabButton: UIButton = {
+    private let settingTabButton: UIButton = {
         var config = UIButton.Configuration.filled()
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
-        config.image = UIImage(systemName: "person", withConfiguration: symbolConfig)
+        config.image = UIImage(systemName: "gearshape", withConfiguration: symbolConfig)
         config.baseForegroundColor = .black
         config.baseForegroundColor = .white
         // 어두운 반투명
@@ -190,7 +190,7 @@ final class WordTabViewController: BaseViewController {
             collectionView,
             showWordBookButton,
 //            addWordButton,
-            profileTabButton,
+            settingTabButton,
             startLearningButton,
             
 //            testButton, // x테스트
@@ -255,7 +255,7 @@ final class WordTabViewController: BaseViewController {
             make.height.equalTo(48)
         }
         
-        profileTabButton.snp.makeConstraints { make in
+        settingTabButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
             make.size.equalTo(48)
@@ -391,6 +391,13 @@ extension WordTabViewController {
                 vc.modalPresentationStyle = .overFullScreen
                 vc.modalTransitionStyle = .crossDissolve
                 owner.present(vc, animated: true)
+            }.disposed(by: disposeBag)
+        
+        settingTabButton.rx.tap
+            .bind(with: self) { owner, _ in
+                let vc = SettingTabViewController()
+                let navVc = UINavigationController(rootViewController: vc)
+                owner.present(navVc, animated: true)
             }.disposed(by: disposeBag)
 
         // 학습 시작하기
