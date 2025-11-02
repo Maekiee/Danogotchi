@@ -189,7 +189,7 @@ final class WordTabViewController: BaseViewController {
 //            noBookInfoContainer,
             collectionView,
             showWordBookButton,
-            addWordButton,
+//            addWordButton,
             profileTabButton,
             startLearningButton,
             
@@ -238,12 +238,12 @@ final class WordTabViewController: BaseViewController {
             make.size.equalTo(48)
         }
         
-        addWordButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-//            make.trailing.equalTo(showWordBookButton.snp.leading).offset(-8)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.size.equalTo(48)
-        }
+//        addWordButton.snp.makeConstraints { make in
+//            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+////            make.trailing.equalTo(showWordBookButton.snp.leading).offset(-8)
+//            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
+//            make.size.equalTo(48)
+//        }
     
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -344,33 +344,37 @@ extension WordTabViewController {
             }.disposed(by: disposeBag)
 
         // 단어 추가
-        addWordButton.rx.tap
-            .bind(with: self) { owner, _ in
-                guard
-                    let bookObjectId = owner.userInfo.selectedBookId
-                        .flatMap({ try? ObjectId(string: $0) })
-                else { return }
-
-                let createWordModel = CreateWord(
-                    wordBookId: bookObjectId,
-                    wordId: nil,
-                    thumbnail: "",
-                    bookTitle: owner.bookTitle,
-                    word: "",
-                    meaning: "",
-                    actionType: .add
-                )
-
-                let vm = AddWordViewModel(wordItem: createWordModel)
-                let vc = UINavigationController(
-                    rootViewController: AddWordViewController(
-                        viewModel: vm,
-                        entryPoint: .add
-                    )
-                )
-                vc.modalPresentationStyle = .fullScreen
-                owner.present(vc, animated: true)
-            }.disposed(by: disposeBag)
+//        addWordButton.rx.tap
+//            .bind(with: self) { owner, _ in
+//                guard
+//                    let bookObjectId = owner.userInfo.selectedBookId
+//                        .flatMap({ try? ObjectId(string: $0) })
+//                else { return }
+//
+//                let createWordModel = CreateWord(
+//                    wordBookId: bookObjectId,
+//                    wordId: nil,
+//                    thumbnail: "",
+//                    bookTitle: owner.bookTitle,
+//                    word: "",
+//                    meaning: "",
+//                    actionType: .add
+//                )
+//
+//                let vm = AddWordViewModel(wordItem: createWordModel)
+////                let vc = AddWordViewController(
+////                    viewModel: vm,
+////                    entryPoint: .add
+////                )
+//                let vc = UINavigationController(
+//                    rootViewController: AddWordViewController(
+//                        viewModel: vm,
+//                        entryPoint: .add
+//                    )
+//                )
+//                vc.modalPresentationStyle = .fullScreen
+//                owner.present(vc, animated: true)
+//            }.disposed(by: disposeBag)
 
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in

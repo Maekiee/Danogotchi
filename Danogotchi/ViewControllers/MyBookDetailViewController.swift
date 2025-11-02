@@ -27,12 +27,28 @@ final class MyBookDetailViewController: BaseViewController {
         button.configuration = config
         return button
     }()
+    private let addBookButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.filled()
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+                pointSize: 16,
+                weight: .medium
+            )
+        config.image = UIImage(systemName: "plus")
+        
+        config.baseForegroundColor = AppColor.appWhite
+        config.baseBackgroundColor = AppColor.oxfordBlue
+        config.cornerStyle = .capsule
+        button.configuration = config
+        return button
+    }()
     private let collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: MyBookDetailViewController.layout()
         )
         view.backgroundColor = AppColor.backgroundBeige
+        view.showsVerticalScrollIndicator = false
         return view
     }()
     
@@ -49,6 +65,7 @@ final class MyBookDetailViewController: BaseViewController {
         [
             backButton,
             collectionView,
+            addBookButton,
         ].forEach { view.addSubview($0)
         }
     }
@@ -57,6 +74,12 @@ final class MyBookDetailViewController: BaseViewController {
         backButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
             make.leading.equalToSuperview().offset(6)
+        }
+        
+        addBookButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-28)
+            make.trailing.equalToSuperview().offset(-20)
+            make.size.equalTo(44)
         }
         
         collectionView.snp.makeConstraints { make in
@@ -87,6 +110,33 @@ extension MyBookDetailViewController {
         output.wordList
             .drive(with: self) { owner, items in
                 owner.applaySnapshot(items: items)
+            }.disposed(by: disposeBag)
+        
+        addBookButton.rx.tap
+            .bind(with: self) { owner, _ in
+                guard
+                    let bookObjectId = owner.userInfo.selectedBookId
+                        .flatMap({ try? ObjectId(string: $0) })
+                else { return }
+
+                let createWordModel = CreateWord(
+                    wordBookId: bookObjectId,
+                    wordId: nil,
+                    thumbnail: "",
+                    bookTitle: "나의 단어장",
+                    word: "",
+                    meaning: "",
+                    actionType: .add
+                )
+                let vm = AddWordViewModel(wordItem: createWordModel)
+                let vc = UINavigationController(
+                    rootViewController: AddWordViewController(
+                        viewModel: vm,
+                        entryPoint: .edit
+                    )
+                )
+                vc.modalPresentationStyle = .fullScreen
+                owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
     }
 }
@@ -120,6 +170,10 @@ extension MyBookDetailViewController {
                             actionType: .edit
                         )
                         let vm = AddWordViewModel(wordItem: createWordModel)
+//                        let vc = AddWordViewController(
+//                            viewModel: vm,
+//                            entryPoint: .edit
+//                        )
                         let vc = UINavigationController(
                             rootViewController: AddWordViewController(
                                 viewModel: vm,
