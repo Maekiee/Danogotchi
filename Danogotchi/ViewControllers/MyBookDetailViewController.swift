@@ -94,6 +94,7 @@ final class MyBookDetailViewController: BaseViewController {
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
+        collectionView.contentInset.bottom = 100
     }
 }
 
