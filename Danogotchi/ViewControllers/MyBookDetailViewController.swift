@@ -129,14 +129,19 @@ extension MyBookDetailViewController {
                     actionType: .add
                 )
                 let vm = AddWordViewModel(wordItem: createWordModel)
-                let vc = UINavigationController(
-                    rootViewController: AddWordViewController(
-                        viewModel: vm,
-                        entryPoint: .edit
-                    )
+                let vc = AddWordViewController(
+                    viewModel: vm,
+                    entryPoint: .edit
                 )
-                vc.modalPresentationStyle = .fullScreen
-                owner.present(vc, animated: true)
+//                let vc = UINavigationController(
+//                    rootViewController: AddWordViewController(
+//                        viewModel: vm,
+//                        entryPoint: .edit
+//                    )
+//                )
+                owner.navigationController?.pushViewController(vc, animated: true)
+//                vc.modalPresentationStyle = .fullScreen
+//                owner.present(vc, animated: true)
             }.disposed(by: disposeBag)
     }
 }

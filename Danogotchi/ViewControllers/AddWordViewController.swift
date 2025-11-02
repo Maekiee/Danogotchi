@@ -20,25 +20,16 @@ final class AddWordViewController: BaseViewController {
     }
     
     // MARK: UI Property
-    private let VScrollView: UIScrollView = {
-        let view = UIScrollView()
-        view.showsVerticalScrollIndicator = false
-        view.isUserInteractionEnabled = true
-        view.delaysContentTouches = false
-        view.canCancelContentTouches = true
-        return view
+    private let backButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "chevron.backward")
+        config.title = "Back"
+        config.imagePadding = 4
+        config.baseForegroundColor = .black
+        button.configuration = config
+        return button
     }()
-    
-    private let contentView = UIView()
-    
-//    private let closeButton: UIButton = {
-//        let button = UIButton()
-//        var config = UIButton.Configuration.plain()
-//        config.image = 
-//        button.configuration = config
-//        return button
-//    }()
-    
     private let wordBookTitleTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어장 세트 이름"
@@ -46,7 +37,6 @@ final class AddWordViewController: BaseViewController {
         tf.isUserInteractionEnabled = true
         return tf
     }()
-    
     private let wordTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어"
@@ -55,7 +45,6 @@ final class AddWordViewController: BaseViewController {
         tf.isUserInteractionEnabled = true
         return tf
     }()
-    
     private let meanTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "뜻"
@@ -64,7 +53,6 @@ final class AddWordViewController: BaseViewController {
         tf.isUserInteractionEnabled = true
         return tf
     }()
-    
     private lazy var addWordButton = PrimaryFillButton(title: self.entryPoint == .add ? "저장" : "수정")
     
     override func viewDidLoad() {
@@ -77,29 +65,23 @@ final class AddWordViewController: BaseViewController {
     }
     
     override func configHierarchy() {
-        
-        view.addSubview(VScrollView)
-        VScrollView.addSubview(contentView)
-        
         [
+            backButton,
             wordTextField,
             meanTextField,
-            addWordButton
-        ].forEach { contentView.addSubview($0) }
+            addWordButton,
+        ].forEach { view.addSubview($0) }
     }
     
     override func configLayout() {
-        VScrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
-        }
         
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview()
+        backButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(8)
         }
         
         wordTextField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.top.equalTo(backButton.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
@@ -110,7 +92,8 @@ final class AddWordViewController: BaseViewController {
         
         [
             wordTextField,
-            meanTextField].forEach { underlineTextField in
+            meanTextField
+        ].forEach { underlineTextField in
             underlineTextField.tf.snp.makeConstraints { make in
                 make.height.equalTo(40) // 원하는 높이 설정
             }
@@ -120,19 +103,10 @@ final class AddWordViewController: BaseViewController {
             make.top.equalTo(meanTextField.snp.bottom).offset(24)
             make.horizontalEdges.equalToSuperview().inset(20)
             make.height.equalTo(48)
-            make.bottom.equalToSuperview().offset(-20)
         }
     }
     
     override func configView() {
-        navigationController?.navigationBar.tintColor = .black
-            
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "xmark"),
-            style: .plain,
-            target: nil,
-            action: nil)
-        
         view.backgroundColor = AppColor.backgroundBeige
         
     }
@@ -152,9 +126,9 @@ extension AddWordViewController {
         )
         let output = viewModel.transform(input: input)
         
-        navigationItem.leftBarButtonItem!.rx.tap
+        backButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.dismiss(animated: true)
+                owner.navigationController?.popViewController(animated: true)
             }.disposed(by: disposeBag)
         
         output.wordImageUrl
