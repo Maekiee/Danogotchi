@@ -86,6 +86,11 @@ final class ActiveLearningManager {
 
     // '활성 단어장' 변경 (ViewControllers에서 호출)
     func setActiveBook(_ book: WordBook, source: WordBookSource) {
+        
+        if activeBook.value?.id != book.id {
+            userInfo.clearQuizState()
+        }
+        
         let identifier: UserInfoManager.ActiveBookIdentifier
         
         switch source {
