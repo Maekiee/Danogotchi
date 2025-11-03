@@ -5,8 +5,13 @@ import RxCocoa
 final class SearchThemeViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let repository: SearchThemeRepoProtocol
+    private let mode: SearchThemeViewController.EntryMode
     
-    init(repository: SearchThemeRepoProtocol = SearchThemeRepository()) {
+    init(
+        mode: SearchThemeViewController.EntryMode = .onboarding,
+        repository: SearchThemeRepoProtocol = SearchThemeRepository()
+    ) {
+        self.mode = mode
         self.repository = repository
     }
     

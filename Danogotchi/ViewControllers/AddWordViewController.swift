@@ -131,6 +131,7 @@ extension AddWordViewController {
                 owner.navigationController?.popViewController(animated: true)
             }.disposed(by: disposeBag)
         
+        
         output.wordImageUrl
             .drive(with: self) { owner, url in
                 currentImageUrl = url

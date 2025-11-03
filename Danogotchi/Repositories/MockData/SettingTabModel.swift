@@ -37,8 +37,8 @@ extension Setting.Category {
         case .statistic:
             return [
                 Setting(icon: "📜", title: "학습 히스토리", category: self),
-                Setting(icon: "🧮", title: "전체 학습 단어", category: self),
-                Setting(icon: "🎯", title: "정오답 비율", category: self),
+//                Setting(icon: "🧮", title: "전체 학습 단어", category: self),
+//                Setting(icon: "🎯", title: "정오답 비율", category: self),
             ]
         case .support:
             return [

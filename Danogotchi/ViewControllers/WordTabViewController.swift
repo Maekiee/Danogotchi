@@ -292,89 +292,25 @@ extension WordTabViewController {
                 _ in
             },
             selectedWordCard: deleteWordTrigger.asObservable(),
-//            segmentChanged: listSegmentedControl.rx.selectedSegmentIndex
-//                .asObservable()
         )
 
         let output = viewModel.transform(input: input)
-
-//        listSegmentedControl.rx.selectedSegmentIndex
-//            .bind(with: self) { owner, index in
-//                owner.startLearningButton.isHidden = index == 1 ? true : false
-//            }.disposed(by: disposeBag)
-
-//        output.bookTitle
-//            .drive(with: self) { owner, title in
-//                owner.bookTitle = title
-//                owner.navigationItem.title = title
-//            }.disposed(by: disposeBag)
-
-//        output.currentWordbook
-//            .drive(with: self) { owner, hasWordBook in
-//                // 단어장 1개 이상
-//                owner.noBookInfoContainer.isHidden = !hasWordBook
-//                owner.addWordButton.isHidden = hasWordBook
-////                owner.addWordButton.isHidden = hasWordBook
-////                owner.showWordBookButton.isHidden = hasWordBook
-////                owner.collectionView.isHidden = hasWordBook
-////                owner.startLearningButton.isHidden = hasWordBook
-//
-//                // 단어장 0개
-////                owner.noBookInfoContainer.isHidden = !hasWordBook
-////                owner.noWordBookLabel.isHidden = !hasWordBook
-////                owner.showCreateBookButton.isHidden = !hasWordBook
-//            }
-//            .disposed(by: disposeBag)
+        
+        
+        UserInfoManager.shared.themeUrlObservable
+            .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, themeUrl in
+                owner.updateBackgroundImage(with: themeUrl)
+            }
+            .disposed(by: disposeBag)
 
         output.wordItems
             .drive(with: self) { owner, wordList in
                 owner.collectionView.isHidden = wordList.isEmpty
-//                let selectedBook = owner.userInfo.selectedBookId
-//
-//                if selectedBook == nil && wordList.isEmpty {
-//                    owner.collectionView.isHidden = true
-//                } else if selectedBook != nil && wordList.isEmpty {
-//                    owner.collectionView.isHidden = true
-//                } else {
-//                    owner.collectionView.isHidden = false
-//                }
-
                 owner.allWordsInfo = wordList
                 owner.applySnapshot(items: wordList)
             }.disposed(by: disposeBag)
-
-        // 단어 추가
-//        addWordButton.rx.tap
-//            .bind(with: self) { owner, _ in
-//                guard
-//                    let bookObjectId = owner.userInfo.selectedBookId
-//                        .flatMap({ try? ObjectId(string: $0) })
-//                else { return }
-//
-//                let createWordModel = CreateWord(
-//                    wordBookId: bookObjectId,
-//                    wordId: nil,
-//                    thumbnail: "",
-//                    bookTitle: owner.bookTitle,
-//                    word: "",
-//                    meaning: "",
-//                    actionType: .add
-//                )
-//
-//                let vm = AddWordViewModel(wordItem: createWordModel)
-////                let vc = AddWordViewController(
-////                    viewModel: vm,
-////                    entryPoint: .add
-////                )
-//                let vc = UINavigationController(
-//                    rootViewController: AddWordViewController(
-//                        viewModel: vm,
-//                        entryPoint: .add
-//                    )
-//                )
-//                vc.modalPresentationStyle = .fullScreen
-//                owner.present(vc, animated: true)
-//            }.disposed(by: disposeBag)
 
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
@@ -461,6 +397,16 @@ extension WordTabViewController {
 //            }.disposed(by: disposeBag)
 
     }
+    
+    private func updateBackgroundImage(with urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        
+        themeBackgroundImage.kf.setImage(
+            with: url,
+            options: [.transition(.fade(0.3)), .cacheOriginalImage]
+        )
+    }
+
 }
 
 // MARK: - CollectionView

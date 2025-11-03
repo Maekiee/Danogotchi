@@ -39,6 +39,12 @@ final class UserInfoManager: UserInfoProtocol {
     
     private let wordBookRefreshRelay = PublishRelay<Void>()
     
+    private let themeUrlRelay = BehaviorRelay<String?>(value: nil)
+    
+    var themeUrlObservable: Observable<String?> {
+        return themeUrlRelay.asObservable()
+    }
+    
     var wordBookRefreshObservable: Observable<Void> {
         return wordBookRefreshRelay.asObservable()
     }
@@ -53,6 +59,7 @@ final class UserInfoManager: UserInfoProtocol {
     private init () {
         // 1. (Static) 마이그레이션 실행
         UserInfoManager.migrateOldKey()
+        
         
         // 2. UserDefaults에서 직접 초기값 로드 (self 사용 안함)
         let initialIdentifier: ActiveBookIdentifier?
@@ -145,6 +152,7 @@ final class UserInfoManager: UserInfoProtocol {
         
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.themeUrl)
+            themeUrlRelay.accept(newValue)
         }
     }
     

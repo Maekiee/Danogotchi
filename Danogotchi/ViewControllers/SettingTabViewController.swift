@@ -134,36 +134,6 @@ final class SettingTabViewController: BaseViewController {
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
-        
-//        navigationController?.setNavigationBarHidden(true, animated: false)
-//
-//        
-//        navigationController?.navigationBar.prefersLargeTitles = true
-//        navigationItem.largeTitleDisplayMode = .always
-//        navigationItem.title = "설정"
-//        
-//        if let navigationBar = navigationController?.navigationBar {
-//            let appearance = UINavigationBarAppearance()
-//            appearance.configureWithOpaqueBackground()
-//            appearance.backgroundColor = AppColor.backgroundBeige
-//            appearance.shadowColor = .clear  // 하단 그림자 제거 (선택사항)
-//            
-//            // 타이틀 색상 설정 (선택사항)
-//            appearance.titleTextAttributes = [
-//                .foregroundColor: UIColor.black,
-//                .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
-//            ]
-//            
-//            // Large Title 설정 (선택사항)
-//            appearance.largeTitleTextAttributes = [
-//                .foregroundColor: UIColor.black
-//            ]
-//            
-//            navigationBar.standardAppearance = appearance
-//            navigationBar.scrollEdgeAppearance = appearance  // 스크롤 시에도 같은 appearance 적용
-//            navigationBar.compactAppearance = appearance
-//        }
-        
     }
     
     private func createLayout() -> UICollectionViewLayout {
@@ -280,7 +250,7 @@ extension SettingTabViewController {
     }
     
     private func showThemeSelector() {
-        let vc = SearchThemeViewController()
+        let vc = SearchThemeViewController(mode: .settings)
         navigationController?.pushViewController(vc, animated: true)
     }
     

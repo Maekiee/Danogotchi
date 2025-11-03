@@ -4,11 +4,20 @@ import SnapKit
 import UIKit
 
 final class SearchThemeViewController: BaseViewController {
+    
+    enum EntryMode {
+        case onboarding
+        case settings
+    }
+    
+    private let entryMode: EntryMode
     private let disposeBag = DisposeBag()
-    private let viewModel = SearchThemeViewModel()
+    private let viewModel: SearchThemeViewModel
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
     private let wordBookRepo = WordBookRepository()
     private let userInfo = UserInfoManager.shared
+    
+    
     
     private enum Section {
         case main
@@ -49,14 +58,27 @@ final class SearchThemeViewController: BaseViewController {
         view.backgroundColor = AppColor.backgroundBeige
         return view
     }()
+    private lazy var  submitButton: PrimaryFillButton = {
+        let button = entryMode == .onboarding ? "시작하기" : "수정하기"
+        return PrimaryFillButton(title: button)
+    }()
     
-    private let submitButton = PrimaryFillButton(title: "시작하기")
+    init(mode: EntryMode = .onboarding) {
+        self.entryMode = mode
+        self.viewModel = SearchThemeViewModel(mode: mode)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
         configLayout()
         configView()
+        
         configDataSource()
         
         bind()
@@ -73,7 +95,7 @@ final class SearchThemeViewController: BaseViewController {
     
     override func configLayout() {
         titleText.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
@@ -99,6 +121,7 @@ final class SearchThemeViewController: BaseViewController {
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
+        navigationController?.navigationBar.tintColor = .black
     }
     
 }
@@ -169,19 +192,53 @@ extension SearchThemeViewController {
         
         submitButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.wordBookRepo.create(title: "나의 단어장")
-                guard let myBook = owner.wordBookRepo.readAll().last else { return }
+                guard let selectedTheme = owner.selectedThemeUrl.value else { return }
                 
-                // 배경 사진이 유저디폴트에 저장되었는지 확인
-                if let selectedTheme = owner.selectedThemeUrl.value {
-                    UserInfoManager.shared.currentThemeUrl = selectedTheme
-                    // 생성된 단어장 유저 인포에 넣기
-                    if owner.userInfo.selectedBookId == nil {
-                        owner.userInfo.selectedBookId = myBook.id
-                        Coordinator.switchToMainVieWController()
-                    }
+                switch owner.entryMode {
+                case .onboarding:
+                    owner.handleOnboardingSubmit(selectedTheme: selectedTheme)
+                case .settings:
+                    owner.handleSettingsSubmit(selectedTheme: selectedTheme)
                 }
+
+//                owner.wordBookRepo.create(title: "나의 단어장")
+//                guard let myBook = owner.wordBookRepo.readAll().last else { return }
+//                
+//                // 배경 사진이 유저디폴트에 저장되었는지 확인
+//                if let selectedTheme = owner.selectedThemeUrl.value {
+//                    UserInfoManager.shared.currentThemeUrl = selectedTheme
+//                    // 생성된 단어장 유저 인포에 넣기
+//                    if owner.userInfo.selectedBookId == nil {
+//                        owner.userInfo.selectedBookId = myBook.id
+//                        Coordinator.switchToMainVieWController()
+//                    }
+//                }
             }.disposed(by: disposeBag)
+    }
+    
+    // 온보딩에서 시작하기 버튼 탭 (기존 로직)
+    private func handleOnboardingSubmit(selectedTheme: String) {
+        // 단어장 생성
+        wordBookRepo.create(title: "나의 단어장")
+        guard let myBook = wordBookRepo.readAll().last else { return }
+        
+        // 테마 저장
+        UserInfoManager.shared.currentThemeUrl = selectedTheme
+        
+        // 생성된 단어장 유저 인포에 넣기
+        if userInfo.selectedBookId == nil {
+            userInfo.selectedBookId = myBook.id
+            Coordinator.switchToMainVieWController()
+        }
+    }
+    
+    /// 설정 화면에서 수정하기 버튼 탭 (새로운 로직)
+    private func handleSettingsSubmit(selectedTheme: String) {
+        // 테마만 변경
+        UserInfoManager.shared.currentThemeUrl = selectedTheme
+        
+        // 설정 화면으로 돌아가기
+        navigationController?.popViewController(animated: true)
     }
 }
 
