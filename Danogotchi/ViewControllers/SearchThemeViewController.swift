@@ -44,10 +44,9 @@ final class SearchThemeViewController: BaseViewController {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: waterfallLayout // 추가
-            //            collectionViewLayout: SearchThemeViewController.layout()
         )
         view.showsVerticalScrollIndicator = false
-        view.backgroundColor = AppColor.appBackgroundColor
+        view.backgroundColor = AppColor.backgroundBeige
         return view
     }()
     
@@ -80,8 +79,8 @@ final class SearchThemeViewController: BaseViewController {
         
         textField.snp.makeConstraints { make in
             make.top.equalTo(titleText.snp.bottom).offset(12)
-            make.horizontalEdges.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.horizontalEdges.equalToSuperview().inset(16)
+            make.height.equalTo(48)
         }
         
         collectionView.snp.makeConstraints { make in
@@ -99,7 +98,7 @@ final class SearchThemeViewController: BaseViewController {
     }
     
     override func configView() {
-        
+        view.backgroundColor = AppColor.backgroundBeige
     }
     
 }
