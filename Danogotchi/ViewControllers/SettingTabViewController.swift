@@ -3,6 +3,39 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
+
+class CustomHeaderView: UICollectionReusableView {
+    static let reuseIdentifier = "CustomHeaderView"
+    
+    private let label: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .medium)
+        label.textColor = .black
+        return label
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(label)
+        label.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(4)  
+            make.top.equalToSuperview().offset(8)
+            make.bottom.equalToSuperview().offset(-8)
+        }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(with text: String) {
+        label.text = text
+    }
+}
+
+
+
+
 final class SettingTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = SettingTabViewModel()
@@ -23,9 +56,7 @@ final class SettingTabViewController: BaseViewController {
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-//        view.backgroundColor = .systemBackground
-
-        view.backgroundColor = .systemBlue
+        view.backgroundColor = AppColor.backgroundBeige
 //        view.delegate = self
         return view
     }()
@@ -69,7 +100,7 @@ final class SettingTabViewController: BaseViewController {
     }
     
     override func configLayout() {
-        
+
     }
     
     override func configView() {
@@ -80,7 +111,15 @@ final class SettingTabViewController: BaseViewController {
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
-        return UICollectionViewCompositionalLayout.list(using: configuration)
+        configuration.backgroundColor = AppColor.backgroundBeige
+        
+        let layout = UICollectionViewCompositionalLayout.list(using: configuration)
+        
+        let config = UICollectionViewCompositionalLayoutConfiguration()
+        config.interSectionSpacing = 0
+        layout.configuration = config
+        
+        return layout
     }
     
     private func configureDataSource() {
@@ -90,19 +129,20 @@ final class SettingTabViewController: BaseViewController {
         { cell, indexPath, setting in
             var contentConfiguration = UIListContentConfiguration.cell()
             contentConfiguration.text = "\(setting.icon)   \(setting.title)"
+            var backgroundConfig = UIBackgroundConfiguration.listGroupedCell()
+//            backgroundConfig.backgroundColor = AppColor.backgroundBeige2
+//            backgroundConfig.backgroundColor = AppColor.pointDarkGray
+            backgroundConfig.backgroundColor = AppColor.appWhite
+            cell.backgroundConfiguration = backgroundConfig
             cell.contentConfiguration = contentConfiguration
             cell.accessories = [.disclosureIndicator()]
         }
         
-        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (headerView, elementKind, indexPath) in
-            guard let self = self else { return }
-            
-            let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
-            
-            var content = UIListContentConfiguration.groupedHeader()
-            
-            content.text = section.description
-            headerView.contentConfiguration = content
+        let headerRegistration = UICollectionView.SupplementaryRegistration<CustomHeaderView>(
+            elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (headerView, elementKind, indexPath) in
+                guard let self = self else { return }
+                let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
+                headerView.configure(with: section.description)
         }
         
         // data source
