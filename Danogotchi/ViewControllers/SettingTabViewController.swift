@@ -18,7 +18,7 @@ class CustomHeaderView: UICollectionReusableView {
         super.init(frame: frame)
         addSubview(label)
         label.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(4)  
+            make.leading.equalToSuperview().offset(4)
             make.top.equalToSuperview().offset(8)
             make.bottom.equalToSuperview().offset(-8)
         }
@@ -53,11 +53,20 @@ final class SettingTabViewController: BaseViewController {
         }
     }
     
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "설정"
+        label.font = .systemFont(ofSize: 28, weight: .bold)
+        label.textColor = .black
+        return label
+    }()
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.backgroundColor = AppColor.backgroundBeige
-//        view.delegate = self
+        view.alwaysBounceVertical = false
+        view.bounces = true
         return view
     }()
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
@@ -79,6 +88,9 @@ final class SettingTabViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+
+        
         if let indexPath = self.collectionView.indexPathsForSelectedItems?.first {
             if let coordinator = self.transitionCoordinator {
                 coordinator.animate(alongsideTransition: { context in
@@ -94,18 +106,64 @@ final class SettingTabViewController: BaseViewController {
         }
     }
     
-    override func configHierarchy() {
-        view.addSubview(collectionView)
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // 다른 화면으로 이동 시 네비게이션 바 다시 보이기
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+
     
+    override func configHierarchy() {
+        view.addSubview(titleLabel)
+        view.addSubview(collectionView)
+        
     }
     
     override func configLayout() {
-
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.leading.equalToSuperview().offset(20)
+        }
+        
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
     }
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
-       
+        
+//        navigationController?.setNavigationBarHidden(true, animated: false)
+//
+//        
+//        navigationController?.navigationBar.prefersLargeTitles = true
+//        navigationItem.largeTitleDisplayMode = .always
+//        navigationItem.title = "설정"
+//        
+//        if let navigationBar = navigationController?.navigationBar {
+//            let appearance = UINavigationBarAppearance()
+//            appearance.configureWithOpaqueBackground()
+//            appearance.backgroundColor = AppColor.backgroundBeige
+//            appearance.shadowColor = .clear  // 하단 그림자 제거 (선택사항)
+//            
+//            // 타이틀 색상 설정 (선택사항)
+//            appearance.titleTextAttributes = [
+//                .foregroundColor: UIColor.black,
+//                .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
+//            ]
+//            
+//            // Large Title 설정 (선택사항)
+//            appearance.largeTitleTextAttributes = [
+//                .foregroundColor: UIColor.black
+//            ]
+//            
+//            navigationBar.standardAppearance = appearance
+//            navigationBar.scrollEdgeAppearance = appearance  // 스크롤 시에도 같은 appearance 적용
+//            navigationBar.compactAppearance = appearance
+//        }
+        
     }
     
     private func createLayout() -> UICollectionViewLayout {
@@ -123,15 +181,13 @@ final class SettingTabViewController: BaseViewController {
     }
     
     private func configureDataSource() {
-
+        
         // list cell
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Setting>
         { cell, indexPath, setting in
             var contentConfiguration = UIListContentConfiguration.cell()
             contentConfiguration.text = "\(setting.icon)   \(setting.title)"
             var backgroundConfig = UIBackgroundConfiguration.listGroupedCell()
-//            backgroundConfig.backgroundColor = AppColor.backgroundBeige2
-//            backgroundConfig.backgroundColor = AppColor.pointDarkGray
             backgroundConfig.backgroundColor = AppColor.appWhite
             cell.backgroundConfiguration = backgroundConfig
             cell.contentConfiguration = contentConfiguration
@@ -143,7 +199,7 @@ final class SettingTabViewController: BaseViewController {
                 guard let self = self else { return }
                 let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
                 headerView.configure(with: section.description)
-        }
+            }
         
         // data source
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) {
@@ -171,7 +227,7 @@ final class SettingTabViewController: BaseViewController {
             dataSource.apply(sectionSnapshot, to: category, animatingDifferences: false)
         }
     }
-
+    
 }
 
 //extension SettingTabViewController: UICollectionViewDelegate {
@@ -189,5 +245,62 @@ extension SettingTabViewController {
     private func bind() {
         let input = SettingTabViewModel.Input()
         let output = viewModel.transform(input: input)
+        
+        
+        collectionView.rx.itemSelected
+            .bind(with: self) { owner, indexPath in
+                guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
+                owner.handleSettingAction(selectedCell.icon)
+            }.disposed(by: disposeBag)
     }
+    
+    private func handleSettingAction(_ setting: Setting) {
+        switch setting.title {
+        case "배경 테마 변경하기":
+            showThemeSelector()
+        case "학습 히스토리":
+            print("학습 히스토리")
+        case "전체 학습 단어":
+            print("전체 학습 단어")
+        case "정오답 비율":
+            print("정오답 비율")
+        case "문의하기":
+            print("문의 하기")
+        case "앱스토어 리뷰":
+            print("앱스토어 리뷰")
+        case "오픈소스 라이선스":
+            print("오픈소스 라이선스")
+        case "개인정보 처리방침":
+            print("개인정보 처리방침")
+        case "앱 버전":
+            print("앱 버전")
+        default:
+            print("ddd")
+        }
+    }
+    
+    private func showThemeSelector() {
+        let vc = SearchThemeViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+//    private func showThemeSelector() {
+//        
+//    }
+//    
+//    private func showThemeSelector() {
+//        
+//    }
+//    
+//    private func showThemeSelector() {
+//        
+//    }
+//    
+//    private func showThemeSelector() {
+//        
+//    }
+//    
+//    private func showThemeSelector() {
+//        
+//    }
 }
