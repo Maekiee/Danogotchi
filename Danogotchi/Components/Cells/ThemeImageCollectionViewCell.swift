@@ -13,14 +13,12 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         view.clipsToBounds = true
         return view
     }()
-    
     private let selectionOverlay: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.3)
         view.isHidden = true
         return view
     }()
-    
     private let checkmarkIcon: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(systemName: "checkmark.circle.fill")
