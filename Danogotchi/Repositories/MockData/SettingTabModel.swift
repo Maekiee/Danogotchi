@@ -5,7 +5,7 @@ struct Setting: Hashable {
     
     enum Category: CaseIterable, CustomStringConvertible {
         case general
-        case statistic
+//        case statistic
         case support
         case info
     }
@@ -22,7 +22,7 @@ extension Setting.Category {
     var description: String {
         switch self {
         case .general: return "일반"
-        case .statistic: return "학습 통계"
+//        case .statistic: return "학습 통계"
         case .support: return "지원 및 피드백"
         case .info: return "앱 정보"
         }
@@ -34,12 +34,12 @@ extension Setting.Category {
             return [
                 Setting(icon: "🎨", title: "배경 테마 변경하기", category: self)
             ]
-        case .statistic:
-            return [
-                Setting(icon: "📜", title: "학습 히스토리", category: self),
+//        case .statistic:
+//            return [
+//                Setting(icon: "📜", title: "학습 히스토리", category: self),
 //                Setting(icon: "🧮", title: "전체 학습 단어", category: self),
 //                Setting(icon: "🎯", title: "정오답 비율", category: self),
-            ]
+//            ]
         case .support:
             return [
                 Setting(icon: "✉️", title: "문의하기", category: self),
