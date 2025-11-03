@@ -24,8 +24,8 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
     private let checkmarkIcon: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(systemName: "checkmark.circle.fill")
-        view.tintColor = AppColor.testPrimaryColor
-        view.backgroundColor = .white
+        view.tintColor = AppColor.appWhite
+        view.backgroundColor = AppColor.oxfordBlue
         view.layer.cornerRadius = 12
         view.clipsToBounds = true
         view.isHidden = true
@@ -91,7 +91,7 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
     
     func setSelected(_ selected: Bool) {
         contentView.layer.borderWidth = selected ? 3 : 0
-        contentView.layer.borderColor = selected ? AppColor.testPrimaryColor.cgColor : UIColor.clear.cgColor
+        contentView.layer.borderColor = selected ? AppColor.appWhite.cgColor : UIColor.clear.cgColor
         selectionOverlay.isHidden = !selected
         checkmarkIcon.isHidden = !selected
     }
