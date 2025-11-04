@@ -76,11 +76,11 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     private func configView() {
         backgroundColor = AppColor.backgroundBeige2
         layer.borderWidth = 1.5
-        layer.borderColor = AppColor.pointDarkGray.cgColor
+        layer.borderColor = AppColor.pointBlack.cgColor
         layer.cornerRadius = 20
         
         // 그림자 (cell의 layer에 적용)
-        layer.shadowColor = AppColor.pointDarkGray.cgColor
+        layer.shadowColor = AppColor.pointBlack.cgColor
         layer.shadowOpacity = 1
         layer.shadowOffset = CGSize(width: 0, height: 4)
         layer.shadowRadius = 0
