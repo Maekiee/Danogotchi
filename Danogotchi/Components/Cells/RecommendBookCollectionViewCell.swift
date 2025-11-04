@@ -59,6 +59,13 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         downloadButton.isHidden = true
         titleLabel.isHidden = false
         titleLabel.text = nil
+        
+        symbolIconImage.snp.remakeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.centerY.equalToSuperview().offset(-16)
+            make.height.equalTo(112)
+            make.width.equalTo(200)
+        }
     }
     
     override init(frame: CGRect) {
@@ -129,6 +136,13 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
                 make.centerY.equalToSuperview().offset(-4)
                 make.height.equalTo(88)
                 make.width.equalTo(180)
+            }
+        } else {
+            symbolIconImage.snp.remakeConstraints { make in
+                make.centerX.equalToSuperview()
+                make.centerY.equalToSuperview().offset(-16)
+                make.height.equalTo(112)
+                make.width.equalTo(200)
             }
         }
         
