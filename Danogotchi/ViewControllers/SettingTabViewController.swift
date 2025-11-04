@@ -258,7 +258,7 @@ extension SettingTabViewController {
         case "문의하기":
             print("문의 하기")
         case "앱스토어 리뷰":
-            print("앱스토어 리뷰")
+            openAppStore()
         case "오픈소스 라이선스":
             print("오픈소스 라이선스")
         case "개인정보 처리방침":
@@ -275,9 +275,13 @@ extension SettingTabViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
-//    private func showThemeSelector() {
-//        
-//    }
+    private func openAppStore() {
+        print("리뷰 가기")
+        let urlString = "itms-apps://itunes.apple.com/app/6753820016"
+        guard let url = URL(string: urlString) else { return }
+        print("리뷰 가기2")
+        UIApplication.shared.open(url)
+    }
 //    
 //    private func showThemeSelector() {
 //        
