@@ -3,6 +3,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 import SafariServices
+import MessageUI
 
 class CustomHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "CustomHeaderView"
@@ -221,7 +222,7 @@ final class SettingTabViewController: BaseViewController {
     
 }
 
-extension SettingTabViewController {
+extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     private func bind() {
         let input = SettingTabViewModel.Input()
         let output = viewModel.transform(input: input)
@@ -238,22 +239,12 @@ extension SettingTabViewController {
         switch setting.title {
         case "배경 테마 변경하기":
             showThemeSelector()
-        case "학습 히스토리":
-            print("학습 히스토리")
-        case "전체 학습 단어":
-            print("전체 학습 단어")
-        case "정오답 비율":
-            print("정오답 비율")
         case "문의하기":
-            print("문의 하기")
+            openEmailForm()
         case "앱스토어 리뷰":
             openAppStore()
-        case "오픈소스 라이선스":
-            pushLicenseList()
         case "개인정보 처리방침":
             openPrivacyPolicy()
-        case "앱 버전":
-            print("앱 버전")
         default:
             print("ddd")
         }
@@ -282,19 +273,73 @@ extension SettingTabViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
 //
-//    private func showThemeSelector() {
-//        
-//    }
-//    
-//    private func showThemeSelector() {
-//        
-//    }
-//    
-//    private func showThemeSelector() {
-//        
-//    }
-//    
-//    private func showThemeSelector() {
-//        
-//    }
+    private func openEmailForm() {
+        // 3. 기기에서 메일을 보낼 수 있는지 확인 (메일 계정이 설정되어 있는지)
+        if MFMailComposeViewController.canSendMail() {
+            let mailComposer = MFMailComposeViewController()
+            
+            // 4. 델리게이트 설정 (메일 전송/취소 시 창을 닫기 위해 필수)
+            mailComposer.mailComposeDelegate = self
+            
+            // 5. 메일 수신자 설정 (배열 형태)
+            mailComposer.setToRecipients(["pdwssf@gmail.com"]) // 실제 이메일 주소
+            
+            // 6. 메일 제목 설정
+            mailComposer.setSubject("앱 문의하기")
+            
+            // 7. 메일 본문 설정 (HTML 형식이 아니므로 false)
+            let body = """
+                    궁금하신 점이나 불편 사항을 편하게 남겨주세요.
+                    
+                    
+                    
+                    
+                    -------------------
+                    앱 버전: \(appVersion)
+                    기기: \(UIDevice.current.model)
+                    OS 버전: \(UIDevice.current.systemVersion)
+                    -------------------
+                    """
+            mailComposer.setMessageBody(body, isHTML: false)
+            
+            // 8. 메일 작성 폼을 모달로 띄웁니다.
+            self.present(mailComposer, animated: true, completion: nil)
+            
+        } else {
+            // 9. 메일 계정이 설정되지 않았을 때 사용자에게 알림
+            showMailErrorAlert()
+        }
+    }
+    // 9-1. 메일 설정 오류 알림 함수
+    func showMailErrorAlert() {
+        let alert = UIAlertController(title: "메일 전송 실패", message: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func showMailSucceedAlert() {
+        let alert = UIAlertController(title: "메일 전송 성공", message: "메일이 성공적으로 전송 되었습니다.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    // 사용자가 '취소' 또는 '전송' 버튼을 눌렀을 때 호출됩니다.
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        // 메일 작성 폼을 닫습니다.
+        controller.dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            switch result {
+            case .sent:
+                self.showMailSucceedAlert()
+            case .saved:
+                print("Mail saved")
+            case .cancelled:
+                print("Mail cancelled")
+            case .failed:
+                print("Mail failed: \(error?.localizedDescription ?? "Unknown error")")
+            @unknown default:
+                fatalError()
+            }
+        }
+    }
 }
