@@ -144,10 +144,8 @@ extension SearchThemeViewController {
         
         output.themeImageList
             .drive(with: self) { owner, imageList in
-                // 추가된 부분 --------------
                 owner.imageDataList = imageList
                 owner.waterfallLayout.invalidateLayout()
-                // ----------------------
                 
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
@@ -200,19 +198,7 @@ extension SearchThemeViewController {
                 case .settings:
                     owner.handleSettingsSubmit(selectedTheme: selectedTheme)
                 }
-
-//                owner.wordBookRepo.create(title: "나의 단어장")
-//                guard let myBook = owner.wordBookRepo.readAll().last else { return }
-//                
-//                // 배경 사진이 유저디폴트에 저장되었는지 확인
-//                if let selectedTheme = owner.selectedThemeUrl.value {
-//                    UserInfoManager.shared.currentThemeUrl = selectedTheme
-//                    // 생성된 단어장 유저 인포에 넣기
-//                    if owner.userInfo.selectedBookId == nil {
-//                        owner.userInfo.selectedBookId = myBook.id
-//                        Coordinator.switchToMainVieWController()
-//                    }
-//                }
+                
             }.disposed(by: disposeBag)
     }
     

@@ -53,7 +53,13 @@ final class SettingTabViewController: BaseViewController {
         }
     }
     
-    
+    private var appVersion: String {
+        guard let info = Bundle.main.infoDictionary,
+              let version = info["CFBundleShortVersionString"] as? String else {
+            return "N/A"
+        }
+        return "v \(version)"
+    }
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "설정"
@@ -154,14 +160,29 @@ final class SettingTabViewController: BaseViewController {
         
         // list cell
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Setting>
-        { cell, indexPath, setting in
-            var contentConfiguration = UIListContentConfiguration.cell()
+        { [weak self] cell, indexPath, setting in
+            guard let self = self else { return }
+            
+            var contentConfiguration = UIListContentConfiguration.valueCell()
             contentConfiguration.text = "\(setting.icon)   \(setting.title)"
+            
             var backgroundConfig = UIBackgroundConfiguration.listGroupedCell()
             backgroundConfig.backgroundColor = AppColor.appWhite
+            
+            if setting.title == "앱 버전" {
+                // 앱 버전 셀일 경우
+                contentConfiguration.secondaryText = appVersion // 버전 정보 표시
+                contentConfiguration.secondaryTextProperties.color = .gray // 버전 텍스트 색상
+                cell.accessories = [] // 화살표 제거
+            } else {
+                // 다른 모든 셀일 경우
+                contentConfiguration.secondaryText = nil
+                cell.accessories = [.disclosureIndicator()] // 화살표 표시
+            }
+            
+            
             cell.backgroundConfiguration = backgroundConfig
             cell.contentConfiguration = contentConfiguration
-            cell.accessories = [.disclosureIndicator()]
         }
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<CustomHeaderView>(
