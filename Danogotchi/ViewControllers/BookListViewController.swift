@@ -46,10 +46,18 @@ final class BookListViewController: BaseViewController {
     
     
     // MARK: UI 프로퍼티
+    private let loadingContinaer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .black.withAlphaComponent(0.7)
+        view.layer.cornerRadius = 20
+        view.isHidden = true
+        return view
+    }()
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.color = .gray
         indicator.hidesWhenStopped = true
+        
         return indicator
     }()
     private let closeButton: UIButton = {
@@ -110,8 +118,9 @@ final class BookListViewController: BaseViewController {
             closeButton,
             moreButton,
             collectionView,
-            loadingIndicator,
+            loadingContinaer,
         ].forEach { view.addSubview($0) }
+        loadingContinaer.addSubview(loadingIndicator)
     }
     
     override func configLayout() {
@@ -129,6 +138,11 @@ final class BookListViewController: BaseViewController {
             make.top.equalTo(moreButton.snp.bottom).offset(2)
             make.horizontalEdges.equalToSuperview().inset(16)
             make.bottom.equalToSuperview()
+        }
+        
+        loadingContinaer.snp.makeConstraints { make in
+            make.size.equalTo(160)
+            make.center.equalToSuperview()
         }
         
         loadingIndicator.snp.makeConstraints { make in
@@ -337,6 +351,7 @@ extension BookListViewController {
         
         output.isLoading
             .drive(with: self) { owner, isLoading in
+                owner.loadingContinaer.isHidden = !isLoading
                 if isLoading {
                     owner.loadingIndicator.startAnimating()
                     owner.view.isUserInteractionEnabled = false
