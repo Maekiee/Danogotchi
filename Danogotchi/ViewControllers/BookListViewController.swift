@@ -46,6 +46,12 @@ final class BookListViewController: BaseViewController {
     
     
     // MARK: UI 프로퍼티
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .gray
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     private let closeButton: UIButton = {
         let button = UIButton()
         button.setTitle("닫기", for: .normal)
@@ -104,6 +110,7 @@ final class BookListViewController: BaseViewController {
             closeButton,
             moreButton,
             collectionView,
+            loadingIndicator,
         ].forEach { view.addSubview($0) }
     }
     
@@ -122,6 +129,10 @@ final class BookListViewController: BaseViewController {
             make.top.equalTo(moreButton.snp.bottom).offset(2)
             make.horizontalEdges.equalToSuperview().inset(16)
             make.bottom.equalToSuperview()
+        }
+        
+        loadingIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -144,8 +155,10 @@ final class BookListViewController: BaseViewController {
                 isSelected = (self.selectedBookId == realmBook.id)
             }
             
+            print("\(indexPath.row)")
+            
             // 4-2. 새로운 binding 함수 호출
-            cell.binding(with: item, isSelected: isSelected)
+            cell.binding(with: item, isSelected: isSelected, indexRow: indexPath.row)
             
             // 4-3. 💡 다운로드 버튼 탭 이벤트 구독
             cell.onTouchDownload
@@ -322,6 +335,17 @@ extension BookListViewController {
             }
             .disposed(by: disposeBag)
         
+        output.isLoading
+            .drive(with: self) { owner, isLoading in
+                if isLoading {
+                    owner.loadingIndicator.startAnimating()
+                    owner.view.isUserInteractionEnabled = false
+                } else {
+                    owner.loadingIndicator.stopAnimating()
+                    owner.view.isUserInteractionEnabled = true
+                }
+            }.disposed(by: disposeBag)
+        
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismiss(animated: true)
@@ -349,13 +373,11 @@ extension BookListViewController {
                 case .recommend(let item):
                     switch item {
                     case .downloaded(let realmBook):
-                        // 10-1. 💡 다운로드된 추천 단어장 선택
                         // Mock 데이터가 아닌 Realm 데이터를 사용
                         wordBook = realmBook
                         source = .realm(id: realmBook.id)
                         
                     case .notDownloaded:
-                        // 10-2. 💡 다운로드 안된 셀은 탭해도 아무 동작 안함
                         return
                     }
                 }

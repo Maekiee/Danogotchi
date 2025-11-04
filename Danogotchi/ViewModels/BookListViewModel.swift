@@ -27,12 +27,14 @@ final class BookListViewModel: BaseViewModel {
         let myBook: Driver<WordBook?>
         let recommendItems: Driver<[RecommendItem]>
         let downloadComplete: Signal<Void>
+        let isLoading: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
         let myBookRelay = BehaviorRelay<WordBook?>(value: nil)
         let recommendItemsRelay = BehaviorRelay<[RecommendItem]>(value: [])
         let downloadCompleteRelay = PublishRelay<Void>()
+        let isLoadingRelay = BehaviorRelay<Bool>(value: false)
         
         let refreshTrigger = Observable.merge(
             input.viewWillAppear,
@@ -97,45 +99,55 @@ final class BookListViewModel: BaseViewModel {
         // 💡 12. 단어장 복사(다운로드) 로직
         downloadBookTrigger
             .bind(with: self) { owner, bookToCopy in
+                isLoadingRelay.accept(true)
                 
-                // (방어 코드) 이미 Realm에 있는지 다시 한번 확인
-                let allMyBooks = owner.wordBookRepo.readAll()
-                if allMyBooks.contains(where: { $0.title == bookToCopy.title }) {
-                    ToastManager.shared.show("이미 '내 단어장'에 존재합니다.")
-                    downloadCompleteRelay.accept(()) // UI 새로고침
-                    return
+                
+                DispatchQueue.main.async {
+                    let allMyBooks = owner.wordBookRepo.readAll()
+                    if allMyBooks.contains(where: { $0.title == bookToCopy.title }) {
+                        DispatchQueue.main.async {
+                            ToastManager.shared.show("이미 '내 단어장'에 존재합니다.")
+                            isLoadingRelay.accept(false)
+                            downloadCompleteRelay.accept(())
+                        }
+                        return
+                    }
+                    
+                    owner.wordBookRepo.create(title: bookToCopy.title)
+                    
+                    // 2. 방금 생성한 단어장 객체를 Realm에서 다시 가져옴
+                    guard let newBookObject = owner.wordBookRepo.readAll().last(where: {
+                        $0.title == bookToCopy.title })?.toObject() else {
+                        DispatchQueue.main.async {
+                            isLoadingRelay.accept(false)
+                        }
+                        return // 생성 실패 시 중단
+                    }
+                    
+                    // 3. 추천 단어장의 단어 목록(Word)을 Realm 단어(WordObject)로 복사
+                    for word in bookToCopy.wordList {
+                        // 3-1. 새 단어(WordObject) 생성
+                        let newWordObject = owner.wordRepo.create(
+                            thumbnail: "", // 썸네일은 비워둠
+                            word: word.word,
+                            meaning: word.meaning
+                        )
+                        // 3-2. 생성된 단어를 2번에서 만든 새 단어장에 연결
+                        owner.wordBookRepo.addWord(bookId: newBookObject.id, word: newWordObject)
+                    }
+                    
+                    ToastManager.shared.show("'\(bookToCopy.title)' 단어장이 추가되었습니다.")
+                    isLoadingRelay.accept(false)
+                    downloadCompleteRelay.accept(())
                 }
-                
-                // 1. Realm에 새 단어장(WordBookObject) 생성
-                owner.wordBookRepo.create(title: bookToCopy.title)
-                
-                // 2. 방금 생성한 단어장 객체를 Realm에서 다시 가져옴
-                guard let newBookObject = owner.wordBookRepo.readAll().last(where: { $0.title == bookToCopy.title })?.toObject() else {
-                    return // 생성 실패 시 중단
-                }
-                
-                // 3. 추천 단어장의 단어 목록(Word)을 Realm 단어(WordObject)로 복사
-                for word in bookToCopy.wordList {
-                    // 3-1. 새 단어(WordObject) 생성
-                    let newWordObject = owner.wordRepo.create(
-                        thumbnail: "", // 썸네일은 비워둠
-                        word: word.word,
-                        meaning: word.meaning
-                    )
-                    // 3-2. 생성된 단어를 2번에서 만든 새 단어장에 연결
-                    owner.wordBookRepo.addWord(bookId: newBookObject.id, word: newWordObject)
-                }
-                
-                ToastManager.shared.show("'\(bookToCopy.title)' 단어장이 추가되었습니다.")
-                downloadCompleteRelay.accept(()) // 4. UI 새로고침 신호
-                
             }.disposed(by: disposeBag)
         
         
         return Output(
             myBook: myBookRelay.asDriver(),
             recommendItems: recommendItemsRelay.asDriver(), // 💡 13. 변경된 Relay 반환
-            downloadComplete: downloadCompleteRelay.asSignal()
+            downloadComplete: downloadCompleteRelay.asSignal(),
+            isLoading: isLoadingRelay.asDriver()
         )
     }
 }

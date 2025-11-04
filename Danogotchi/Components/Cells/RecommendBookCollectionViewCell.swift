@@ -11,6 +11,15 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         return downloadButton.rx.tap.asObservable()
     }
     
+    
+    private let symbolIconImage: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "businessIcon")
+        view.contentMode = .scaleAspectFill
+//        view.layer.borderWidth = 1
+//        view.layer.borderColor = UIColor.gray.cgColor
+        return view
+    }()
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
@@ -36,7 +45,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
             pointSize: 40, // 아이콘 크기
             weight: .medium
         )
-        config.baseForegroundColor = AppColor.oxfordBlue.withAlphaComponent(0.8)
+        config.baseForegroundColor = AppColor.oxfordBlue
         button.configuration = config
         button.isHidden = true // 기본값은 숨김
         return button
@@ -67,7 +76,8 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         [
             titleLabel,
             checkIcon,
-            downloadButton
+            downloadButton,
+            symbolIconImage
         ].forEach { contentView.addSubview($0)
         }
     }
@@ -84,7 +94,15 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         }
         
         downloadButton.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.centerX.equalToSuperview()
+            make.centerY.equalToSuperview().offset(-16)
+        }
+        
+        symbolIconImage.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.centerY.equalToSuperview().offset(-16)
+            make.height.equalTo(112)
+            make.width.equalTo(200)
         }
     }
     
@@ -102,13 +120,14 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with item: BookListViewModel.RecommendItem, isSelected: Bool) {
+    func binding(with item: BookListViewModel.RecommendItem, isSelected: Bool, indexRow: Int) {
         switch item {
         case .downloaded(let realmBook):
             // 1. 이미 Realm에 있는 경우 (기존 로직)
             titleLabel.text = realmBook.title
             checkIcon.isHidden = !isSelected
             downloadButton.isHidden = true
+            symbolIconImage.isHidden = false
             titleLabel.isHidden = false
             
         case .notDownloaded(let mockBook):
@@ -117,10 +136,13 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
             titleLabel.isHidden = false
             checkIcon.isHidden = true
             downloadButton.isHidden = false
+            symbolIconImage.isHidden = true
             
             // 다운로드 버튼이 보일 때 제목을 흐리게 처리 (선택 사항)
             titleLabel.textColor = .black.withAlphaComponent(0.4)
         }
+        
+        
     }
 //    func binding(with item: WordBook, isSelected: Bool) {
 //        titleLabel.text = item.title
