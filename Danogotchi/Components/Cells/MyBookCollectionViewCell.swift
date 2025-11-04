@@ -23,6 +23,12 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         view.isHidden = true
         return view
     }()
+    private let imageIcon: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "book_image_my")
+        view.contentMode = .scaleAspectFill
+        return view
+    }()
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -42,12 +48,21 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     
     private func configHierarchy() {
         [
+            imageIcon,
             titleLabel,
             checkIcon
         ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
+        
+        imageIcon.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.leading.equalToSuperview().offset(20)
+            make.trailing.lessThanOrEqualTo(titleLabel.snp.leading).offset(-4)
+            make.size.equalTo(80)
+        }
+        
         titleLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }

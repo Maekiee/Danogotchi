@@ -14,7 +14,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     
     private let symbolIconImage: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: "businessIcon")
+//        view.image = UIImage(named: "businessIcon")
         view.contentMode = .scaleAspectFill
 //        view.layer.borderWidth = 1
 //        view.layer.borderColor = UIColor.gray.cgColor
@@ -121,6 +121,18 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     
     
     func binding(with item: BookListViewModel.RecommendItem, isSelected: Bool, indexRow: Int) {
+        symbolIconImage.image = UIImage(named: "book_image_\(indexRow)")
+        
+        if indexRow == 2 {
+            symbolIconImage.snp.remakeConstraints { make in
+                make.centerX.equalToSuperview()
+                make.centerY.equalToSuperview().offset(-4)
+                make.height.equalTo(88)
+                make.width.equalTo(180)
+            }
+        }
+        
+        
         switch item {
         case .downloaded(let realmBook):
             // 1. 이미 Realm에 있는 경우 (기존 로직)
