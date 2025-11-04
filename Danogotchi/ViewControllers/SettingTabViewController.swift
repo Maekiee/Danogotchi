@@ -2,7 +2,7 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-
+import SafariServices
 
 class CustomHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "CustomHeaderView"
@@ -221,17 +221,6 @@ final class SettingTabViewController: BaseViewController {
     
 }
 
-//extension SettingTabViewController: UICollectionViewDelegate {
-//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        guard let setting = self.dataSource.itemIdentifier(for: indexPath)?.icon else {
-//            collectionView.deselectItem(at: indexPath, animated: true)
-//            return
-//        }
-//        let detailViewController = SettingTabViewController(with: setting)
-//        self.navigationController?.pushViewController(detailViewController, animated: true)
-//    }
-//}
-
 extension SettingTabViewController {
     private func bind() {
         let input = SettingTabViewModel.Input()
@@ -260,9 +249,9 @@ extension SettingTabViewController {
         case "앱스토어 리뷰":
             openAppStore()
         case "오픈소스 라이선스":
-            print("오픈소스 라이선스")
+            pushLicenseList()
         case "개인정보 처리방침":
-            print("개인정보 처리방침")
+            openPrivacyPolicy()
         case "앱 버전":
             print("앱 버전")
         default:
@@ -276,13 +265,23 @@ extension SettingTabViewController {
     }
     
     private func openAppStore() {
-        print("리뷰 가기")
         let urlString = "itms-apps://itunes.apple.com/app/6753820016"
         guard let url = URL(string: urlString) else { return }
-        print("리뷰 가기2")
         UIApplication.shared.open(url)
     }
-//    
+    
+    private func openPrivacyPolicy() {
+        let urlString = "https://nebulous-coffee-e6d.notion.site/27ef47543db2800eb0d0d6e910c09cfc?source=copy_link"
+        guard let url = URL(string: urlString) else { return }
+        let safariVC = SFSafariViewController(url: url)
+        present(safariVC, animated: true)
+    }
+    
+    private func pushLicenseList() {
+        let vc = OpenSourceLicenseListViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+//
 //    private func showThemeSelector() {
 //        
 //    }

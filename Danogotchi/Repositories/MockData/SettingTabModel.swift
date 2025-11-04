@@ -47,7 +47,7 @@ extension Setting.Category {
             ]
         case .info:
             return [
-                Setting(icon: "👾", title: "오픈소스 라이선스", category: self),
+//                Setting(icon: "👾", title: "오픈소스 라이선스", category: self),
                 Setting(icon: "🔒", title: "개인정보 처리방침", category: self),
                 Setting(icon: "🏷️", title: "앱 버전", category: self),
             ]
