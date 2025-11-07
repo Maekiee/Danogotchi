@@ -28,10 +28,8 @@ final class SearchThemeViewController: BaseViewController {
     
     private var dataSource: DataSource!
     
-    // 추가 ----------------------------------
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()
-    // ------------------------------------
     
     
     private let titleText: UILabel = {

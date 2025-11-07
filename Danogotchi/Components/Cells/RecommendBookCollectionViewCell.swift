@@ -170,9 +170,5 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         
         
     }
-//    func binding(with item: WordBook, isSelected: Bool) {
-//        titleLabel.text = item.title
-//        checkIcon.isHidden = !isSelected
-//    }
 }
 

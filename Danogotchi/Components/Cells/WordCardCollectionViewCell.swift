@@ -162,8 +162,6 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
                 make.size.equalTo(24)
             }
             
-            // [중요] 셀의 최종 높이를 결정하는 하단 제약조건
-            // chip의 하단을 셀의 하단에 연결하여 수직 경로를 완성합니다.
             chip.snp.makeConstraints { make in
                 make.bottom.equalToSuperview().inset(16)
             }
