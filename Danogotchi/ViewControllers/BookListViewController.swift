@@ -20,7 +20,7 @@ final class BookListViewController: BaseViewController {
     private let viewModel = BookListViewModel()
     
     private var selectedBookId: String?
-
+    
     
     private enum Section {
         case myBook
@@ -155,7 +155,8 @@ final class BookListViewController: BaseViewController {
     }
     
     private func setupCellRegistrations() {
-        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook> { [weak self] cell, indexPath, item in
+        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook> {
+            [weak self] cell, indexPath, item in
             guard let self = self else { return }
             let isSelected = selectedBookId == item.id
             cell.binding(with: item, isSelected: isSelected)
@@ -163,18 +164,15 @@ final class BookListViewController: BaseViewController {
         
         recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, BookListViewModel.RecommendItem> { [weak self] cell, indexPath, item in
             guard let self = self else { return }
-            // 4-1. 선택 상태 확인 (downloaded 상태일 때만)
+            
             var isSelected = false
+            
             if case .downloaded(let realmBook) = item {
                 isSelected = (self.selectedBookId == realmBook.id)
             }
             
-            print("\(indexPath.row)")
-            
-            // 4-2. 새로운 binding 함수 호출
             cell.binding(with: item, isSelected: isSelected, indexRow: indexPath.row)
             
-            // 4-3. 💡 다운로드 버튼 탭 이벤트 구독
             cell.onTouchDownload
                 .bind(with: self) { owner, _ in
                     // .notDownloaded 상태일 때만 트리거 발생
@@ -339,8 +337,6 @@ extension BookListViewController {
                 owner.applySnapshot(myBook: myBook, recommendItems: recommendItems) // 수정된 함수 호출
             }.disposed(by: disposeBag)
         
-        // 9-4. 💡 다운로드 완료 시 (옵션: 선택 상태 새로고침 - 필요 시)
-        // (현재 applySnapshot이 전체를 갱신하므로 별도 처리는 불필요)
         output.downloadComplete
             .emit(with: self) { owner, _ in
                 // 다운로드가 완료되면 ActiveLearningManager의 캐시된 ID를 다시 확인함
@@ -408,5 +404,10 @@ extension BookListViewController {
                 snapshot.reloadSections(sections)
                 owner.dataSource.apply(snapshot, animatingDifferences: false)
                 
-            }.disposed(by: disposeBag)    }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    owner.dismiss(animated: true)
+                }
+                
+            }.disposed(by: disposeBag)
+    }
 }
