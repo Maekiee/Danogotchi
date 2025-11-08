@@ -200,19 +200,27 @@ extension SearchThemeViewController {
             }.disposed(by: disposeBag)
     }
     
-    // 온보딩에서 시작하기 버튼 탭 (기존 로직)
     private func handleOnboardingSubmit(selectedTheme: String) {
-        // 단어장 생성
-        wordBookRepo.create(title: "나의 단어장")
-        guard let myBook = wordBookRepo.readAll().last else { return }
         
-        // 테마 저장
         UserInfoManager.shared.currentThemeUrl = selectedTheme
         
-        // 생성된 단어장 유저 인포에 넣기
-        if userInfo.selectedBookId == nil {
-            userInfo.selectedBookId = myBook.id
+        let existingBooks = wordBookRepo.readAll()
+        
+        if let existingBooks = existingBooks.first {
+            userInfo.selectedBookId = existingBooks.id
             Coordinator.switchToMainVieWController()
+        } else {
+            // 새로 생성
+            wordBookRepo.create(title: "나의 단어장")
+            
+            if let newBook = wordBookRepo.readAll().last {
+                print("✅ 새 단어장 생성 완료: \(newBook.id)")
+                userInfo.selectedBookId = newBook.id
+                Coordinator.switchToMainVieWController()
+            } else {
+                print("⚠️ 단어장 생성/조회 실패")
+                // 사용자에게 에러 알림
+            }
         }
     }
     
