@@ -61,23 +61,6 @@ struct CardBlurView: View {
                 .background(.white.opacity(0.15))
         }
         .clipShape(RoundedRectangle(cornerRadius: 20))
-//        .overlay(alignment: .topTrailing) {
-//            Button {
-//                onModifyTap?()
-//            } label: {
-//                Image(systemName: "ellipsis")
-//                    .padding(.vertical, 8)
-//                    .padding(.horizontal, 12)
-//                    .background(
-//                        Color.white.opacity(0.2)
-//                            .background(.ultraThinMaterial)
-//                    )
-//                    .cornerRadius(16)
-//                    .contentShape(Rectangle())
-//            }
-//            .buttonStyle(.plain)
-//            .padding(12)
-//        }
     }
 }
 
