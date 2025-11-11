@@ -1,0 +1,78 @@
+import UIKit
+import SnapKit
+import RxSwift
+import RxCocoa
+
+final class CustomProgressView: UIView {
+    
+    private let trackView: UIView = {
+        let view = UIView()
+        view.backgroundColor = AppColor.appWhite
+        view.layer.borderColor = UIColor.black.cgColor
+        view.layer.borderWidth = 1
+        return view
+    }()
+    
+    
+    private let progressFillView: UIView = {
+        let view = UIView()
+        view.backgroundColor = AppColor.oxfordBlue
+        return view
+    }()
+    
+    
+    private var progressWidthConstraint: Constraint?
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupLayout()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupLayout() {
+        backgroundColor = .clear
+        
+        // 트랙 뷰를 먼저 추가
+        addSubview(trackView)
+        trackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        // 게이지 뷰를 트랙 뷰의 자식으로 추가
+        trackView.addSubview(progressFillView)
+        progressFillView.snp.makeConstraints { make in
+            make.top.bottom.leading.equalToSuperview()
+            self.progressWidthConstraint = make.width.equalTo(0).constraint
+        }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        let cornerRadius = bounds.height / 2
+        
+        trackView.layer.cornerRadius = cornerRadius
+        progressFillView.layer.cornerRadius = cornerRadius
+        
+        trackView.clipsToBounds = true
+    }
+    
+    func setProgress(_ progress: Float, animated: Bool) {
+        let newProgress = max(0.0, min(1.0, progress))
+
+        let newWidth = trackView.bounds.width * CGFloat(newProgress)
+        
+        progressWidthConstraint?.update(offset: newWidth)
+        
+        if animated {
+            UIView.animate(withDuration: 0.25) {
+                self.trackView.layoutIfNeeded()
+            }
+        } else {
+            self.trackView.layoutIfNeeded()
+        }
+    }
+}

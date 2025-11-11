@@ -43,19 +43,22 @@ final class ChoiceQuizViewController: BaseViewController {
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
     }()
-    private let progressView: UIProgressView = {
-        let progress = UIProgressView(progressViewStyle: .bar)
-        progress.progressTintColor = AppColor.oxfordBlue
-        progress.trackTintColor = AppColor.appWhite
-        progress.progress = 0.0
-        progress.layer.cornerRadius = 6
-        progress.clipsToBounds = true
-        progress.layer.sublayers?[1].cornerRadius = 6
-        progress.subviews[1].clipsToBounds = true
-        progress.layer.borderColor = UIColor.black.cgColor
-        progress.layer.borderWidth = 1
-        return progress
-    }()
+    private let progressView = CustomProgressView()
+//    private let progressView: UIProgressView = {
+//        let progress = UIProgressView(progressViewStyle: .bar)
+//        progress.progressTintColor = AppColor.oxfordBlue
+//        progress.trackTintColor = AppColor.appWhite
+//        progress.progress = 0.0
+//        progress.layer.cornerRadius = 6
+//        progress.clipsToBounds = true
+//      
+////        progress.layer.sublayers?[1].cornerRadius = 6
+//        progress.subviews[1].clipsToBounds = true
+//      
+//        progress.layer.borderColor = UIColor.black.cgColor
+//        progress.layer.borderWidth = 1
+//        return progress
+//    }()
     private let totalQuestionLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
@@ -383,6 +386,16 @@ extension ChoiceQuizViewController {
             
         case .dismiss:
             break
+        }
+    }
+}
+
+
+extension Reactive where Base: CustomProgressView {
+    var progress: Binder<Float> {
+        return Binder(self.base) { view, progress in
+            // 애니메이션과 함께 progress 설정
+            view.setProgress(progress, animated: true)
         }
     }
 }
