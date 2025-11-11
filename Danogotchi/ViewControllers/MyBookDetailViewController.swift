@@ -22,6 +22,16 @@ final class MyBookDetailViewController: BaseViewController {
     private var dataSource: DataSource!
     
     // MARK: UI 프로퍼티
+    private let backButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "chevron.backward")
+        config.title = "Back"
+        config.imagePadding = 4
+        config.baseForegroundColor = .black
+        button.configuration = config
+        return button
+    }()
     private let addBookButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.filled()
@@ -55,11 +65,6 @@ final class MyBookDetailViewController: BaseViewController {
         return label
     }()
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -69,13 +74,9 @@ final class MyBookDetailViewController: BaseViewController {
         bind()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-    
     override func configHierarchy() {
         [
+            backButton,
             collectionView,
             emptyTextLabel,
             addBookButton,
@@ -84,12 +85,17 @@ final class MyBookDetailViewController: BaseViewController {
     }
     
     override func configLayout() {
+        
+        backButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(12)
+        }
+        
         addBookButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-28)
             make.trailing.equalToSuperview().offset(-20)
             make.size.equalTo(44)
         }
-        
         
         emptyTextLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
@@ -97,7 +103,7 @@ final class MyBookDetailViewController: BaseViewController {
         }
         
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.top.equalTo(backButton.snp.bottom).offset(8)
             make.horizontalEdges.equalToSuperview().inset(16)
             make.bottom.equalToSuperview()
         }
@@ -105,24 +111,7 @@ final class MyBookDetailViewController: BaseViewController {
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
-        navigationController?.navigationBar.tintColor = .black
         collectionView.contentInset.bottom = 100
-        
-        let appearance = UINavigationBarAppearance()
-        
-        // 1. 네비게이션 바를 불투명하게(Opaque) 만들고, 배경색을 뷰의 배경색과 맞춥니다.
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = AppColor.backgroundBeige
-        
-        // 2. 네비게이션 바 하단의 그림자(선)를 제거합니다.
-        appearance.shadowColor = .clear
-        
-        // 3. 이 appearance를 standard(스크롤 중)와 scrollEdge(맨 위) 상태 모두에 적용합니다.
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-        // 4. (기존 코드) 백버튼 등 아이템 색상 설정
-        navigationController?.navigationBar.tintColor = .black
     }
 }
 
@@ -150,23 +139,28 @@ extension MyBookDetailViewController {
             .bind(to: myBookObjectId)
             .disposed(by: disposeBag)
         
+        backButton.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.navigationController?.popViewController(animated: true)
+            }.disposed(by: disposeBag)
+        
         addBookButton.rx.tap
             .withLatestFrom(myBookObjectId)
             .compactMap{ $0 }
             .bind(with: self) { owner, bookObjectId in
                 let createWordModel = CreateWord(
-                    wordBookId: bookObjectId, // 💡 전달받은 ID 사용
+                    wordBookId: bookObjectId, //
                     wordId: nil,
                     thumbnail: "",
                     bookTitle: "나의 단어장",
                     word: "",
                     meaning: "",
-                    actionType: .add // 💡 .add 액션
+                    actionType: .add //
                 )
                 let vm = AddWordViewModel(wordItem: createWordModel)
                 let vc = AddWordViewController(
                     viewModel: vm,
-                    entryPoint: .add // 💡 .add 액션
+                    entryPoint: .add //
                 )
                 owner.navigationController?.pushViewController(vc, animated: true)
             }.disposed(by: disposeBag)
