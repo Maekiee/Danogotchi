@@ -8,17 +8,7 @@ final class TTSManager: NSObject {
     private let synthesizer = AVSpeechSynthesizer()
     private let disposeBag = DisposeBag()
     
-//    private let _isSpeaking = BehaviorRelay<Bool>(value: false)
-//    private let _speechEvent = PublishRelay<SpeechEvent>()
     private let _currentSpeakingText = BehaviorRelay<String?>(value: nil)
-    
-//    var isSpeaking: Observable<Bool> {
-//        return _isSpeaking.asObservable()
-//    }
-//    
-//    var speechEvent: Observable<SpeechEvent> {
-//        return _speechEvent.asObservable()
-//    }
     
     var currentSpeakingText: Observable<String?> {
         return _currentSpeakingText.asObservable()

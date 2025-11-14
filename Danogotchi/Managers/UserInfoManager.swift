@@ -109,7 +109,6 @@ final class UserInfoManager: UserInfoProtocol {
             // 'activeBookIdentifier'가 아닌 'defaultRealmBookIdKey'에 값을 씀
             UserDefaults.standard.set(newValue, forKey: Keys.defaultRealmBookIdKey)
             
-            // --- 중요 ---
             // '기본 내 단어장'이 '활성 단어장'이기도 하다면, '활성' 상태도 같이 업데이트
             if let newValue = newValue {
                 activeBookIdentifier = ActiveBookIdentifier(id: newValue, type: .realm)
@@ -122,7 +121,6 @@ final class UserInfoManager: UserInfoProtocol {
         }
     }
     
-    // --- 마이그레이션 로직 (Static으로 변경) ---
     private static func migrateOldKey() {
         let defaults = UserDefaults.standard
         
