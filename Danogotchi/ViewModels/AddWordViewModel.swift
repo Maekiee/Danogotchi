@@ -123,11 +123,7 @@ final class AddWordViewModel: BaseViewModel {
             .bind(with: self) { owner, responseValue in
                 switch responseValue {
                 case .success(let value):
-                    print("여기 검색: \(value)")
                     wordImageItems.accept(value)
-//                    if let firstImageUrl = value.results.first?.urls.raw {
-//                        wordImageUrl.accept(firstImageUrl)
-//                    } 
                 case .failure(_):
                     print("네트워크 에러")
                 }

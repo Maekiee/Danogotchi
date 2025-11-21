@@ -74,7 +74,6 @@ final class MainWordCardCollectionViewCell: UICollectionViewCell {
             onModifyTap: { [weak self] in
                 guard let self = self else { return }
                 onModifyTapRelay.accept(())
-                print("셀에서 프린트")
             }
         )
         

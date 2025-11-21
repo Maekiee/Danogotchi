@@ -44,19 +44,16 @@ final class CreateBookViewModel: BaseViewModel {
                     
                     createBookDoneTrigger.accept(())
                 } else {
-                    print("타이틀 없음")
                     // 단어장 생성
                     owner.wordBookRepo.create(title: text)
                     // 생성한 단어장 가져오기
                     guard let newBook = owner.wordBookRepo.readAll().last else { return }
 
-                    // UserInfoManager의 selectedBookId값이 nil 이면  newBook의 아이디 값 UserInfoManager의 selectedBookId로 값 전달
                     if owner.userInfo.selectedBookId == nil {
                         owner.userInfo.selectedBookId = newBook.id
                     }
                     
                     createBookDoneTrigger.accept(())
-                    // UserInfoManagerdml selectedBookId값이 nil이 아니면 아무런 동작 하지 않음
                 }
 
                 

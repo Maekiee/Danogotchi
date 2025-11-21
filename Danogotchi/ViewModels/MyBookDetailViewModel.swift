@@ -27,10 +27,8 @@ final class MyBookDetailViewModel: BaseViewModel {
         let wordList = BehaviorRelay<[WordDisplayInfo]>(value: [])
         
         input.viewWillAppear
-        // 💡 화면에 진입할 때마다 데이터 갱신 (take(1) 제거)
             .bind(with: self) { owner, _ in
                 
-                // 💡 2. "나의 단어장" Struct를 제목으로 직접 검색
                 guard let myBookStruct = owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" }) else {
                     // "나의 단어장"이 없는 경우 빈 배열 처리
                     wordList.accept([])
@@ -38,7 +36,6 @@ final class MyBookDetailViewModel: BaseViewModel {
                     return
                 }
                 
-                // 💡 3. 찾은 "나의 단어장"의 ID(String)로 ObjectId 생성
                 guard let bookId = try? ObjectId(string: myBookStruct.id) else {
                     wordList.accept([])
                     owner.myBookObjectId.accept(nil)
@@ -47,7 +44,6 @@ final class MyBookDetailViewModel: BaseViewModel {
                 
                 owner.myBookObjectId.accept(bookId)
                 
-                // 💡 4. "나의 단어장" ID를 사용해 단어 목록 조회 (기존 로직 동일)
                 let myWordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
                 let histories = owner.learningHistoryRepo.fetchAllHistory()
                 let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })

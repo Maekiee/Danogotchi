@@ -341,7 +341,6 @@ extension BookListViewController {
             .emit(with: self) { owner, _ in
                 // 다운로드가 완료되면 ActiveLearningManager의 캐시된 ID를 다시 확인함
                 // (선택 사항: 사용성을 더 좋게 하려면 여기서 selectedBookId를 갱신할 수 있음)
-                print("Download complete, snapshot refreshed.")
             }
             .disposed(by: disposeBag)
         

@@ -264,11 +264,9 @@ extension SearchThemeViewController {
             wordBookRepo.create(title: "나의 단어장")
             
             if let newBook = wordBookRepo.readAll().last {
-                print("✅ 새 단어장 생성 완료: \(newBook.id)")
                 userInfo.selectedBookId = newBook.id
                 Coordinator.switchToMainVieWController()
             } else {
-                print("⚠️ 단어장 생성/조회 실패")
                 // 사용자에게 에러 알림
             }
         }
