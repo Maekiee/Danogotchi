@@ -32,35 +32,29 @@ final class ActiveLearningManager {
         self.recommendRepo = recommendRepo
         self.userInfo = userInfo
         
-        // 1. UserInfoManager의 '식별자' 변경을 구독
         userInfo.activeBookIdentifierRelay
             .flatMapLatest { [weak self] identifier -> Observable<(WordBook?, WordBookSource?)> in
                 guard let self = self, let identifier = identifier else {
                     return .just((nil, nil)) // 선택된 책 없음
                 }
                 
-                // 식별자 Type에 따라 적절한 저장소에서 WordBook 로드
                 switch identifier.type {
                 case .realm:
                     let source: WordBookSource = .realm(id: identifier.id)
                     return self.loadRealmBook(id: identifier.id).map { ($0, $0 != nil ? source : nil) }
-//                    return self.loadRealmBook(id: identifier.id).map { ($0, source) }
                 case .recommended:
                     let source: WordBookSource = .recommended(id: identifier.id)
                     return self.loadRecommendedBook(id: identifier.id).map { ($0, $0 != nil ? source : nil) }
-//                    return self.loadRecommendedBook(id: identifier.id).map { ($0, source) }
                 }
             }
             .subscribe(with: self, onNext: { owner, result in
                 let (book, source) = result
-                // 2. 로드된 WordBook과 Source를 각각의 Relay에 주입
                 owner.activeBook.accept(book)
                 owner.activeBookSource.accept(source)
             })
             .disposed(by: disposeBag)
     }
 
-    // Helper: Realm 단어장 로드
     private func loadRealmBook(id: String) -> Observable<WordBook?> {
         guard let objectId = try? ObjectId(string: id),
               let bookObject = wordBookRepo.read(id: objectId) else {

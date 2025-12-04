@@ -52,27 +52,19 @@ final class TTSManager: NSObject {
 
 extension TTSManager: AVSpeechSynthesizerDelegate {
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-//        _isSpeaking.accept(true)
-//        _speechEvent.accept(.started)
     }
     
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-//        _isSpeaking.accept(false)
-//        _speechEvent.accept(.finished)
         _currentSpeakingText.accept(nil)
     }
     
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-//        _speechEvent.accept(.paused)
     }
     
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-//        _speechEvent.accept(.continued)
     }
     
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
         _currentSpeakingText.accept(nil)
-//        _isSpeaking.accept(false)
-//        _speechEvent.accept(.cancelled)
     }
 }

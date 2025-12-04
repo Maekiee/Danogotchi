@@ -230,24 +230,6 @@ final class ChoiceQuizViewController: BaseViewController {
         choice1Button.snp.makeConstraints { make in
             make.height.equalTo(48)
         }
-        
-        //        questionLabel.snp.makeConstraints { make in
-        ////            make.top.equalTo(progressView.snp.bottom).offset(<#T##amount: any ConstraintOffsetTarget##any ConstraintOffsetTarget#>)
-        //            make.top.equalTo(quizQuestionCard.snp.bottom).offset(24)
-        //            make.center.equalToSuperview()
-        //        }
-        
-        //        progressStackView.snp.makeConstraints { make in
-        //            make.top.equalTo(titleLabel.snp.bottom).offset(16)
-        //            make.horizontalEdges.equalToSuperview().inset(24)
-        //            make.height.equalTo(20)
-        //        }
-        
-        //        thumbnailImage.snp.makeConstraints { make in
-        //            make.top.equalTo(progressView.snp.bottom).offset(16)
-        //            make.horizontalEdges.equalToSuperview().inset(24)
-        //            make.height.equalTo(thumbnailImage.snp.width).multipliedBy(2.0/3.0)
-        //        }
     }
     
     override func configView() {
