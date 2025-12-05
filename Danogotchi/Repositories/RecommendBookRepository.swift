@@ -43,13 +43,11 @@ final class RecommendBookRepository: RecommendBookRepoProtocol {
                 return .just(recommendBooks)
     }
     
-    
-    // 5. [(String, String)] 배열을 [Word] 배열로 변환하는 헬퍼 함수
     private func generateWords(from data: [(String, String)]) -> [Word] {
         return data.enumerated().map { (index, item) in
             Word(
-                id: "mock_word_\(item.0)_\(index)", // 고유 ID 생성
-                thumbnail: "", // 썸네일은 일단 비워둠
+                id: "mock_word_\(item.0)_\(index)",
+                thumbnail: "",
                 word: item.0,
                 meaning: item.1,
                 createAt: Date()
@@ -57,7 +55,6 @@ final class RecommendBookRepository: RecommendBookRepoProtocol {
         }
     }
     
-    // 6. [Word] 배열을 WordBook 구조체로 변환하는 헬퍼 함수
     private func createWordBook(id: String, title: String, data: [(String, String)]) -> WordBook {
         let words = generateWords(from: data)
         return WordBook(

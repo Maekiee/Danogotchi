@@ -62,7 +62,6 @@ final class BookListViewModel: BaseViewModel {
                 return self.recommendBookRepo.fetchRecommendBooks()
                     .map { mockBooks in
                         mockBooks.map { mockBook in
-                            // Realm에 Mock 단어장과 "제목"이 같은 단어장이 있는지 확인
                             if let matchingRealmBook = myBooks.first(where: { $0.title == mockBook.title }) {
                                 if matchingRealmBook.title == "나의 단어장" {
                                     return nil
@@ -73,7 +72,7 @@ final class BookListViewModel: BaseViewModel {
                                 return .notDownloaded(mockBook)
                             }
                         }
-                        .compactMap { $0 } // nil 제거
+                        .compactMap { $0 }
                     }
             }
             .bind(to: recommendItemsRelay)
@@ -102,12 +101,12 @@ final class BookListViewModel: BaseViewModel {
                         DispatchQueue.main.async {
                             isLoadingRelay.accept(false)
                         }
-                        return // 생성 실패 시 중단
+                        return
                     }
                     
                     for word in bookToCopy.wordList {
                         let newWordObject = owner.wordRepo.create(
-                            thumbnail: "", // 썸네일은 비워둠
+                            thumbnail: "", 
                             word: word.word,
                             meaning: word.meaning
                         )

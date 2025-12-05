@@ -6,10 +6,9 @@ import RealmSwift
 
 final class WordTabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    // userInfo는 clearQuizState를 위해서만 사용
+    
     private let userInfo = UserInfoManager.shared
     
-    // Realm 의존성은 '단어 삭제', '학습 이력'을 위해서만 유지
     private let wordRepo: WordRepositoryProtocol
     private let learningHistoryRepo: LearningHistoryRepositoryProtocol
     
@@ -27,40 +26,26 @@ final class WordTabViewModel: BaseViewModel {
     }
     
     struct Output {
-        // 단어장 존재 여부(currentWordbook) 및 bookTitle 제거
         let wordItems: Driver<[WordDisplayInfo]>
     }
     
     func transform(input: Input) -> Output {
-        
-        // --- 1. 데이터 소스 정의 ---
-        
-        // ActiveLearningManager의 캐시된 단어장 및 출처를 가져옴
         let activeBookRelay = ActiveLearningManager.shared.activeBook
         let activeBookSourceRelay = ActiveLearningManager.shared.activeBookSource
         
         // 최종적으로 UI에 바인딩될 WordDisplayInfo 배열
         let allWordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
-
         
-        // --- 2. 데이터 스트림 로직 ---
-        
-        // 1. '활성 단어장' 자체가 변경되었을 때
         let bookChangedTrigger = activeBookRelay.compactMap { $0 }.map { _ in () }
-        
-        // 2. 'viewWillAppear'가 호출되었을 때 (학습 이력 등 스탯 갱신)
-        //    (startWith로 초기 로드 트리거)
+    
         let viewRefreshTrigger = input.viewWillAppear.startWith(())
         
-        // 두 이벤트 중 하나라도 발생하면, 최신 활성 단어장을 기준으로 스탯을 다시 계산
         Observable.merge(bookChangedTrigger, viewRefreshTrigger)
-            .withLatestFrom(activeBookRelay.compactMap { $0 }) // 최신 'WordBook' 객체를 가져옴
+            .withLatestFrom(activeBookRelay.compactMap { $0 })
             .bind(with: self) { owner, book in
                 
-                // 캐시된 'WordBook' 객체에서 단어 목록을 가져옴
                 let wordList = book.wordList.reversed()
                 
-                // (이하 학습 이력 계산 로직은 기존과 동일)
                 let histories = owner.learningHistoryRepo.fetchAllHistory()
                 let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
                 

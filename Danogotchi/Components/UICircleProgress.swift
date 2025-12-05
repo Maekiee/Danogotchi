@@ -31,13 +31,12 @@ final class UICircleProgress: UIView {
     // MARK: - Layout
     override func layoutSubviews() {
         super.layoutSubviews()
-        // 뷰의 크기가 결정되면 레이어의 경로를 설정합니다.
         updateCircularPath()
     }
     
     // MARK: - Public Method
     public func setProgress(_ value: Double, animated: Bool = true) {
-        let clampedValue = max(0.0, min(1.0, value)) // 0.0 ~ 1.0 사이로 값 고정
+        let clampedValue = max(0.0, min(1.0, value))
         
         CATransaction.begin()
         if !animated {
@@ -66,8 +65,8 @@ final class UICircleProgress: UIView {
         progressLayer.strokeColor = AppColor.oxfordBlue.cgColor
         progressLayer.fillColor = UIColor.clear.cgColor
         progressLayer.lineWidth = lineWidth
-        progressLayer.lineCap = .round // 끝부분을 둥글게
-        progressLayer.strokeEnd = 0 // 시작은 0
+        progressLayer.lineCap = .round
+        progressLayer.strokeEnd = 0
     }
 
     private func setupPercentageLabel() {
@@ -88,7 +87,7 @@ final class UICircleProgress: UIView {
     private func updateCircularPath() {
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
         let radius = (min(bounds.width, bounds.height) - lineWidth) / 2
-        let startAngle = -CGFloat.pi / 2 // 12시 방향에서 시작
+        let startAngle = -CGFloat.pi / 2
         let endAngle = startAngle + (2 * CGFloat.pi)
         
         let circularPath = UIBezierPath(
