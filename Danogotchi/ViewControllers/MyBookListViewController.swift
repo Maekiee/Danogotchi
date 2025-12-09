@@ -121,7 +121,6 @@ final class MyBookListViewController: BaseViewController {
             make.trailing.equalToSuperview().offset(-16)
         }
         
-        // collectionView의 상단 기준을 titleLabel로 변경합니다.
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)

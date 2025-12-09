@@ -80,7 +80,7 @@ final class WordImageListViewController: BaseViewController {
         collectionView.showsVerticalScrollIndicator = false
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.itemSize = CGSize(
-                width: (view.frame.width - 48) / 3, // 3개 컬럼, 패딩 고려
+                width: (view.frame.width - 48) / 3,
                 height: (view.frame.width - 48) / 3
             )
         }

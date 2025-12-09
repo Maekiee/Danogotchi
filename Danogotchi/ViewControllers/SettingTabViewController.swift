@@ -274,20 +274,15 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     }
 //
     private func openEmailForm() {
-        // 3. 기기에서 메일을 보낼 수 있는지 확인 (메일 계정이 설정되어 있는지)
         if MFMailComposeViewController.canSendMail() {
             let mailComposer = MFMailComposeViewController()
             
-            // 4. 델리게이트 설정 (메일 전송/취소 시 창을 닫기 위해 필수)
             mailComposer.mailComposeDelegate = self
             
-            // 5. 메일 수신자 설정 (배열 형태)
-            mailComposer.setToRecipients(["pdwssf@gmail.com"]) // 실제 이메일 주소
+            mailComposer.setToRecipients(["pdwssf@gmail.com"])
             
-            // 6. 메일 제목 설정
             mailComposer.setSubject("앱 문의하기")
             
-            // 7. 메일 본문 설정 (HTML 형식이 아니므로 false)
             let body = """
                     궁금하신 점이나 불편 사항을 편하게 남겨주세요.
                     
@@ -302,15 +297,13 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
                     """
             mailComposer.setMessageBody(body, isHTML: false)
             
-            // 8. 메일 작성 폼을 모달로 띄웁니다.
             self.present(mailComposer, animated: true, completion: nil)
             
         } else {
-            // 9. 메일 계정이 설정되지 않았을 때 사용자에게 알림
             showMailErrorAlert()
         }
     }
-    // 9-1. 메일 설정 오류 알림 함수
+    
     func showMailErrorAlert() {
         let alert = UIAlertController(title: "메일 전송 실패", message: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
@@ -323,9 +316,7 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    // 사용자가 '취소' 또는 '전송' 버튼을 눌렀을 때 호출됩니다.
     func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-        // 메일 작성 폼을 닫습니다.
         controller.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
             switch result {

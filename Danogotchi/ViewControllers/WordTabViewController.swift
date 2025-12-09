@@ -209,42 +209,12 @@ final class WordTabViewController: BaseViewController {
             make.edges.equalToSuperview()
         }
         
-//        noBookInfoContainer.snp.makeConstraints { make in
-//            make.horizontalEdges.equalToSuperview().inset(32)
-//            make.center.equalToSuperview().offset(-40)
-//            make.height.equalTo(144)
-//        }
-//        
-//        noWordBookLabel.snp.makeConstraints { make in
-//            make.top.equalToSuperview().offset(40)
-//            make.centerX.equalToSuperview()
-//        }
-//
-//        showCreateBookButton.snp.makeConstraints { make in
-//            make.top.equalTo(noWordBookLabel.snp.bottom).offset(8)
-//            make.horizontalEdges.equalToSuperview().inset(24)
-//            make.height.equalTo(40)
-//        }
-        
-//        showWordBookButton.snp.makeConstraints { make in
-//            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-//            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
-//            make.size.equalTo(40)
-//        }
-        
         showWordBookButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.size.equalTo(48)
         }
         
-//        addWordButton.snp.makeConstraints { make in
-//            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-////            make.trailing.equalTo(showWordBookButton.snp.leading).offset(-8)
-//            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
-//            make.size.equalTo(48)
-//        }
-    
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -261,11 +231,6 @@ final class WordTabViewController: BaseViewController {
             make.size.equalTo(48)
         }
         
-//        listSegmentedControl.snp.makeConstraints { make in
-//            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-//            make.horizontalEdges.equalToSuperview().inset(16)
-//            make.height.equalTo(32)  // 적절한 높이 설정
-//        }
         /// 크레시 테스트
         //        testButton.snp.makeConstraints { make in
         //            make.bottom.equalTo(startLearningButton.snp.top).offset(10)
@@ -363,14 +328,10 @@ extension WordTabViewController {
 
                 var wordsForQuiz: [Word]
 
-                // 이어할 퀴즈가 있는지 확인합니다.
                 if let currentWordIds = owner.userInfo.currentQuizWordIds {
-                    // 이어할 퀴즈가 있다면, 저장된 단어 ID 목록을 기반으로 퀴즈를 재구성합니다.
-                    // (틀린 문제 학습하기를 이어하는 경우도 이 로직으로 처리됩니다.)
                     let wordIdSet = Set(currentWordIds)
                     wordsForQuiz = allWords.filter { wordIdSet.contains($0.id) }
                 } else {
-                    // 새로 시작하는 퀴즈라면, 전체 단어 목록으로 퀴즈를 구성하고 상태를 저장합니다.
                     wordsForQuiz = allWords
                     let wordIds = wordsForQuiz.map { $0.id }
                     owner.userInfo.currentQuizWordIds = wordIds
@@ -481,7 +442,6 @@ extension WordTabViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 
-    // 추후에 공용으로 사용할 수 있는 메서드로 분리 해보기
     private static func layout() -> UICollectionViewLayout {
         let item = NSCollectionLayoutItem(
             layoutSize: NSCollectionLayoutSize(

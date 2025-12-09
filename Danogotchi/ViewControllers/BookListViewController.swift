@@ -331,16 +331,16 @@ extension BookListViewController {
         )
         let output = viewModel.transform(input: input)
         
-        Driver.combineLatest(output.myBook, output.recommendItems) // recommendItems 구독
+        Driver.combineLatest(output.myBook, output.recommendItems)
             .drive(with: self) { owner, data in
                 let (myBook, recommendItems) = data
-                owner.applySnapshot(myBook: myBook, recommendItems: recommendItems) // 수정된 함수 호출
+                owner.applySnapshot(myBook: myBook, recommendItems: recommendItems)
             }.disposed(by: disposeBag)
         
         output.downloadComplete
             .emit(with: self) { owner, _ in
                 // 다운로드가 완료되면 ActiveLearningManager의 캐시된 ID를 다시 확인함
-                // (선택 사항: 사용성을 더 좋게 하려면 여기서 selectedBookId를 갱신할 수 있음)
+                // 하려면 여기서 selectedBookId를 갱신 로직 추가 가능
             }
             .disposed(by: disposeBag)
         
@@ -376,14 +376,12 @@ extension BookListViewController {
                 
                 switch selectedCell {
                 case .currentBook(let book):
-                    // '내 단어장' 선택 (기존 로직)
                     wordBook = book
                     source = .realm(id: book.id)
                     
                 case .recommend(let item):
                     switch item {
                     case .downloaded(let realmBook):
-                        // Mock 데이터가 아닌 Realm 데이터를 사용
                         wordBook = realmBook
                         source = .realm(id: realmBook.id)
                         
@@ -392,12 +390,10 @@ extension BookListViewController {
                     }
                 }
                 
-                // 10-3. ActiveLearningManager 호출 (Realm 데이터로)
                 ActiveLearningManager.shared.setActiveBook(wordBook, source: source)
                 
                 owner.selectedBookId = wordBook.id
                 
-                // 10-4. UI 갱신
                 var snapshot = owner.dataSource.snapshot()
                 let sections = snapshot.sectionIdentifiers
                 snapshot.reloadSections(sections)

@@ -95,7 +95,7 @@ final class AddWordViewController: BaseViewController {
             meanTextField
         ].forEach { underlineTextField in
             underlineTextField.tf.snp.makeConstraints { make in
-                make.height.equalTo(40) // 원하는 높이 설정
+                make.height.equalTo(40)
             }
         }
         

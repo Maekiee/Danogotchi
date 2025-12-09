@@ -149,13 +149,13 @@ extension MyBookDetailViewController {
             .compactMap{ $0 }
             .bind(with: self) { owner, bookObjectId in
                 let createWordModel = CreateWord(
-                    wordBookId: bookObjectId, //
+                    wordBookId: bookObjectId,
                     wordId: nil,
                     thumbnail: "",
                     bookTitle: "나의 단어장",
                     word: "",
                     meaning: "",
-                    actionType: .add //
+                    actionType: .add
                 )
                 let vm = AddWordViewModel(wordItem: createWordModel)
                 let vc = AddWordViewController(
@@ -187,7 +187,7 @@ extension MyBookDetailViewController {
                         }
                         
                         let createWordModel = CreateWord(
-                            wordBookId: bookObjectId, // 💡 전달받은 ID 사용
+                            wordBookId: bookObjectId,
                             wordId: try! ObjectId(string: item.word.id),
                             thumbnail: item.word.thumbnail,
                             bookTitle: "",
