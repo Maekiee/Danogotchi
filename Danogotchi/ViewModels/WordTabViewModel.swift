@@ -33,7 +33,6 @@ final class WordTabViewModel: BaseViewModel {
         let activeBookRelay = ActiveLearningManager.shared.activeBook
         let activeBookSourceRelay = ActiveLearningManager.shared.activeBookSource
         
-        // 최종적으로 UI에 바인딩될 WordDisplayInfo 배열
         let allWordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
         
         let bookChangedTrigger = activeBookRelay.compactMap { $0 }.map { _ in () }
@@ -65,41 +64,6 @@ final class WordTabViewModel: BaseViewModel {
                 allWordItems.accept(Array(displayItems))
                 
             }.disposed(by: disposeBag)
-
-        
-        // --- 3. 단어 삭제 로직 ---
-        
-//        input.selectedWordCard
-//            .withLatestFrom(activeBookSourceRelay.compactMap { $0 }) { ($0, $1) } // (삭제할 Word, 단어장 Source)
-//            .bind(with: self) { owner, data in
-//                let (wordCard, source) = data
-//                
-//                // 추천 단어장(.recommended)인 경우 삭제를 막음
-//                guard case .realm(_) = source else {
-//                    ToastManager.shared.show("추천 단어장의 단어는 삭제할 수 없습니다.")
-//                    return
-//                }
-//                
-//                // 1. UI(Relay)에서 지우기
-//                let filteredList = allWordItems.value.filter { $0.word.id != wordCard.id }
-//                allWordItems.accept(filteredList)
-//                
-//                // 2. DB에서 지우기
-//                let wordId = try! ObjectId(string: wordCard.id)
-//                owner.wordRepo.delete(id: wordId)
-//                
-//                // 3. ActiveLearningManager 캐시에서 지우기
-//                ActiveLearningManager.shared.removeWordFromActiveBook(wordId: wordCard.id)
-//
-//                // 4. 퀴즈 상태 초기화
-//                owner.userInfo.clearQuizState()
-//                
-//            }.disposed(by: disposeBag)
-
-        
-        // --- 4. Output 바인딩 ---
-        
-        // currentWordbook 및 bookTitle 관련 로직 제거
         
         return Output(
             wordItems: allWordItems.asDriver()

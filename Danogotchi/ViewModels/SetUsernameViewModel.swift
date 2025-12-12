@@ -30,9 +30,7 @@ final class SetUsernameViewModel: BaseViewModel {
             }
             .map { !(2..<10).contains($0.count) }
             .bind(with: self) { owner, isValid in
-                // 버튼 활성화 상태
                 buttonAbleState.accept(!isValid)
-                // 유효성 안내 텍스트
                 validStateText.accept(isValid ? "2글자 이상 10글자 미만으로 설정해주세요" : "")
             }
             .disposed(by: disposeBag)
