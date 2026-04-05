@@ -44,7 +44,7 @@ final class SearchThemeViewController: BaseViewController {
     }()
     private let titleText: UILabel = {
         let label = UILabel()
-        label.text = "배경 테마를 골라주세요"
+        label.text = "배경 테마를 골라주세요2"
         label.font = .systemFont(ofSize: 28, weight: .semibold)
         label.textColor = .black
         return label
