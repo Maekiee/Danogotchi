@@ -17,8 +17,6 @@ final class SearchThemeViewController: BaseViewController {
     private let wordBookRepo = WordBookRepository()
     private let userInfo = UserInfoManager.shared
     
-    
-    
     private enum Section {
         case main
     }
@@ -77,7 +75,8 @@ final class SearchThemeViewController: BaseViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    @MainActor
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
@@ -122,7 +121,6 @@ final class SearchThemeViewController: BaseViewController {
     }
     
     override func configLayout() {
-        
         if entryMode == .settings {
             backButton.snp.makeConstraints { make in
                 make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
@@ -166,6 +164,8 @@ final class SearchThemeViewController: BaseViewController {
     }
     
 }
+
+
 
 extension SearchThemeViewController {
     private func bind() {
@@ -258,14 +258,18 @@ extension SearchThemeViewController {
         
         if let existingBooks = existingBooks.first {
             userInfo.selectedBookId = existingBooks.id
-            Coordinator.switchToMainVieWController()
+            
+            // 코디네이터로 대체
+//            CoordinatorTest.switchToMainVieWController()
         } else {
             // 새로 생성
             wordBookRepo.create(title: "나의 단어장")
             
             if let newBook = wordBookRepo.readAll().last {
                 userInfo.selectedBookId = newBook.id
-                Coordinator.switchToMainVieWController()
+                
+                // 코디네이터로 대체
+//                CoordinatorTest.switchToMainVieWController()
             } else {
                 // 사용자에게 에러 알림
             }

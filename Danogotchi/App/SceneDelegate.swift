@@ -1,80 +1,14 @@
 import UIKit
-import RealmSwift
-
-enum Coordinator {
-    static func switchToMainVieWController() {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let sceneDelegate = windowScene.delegate as? SceneDelegate else { return }
-  
-        let vm = WordTabViewModel()
-        let vc = WordTabViewController(viewModel: vm)
-        sceneDelegate.changeRootVC(vc)
-        
-//        let NavVC = UINavigationController(rootViewController: WordTabViewController(viewModel: vm))
-//        configureNavigationBar(NavVC)
-//        sceneDelegate.changeRootVC(NavVC)
-//        
-//        sceneDelegate.changeRootVC(MainTabViewController())
-    }
-    
-    
-    // 임시 파일
-    static func configureNavigationBar(_ navController: UINavigationController) {
-        let navigationBarAppearance = UINavigationBarAppearance()
-        navigationBarAppearance.configureWithTransparentBackground()
-
-        navigationBarAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
-        navigationBarAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.1)
-        
-        navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.black]
-        navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
-        
-        navigationBarAppearance.shadowColor = .clear
-        
-        UINavigationBar.appearance().standardAppearance = navigationBarAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
-        UINavigationBar.appearance().compactAppearance = navigationBarAppearance
-    }
-}
-
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
     var window: UIWindow?
-
-
+    private var appCoordinator: AppCoordinator?
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene)
-        
-        let realm = try? Realm()
-        
-        print("Realm is located at:", realm!.configuration.fileURL!)
-        
-        if UserInfoManager.shared.currentThemeUrl != nil {
-            // 탭바 없는거
-            let vm = WordTabViewModel()
-            let vc = WordTabViewController(viewModel: vm)
-//            let navVC = UINavigationController(rootViewController: vc)
-//            Coordinator.configureNavigationBar(navVC)
-            window?.rootViewController = vc
-            
-            // 탭바 있는거
-//            window?.rootViewController = MainTabViewController()
-        } else {
-//            window?.rootViewController = SetUserNameViewController()
-            window?.rootViewController = SearchThemeViewController()
-        }
-        
-        
-        window?.makeKeyAndVisible()
-    }
-    
-    func changeRootVC(_ vc: UIViewController ) {
-        guard let window = self.window else { return }
-        window.rootViewController = vc
-        UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve) { }
+        appCoordinator = AppCoordinator(window: window!)
+        appCoordinator?.start()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -96,7 +30,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidEnterBackground(_ scene: UIScene) {
         
     }
-
-
 }
 

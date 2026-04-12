@@ -39,7 +39,9 @@ final class SetUsernameViewModel: BaseViewModel {
             .bind(with: self) { owner, _ in
                 // 유저 이름 저장
                 owner.userManager.username = nickname
-                Coordinator.switchToMainVieWController()
+                
+                // 코디네이터로 대체
+//                CoordinatorTest.switchToMainVieWController()
             }.disposed(by: disposeBag)
                 
         return Output(
