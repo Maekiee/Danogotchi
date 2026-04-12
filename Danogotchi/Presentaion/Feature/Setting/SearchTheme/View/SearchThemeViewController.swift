@@ -3,7 +3,15 @@ import RxSwift
 import SnapKit
 import UIKit
 
+
+protocol SearchThemeViewControllerDelegate: AnyObject {
+    func didSelectTheme()
+    func didTapBack()
+}
+
 final class SearchThemeViewController: BaseViewController {
+    
+    weak var delegate: SearchThemeViewControllerDelegate?
     
     enum EntryMode {
         case onboarding
@@ -171,7 +179,6 @@ extension SearchThemeViewController {
     private func bind() {
         let loadNextPage = PublishRelay<Void>()
         
-        
         let input = SearchThemeViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
@@ -259,8 +266,11 @@ extension SearchThemeViewController {
         if let existingBooks = existingBooks.first {
             userInfo.selectedBookId = existingBooks.id
             
+            
+            
             // 코디네이터로 대체
 //            CoordinatorTest.switchToMainVieWController()
+            delegate?.didSelectTheme()
         } else {
             // 새로 생성
             wordBookRepo.create(title: "나의 단어장")
@@ -270,6 +280,7 @@ extension SearchThemeViewController {
                 
                 // 코디네이터로 대체
 //                CoordinatorTest.switchToMainVieWController()
+                delegate?.didSelectTheme()
             } else {
                 // 사용자에게 에러 알림
             }
