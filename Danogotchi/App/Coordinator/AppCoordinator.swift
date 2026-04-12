@@ -36,6 +36,19 @@ extension AppCoordinator {
     }
     
     private func startOnBoardingFlow() {
-        window.rootViewController = SearchThemeViewController()
+        let nav = UINavigationController()
+        nav.isNavigationBarHidden = true
+        let onboardingCoordinator = OnboardingCoordinator(navigationController: nav)
+        onboardingCoordinator.delegate = self
+        addChild(onboardingCoordinator)
+        onboardingCoordinator.start()
+        window.rootViewController = nav
+    }
+}
+
+extension AppCoordinator: OnboardingCoordinatorDelegate {
+    func onboardingDidComplete() {
+        childCoordinators.removeAll { $0 is OnboardingCoordinator }
+        switchToMainScene()
     }
 }
