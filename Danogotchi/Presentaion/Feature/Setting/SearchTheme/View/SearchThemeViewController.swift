@@ -33,7 +33,6 @@ final class SearchThemeViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, ThemeImageViewData>
     
     private var dataSource: DataSource!
-    
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()
     
@@ -168,7 +167,6 @@ final class SearchThemeViewController: BaseViewController {
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
-//        navigationController?.navigationBar.tintColor = .black
     }
     
 }
@@ -265,21 +263,13 @@ extension SearchThemeViewController {
         
         if let existingBooks = existingBooks.first {
             userInfo.selectedBookId = existingBooks.id
-            
-            
-            
-            // 코디네이터로 대체
-//            CoordinatorTest.switchToMainVieWController()
             delegate?.didSelectTheme()
         } else {
             // 새로 생성
             wordBookRepo.create(title: "나의 단어장")
-            
+    
             if let newBook = wordBookRepo.readAll().last {
                 userInfo.selectedBookId = newBook.id
-                
-                // 코디네이터로 대체
-//                CoordinatorTest.switchToMainVieWController()
                 delegate?.didSelectTheme()
             } else {
                 // 사용자에게 에러 알림
