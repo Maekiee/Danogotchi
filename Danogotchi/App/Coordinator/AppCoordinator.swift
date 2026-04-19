@@ -27,16 +27,20 @@ extension AppCoordinator {
     }
     
     func switchToMainScene() {
-//        let vm = WordTabViewModel()
-        let vm = container.makeWordTabViewModel()
-        window.rootViewController = WordTabViewController(viewModel: vm)
+        startMainFlow()
         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve) { }
     }
     
     private func startMainFlow() {
-//        let vm = WordTabViewModel()
-        let vm = container.makeWordTabViewModel()
-        window.rootViewController =  WordTabViewController(viewModel: vm)
+        let nav = UINavigationController()
+        nav.isNavigationBarHidden = true
+        let mainCoordinator = MainCoordinator(
+            container: container,
+            navigationController: nav
+        )
+        addChild(mainCoordinator)
+        mainCoordinator.start()
+        window.rootViewController = nav
     }
     
     private func startOnBoardingFlow() {

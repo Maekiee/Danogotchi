@@ -5,6 +5,15 @@ import RxSwift
 import SnapKit
 import UIKit
 
+
+protocol WordTabViewControllerDelegate {
+    func wordTabDidTapBookList()
+    func wordTabDidTapCreateBook()
+    func wordTabDidTapSetting()
+    func wordTabdidTapStartQuiz(quizData: QuizData)
+    func wordTabDidTapEditWord(wordItem: CreateWord)
+}
+
 final class WordTabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: WordTabViewModel
