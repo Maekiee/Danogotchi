@@ -38,6 +38,18 @@ extension DIContainer {
     func makeRecommendBookRepository() -> RecommendBookRepoProtocol {
         return RecommendBookRepository()
     }
+    
+    func makeBookListViewModel() -> BookListViewModel {
+        let wordBookRepository = makeWordBookRepository()
+        let recommendBookRepository = makeRecommendBookRepository()
+        let wordRepository = makeWordRepository()
+        
+        return BookListViewModel(
+            recommendBookRepository: recommendBookRepository,
+            wordBookRepository: wordBookRepository,
+            wordRepository: wordRepository
+        )
+    }
 }
 
 // MARK: - Quiz

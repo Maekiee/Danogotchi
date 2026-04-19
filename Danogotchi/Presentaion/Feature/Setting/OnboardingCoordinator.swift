@@ -5,7 +5,7 @@ protocol OnboardingCoordinatorDelegate: AnyObject {
 }
 
 final class OnboardingCoordinator: Coordinator, SearchThemeViewControllerDelegate {
-    var childCoordinators: [any Coordinator] = []
+    var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     weak var delegate: OnboardingCoordinatorDelegate?
     private let container: DIContainer

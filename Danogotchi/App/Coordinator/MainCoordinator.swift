@@ -2,7 +2,7 @@ import UIKit
 
 
 
-final class MainCoordinator: Coordinator{
+final class MainCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     private let container: DIContainer
@@ -34,7 +34,6 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         addChild(libraryCoordinator)
         libraryCoordinator.start()
         navigationController.present(nav, animated: true)
-        // TODO: A-4에서 LibraryCoordinator 생성/push 처리
     }
     
     func wordTabDidTapCreateBook() {

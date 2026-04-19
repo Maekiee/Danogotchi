@@ -8,11 +8,21 @@ final class BookListViewModel: BaseViewModel {
     private let userInfo = UserInfoManager.shared
     private let activeManager = ActiveLearningManager.shared
     
-    private let recommendBookRepo = RecommendBookRepository()
-    private let wordBookRepo = WordBookRepository()
-    private let wordRepo = WordRepository()
+    private let recommendBookRepository: RecommendBookRepoProtocol
+    private let wordBookRepository: WordBookRepositoryProtocol
+    private let wordRepository: WordRepositoryProtocol
     
     let downloadBookTrigger = PublishRelay<WordBook>()
+    
+    init (
+        recommendBookRepository: RecommendBookRepoProtocol,
+        wordBookRepository: WordBookRepositoryProtocol,
+        wordRepository: WordRepositoryProtocol
+    ) {
+        self.recommendBookRepository = recommendBookRepository
+        self.wordBookRepository = wordBookRepository
+        self.wordRepository = wordRepository
+    }
     
     enum RecommendItem: Hashable {
         case downloaded(WordBook)
@@ -42,7 +52,7 @@ final class BookListViewModel: BaseViewModel {
         ).startWith(())
         
         refreshTrigger.bind(with: self) { owner, _ in
-            guard let myBookStruct = owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" }) else {
+            guard let myBookStruct = owner.wordBookRepository.readAll().first(where: { $0.title == "나의 단어장" }) else {
                 myBookRelay.accept(nil)
                 return
             }
@@ -57,9 +67,9 @@ final class BookListViewModel: BaseViewModel {
             .flatMapLatest { [weak self] _ -> Observable<[RecommendItem]> in
                 guard let self = self else { return .just([]) }
                 
-                let myBooks = self.wordBookRepo.readAll()
+                let myBooks = self.wordBookRepository.readAll()
                 
-                return self.recommendBookRepo.fetchRecommendBooks()
+                return self.recommendBookRepository.fetchRecommendBooks()
                     .map { mockBooks in
                         mockBooks.map { mockBook in
                             if let matchingRealmBook = myBooks.first(where: { $0.title == mockBook.title }) {
@@ -84,7 +94,7 @@ final class BookListViewModel: BaseViewModel {
                 
                 
                 DispatchQueue.main.async {
-                    let allMyBooks = owner.wordBookRepo.readAll()
+                    let allMyBooks = owner.wordBookRepository.readAll()
                     if allMyBooks.contains(where: { $0.title == bookToCopy.title }) {
                         DispatchQueue.main.async {
                             ToastManager.shared.show("이미 '내 단어장'에 존재합니다.")
@@ -94,9 +104,9 @@ final class BookListViewModel: BaseViewModel {
                         return
                     }
                     
-                    owner.wordBookRepo.create(title: bookToCopy.title)
+                    owner.wordBookRepository.create(title: bookToCopy.title)
                     
-                    guard let newBookObject = owner.wordBookRepo.readAll().last(where: {
+                    guard let newBookObject = owner.wordBookRepository.readAll().last(where: {
                         $0.title == bookToCopy.title })?.toObject() else {
                         DispatchQueue.main.async {
                             isLoadingRelay.accept(false)
@@ -105,13 +115,13 @@ final class BookListViewModel: BaseViewModel {
                     }
                     
                     for word in bookToCopy.wordList {
-                        let newWordObject = owner.wordRepo.create(
-                            thumbnail: "", 
+                        let newWordObject = owner.wordRepository.create(
+                            thumbnail: "",
                             word: word.word,
                             meaning: word.meaning
                         )
                         
-                        owner.wordBookRepo.addWord(bookId: newBookObject.id, word: newWordObject)
+                        owner.wordBookRepository.addWord(bookId: newBookObject.id, word: newWordObject)
                     }
                     
                     ToastManager.shared.show("'\(bookToCopy.title)' 단어장이 추가되었습니다.")

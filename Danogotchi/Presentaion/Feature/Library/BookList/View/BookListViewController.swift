@@ -14,12 +14,27 @@ struct Recommend: Hashable, Identifiable {
     let title: String
 }
 
+protocol BookListViewControllerDelegate: AnyObject {
+    func bookListDidTapClose()
+    func bookListDidSelectActiveBook()
+    func bookListDidTapMore()
+}
+
 
 final class BookListViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel = BookListViewModel()
-    
+    private let viewModel: BookListViewModel
     private var selectedBookId: String?
+    weak var delegate: BookListViewControllerDelegate?
+    
+    init(viewModel: BookListViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     
     private enum Section {
@@ -358,13 +373,15 @@ extension BookListViewController {
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.dismiss(animated: true)
+//                owner.dismiss(animated: true)
+                owner.delegate?.bookListDidTapClose()
             }.disposed(by: disposeBag)
         
         moreButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = MyBookDetailViewController()
-                owner.navigationController?.pushViewController(vc, animated: true)
+//                let vc = MyBookDetailViewController()
+//                owner.navigationController?.pushViewController(vc, animated: true)
+                owner.delegate?.bookListDidTapMore()
             }.disposed(by: disposeBag)
         
         collectionView.rx.itemSelected
@@ -400,7 +417,8 @@ extension BookListViewController {
                 owner.dataSource.apply(snapshot, animatingDifferences: false)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    owner.dismiss(animated: true)
+//                    owner.dismiss(animated: true)
+                    owner.delegate?.bookListDidSelectActiveBook()
                 }
                 
             }.disposed(by: disposeBag)
