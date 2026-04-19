@@ -6,11 +6,11 @@ import SnapKit
 import UIKit
 
 
-protocol WordTabViewControllerDelegate {
+protocol WordTabViewControllerDelegate: AnyObject {
     func wordTabDidTapBookList()
     func wordTabDidTapCreateBook()
     func wordTabDidTapSetting()
-    func wordTabdidTapStartQuiz(quizData: QuizData)
+    func wordTabDidTapStartQuiz(quizData: QuizData)
     func wordTabDidTapEditWord(wordItem: CreateWord)
 }
 
@@ -20,6 +20,7 @@ final class WordTabViewController: BaseViewController {
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
     private var allWordsInfo: [WordDisplayInfo] = []
+    weak var delegate: WordTabViewControllerDelegate?
 
     private enum Section {
         case main
@@ -288,26 +289,18 @@ extension WordTabViewController {
 
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
-//                let vc = MyBookListViewController()
-                let vc = BookListViewController()
-                let navVC = UINavigationController(rootViewController: vc)
-                owner.present(navVC, animated: true)
+                owner.delegate?.wordTabDidTapBookList()
             }.disposed(by: disposeBag)
 
         // 단어장 생성
         showCreateBookButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = CreateBookViewController()
-                vc.modalPresentationStyle = .overFullScreen
-                vc.modalTransitionStyle = .crossDissolve
-                owner.present(vc, animated: true)
+                owner.delegate?.wordTabDidTapCreateBook()
             }.disposed(by: disposeBag)
         
         settingTabButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = SettingTabViewController()
-                let navVc = UINavigationController(rootViewController: vc)
-                owner.present(navVc, animated: true)
+                owner.delegate?.wordTabDidTapSetting()
             }.disposed(by: disposeBag)
 
         // 학습 시작하기
@@ -352,10 +345,11 @@ extension WordTabViewController {
                 // 위에서 결정된 `wordsForQuiz`를 사용하여 퀴즈 데이터를 생성합니다.
                 let quizData = QuizData(words: wordsForQuiz, allWord: allWords)
 
-                let choiceVM = ChoiceQuizViewModel(quizData: quizData)
-                let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
-                choiceVC.modalPresentationStyle = .fullScreen
-                owner.present(choiceVC, animated: true)
+//                let choiceVM = ChoiceQuizViewModel(quizData: quizData)
+//                let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
+//                choiceVC.modalPresentationStyle = .fullScreen
+//                owner.present(choiceVC, animated: true)
+                owner.delegate?.wordTabDidTapStartQuiz(quizData: quizData)
             }.disposed(by: disposeBag)
         
         
@@ -409,15 +403,16 @@ extension WordTabViewController {
                             meaning: item.word.meaning,
                             actionType: .edit
                         )
-                        let vm = AddWordViewModel(wordItem: createWordModel)
-                        let vc = UINavigationController(
-                            rootViewController: AddWordViewController(
-                                viewModel: vm,
-                                entryPoint: .edit
-                            )
-                        )
-                        vc.modalPresentationStyle = .fullScreen
-                        owner.present(vc, animated: true)
+//                        let vm = AddWordViewModel(wordItem: createWordModel)
+//                        let vc = UINavigationController(
+//                            rootViewController: AddWordViewController(
+//                                viewModel: vm,
+//                                entryPoint: .edit
+//                            )
+//                        )
+//                        vc.modalPresentationStyle = .fullScreen
+//                        owner.present(vc, animated: true)
+                        owner.delegate?.wordTabDidTapEditWord(wordItem: createWordModel)
                     },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }
