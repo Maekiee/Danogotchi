@@ -6,13 +6,14 @@ final class SearchThemeViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let repository: SearchThemeRepoProtocol
     private let mode: SearchThemeViewController.EntryMode
+//    private let mode: SearchThemeViewController.EntryMode
     
     init(
-        mode: SearchThemeViewController.EntryMode = .onboarding,
-        repository: SearchThemeRepoProtocol = SearchThemeRepository()
+        mode: SearchThemeViewController.EntryMode,
+        repository: SearchThemeRepoProtocol
     ) {
-        self.mode = mode
         self.repository = repository
+        self.mode = mode
     }
     
     struct Input {

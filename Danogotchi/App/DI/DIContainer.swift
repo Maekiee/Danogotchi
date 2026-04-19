@@ -18,6 +18,15 @@ extension DIContainer {
     func makeWordRepository() -> WordRepositoryProtocol {
         return WordRepository()
     }
+    
+    func makeWordTabViewModel() -> WordTabViewModel {
+        let wordRepository = makeWordRepository()
+        let learnHistoryRepository = makeLearningHistoryRepository()
+        return WordTabViewModel(
+            wordRepository: wordRepository,
+            learnHistoryRepository: learnHistoryRepository
+        )
+    }
 }
 
 // MARK: - Library
@@ -42,5 +51,13 @@ extension DIContainer {
 extension DIContainer {
     func makeSearchThemeRepository() -> SearchThemeRepoProtocol {
         return SearchThemeRepository()
+    }
+    
+    func makeSearchThemeViewModel(mode: SearchThemeViewController.EntryMode) -> SearchThemeViewModel {
+        let repository = makeSearchThemeRepository()
+        return SearchThemeViewModel(
+            mode: mode,
+            repository: repository
+        )
     }
 }

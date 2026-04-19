@@ -49,7 +49,7 @@ final class SearchThemeViewController: BaseViewController {
     }()
     private let titleText: UILabel = {
         let label = UILabel()
-        label.text = "배경 테마를 골라주세요2"
+        label.text = "배경 테마를 골라주세요"
         label.font = .systemFont(ofSize: 28, weight: .semibold)
         label.textColor = .black
         return label
@@ -76,9 +76,12 @@ final class SearchThemeViewController: BaseViewController {
         return PrimaryFillButton(title: button)
     }()
     
-    init(mode: EntryMode = .onboarding) {
+    init(
+        mode: EntryMode,
+        viewModel: SearchThemeViewModel
+    ) {
         self.entryMode = mode
-        self.viewModel = SearchThemeViewModel(mode: mode)
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     

@@ -8,13 +8,19 @@ final class OnboardingCoordinator: Coordinator, SearchThemeViewControllerDelegat
     var childCoordinators: [any Coordinator] = []
     var navigationController: UINavigationController
     weak var delegate: OnboardingCoordinatorDelegate?
+    private let container: DIContainer
     
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController,
+         container: DIContainer) {
         self.navigationController = navigationController
+        self.container = container
     }
     
     func start() {
-        let vc = SearchThemeViewController()
+        let vc = SearchThemeViewController(
+            mode: .onboarding,
+            viewModel: container.makeSearchThemeViewModel(mode: .onboarding)
+        )
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
         

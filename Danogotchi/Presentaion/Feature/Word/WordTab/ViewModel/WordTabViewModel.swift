@@ -6,18 +6,16 @@ import RealmSwift
 
 final class WordTabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    
     private let userInfo = UserInfoManager.shared
-    
-    private let wordRepo: WordRepositoryProtocol
-    private let learningHistoryRepo: LearningHistoryRepositoryProtocol
+    private let wordRepository: WordRepositoryProtocol
+    private let learnHistoryRepository: LearningHistoryRepositoryProtocol
     
     init(
-        wordRepo: WordRepositoryProtocol = WordRepository(),
-        learningHistoryRepo: LearningHistoryRepositoryProtocol = LearningHistoryRepository()
+        wordRepository: WordRepositoryProtocol,
+        learnHistoryRepository: LearningHistoryRepositoryProtocol
     ) {
-        self.wordRepo = wordRepo
-        self.learningHistoryRepo = learningHistoryRepo
+        self.wordRepository = wordRepository
+        self.learnHistoryRepository = learnHistoryRepository
     }
     
     struct Input {
@@ -43,9 +41,10 @@ final class WordTabViewModel: BaseViewModel {
             .withLatestFrom(activeBookRelay.compactMap { $0 })
             .bind(with: self) { owner, book in
                 
+                
                 let wordList = book.wordList.reversed()
                 
-                let histories = owner.learningHistoryRepo.fetchAllHistory()
+                let histories = owner.learnHistoryRepository.fetchAllHistory()
                 let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
                 
                 let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in

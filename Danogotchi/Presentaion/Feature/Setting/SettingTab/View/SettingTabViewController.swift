@@ -251,7 +251,9 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     }
     
     private func showThemeSelector() {
-        let vc = SearchThemeViewController(mode: .settings)
+        // TODO: Step 1-7에서 SettingCoordinator로 이동
+        let vm = SearchThemeViewModel(mode: .settings, repository: SearchThemeRepository())
+        let vc = SearchThemeViewController(mode: .settings, viewModel: vm)
         navigationController?.pushViewController(vc, animated: true)
     }
     
