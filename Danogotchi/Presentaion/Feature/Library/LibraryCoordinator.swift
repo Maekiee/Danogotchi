@@ -18,11 +18,10 @@ final class LibraryCoordinator: Coordinator {
 
 extension LibraryCoordinator {
     func start() {
-        // TODO: A-4-C에서 BookListViewModel 주입 + BookListVC 생성 + delegate 연결
         let vm = container.makeBookListViewModel()
         let vc = BookListViewController(viewModel: vm)
         vc.delegate = self
-        navigationController.setViewControllers([vc], animated: true)
+        navigationController.setViewControllers([vc], animated: false)
     }
 }
 

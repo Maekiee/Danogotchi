@@ -12,8 +12,6 @@ final class BookListViewModel: BaseViewModel {
     private let wordBookRepository: WordBookRepositoryProtocol
     private let wordRepository: WordRepositoryProtocol
     
-    let downloadBookTrigger = PublishRelay<WordBook>()
-    
     init (
         recommendBookRepository: RecommendBookRepoProtocol,
         wordBookRepository: WordBookRepositoryProtocol,
@@ -23,6 +21,8 @@ final class BookListViewModel: BaseViewModel {
         self.wordBookRepository = wordBookRepository
         self.wordRepository = wordRepository
     }
+    
+    let downloadBookTrigger = PublishRelay<WordBook>()
     
     enum RecommendItem: Hashable {
         case downloaded(WordBook)
