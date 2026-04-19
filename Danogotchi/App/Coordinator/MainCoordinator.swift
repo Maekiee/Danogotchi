@@ -2,7 +2,7 @@ import UIKit
 
 
 
-final class MainCoordinator: Coordinator {
+final class MainCoordinator: Coordinator{
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     private let container: DIContainer
@@ -25,6 +25,15 @@ final class MainCoordinator: Coordinator {
 
 extension MainCoordinator: WordTabViewControllerDelegate {
     func wordTabDidTapBookList() {
+        let nav = UINavigationController()
+        let libraryCoordinator = LibraryCoordinator(
+            container: container,
+            navigationController: nav
+        )
+        libraryCoordinator.delegate = self
+        addChild(libraryCoordinator)
+        libraryCoordinator.start()
+        navigationController.present(nav, animated: true)
         // TODO: A-4에서 LibraryCoordinator 생성/push 처리
     }
     
@@ -42,6 +51,12 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     
     func wordTabDidTapEditWord(wordItem: CreateWord) {
         // TODO: A-4 또는 직접 present (AddWord는 단일 화면)
+    }
+}
+
+extension MainCoordinator: LibraryCoordinatorDelegate {
+    func libraryCoordinatorDidFinish() {
+        childCoordinators.removeAll { $0 is LibraryCoordinator }
     }
 }
 
