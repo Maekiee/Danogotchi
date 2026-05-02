@@ -27,6 +27,10 @@ extension DIContainer {
             learnHistoryRepository: learnHistoryRepository
         )
     }
+    
+    func makeAddWordViewModel() -> AddWordViewModel {
+        return AddWordViewModel()
+    }
 }
 
 // MARK: - Library
@@ -49,6 +53,14 @@ extension DIContainer {
             wordBookRepository: wordBookRepository,
             wordRepository: wordRepository
         )
+    }
+    
+    func makeMyBookDetailViewModel() -> MyBookDetailViewModel {
+        return MyBookDetailViewModel()
+    }
+    
+    func makeCreateBookViewModel() -> CreateBookViewModel {
+        return CreateBookViewModel()
     }
 }
 
