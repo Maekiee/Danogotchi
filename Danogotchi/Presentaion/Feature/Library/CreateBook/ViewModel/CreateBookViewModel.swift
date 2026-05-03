@@ -5,13 +5,13 @@ import RealmSwift
 
 final class CreateBookViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let wordBookRepo: WordBookRepositoryProtocol
+    private let wordBookRepository: WordBookRepositoryProtocol
     private let userInfo = UserInfoManager.shared
     
     init(
-        wordBookRepo: WordBookRepositoryProtocol = WordBookRepository()
+        wordBookRepository: WordBookRepositoryProtocol
     ) {
-        self.wordBookRepo = wordBookRepo
+        self.wordBookRepository = wordBookRepository
     }
     
     
@@ -40,14 +40,14 @@ final class CreateBookViewModel: BaseViewModel {
                 
                 if let bookId = input.selectedBookId {
                     let bookObjectId = try! ObjectId(string: bookId)
-                    owner.wordBookRepo.update(id: bookObjectId, title: text)
+                    owner.wordBookRepository.update(id: bookObjectId, title: text)
                     
                     createBookDoneTrigger.accept(())
                 } else {
                     // 단어장 생성
-                    owner.wordBookRepo.create(title: text)
+                    owner.wordBookRepository.create(title: text)
                     // 생성한 단어장 가져오기
-                    guard let newBook = owner.wordBookRepo.readAll().last else { return }
+                    guard let newBook = owner.wordBookRepository.readAll().last else { return }
 
                     if owner.userInfo.selectedBookId == nil {
                         owner.userInfo.selectedBookId = newBook.id

@@ -7,11 +7,21 @@ final class MyBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     
-    private let wordBookRepo = WordBookRepository()
-    private let wordRepo = WordRepository()
-    private let learningHistoryRepo = LearningHistoryRepository()
+    private let wordBookRepository: WordBookRepositoryProtocol
+    private let wordRepository: WordRepositoryProtocol
+    private let learningHistoryRepository: LearningHistoryRepositoryProtocol
     
     private let myBookObjectId = BehaviorRelay<ObjectId?>(value: nil)
+    
+    init(
+        wordBookRepository: WordBookRepositoryProtocol,
+        wordRepository: WordRepositoryProtocol,
+        learningHistoryRepository: LearningHistoryRepositoryProtocol
+    ) {
+        self.wordBookRepository = wordBookRepository
+        self.wordRepository = wordRepository
+        self.learningHistoryRepository = learningHistoryRepository
+    }
     
     struct Input {
         let viewWillAppear: Observable<Void>
@@ -29,7 +39,7 @@ final class MyBookDetailViewModel: BaseViewModel {
         input.viewWillAppear
             .bind(with: self) { owner, _ in
                 
-                guard let myBookStruct = owner.wordBookRepo.readAll().first(where: { $0.title == "나의 단어장" }) else {
+                guard let myBookStruct = owner.wordBookRepository.readAll().first(where: { $0.title == "나의 단어장" }) else {
                     // "나의 단어장"이 없는 경우 빈 배열 처리
                     wordList.accept([])
                     owner.myBookObjectId.accept(nil)
@@ -44,8 +54,8 @@ final class MyBookDetailViewModel: BaseViewModel {
                 
                 owner.myBookObjectId.accept(bookId)
                 
-                let myWordList = owner.wordBookRepo.fetchWordsInWordBook(id: bookId).reversed()
-                let histories = owner.learningHistoryRepo.fetchAllHistory()
+                let myWordList = owner.wordBookRepository.fetchWordsInWordBook(id: bookId).reversed()
+                let histories = owner.learningHistoryRepository.fetchAllHistory()
                 let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
                 let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
                     let correctCount = historyModels.filter { $0.isCorrect }.count
@@ -73,7 +83,7 @@ final class MyBookDetailViewModel: BaseViewModel {
                 
                 // 디비에서 지우기
                 let wordId = try! ObjectId(string: wordItem.id)
-                owner.wordRepo.delete(id: wordId)
+                owner.wordRepository.delete(id: wordId)
                 
                 
                 if let activeBookId = UserInfoManager.shared.activeBookIdentifier?.id,

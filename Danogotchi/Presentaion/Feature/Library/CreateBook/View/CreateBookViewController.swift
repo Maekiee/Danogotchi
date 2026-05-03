@@ -5,10 +5,15 @@ import RxCocoa
 
 final class CreateBookViewController: BaseViewController {
     let disposeBag = DisposeBag()
-    private let viewModel = CreateBookViewModel()
+//    private let viewModel = CreateBookViewModel()
+    private let viewModel: CreateBookViewModel
     private let selectedBookInfo: (String, String)?
     
-    init(selectedBookInfo: (String, String)? = nil) {
+    init(
+        viewModel: CreateBookViewModel,
+        selectedBookInfo: (String, String)? = nil
+    ) {
+        self.viewModel = viewModel
         self.selectedBookInfo = selectedBookInfo
         super.init(nibName: nil, bundle: nil)
     }

@@ -15,6 +15,7 @@ final class DIContainer {
 
 // MARK: - Word
 extension DIContainer {
+    
     func makeWordRepository() -> WordRepositoryProtocol {
         return WordRepository()
     }
@@ -28,8 +29,14 @@ extension DIContainer {
         )
     }
     
-    func makeAddWordViewModel() -> AddWordViewModel {
-        return AddWordViewModel()
+    func makeAddWordViewModel(wordItem: CreateWord) -> AddWordViewModel {
+        let wordRepository = makeWordRepository()
+        let wordBookRepository = makeWordBookRepository()
+        return AddWordViewModel(
+            wordItem: wordItem,
+            wordBookRepository: wordBookRepository,
+            wordRepository: wordRepository
+        )
     }
 }
 
@@ -55,12 +62,24 @@ extension DIContainer {
         )
     }
     
+    // -- 추가 --
+    
     func makeMyBookDetailViewModel() -> MyBookDetailViewModel {
-        return MyBookDetailViewModel()
+        let wordBookRepository = makeWordBookRepository()
+        let wordRepository = makeWordRepository()
+        let learningHistoryRepository = makeLearningHistoryRepository()
+        return MyBookDetailViewModel(
+            wordBookRepository: wordBookRepository,
+            wordRepository: wordRepository,
+            learningHistoryRepository: learningHistoryRepository
+        )
     }
     
     func makeCreateBookViewModel() -> CreateBookViewModel {
-        return CreateBookViewModel()
+        let wordBookRepository = makeWordBookRepository()
+        return CreateBookViewModel(
+            wordBookRepository: wordBookRepository
+        )
     }
 }
 

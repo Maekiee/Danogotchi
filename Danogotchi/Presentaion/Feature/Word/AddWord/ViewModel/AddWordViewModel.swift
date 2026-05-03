@@ -5,22 +5,24 @@ import RealmSwift
 
 final class AddWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let wordBookRepo: WordBookRepositoryProtocol
-    private let wordRepo: WordRepositoryProtocol
+    
+    private let wordItem: CreateWord?
+    private let wordBookRepository: WordBookRepositoryProtocol
+    private let wordRepository: WordRepositoryProtocol
     private let userInfoManager = UserInfoManager.shared
     
     private var isWordBookId: ObjectId?
-    private let wordItem: CreateWord?
+    
     
     
     init(
         wordItem: CreateWord? = nil,
-        wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
-        wordRepo: WordRepositoryProtocol = WordRepository()
+        wordBookRepository: WordBookRepositoryProtocol,
+        wordRepository: WordRepositoryProtocol
     ) {
         self.wordItem = wordItem
-        self.wordBookRepo = wordBookRepo
-        self.wordRepo = wordRepo
+        self.wordBookRepository = wordBookRepository
+        self.wordRepository = wordRepository
     }
     
     
@@ -224,14 +226,14 @@ final class AddWordViewModel: BaseViewModel {
         switch actionType {
             // 단어 추가 로직
         case .add:
-            let newWord = wordRepo.create(thumbnail: url, word: word, meaning: meaning)
-            wordBookRepo.addWord(bookId: bookObjectId, word: newWord)
+            let newWord = wordRepository.create(thumbnail: url, word: word, meaning: meaning)
+            wordBookRepository.addWord(bookId: bookObjectId, word: newWord)
             userInfoManager.notifyWordBookUpdate()
             // 단어 수정 ㅇ로직
         case .edit:
             // 단어 수정
             guard let wordId = wordItem?.wordId else { return }
-            wordRepo.update(id: wordId, thumbnail: url, word: word, meaning: meaning)
+            wordRepository.update(id: wordId, thumbnail: url, word: word, meaning: meaning)
             userInfoManager.notifyWordBookUpdate()
         }
         

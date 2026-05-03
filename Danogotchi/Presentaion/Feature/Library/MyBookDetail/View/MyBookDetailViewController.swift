@@ -4,11 +4,27 @@ import RxSwift
 import RxCocoa
 import RealmSwift
 
+
+protocol MyBookDetailViewControllerDelegate: AnyObject {
+    func myBookDetailDidTapBack()
+    func myBookDetailDidTapAddWord(with createWordModel: CreateWord)
+    func myBookDetailDidTapEditWord(with createWordModel: CreateWord)
+}
+
 final class MyBookDetailViewController: BaseViewController {
+    weak var delegate: MyBookDetailViewControllerDelegate?
     private let disposeBag = DisposeBag()
-    private let viewModel = MyBookDetailViewModel()
-    
+    private let viewModel: MyBookDetailViewModel
     private let userInfo = UserInfoManager.shared
+    
+    init(viewModel: MyBookDetailViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private let deleteWordTrigger = PublishRelay<Word>()
     private let myBookObjectId = BehaviorRelay<ObjectId?>(value: nil)
@@ -141,7 +157,8 @@ extension MyBookDetailViewController {
         
         backButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.navigationController?.popViewController(animated: true)
+                // 코디네이터 적용
+                owner.delegate?.myBookDetailDidTapBack()
             }.disposed(by: disposeBag)
         
         addBookButton.rx.tap
@@ -157,12 +174,8 @@ extension MyBookDetailViewController {
                     meaning: "",
                     actionType: .add
                 )
-                let vm = AddWordViewModel(wordItem: createWordModel)
-                let vc = AddWordViewController(
-                    viewModel: vm,
-                    entryPoint: .add //
-                )
-                owner.navigationController?.pushViewController(vc, animated: true)
+                // 코디네이터 적용
+                owner.delegate?.myBookDetailDidTapAddWord(with: createWordModel)
             }.disposed(by: disposeBag)
     }
 }
@@ -195,12 +208,8 @@ extension MyBookDetailViewController {
                             meaning: item.word.meaning,
                             actionType: .edit
                         )
-                        let vm = AddWordViewModel(wordItem: createWordModel)
-                        let vc = AddWordViewController(
-                            viewModel: vm,
-                            entryPoint: .edit
-                        )
-                        owner.navigationController?.pushViewController(vc, animated: true)
+                        // 코디네이터 적용
+                        owner.delegate?.myBookDetailDidTapEditWord(with: createWordModel)
                     },
                     deleteAction: { [weak self] in
                         guard let owner = self else { return }
@@ -215,7 +224,8 @@ extension MyBookDetailViewController {
             return collectionView.dequeueConfiguredReusableCell(
                 using: cellregistration,
                 for: indexPath,
-                item: itemIdentifier)
+                item: itemIdentifier,
+            )
         }
     }
     

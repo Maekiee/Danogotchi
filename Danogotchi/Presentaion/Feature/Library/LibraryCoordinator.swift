@@ -7,21 +7,28 @@ protocol LibraryCoordinatorDelegate: AnyObject {
 final class LibraryCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let container: DIContainer
+    private let DIContainer: DIContainer
     weak var delegate: LibraryCoordinatorDelegate?
     
     init(container: DIContainer, navigationController: UINavigationController) {
-        self.container = container
+        self.DIContainer = container
         self.navigationController = navigationController
     }
 }
 
 extension LibraryCoordinator {
     func start() {
-        let vm = container.makeBookListViewModel()
+        let vm = DIContainer.makeBookListViewModel()
         let vc = BookListViewController(viewModel: vm)
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
+    }
+    
+    func showMyBookDetail() {
+        let vm = DIContainer.makeMyBookDetailViewModel()
+        let vc = MyBookDetailViewController(viewModel: vm)
+        vc.delegate = self
+        navigationController.pushViewController(vc, animated: true)
     }
 }
 
@@ -41,5 +48,27 @@ extension LibraryCoordinator: BookListViewControllerDelegate {
 
     func bookListDidTapMore() {
         // TODO: A-4-D에서 MyBookDetailVC push
+        showMyBookDetail()
     }
+}
+
+
+extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
+    func myBookDetailDidTapBack() {
+        navigationController.popViewController(animated: true)
+    }
+    
+    func myBookDetailDidTapAddWord(with createWordModel: CreateWord) {
+        let vm = DIContainer.makeAddWordViewModel(wordItem: createWordModel)
+        let vc = AddWordViewController(viewModel: vm, entryPoint: .add)
+        navigationController.pushViewController(vc, animated: true)
+    }
+    
+    func myBookDetailDidTapEditWord(with createWordModel: CreateWord) {
+        let vm = DIContainer.makeAddWordViewModel(wordItem: createWordModel)
+        let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
+        navigationController.pushViewController(vc, animated: true)
+    }
+    
+    
 }

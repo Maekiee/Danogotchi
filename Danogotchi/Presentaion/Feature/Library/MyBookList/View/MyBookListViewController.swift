@@ -208,14 +208,15 @@ extension MyBookListViewController {
         // 단어장 추가하기
         addBookButton.rx.tap
             .bind(with: self) { owner, _ in
-                let vc = CreateBookViewController()
-                vc.modalPresentationStyle = .overFullScreen
-                vc.modalTransitionStyle = .crossDissolve
-                
-                vc.bookCreated
-                    .bind(to: owner.refreshTrigger)
-                    .disposed(by: vc.disposeBag)
-                owner.present(vc, animated: true)
+                print("단어 추가하기 화면으로 이동")
+//                let vc = CreateBookViewController()
+//                vc.modalPresentationStyle = .overFullScreen
+//                vc.modalTransitionStyle = .crossDissolve
+//                
+//                vc.bookCreated
+//                    .bind(to: owner.refreshTrigger)
+//                    .disposed(by: vc.disposeBag)
+//                owner.present(vc, animated: true)
                 
             }.disposed(by: disposeBag)
         
@@ -235,14 +236,15 @@ extension MyBookListViewController {
                 owner.showActionSheet(
                     title: item.title,
                     editAction: {
-                        let vc = CreateBookViewController(selectedBookInfo: (item.id, item.title))
-                        vc.modalPresentationStyle = .overFullScreen
-                        vc.modalTransitionStyle = .crossDissolve
-                        
-                        vc.bookCreated
-                            .bind(to: owner.refreshTrigger)
-                            .disposed(by: vc.disposeBag)
-                        owner.present(vc, animated: true)
+                        print("단어장 추하기 화면 수정 버전으로 이동")
+//                        let vc = CreateBookViewController(selectedBookInfo: (item.id, item.title))
+//                        vc.modalPresentationStyle = .overFullScreen
+//                        vc.modalTransitionStyle = .crossDissolve
+//                        
+//                        vc.bookCreated
+//                            .bind(to: owner.refreshTrigger)
+//                            .disposed(by: vc.disposeBag)
+//                        owner.present(vc, animated: true)
                     },
                     deleteAction: {
                         owner.deleteTrigger.accept(item)
