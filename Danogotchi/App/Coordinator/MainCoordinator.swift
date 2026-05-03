@@ -1,7 +1,5 @@
 import UIKit
 
-
-
 final class MainCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
@@ -37,11 +35,25 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     }
     
     func wordTabDidTapCreateBook() {
+//        let vm = container.makeCreateBookViewModel()
+//        let vc = CreateBookViewController(viewModel: vm)
         // TODO: A-4에서 LibraryCoordinator 경로
     }
     
     func wordTabDidTapSetting() {
         // TODO: A-5에서 SettingCoordinator 생성 후 present
+        let nav = UINavigationController()
+        let settingCoordinator = SettingCoordinator(
+            container: container,
+            navigationController: nav
+        )
+        settingCoordinator.delegate = self
+        addChild(settingCoordinator)
+        settingCoordinator.start()
+        
+        nav.modalPresentationStyle = .fullScreen
+        navigationController.present(nav, animated: true)
+        
     }
     
     func wordTabDidTapStartQuiz(quizData: QuizData) {
@@ -59,3 +71,10 @@ extension MainCoordinator: LibraryCoordinatorDelegate {
     }
 }
 
+extension MainCoordinator: SettingCoordinatorDelegate {
+    
+    func settingCoordinatorDidFinish() {
+        childCoordinators.removeAll { $0 is SettingCoordinator }
+    }
+    
+}

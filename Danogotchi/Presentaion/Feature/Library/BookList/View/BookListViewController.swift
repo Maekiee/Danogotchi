@@ -379,8 +379,6 @@ extension BookListViewController {
         
         moreButton.rx.tap
             .bind(with: self) { owner, _ in
-//                let vc = MyBookDetailViewController()
-//                owner.navigationController?.pushViewController(vc, animated: true)
                 owner.delegate?.bookListDidTapMore()
             }.disposed(by: disposeBag)
         

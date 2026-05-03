@@ -36,10 +36,25 @@ class CustomHeaderView: UICollectionReusableView {
 
 
 
+protocol SettingTabViewControllerDelegate: AnyObject {
+    func didTapSetDamagotchi()
+    func didTapSearchTheme()
+    func didTapClose()
+}
 
 final class SettingTabViewController: BaseViewController {
+    weak var delegate: SettingTabViewControllerDelegate?
     private let disposeBag = DisposeBag()
-    private let viewModel = SettingTabViewModel()
+    private let viewModel: SettingTabViewModel
+    
+    init(viewModel: SettingTabViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     typealias Section = Setting.Category
     
