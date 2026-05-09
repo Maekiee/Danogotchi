@@ -41,6 +41,12 @@
 /* Begin PBXFileReference section */
 		765182CB2E843A75005EE2F7 /* Danogotchi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Danogotchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		765183672E843CF0005EE2F7 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		76615D062FAE04A1005706B5 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
+		76615D072FAE1036005706B5 /* architecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = architecture.md; sourceTree = "<group>"; };
+		76615D082FAE1036005706B5 /* conventions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = conventions.md; sourceTree = "<group>"; };
+		76615D092FAE1036005706B5 /* environment.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = environment.md; sourceTree = "<group>"; };
+		76615D0B2FAE1100005706B5 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
+		76615D0C2FAE18CD005706B5 /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -96,6 +102,10 @@
 				765183672E843CF0005EE2F7 /* .gitignore */,
 				765182CD2E843A75005EE2F7 /* Danogotchi */,
 				765182CC2E843A75005EE2F7 /* Products */,
+				76615D062FAE04A1005706B5 /* CLAUDE.md */,
+				76615D0A2FAE1036005706B5 /* docs */,
+				76615D0B2FAE1100005706B5 /* TODO.md */,
+				76615D0C2FAE18CD005706B5 /* migration.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -105,6 +115,16 @@
 				765182CB2E843A75005EE2F7 /* Danogotchi.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		76615D0A2FAE1036005706B5 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				76615D072FAE1036005706B5 /* architecture.md */,
+				76615D082FAE1036005706B5 /* conventions.md */,
+				76615D092FAE1036005706B5 /* environment.md */,
+			);
+			path = docs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

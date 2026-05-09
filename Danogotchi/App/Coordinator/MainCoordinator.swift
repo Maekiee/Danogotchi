@@ -50,8 +50,6 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         settingCoordinator.delegate = self
         addChild(settingCoordinator)
         settingCoordinator.start()
-        
-        nav.modalPresentationStyle = .fullScreen
         navigationController.present(nav, animated: true)
         
     }

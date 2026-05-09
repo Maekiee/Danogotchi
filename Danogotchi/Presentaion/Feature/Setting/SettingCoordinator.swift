@@ -36,15 +36,15 @@ extension SettingCoordinator: SettingCoordinatorDelegate {
 
 extension SettingCoordinator: SettingTabViewControllerDelegate {
     func didTapSetDamagotchi() {
-        <#code#>
+        
     }
     
     func didTapSearchTheme() {
-        <#code#>
+        
     }
     
     func didTapClose() {
-        <#code#>
+        
     }
     
     
