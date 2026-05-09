@@ -37,7 +37,6 @@ class CustomHeaderView: UICollectionReusableView {
 
 
 protocol SettingTabViewControllerDelegate: AnyObject {
-    func didTapSetDamagotchi()
     func didTapSearchTheme()
     func didTapClose()
 }
@@ -246,31 +245,21 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
         collectionView.rx.itemSelected
             .bind(with: self) { owner, indexPath in
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
-                owner.handleSettingAction(selectedCell.icon)
+                switch selectedCell.icon.title {
+                case "배경 테마 변경하기":
+                    owner.delegate?.didTapSearchTheme()
+                case "문의하기":
+                    owner.openEmailForm()
+                case "앱스토어 리뷰":
+                    owner.openAppStore()
+                case "개인정보 처리방침":
+                    owner.openPrivacyPolicy()
+                default:
+                    print("ddd")
+                }
             }.disposed(by: disposeBag)
     }
     
-    private func handleSettingAction(_ setting: Setting) {
-        switch setting.title {
-        case "배경 테마 변경하기":
-            showThemeSelector()
-        case "문의하기":
-            openEmailForm()
-        case "앱스토어 리뷰":
-            openAppStore()
-        case "개인정보 처리방침":
-            openPrivacyPolicy()
-        default:
-            print("ddd")
-        }
-    }
-    
-    private func showThemeSelector() {
-        // TODO: Step 1-7에서 SettingCoordinator로 이동
-        let vm = SearchThemeViewModel(mode: .settings, repository: SearchThemeRepository())
-        let vc = SearchThemeViewController(mode: .settings, viewModel: vm)
-        navigationController?.pushViewController(vc, animated: true)
-    }
     
     private func openAppStore() {
         let urlString = "itms-apps://itunes.apple.com/app/6753820016"
@@ -284,12 +273,7 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
         let safariVC = SFSafariViewController(url: url)
         present(safariVC, animated: true)
     }
-    
-    private func pushLicenseList() {
-        let vc = OpenSourceLicenseListViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
-//
+
     private func openEmailForm() {
         if MFMailComposeViewController.canSendMail() {
             let mailComposer = MFMailComposeViewController()

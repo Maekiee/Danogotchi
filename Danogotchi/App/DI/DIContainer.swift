@@ -112,9 +112,4 @@ extension DIContainer {
         return SettingTabViewModel()
     }
     
-    func makeSetUserNameViewModel() -> SetUsernameViewModel {
-        return SetUsernameViewModel()
-    }
-    
-    
 }

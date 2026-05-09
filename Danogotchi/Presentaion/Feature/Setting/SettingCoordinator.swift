@@ -35,12 +35,10 @@ extension SettingCoordinator: SettingCoordinatorDelegate {
 }
 
 extension SettingCoordinator: SettingTabViewControllerDelegate {
-    func didTapSetDamagotchi() {
-        
-    }
-    
     func didTapSearchTheme() {
-        
+        let vm = container.makeSearchThemeViewModel(mode: .settings)
+        let vc = SearchThemeViewController(mode: .settings, viewModel: vm)
+        navigationController.pushViewController(vc, animated: true)
     }
     
     func didTapClose() {
