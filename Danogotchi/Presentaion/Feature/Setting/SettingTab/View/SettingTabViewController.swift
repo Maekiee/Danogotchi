@@ -56,14 +56,14 @@ final class SettingTabViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    typealias Section = Setting.Category
+    typealias Section = SettingMenu.Category
     
     struct Item: Hashable {
         private let id = UUID()
-        let icon: Setting
+        let icon: SettingMenu
         let title:String
         
-        init(icon: Setting, title: String) {
+        init(icon: SettingMenu, title: String) {
             self.icon = icon
             self.title = title
         }
@@ -165,7 +165,7 @@ final class SettingTabViewController: BaseViewController {
     private func configureDataSource() {
         
         // list cell
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Setting>
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SettingMenu>
         { [weak self] cell, indexPath, setting in
             guard let self = self else { return }
             
@@ -175,7 +175,7 @@ final class SettingTabViewController: BaseViewController {
             var backgroundConfig = UIBackgroundConfiguration.listGroupedCell()
             backgroundConfig.backgroundColor = AppColor.appWhite
             
-            if setting.title == "앱 버전" {
+            if setting.action == .appVersion {
                 // 앱 버전 셀일 경우
                 contentConfiguration.secondaryText = appVersion // 버전 정보 표시
                 contentConfiguration.secondaryTextProperties.color = .gray // 버전 텍스트 색상
@@ -198,7 +198,6 @@ final class SettingTabViewController: BaseViewController {
                 headerView.configure(with: section.description)
             }
         
-        // data source
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) {
             collectionView, indexPath, item -> UICollectionViewCell? in
             return collectionView.dequeueConfiguredReusableCell(
@@ -217,7 +216,7 @@ final class SettingTabViewController: BaseViewController {
     }
     
     private func applyInitialSnapshots() {
-        for category in Setting.Category.allCases {
+        for category in SettingMenu.Category.allCases {
             var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item>()
             let items = category.list.map { Item(icon: $0, title: $0.title) }
             sectionSnapshot.append(items)
@@ -232,21 +231,20 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
         let input = SettingTabViewModel.Input()
         let output = viewModel.transform(input: input)
         
-        
         collectionView.rx.itemSelected
             .bind(with: self) { owner, indexPath in
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
-                switch selectedCell.icon.title {
-                case "배경 테마 변경하기":
+                switch selectedCell.icon.action {
+                case .searchTheme:
                     owner.delegate?.didTapSearchTheme()
-                case "문의하기":
+                case .inquiry:
                     owner.openEmailForm()
-                case "앱스토어 리뷰":
+                case .appStore:
                     owner.delegate?.didTapAppStore()
-                case "개인정보 처리방침":
+                case .privacyPolicy:
                     owner.delegate?.didTapPrivacyPolicy()
-                default:
-                    print("")
+                case .appVersion:
+                    owner.collectionView.deselectItem(at: indexPath, animated: true)
                 }
             }.disposed(by: disposeBag)
     }

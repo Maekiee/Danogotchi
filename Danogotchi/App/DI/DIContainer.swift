@@ -90,7 +90,7 @@ extension DIContainer {
     }
 }
 
-// MARK: - Setting
+// MARK: - Setting Tab
 extension DIContainer {
     func makeSearchThemeRepository() -> SearchThemeRepoProtocol {
         return SearchThemeRepository()
