@@ -41,7 +41,6 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     }
     
     func wordTabDidTapSetting() {
-        // TODO: A-5에서 SettingCoordinator 생성 후 present
         let nav = UINavigationController()
         let settingCoordinator = SettingCoordinator(
             container: container,
@@ -51,7 +50,6 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         addChild(settingCoordinator)
         settingCoordinator.start()
         navigationController.present(nav, animated: true)
-        
     }
     
     func wordTabDidTapStartQuiz(quizData: QuizData) {

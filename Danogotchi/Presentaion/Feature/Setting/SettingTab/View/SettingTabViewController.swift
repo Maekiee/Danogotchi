@@ -34,8 +34,6 @@ class CustomHeaderView: UICollectionReusableView {
     }
 }
 
-
-
 protocol SettingTabViewControllerDelegate: AnyObject {
     func didTapSearchTheme()
     func didTapClose()
@@ -95,6 +93,7 @@ final class SettingTabViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationController?.setNavigationBarHidden(true, animated: false)
         
         configHierarchy()
         configLayout()
@@ -108,9 +107,6 @@ final class SettingTabViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-
         
         if let indexPath = self.collectionView.indexPathsForSelectedItems?.first {
             if let coordinator = self.transitionCoordinator {
@@ -126,14 +122,6 @@ final class SettingTabViewController: BaseViewController {
             }
         }
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        // 다른 화면으로 이동 시 네비게이션 바 다시 보이기
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
-
     
     override func configHierarchy() {
         view.addSubview(titleLabel)
@@ -305,17 +293,20 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
         }
     }
     
+    // 공통 컴포넌트로 분리
     func showMailErrorAlert() {
         let alert = UIAlertController(title: "메일 전송 실패", message: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
     
+    // 공통 컴포넌트로 분리
     func showMailSucceedAlert() {
         let alert = UIAlertController(title: "메일 전송 성공", message: "메일이 성공적으로 전송 되었습니다.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
+    
     
     func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
         controller.dismiss(animated: true) { [weak self] in

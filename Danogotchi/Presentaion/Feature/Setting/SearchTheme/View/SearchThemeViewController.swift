@@ -90,14 +90,6 @@ final class SearchThemeViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        if entryMode == .settings {
-            navigationController?.setNavigationBarHidden(true, animated: animated)
-        }
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -111,10 +103,6 @@ final class SearchThemeViewController: BaseViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
-        if entryMode == .settings {
-            navigationController?.setNavigationBarHidden(false, animated: animated)
-        }
     }
     
     override func configHierarchy() {
