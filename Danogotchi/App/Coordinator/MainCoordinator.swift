@@ -68,7 +68,6 @@ extension MainCoordinator: LibraryCoordinatorDelegate {
 }
 
 extension MainCoordinator: SettingCoordinatorDelegate {
-    
     func settingCoordinatorDidFinish() {
         childCoordinators.removeAll { $0 is SettingCoordinator }
     }

@@ -36,6 +36,9 @@ class CustomHeaderView: UICollectionReusableView {
 
 protocol SettingTabViewControllerDelegate: AnyObject {
     func didTapSearchTheme()
+    func didTapInquiry()
+    func didTapAppStore()
+    func didTapPrivacyPolicy()
     func didTapClose()
 }
 
@@ -239,28 +242,15 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
                 case "문의하기":
                     owner.openEmailForm()
                 case "앱스토어 리뷰":
-                    owner.openAppStore()
+                    owner.delegate?.didTapAppStore()
                 case "개인정보 처리방침":
-                    owner.openPrivacyPolicy()
+                    owner.delegate?.didTapPrivacyPolicy()
                 default:
-                    print("ddd")
+                    print("")
                 }
             }.disposed(by: disposeBag)
     }
     
-    
-    private func openAppStore() {
-        let urlString = "itms-apps://itunes.apple.com/app/6753820016"
-        guard let url = URL(string: urlString) else { return }
-        UIApplication.shared.open(url)
-    }
-    
-    private func openPrivacyPolicy() {
-        let urlString = "https://nebulous-coffee-e6d.notion.site/27ef47543db2800eb0d0d6e910c09cfc?source=copy_link"
-        guard let url = URL(string: urlString) else { return }
-        let safariVC = SFSafariViewController(url: url)
-        present(safariVC, animated: true)
-    }
 
     private func openEmailForm() {
         if MFMailComposeViewController.canSendMail() {
