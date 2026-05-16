@@ -62,8 +62,6 @@ extension DIContainer {
         )
     }
     
-    // -- 추가 --
-    
     func makeMyBookDetailViewModel() -> MyBookDetailViewModel {
         let wordBookRepository = makeWordBookRepository()
         let wordRepository = makeWordRepository()
@@ -107,9 +105,12 @@ extension DIContainer {
 
 
 extension DIContainer {
-    
+    func makeAppEnvProvider() -> AppEnvProvider {
+        return DefaultAppEnvProvider()
+    }
     func makeSettingTabViewModel() -> SettingTabViewModel {
-        return SettingTabViewModel()
+        let envProvider = makeAppEnvProvider()
+        return SettingTabViewModel(appEnv: envProvider)
     }
     
 }

@@ -58,17 +58,6 @@ final class SettingTabViewController: BaseViewController {
     
     typealias Section = SettingMenu.Category
     
-    struct Item: Hashable {
-        private let id = UUID()
-        let icon: SettingMenu
-        let title:String
-        
-        init(icon: SettingMenu, title: String) {
-            self.icon = icon
-            self.title = title
-        }
-    }
-    
     private var appVersion: String {
         guard let info = Bundle.main.infoDictionary,
               let version = info["CFBundleShortVersionString"] as? String else {
@@ -91,7 +80,7 @@ final class SettingTabViewController: BaseViewController {
         view.bounces = true
         return view
     }()
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<Section, SettingMenu>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -198,12 +187,13 @@ final class SettingTabViewController: BaseViewController {
                 headerView.configure(with: section.description)
             }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) {
+        dataSource = UICollectionViewDiffableDataSource<Section, SettingMenu>(collectionView: collectionView) {
             collectionView, indexPath, item -> UICollectionViewCell? in
             return collectionView.dequeueConfiguredReusableCell(
                 using: cellRegistration,
                 for: indexPath,
-                item: item.icon)
+                item: item
+            )
         }
         
         dataSource.supplementaryViewProvider = { (collectionView, elementKind, indexPath) -> UICollectionReusableView? in
@@ -217,10 +207,10 @@ final class SettingTabViewController: BaseViewController {
     
     private func applyInitialSnapshots() {
         for category in SettingMenu.Category.allCases {
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item>()
-            let items = category.list.map { Item(icon: $0, title: $0.title) }
-            sectionSnapshot.append(items)
-            dataSource.apply(sectionSnapshot, to: category, animatingDifferences: false)
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<SettingMenu>()
+            sectionSnapshot.append(category.list)
+            dataSource
+                .apply(sectionSnapshot, to: category, animatingDifferences: false)
         }
     }
     
@@ -228,13 +218,15 @@ final class SettingTabViewController: BaseViewController {
 
 extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     private func bind() {
-        let input = SettingTabViewModel.Input()
+        let input = SettingTabViewModel.Input(
+            viewDidLoad: Observable.just(())
+        )
         let output = viewModel.transform(input: input)
         
         collectionView.rx.itemSelected
             .bind(with: self) { owner, indexPath in
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
-                switch selectedCell.icon.action {
+                switch selectedCell.action {
                 case .searchTheme:
                     owner.delegate?.didTapSearchTheme()
                 case .inquiry:
