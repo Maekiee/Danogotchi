@@ -199,9 +199,13 @@ final class SettingTabViewController: BaseViewController {
     }
 }
 
-extension SettingTabViewController: MFMailComposeViewControllerDelegate {
+extension SettingTabViewController {
     private func bind() {
-        let input = SettingTabViewModel.Input()
+        let input = SettingTabViewModel.Input(
+            itemSelected: collectionView.rx.itemSelected.compactMap { [weak self] indexPath in
+                self?.dataSource.itemIdentifier(for: indexPath)
+            }
+        )
         let output = viewModel.transform(input: input)
         
         // 앱 버전
@@ -223,56 +227,41 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
                 }
             }.disposed(by: disposeBag)
         
-        collectionView.rx.itemSelected
-            .bind(with: self) { owner, indexPath in
-                guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
-                switch selectedCell.action {
+        output.action
+            .emit(with: self) { owner, action in
+                switch action {
                 case .searchTheme:
                     owner.delegate?.didTapSearchTheme()
                 case .inquiry:
-                    owner.openEmailForm()
+                    break
                 case .appStore:
                     owner.delegate?.didTapAppStore()
                 case .privacyPolicy:
                     owner.delegate?.didTapPrivacyPolicy()
                 case .appVersion:
-                    owner.collectionView.deselectItem(at: indexPath, animated: true)
+                    owner.collectionView.indexPathsForSelectedItems?.forEach {
+                        owner.collectionView.deselectItem(at: $0, animated: true)
+                    }
+                }
+            }.disposed(by: disposeBag)
+        
+        output.mailBody
+            .emit(with: self) { owner, body in
+                if MFMailComposeViewController.canSendMail() {
+                    let mailComposer = MFMailComposeViewController()
+                    mailComposer.mailComposeDelegate = owner
+                    mailComposer.setToRecipients(["pdwssf@gmail.com"])
+                    mailComposer.setSubject("앱 문의하기")
+                    mailComposer.setMessageBody(body, isHTML: false)
+                    owner.present(mailComposer, animated: true, completion: nil)
+                } else {
+                    owner.showMailErrorAlert()
                 }
             }.disposed(by: disposeBag)
     }
-    
+}
 
-    private func openEmailForm() {
-        if MFMailComposeViewController.canSendMail() {
-            let mailComposer = MFMailComposeViewController()
-            
-            mailComposer.mailComposeDelegate = self
-            
-            mailComposer.setToRecipients(["pdwssf@gmail.com"])
-            
-            mailComposer.setSubject("앱 문의하기")
-            
-            let body = """
-                    궁금하신 점이나 불편 사항을 편하게 남겨주세요.
-                    
-                    
-                    
-                    
-                    -------------------
-                    앱 버전: \(currentAppVersion)
-                    기기: \(UIDevice.current.model)
-                    OS 버전: \(UIDevice.current.systemVersion)
-                    -------------------
-                    """
-            mailComposer.setMessageBody(body, isHTML: false)
-            
-            self.present(mailComposer, animated: true, completion: nil)
-            
-        } else {
-            showMailErrorAlert()
-        }
-    }
-    
+extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     // 공통 컴포넌트로 분리
     func showMailErrorAlert() {
         let alert = UIAlertController(title: "메일 전송 실패", message: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요.", preferredStyle: .alert)
@@ -287,7 +276,7 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    
+    // 메일 관련
     func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
         controller.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
