@@ -58,13 +58,7 @@ final class SettingTabViewController: BaseViewController {
     
     typealias Section = SettingMenu.Category
     
-    private var appVersion: String {
-        guard let info = Bundle.main.infoDictionary,
-              let version = info["CFBundleShortVersionString"] as? String else {
-            return "N/A"
-        }
-        return "v \(version)"
-    }
+    private var currentAppVersion: String = ""
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "설정"
@@ -92,7 +86,6 @@ final class SettingTabViewController: BaseViewController {
         configView()
         
         configureDataSource()
-        applyInitialSnapshots()
         
         bind()
     }
@@ -166,7 +159,7 @@ final class SettingTabViewController: BaseViewController {
             
             if setting.action == .appVersion {
                 // 앱 버전 셀일 경우
-                contentConfiguration.secondaryText = appVersion // 버전 정보 표시
+                contentConfiguration.secondaryText = currentAppVersion // 버전 정보 표시
                 contentConfiguration.secondaryTextProperties.color = .gray // 버전 텍스트 색상
                 cell.accessories = [] // 화살표 제거
             } else {
@@ -204,24 +197,31 @@ final class SettingTabViewController: BaseViewController {
             return nil
         }
     }
-    
-    private func applyInitialSnapshots() {
-        for category in SettingMenu.Category.allCases {
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<SettingMenu>()
-            sectionSnapshot.append(category.list)
-            dataSource
-                .apply(sectionSnapshot, to: category, animatingDifferences: false)
-        }
-    }
-    
 }
 
 extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     private func bind() {
-        let input = SettingTabViewModel.Input(
-            viewDidLoad: Observable.just(())
-        )
+        let input = SettingTabViewModel.Input()
         let output = viewModel.transform(input: input)
+        
+        // 앱 버전
+        output.appVersion
+            .drive(with: self) { owner, version in
+                owner.currentAppVersion = version
+            }.disposed(by: disposeBag)
+        
+        output.sections
+            .drive(with: self) { owner, sections in
+                sections.forEach { section in
+                    var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<SettingMenu>()
+                    sectionSnapshot.append(section.items)
+                    owner.dataSource.apply(
+                        sectionSnapshot,
+                        to: section.category,
+                        animatingDifferences: false
+                    )
+                }
+            }.disposed(by: disposeBag)
         
         collectionView.rx.itemSelected
             .bind(with: self) { owner, indexPath in
@@ -259,7 +259,7 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
                     
                     
                     -------------------
-                    앱 버전: \(appVersion)
+                    앱 버전: \(currentAppVersion)
                     기기: \(UIDevice.current.model)
                     OS 버전: \(UIDevice.current.systemVersion)
                     -------------------
