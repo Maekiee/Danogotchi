@@ -17,10 +17,9 @@ final class ChoiceQuizViewController: BaseViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     // MARK: - UI 프로퍼티
     private let closeButton: UIButton = {

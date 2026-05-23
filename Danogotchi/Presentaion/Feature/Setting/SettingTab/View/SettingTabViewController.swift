@@ -30,6 +30,7 @@ final class SettingTabViewController: BaseViewController {
     typealias Section = SettingMenu.Category
     
     private var currentAppVersion: String = ""
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "설정"
@@ -82,7 +83,6 @@ final class SettingTabViewController: BaseViewController {
     override func configHierarchy() {
         view.addSubview(titleLabel)
         view.addSubview(collectionView)
-        
     }
     
     override func configLayout() {
@@ -114,10 +114,11 @@ final class SettingTabViewController: BaseViewController {
         
         return layout
     }
-    
+}
+
+//MARK: DiffableDataSource
+extension SettingTabViewController {
     private func configureDataSource() {
-        
-        // list cell
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SettingMenu>
         { [weak self] cell, indexPath, setting in
             guard let self = self else { return }
@@ -129,16 +130,13 @@ final class SettingTabViewController: BaseViewController {
             backgroundConfig.backgroundColor = AppColor.appWhite
             
             if setting.action == .appVersion {
-                // 앱 버전 셀일 경우
-                contentConfiguration.secondaryText = currentAppVersion // 버전 정보 표시
-                contentConfiguration.secondaryTextProperties.color = .gray // 버전 텍스트 색상
-                cell.accessories = [] // 화살표 제거
+                contentConfiguration.secondaryText = currentAppVersion
+                contentConfiguration.secondaryTextProperties.color = .gray
+                cell.accessories = []
             } else {
-                // 다른 모든 셀일 경우
                 contentConfiguration.secondaryText = nil
-                cell.accessories = [.disclosureIndicator()] // 화살표 표시
+                cell.accessories = [.disclosureIndicator()]
             }
-            
             
             cell.backgroundConfiguration = backgroundConfig
             cell.contentConfiguration = contentConfiguration
@@ -170,6 +168,8 @@ final class SettingTabViewController: BaseViewController {
     }
 }
 
+
+//MARK: - viewModel biding
 extension SettingTabViewController {
     private func bind() {
         let input = SettingTabViewModel.Input(
@@ -232,6 +232,7 @@ extension SettingTabViewController {
     }
 }
 
+//
 extension SettingTabViewController: MFMailComposeViewControllerDelegate {
     // 공통 컴포넌트로 분리
     func showMailErrorAlert() {

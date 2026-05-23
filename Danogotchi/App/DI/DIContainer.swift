@@ -86,6 +86,14 @@ extension DIContainer {
     func makeLearningHistoryRepository() -> LearningHistoryRepositoryProtocol {
         return LearningHistoryRepository()
     }
+    
+    func makeChoiceQuizViewModel(quizData: QuizData) -> ChoiceQuizViewModel {
+        let learningHistoryRepository = makeLearningHistoryRepository()
+        return ChoiceQuizViewModel(
+            learningHistoryRepository: learningHistoryRepository,
+            quizData: quizData
+        )
+    }
 }
 
 // MARK: - Setting Tab

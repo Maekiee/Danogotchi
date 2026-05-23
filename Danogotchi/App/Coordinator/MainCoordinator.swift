@@ -52,6 +52,7 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
+    // 학습하기
     func wordTabDidTapStartQuiz(quizData: QuizData) {
         // TODO: A-6에서 QuizCoordinator 생성/present
     }

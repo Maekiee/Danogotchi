@@ -48,13 +48,15 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
     }
     
     func didTapAppStore() {
-        let urlString = "itms-apps://itunes.apple.com/app/6753820016"
+        let storeLink = "itms-apps://itunes.apple.com/app/6753820016"
+        let urlString = storeLink
         guard let url = URL(string: urlString) else { return }
         UIApplication.shared.open(url)
     }
     
     func didTapPrivacyPolicy() {
-        let urlString = "https://nebulous-coffee-e6d.notion.site/27ef47543db2800eb0d0d6e910c09cfc?source=copy_link"
+        let privacyPolicyLink = "https://nebulous-coffee-e6d.notion.site/27ef47543db2800eb0d0d6e910c09cfc?source=copy_link"
+        let urlString = privacyPolicyLink
         guard let url = URL(string: urlString) else { return }
         let safariVC = SFSafariViewController(url: url)
         navigationController.present(safariVC, animated: true)
