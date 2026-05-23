@@ -5,11 +5,20 @@ import RxSwift
 import RxCocoa
 
 
+protocol CompleteQuizViewControllerDelegate: AnyObject {
+    func completeQuizDidSelectAction(
+        _ action: CompleteQuizViewModel.ActionType,
+        originalQuizData: QuizData,
+        result: QuizResult
+    )
+}
+
 final class CompleteQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: CompleteQuizViewModel
     private let originalQuizData: QuizData
     private let currentResult: QuizResult
+    weak var delegate: CompleteQuizViewControllerDelegate?
     
     // MARK: - 완료 후 액션을 전달하기 위한 클로저
     var onDismissAction: ((CompleteQuizViewModel.ActionType, QuizData, QuizResult) -> Void)?

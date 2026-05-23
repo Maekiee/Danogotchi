@@ -25,7 +25,17 @@ final class QuizCoordinator: Coordinator {
     func start() {
         let vm = container.makeChoiceQuizViewModel(quizData: quizData)
         let vc = ChoiceQuizViewController(viewModel: vm)
+        vc.deletate = self
         navigationController.setViewControllers([vc], animated: false)
     }
 }
 
+extension QuizCoordinator: ChoiceQuizViewControllerDelegate {
+    func quizDidComplete(originalData: QuizData, result: QuizResult) {
+        
+    }
+    
+    func quizDidTapClose() {
+        
+    }
+}

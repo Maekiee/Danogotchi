@@ -5,9 +5,15 @@ import RxCocoa
 import Kingfisher
 
 
+protocol ChoiceQuizViewControllerDelegate: AnyObject {
+    func quizDidComplete(originalData: QuizData, result: QuizResult)
+    func quizDidTapClose()
+}
+
 final class ChoiceQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: ChoiceQuizViewModel
+    weak var deletate: ChoiceQuizViewControllerDelegate?
     
     // 외부에서 새로운 QuizData를 받아 ViewModel을 리셋하기 위한 Relay
     private let restartTrigger = PublishRelay<QuizData>()
@@ -371,6 +377,11 @@ extension ChoiceQuizViewController {
     }
 }
 
+extension ChoiceQuizViewController {
+    func updateQuizData(_ newQuizData: QuizData) {
+        restartTrigger.accept(newQuizData)
+    }
+}
 
 extension Reactive where Base: CustomProgressView {
     var progress: Binder<Float> {
