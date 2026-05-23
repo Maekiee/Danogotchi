@@ -124,7 +124,7 @@ final class ChoiceQuizViewModel: BaseViewModel {
                 
                 // LearningHistory 저장
                 if let wordObjectId = try? ObjectId(string: word.id) {
-                    learningHistory.addHistory(wordObjectId: wordObjectId, isCorrect: isCorrect)
+                    learningHistoryRepository.addHistory(wordObjectId: wordObjectId, isCorrect: isCorrect)
                 }
                 
                 if isCorrect {

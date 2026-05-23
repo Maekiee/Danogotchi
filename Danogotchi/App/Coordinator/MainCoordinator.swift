@@ -35,9 +35,10 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     }
     
     func wordTabDidTapCreateBook() {
-//        let vm = container.makeCreateBookViewModel()
-//        let vc = CreateBookViewController(viewModel: vm)
-        // TODO: A-4에서 LibraryCoordinator 경로
+        let vm = container.makeCreateBookViewModel()
+        let vc = CreateBookViewController(viewModel: vm)
+        vc.modalPresentationStyle = .fullScreen
+        navigationController.present(vc, animated: true)
     }
     
     func wordTabDidTapSetting() {
@@ -54,11 +55,26 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     
     // 학습하기
     func wordTabDidTapStartQuiz(quizData: QuizData) {
-        // TODO: A-6에서 QuizCoordinator 생성/present
+        let nav = UINavigationController()
+        nav.setNavigationBarHidden(true, animated: false)
+        nav.modalPresentationStyle = .fullScreen
+        let quizCoordinator = QuizCoordinator(
+            container: container,
+            navigationController: nav,
+            quizData: quizData
+        )
+        quizCoordinator.delegate = self
+        addChild(quizCoordinator)
+        quizCoordinator.start()
+        navigationController.present(nav, animated: true)
+        
     }
     
     func wordTabDidTapEditWord(wordItem: CreateWord) {
-        // TODO: A-4 또는 직접 present (AddWord는 단일 화면)
+        let vm = container.makeAddWordViewModel(wordItem: wordItem)
+        let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
+        vc.modalPresentationStyle = .fullScreen
+        navigationController.present(vc, animated: true)
     }
 }
 
@@ -72,5 +88,10 @@ extension MainCoordinator: SettingCoordinatorDelegate {
     func settingCoordinatorDidFinish() {
         childCoordinators.removeAll { $0 is SettingCoordinator }
     }
-    
+}
+
+extension MainCoordinator: QuizCoordinatorDelegate {
+    func quizCoordinatorDidFinish() {
+        childCoordinators.removeAll { $0 is QuizCoordinator }
+    }
 }
