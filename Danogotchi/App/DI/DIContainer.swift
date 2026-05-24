@@ -94,6 +94,10 @@ extension DIContainer {
             quizData: quizData
         )
     }
+    
+    func makeCompleteQuizViewModel(result: QuizResult) -> CompleteQuizViewModel {
+        return CompleteQuizViewModel(result: result)
+    }
 }
 
 // MARK: - Setting Tab

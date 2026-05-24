@@ -21,7 +21,7 @@ final class CompleteQuizViewController: BaseViewController {
     weak var delegate: CompleteQuizViewControllerDelegate?
     
     // MARK: - 완료 후 액션을 전달하기 위한 클로저
-    var onDismissAction: ((CompleteQuizViewModel.ActionType, QuizData, QuizResult) -> Void)?
+//    var onDismissAction: ((CompleteQuizViewModel.ActionType, QuizData, QuizResult) -> Void)?
     
     init(viewModel: CompleteQuizViewModel, originalQuizData: QuizData, result: QuizResult) {
         self.viewModel = viewModel
@@ -166,9 +166,10 @@ extension CompleteQuizViewController {
 
 extension CompleteQuizViewController {
     private func handleAction(_ action: CompleteQuizViewModel.ActionType) {
-        dismiss(animated: true) { [weak self] in
-            guard let self = self else { return }
-            self.onDismissAction?(action, self.originalQuizData, self.currentResult)
-        }
+        delegate?.completeQuizDidSelectAction(
+            action,
+            originalQuizData: originalQuizData,
+            result: currentResult
+        )
     }
 }

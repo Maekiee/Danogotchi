@@ -13,7 +13,7 @@ protocol ChoiceQuizViewControllerDelegate: AnyObject {
 final class ChoiceQuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: ChoiceQuizViewModel
-    weak var deletate: ChoiceQuizViewControllerDelegate?
+    weak var delegate: ChoiceQuizViewControllerDelegate?
     
     // 외부에서 새로운 QuizData를 받아 ViewModel을 리셋하기 위한 Relay
     private let restartTrigger = PublishRelay<QuizData>()
@@ -164,7 +164,6 @@ final class ChoiceQuizViewController: BaseViewController {
         stack.addArrangedSubview(progressView)
         return stack
     }()
-    
     private lazy var choiceStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
@@ -326,54 +325,21 @@ extension ChoiceQuizViewController {
         
         output.quizCompleted
             .emit(with: self) { owner, result in
-                let currentQuizData = owner.viewModel.quizDataRelay.value
-                let vm = CompleteQuizViewModel(result: result)
-                let vc = CompleteQuizViewController(viewModel: vm, originalQuizData: currentQuizData, result: result)
-                
-                vc.onDismissAction = { [weak self] action, quizData, result in
-                    guard let self = self else { return }
-                    self.handleQuizAction(action, originalData: quizData, result: result)
-                }
-                
-                vc.modalPresentationStyle = .fullScreen
-                owner.present(vc, animated: true)
+                let currentQuestion = owner.viewModel.quizDataRelay.value
+                owner.delegate?.quizDidComplete(originalData: currentQuestion, result: result)
             }.disposed(by: disposeBag)
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
                 AlertUtils.showAlert(
-                    on: owner,
+                    on: owner!,
                     title: "학습 중단",
                     message: "정말로 학습을 중단하시겠습니까?",
-                    confirmAction: {
-                        owner.dismiss(animated: true)
+                    confirmAction: { [weak owner] in
+                        owner?.delegate?.quizDidTapClose()
                     }
                 )
             }.disposed(by: disposeBag)
-    }
-    
-    private func handleQuizAction(_ action: CompleteQuizViewModel.ActionType, originalData: QuizData, result: QuizResult) {
-        switch action {
-        case .restart:
-            let newQuizData = QuizData(
-                words: originalData.allWord,
-                allWord: originalData.allWord
-            )
-            restartTrigger.accept(newQuizData)
-            
-        case .retryIncorrect(let words):
-            let newQuizData = QuizData(
-                words: words,
-                allWord: originalData.allWord
-            )
-            restartTrigger.accept(newQuizData)
-            
-        case .finish:
-            self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
-            
-        case .dismiss:
-            break
-        }
     }
 }
 
