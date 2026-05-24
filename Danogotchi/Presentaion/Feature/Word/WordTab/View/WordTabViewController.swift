@@ -289,6 +289,7 @@ extension WordTabViewController {
 
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
+                print("Hello world!!!")
                 owner.delegate?.wordTabDidTapBookList()
             }.disposed(by: disposeBag)
 

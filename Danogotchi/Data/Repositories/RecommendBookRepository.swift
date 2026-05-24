@@ -2,10 +2,6 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-protocol RecommendBookRepoProtocol {
-    func fetchRecommendBooks() -> Observable<[WordBook]>
-}
-
 final class RecommendBookRepository: RecommendBookRepoProtocol {
     
     func fetchRecommendBooks() -> RxSwift.Observable<[WordBook]> {

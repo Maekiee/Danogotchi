@@ -4,7 +4,7 @@ protocol LibraryCoordinatorDelegate: AnyObject {
     func libraryCoordinatorDidFinish()
 }
 
-final class LibraryCoordinator: Coordinator {
+final class LibraryCoordinator:NSObject, Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     private let DIContainer: DIContainer
@@ -13,6 +13,7 @@ final class LibraryCoordinator: Coordinator {
     init(container: DIContainer, navigationController: UINavigationController) {
         self.DIContainer = container
         self.navigationController = navigationController
+        super.init()
     }
 }
 
@@ -22,6 +23,7 @@ extension LibraryCoordinator {
         let vc = BookListViewController(viewModel: vm)
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
+        navigationController.presentationController?.delegate = self
     }
     
     func showMyBookDetail() {
@@ -47,7 +49,6 @@ extension LibraryCoordinator: BookListViewControllerDelegate {
     }
 
     func bookListDidTapMore() {
-        // TODO: A-4-D에서 MyBookDetailVC push
         showMyBookDetail()
     }
 }
@@ -69,6 +70,10 @@ extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
         let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
         navigationController.pushViewController(vc, animated: true)
     }
-    
-    
+}
+
+extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        delegate?.libraryCoordinatorDidFinish()
+    }
 }

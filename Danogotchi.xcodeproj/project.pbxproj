@@ -47,6 +47,7 @@
 		76615D092FAE1036005706B5 /* environment.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = environment.md; sourceTree = "<group>"; };
 		76615D0B2FAE1100005706B5 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		76615D0C2FAE18CD005706B5 /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
+		76AF708B2FC2C67B004FE796 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -99,6 +100,7 @@
 		765182C22E843A75005EE2F7 = {
 			isa = PBXGroup;
 			children = (
+				76AF708B2FC2C67B004FE796 /* AGENTS.md */,
 				765183672E843CF0005EE2F7 /* .gitignore */,
 				765182CD2E843A75005EE2F7 /* Danogotchi */,
 				765182CC2E843A75005EE2F7 /* Products */,
