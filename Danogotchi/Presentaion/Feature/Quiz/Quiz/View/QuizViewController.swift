@@ -5,17 +5,17 @@ import RxCocoa
 import Kingfisher
 
 
-protocol ChoiceQuizViewControllerDelegate: AnyObject {
+protocol QuizViewControllerDelegate: AnyObject {
     func quizDidComplete(originalData: QuizData, result: QuizResult)
     func quizDidTapClose()
 }
 
-final class ChoiceQuizViewController: BaseViewController {
+final class QuizViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel: ChoiceQuizViewModel
-    weak var delegate: ChoiceQuizViewControllerDelegate?
+    private let viewModel: QuizViewModel
+    weak var delegate: QuizViewControllerDelegate?
     
-    init(viewModel: ChoiceQuizViewModel) {
+    init(viewModel: QuizViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -238,7 +238,7 @@ final class ChoiceQuizViewController: BaseViewController {
     }
 }
 
-extension ChoiceQuizViewController {
+extension QuizViewController {
     private func bind() {
         let choiceTaps = Observable.merge(
             choice1Button.rx.tap.map { 0 },
@@ -247,7 +247,7 @@ extension ChoiceQuizViewController {
             choice4Button.rx.tap.map { 3 }
         )
         
-        let input = ChoiceQuizViewModel.Input(
+        let input = QuizViewModel.Input(
             choiceSelected: choiceTaps
         )
         

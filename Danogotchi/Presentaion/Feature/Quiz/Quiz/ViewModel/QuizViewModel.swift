@@ -3,7 +3,7 @@ import RxSwift
 import RxCocoa
 import RealmSwift
 
-final class ChoiceQuizViewModel: BaseViewModel {
+final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let learningHistoryRepository: LearningHistoryRepositoryProtocol
     private let userInfo = UserInfoManager.shared

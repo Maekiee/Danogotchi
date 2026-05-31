@@ -87,9 +87,9 @@ extension DIContainer {
         return LearningHistoryRepository()
     }
     
-    func makeChoiceQuizViewModel(quizData: QuizData) -> ChoiceQuizViewModel {
+    func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
         let learningHistoryRepository = makeLearningHistoryRepository()
-        return ChoiceQuizViewModel(
+        return QuizViewModel(
             learningHistoryRepository: learningHistoryRepository,
             quizData: quizData
         )

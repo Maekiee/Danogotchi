@@ -23,19 +23,19 @@ final class QuizCoordinator: Coordinator {
     }
 
     func start() {
-        let vc = makeChoiceQuizViewController(quizData: quizData)
+        let vc = makeQuizViewController(quizData: quizData)
         navigationController.setViewControllers([vc], animated: false)
     }
     
-    private func makeChoiceQuizViewController(quizData: QuizData) -> ChoiceQuizViewController {
-        let vm = container.makeChoiceQuizViewModel(quizData: quizData)
-        let vc = ChoiceQuizViewController(viewModel: vm)
+    private func makeQuizViewController(quizData: QuizData) -> QuizViewController {
+        let vm = container.makeQuizViewModel(quizData: quizData)
+        let vc = QuizViewController(viewModel: vm)
         vc.delegate = self
         return vc
     }
 }
 
-extension QuizCoordinator: ChoiceQuizViewControllerDelegate {
+extension QuizCoordinator: QuizViewControllerDelegate {
     func quizDidComplete(originalData: QuizData, result: QuizResult) {
         let vm = container.makeCompleteQuizViewModel(result: result)
         let vc = CompleteQuizViewController(
@@ -82,7 +82,7 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
     }
     
     private func restartQuiz(with quizData: QuizData) {
-        let vc = makeChoiceQuizViewController(quizData: quizData)
+        let vc = makeQuizViewController(quizData: quizData)
         navigationController.setViewControllers([vc], animated: false)
     }
     
