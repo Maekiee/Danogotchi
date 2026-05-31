@@ -8,7 +8,7 @@ final class ChoiceQuizViewModel: BaseViewModel {
     private let learningHistoryRepository: LearningHistoryRepositoryProtocol
     private let userInfo = UserInfoManager.shared
     
-    let quizDataRelay: BehaviorRelay<QuizData>
+    private let quizDataRelay: BehaviorRelay<QuizData>
     
     private let currentIndex: BehaviorRelay<Int>
     private let nextQuestionTrigger = PublishRelay<Void>()
@@ -33,10 +33,9 @@ final class ChoiceQuizViewModel: BaseViewModel {
             self.incorrectWords = quizData.allWord.filter { incorrectWordIds.contains($0.id) }
         }
     }
-    
+
     struct Input {
         let choiceSelected: Observable<Int>
-        let restartWithNewData: Observable<QuizData>
     }
     
     struct Output {
@@ -47,38 +46,28 @@ final class ChoiceQuizViewModel: BaseViewModel {
         let questionWord: Driver<String>
         let choices: Driver<[String]>
         let answerResult: Signal<AnswerResult>
-        let quizCompleted: Signal<QuizResult>
+        let quizCompleted: Signal<(originalData: QuizData, result: QuizResult)>
     }
     
     func transform(input: Input) -> Output {
         let answerResultRelay = PublishRelay<AnswerResult>()
-        let quizCompletedRelay = PublishRelay<QuizResult>()
+        let quizCompletedRelay = PublishRelay<(originalData: QuizData, result: QuizResult)>()
         var correctCount = userInfo.currentCorrectCount
-        
-        input.restartWithNewData
-            .bind(with: self) { owner, newQuizData in
-                correctCount = 0
-                owner.incorrectWords = []
-                let wordIds = newQuizData.words.map { $0.id }
-                owner.userInfo.currentQuizWordIds = wordIds
-                owner.userInfo.currentQuizIndex = 0
-                owner.userInfo.currentCorrectCount = 0
-                owner.userInfo.currentIncorrectWordIds = nil
-                owner.currentIndex.accept(0)
-                owner.quizDataRelay.accept(newQuizData)
-            }
-            .disposed(by: disposeBag)
-        
+
         // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
         let currentQuizData = Observable.combineLatest(
             currentIndex,
             quizDataRelay
-        ).map { index, quizData -> (Word, [String], Int)? in
-            guard let wordIds = self.userInfo.currentQuizWordIds, index < wordIds.count else { return nil }
+        ).map { [weak self] index, quizData -> (Word, [String], Int)? in
+            guard let self else { return nil }
+            guard let wordIds = self.userInfo.currentQuizWordIds,
+                    index < wordIds.count else { return nil }
+            
             let currentWordId = wordIds[index]
             guard let word = quizData.allWord.first(where: { $0.id == currentWordId }) else { return nil }
             
-            let (choices, correctIndex) = self.generateChoices(for: word, allWords: quizData.allWord)
+            let (choices, correctIndex) = self.generateChoices(
+                for: word, allWords: quizData.allWord)
             return (word, choices, correctIndex)
         }.share(replay: 1, scope: .whileConnected)
         
@@ -154,13 +143,12 @@ final class ChoiceQuizViewModel: BaseViewModel {
                 
                 if nextIndex >= owner.userInfo.currentQuizWordIds!.count {
                     owner.userInfo.clearQuizState()
-                    quizCompletedRelay.accept(
-                        QuizResult(
-                            correct: correctCount,
-                            total: quizData.words.count,
-                            incorrectWords: owner.incorrectWords
-                        )
+                    let result = QuizResult(
+                        correct: correctCount,
+                        total: quizData.words.count,
+                        incorrectWords: owner.incorrectWords
                     )
+                    quizCompletedRelay.accept((originalData: quizData, result: result))
                 } else {
                     owner.currentIndex.accept(nextIndex)
                 }

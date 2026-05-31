@@ -15,9 +15,6 @@ final class ChoiceQuizViewController: BaseViewController {
     private let viewModel: ChoiceQuizViewModel
     weak var delegate: ChoiceQuizViewControllerDelegate?
     
-    // 외부에서 새로운 QuizData를 받아 ViewModel을 리셋하기 위한 Relay
-    private let restartTrigger = PublishRelay<QuizData>()
-    
     init(viewModel: ChoiceQuizViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -251,8 +248,7 @@ extension ChoiceQuizViewController {
         )
         
         let input = ChoiceQuizViewModel.Input(
-            choiceSelected: choiceTaps,
-            restartWithNewData: restartTrigger.asObservable()
+            choiceSelected: choiceTaps
         )
         
         let output = viewModel.transform(input: input)
@@ -316,36 +312,24 @@ extension ChoiceQuizViewController {
                     buttons[result.correctIndex].setTitleColor(.white, for: .normal)
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                    guard let self = self else { return }
-                    viewModel.moveToNextQuestion()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak owner] in
+                    owner?.viewModel.moveToNextQuestion()
                 }
             }
             .disposed(by: disposeBag)
         
         output.quizCompleted
-            .emit(with: self) { owner, result in
-                let currentQuestion = owner.viewModel.quizDataRelay.value
-                owner.delegate?.quizDidComplete(originalData: currentQuestion, result: result)
+            .emit(with: self) { owner, completed in
+                owner.delegate?.quizDidComplete(
+                    originalData: completed.originalData,
+                    result: completed.result
+                )
             }.disposed(by: disposeBag)
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
-                AlertUtils.showAlert(
-                    on: owner!,
-                    title: "학습 중단",
-                    message: "정말로 학습을 중단하시겠습니까?",
-                    confirmAction: { [weak owner] in
-                        owner?.delegate?.quizDidTapClose()
-                    }
-                )
+                owner.delegate?.quizDidTapClose()
             }.disposed(by: disposeBag)
-    }
-}
-
-extension ChoiceQuizViewController {
-    func updateQuizData(_ newQuizData: QuizData) {
-        restartTrigger.accept(newQuizData)
     }
 }
 

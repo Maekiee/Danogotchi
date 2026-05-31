@@ -21,12 +21,17 @@ final class QuizCoordinator: Coordinator {
         self.navigationController = navigationController
         self.quizData = quizData
     }
-    
+
     func start() {
+        let vc = makeChoiceQuizViewController(quizData: quizData)
+        navigationController.setViewControllers([vc], animated: false)
+    }
+    
+    private func makeChoiceQuizViewController(quizData: QuizData) -> ChoiceQuizViewController {
         let vm = container.makeChoiceQuizViewModel(quizData: quizData)
         let vc = ChoiceQuizViewController(viewModel: vm)
         vc.delegate = self
-        navigationController.setViewControllers([vc], animated: false)
+        return vc
     }
 }
 
@@ -45,9 +50,7 @@ extension QuizCoordinator: ChoiceQuizViewControllerDelegate {
     }
     
     func quizDidTapClose() {
-        navigationController.dismiss(animated: true) { [weak self] in
-            self?.delegate?.quizCoordinatorDidFinish()
-        }
+        showInterruptAlert()
     }
 }
 
@@ -64,32 +67,42 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
                 allWord: originalQuizData.allWord
             )
             navigationController.dismiss(animated: true) { [weak self] in
-                self?.passNewQuizData(newQuizData)
+                self?.restartQuiz(with: newQuizData)
             }
             
         case .retryIncorrect(let words):
             let newQuizData = QuizData(words: words, allWord: originalQuizData.allWord)
             navigationController.dismiss(animated: true) { [weak self] in
-                self?.passNewQuizData(newQuizData)
+                self?.restartQuiz(with: newQuizData)
             }
             
-        case .finish:
-            navigationController.dismiss(animated: true) { [weak self] in
-                guard let self = self else { return }
-                self.navigationController.presentingViewController?.dismiss(animated: true) {
-                    self.delegate?.quizCoordinatorDidFinish()
-                }
-            }
-            
-        case .dismiss:
-            navigationController.dismiss(animated: true)
+        case .finish, .dismiss:
+            finish()
         }
     }
     
-    private func passNewQuizData(_ quizData: QuizData) {
-        guard let choiceVC = navigationController.viewControllers.first as? ChoiceQuizViewController else { return }
-        choiceVC.updateQuizData(quizData)
+    private func restartQuiz(with quizData: QuizData) {
+        let vc = makeChoiceQuizViewController(quizData: quizData)
+        navigationController.setViewControllers([vc], animated: false)
+    }
+    
+    private func showInterruptAlert() {
+        AlertUtils.showAlert(
+            on: navigationController,
+            title: "학습 중단",
+            message: "정말로 학습을 중단하시겠습니까?",
+            confirmAction: { [weak self] in
+                DispatchQueue.main.async {
+                    // dismiss 이후 화면 닫힘
+                    self?.finish()
+                }
+            }
+        )
+    }
+
+    private func finish() {
+        navigationController.presentingViewController?.dismiss(animated: true)
+        delegate?.quizCoordinatorDidFinish()   // dismiss 타이밍과 무관하게 즉시 부모에서 제거
     }
 }
-
 

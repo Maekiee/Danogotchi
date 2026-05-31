@@ -46,13 +46,6 @@ final class WordTabViewController: BaseViewController {
         view.contentMode = .scaleAspectFill
         return view
     }()
-    
-//    private let listSegmentedControl: UISegmentedControl = {
-//        let control = UISegmentedControl(items: ["전체", "완료"])
-//        control.selectedSegmentIndex = 0
-//        control.backgroundColor = .systemGray5
-//        return control
-//    }()
 
     private let settingTabButton: UIButton = {
         var config = UIButton.Configuration.filled()
@@ -113,7 +106,6 @@ final class WordTabViewController: BaseViewController {
         let view = UIVisualEffectView(effect: blurEffect)
         view.layer.cornerRadius = 20
         view.layer.masksToBounds = true
-//        view.alpha = 0.
         return view
     }()
     
@@ -126,13 +118,6 @@ final class WordTabViewController: BaseViewController {
     }()
     
     private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
-
-//    private let testButton: UIButton = {
-//        let button = UIButton(type: .roundedRect)
-//        button.frame = CGRect(x: 20, y: 50, width: 100, height: 30)
-//        button.setTitle("Test Crash", for: [])
-//        return button
-//    }()
 
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
@@ -196,21 +181,12 @@ final class WordTabViewController: BaseViewController {
     override func configHierarchy() {
         [
             themeBackgroundImage,
-//            noBookInfoContainer,
             collectionView,
             showWordBookButton,
-//            addWordButton,
             settingTabButton,
             startLearningButton,
             
-//            testButton, // x테스트
-//            listSegmentedControl,
         ].forEach { view.addSubview($0) }
-        
-//        [
-//            showCreateBookButton,
-//            noWordBookLabel
-//        ].forEach { noBookInfoContainer.contentView.addSubview($0) }
     }
 
     override func configLayout() {
@@ -240,19 +216,9 @@ final class WordTabViewController: BaseViewController {
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
             make.size.equalTo(48)
         }
-        
-        /// 크레시 테스트
-        //        testButton.snp.makeConstraints { make in
-        //            make.bottom.equalTo(startLearningButton.snp.top).offset(10)
-        //            make.horizontalEdges.equalToSuperview().inset(24)
-        //            make.height.equalTo(44)
-        //        }
     }
 
     override func configView() {
-//        let firstBarButton = UIBarButtonItem(customView: showWordBookButton)
-//        let secondBarButton = UIBarButtonItem(customView: addWordButton)
-//        navigationItem.rightBarButtonItems = [firstBarButton, secondBarButton]
         
         if let themeUrl = userInfo.currentThemeUrl {
             themeBackgroundImage.kf.setImage(with: URL(string: themeUrl))
@@ -319,8 +285,6 @@ extension WordTabViewController {
                 }
 
                 guard allWords.count >= 4 else {
-                    print("최소 4개 이상 필요해요")
-
                     AlertUtils.showNotificationAlert(
                         on: owner,
                         title: "알림",
@@ -342,25 +306,11 @@ extension WordTabViewController {
                     owner.userInfo.currentCorrectCount = 0
                     owner.userInfo.currentIncorrectWordIds = nil
                 }
-
-                // 위에서 결정된 `wordsForQuiz`를 사용하여 퀴즈 데이터를 생성합니다.
+                
                 let quizData = QuizData(words: wordsForQuiz, allWord: allWords)
 
-//                let choiceVM = ChoiceQuizViewModel(quizData: quizData)
-//                let choiceVC = ChoiceQuizViewController(viewModel: choiceVM)
-//                choiceVC.modalPresentationStyle = .fullScreen
-//                owner.present(choiceVC, animated: true)
                 owner.delegate?.wordTabDidTapStartQuiz(quizData: quizData)
             }.disposed(by: disposeBag)
-        
-        
-        // 크레시 테스트
-//        testButton.rx.tap
-//            .bind(with: self) { owner, _ in
-//                let numbers = [0]
-//                let _ = numbers[1]
-//            }.disposed(by: disposeBag)
-
     }
     
     private func updateBackgroundImage(with urlString: String) {
@@ -404,15 +354,7 @@ extension WordTabViewController {
                             meaning: item.word.meaning,
                             actionType: .edit
                         )
-//                        let vm = AddWordViewModel(wordItem: createWordModel)
-//                        let vc = UINavigationController(
-//                            rootViewController: AddWordViewController(
-//                                viewModel: vm,
-//                                entryPoint: .edit
-//                            )
-//                        )
-//                        vc.modalPresentationStyle = .fullScreen
-//                        owner.present(vc, animated: true)
+                        
                         owner.delegate?.wordTabDidTapEditWord(wordItem: createWordModel)
                     },
                     deleteAction: { [weak self] in
