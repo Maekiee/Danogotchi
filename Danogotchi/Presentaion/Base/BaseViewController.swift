@@ -10,11 +10,11 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColor.appBackgroundColor
-        print("init 생성")
+        print("✅ Init: \(String(describing: type(of: self))) ✅")
     }
     
     deinit {
-        print("Deinit 해제됨")
+        print("☑️ Deinit 해제: \(String(describing: type(of: self))) ☑️")
     }
     
     func configHierarchy() { }
