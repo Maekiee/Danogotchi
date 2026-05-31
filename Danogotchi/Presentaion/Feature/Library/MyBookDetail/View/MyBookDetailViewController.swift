@@ -191,9 +191,7 @@ extension MyBookDetailViewController {
             cell.onTouchIcon.bind(with: self) { owner, _ in
                 owner.showActionSheet(
                     title: item.word.word,
-                    editAction: { [weak self] in
-                        guard let owner = self else { return }
-                        
+                    editAction: {
                         guard let bookObjectId = owner.myBookObjectId.value else {
                             print("Error: '나의 단어장' ID가 없습니다.")
                             return
@@ -211,8 +209,7 @@ extension MyBookDetailViewController {
                         // 코디네이터 적용
                         owner.delegate?.myBookDetailDidTapEditWord(with: createWordModel)
                     },
-                    deleteAction: { [weak self] in
-                        guard let owner = self else { return }
+                    deleteAction: {
                         owner.deleteWordTrigger.accept(item.word)
                     }
                 )

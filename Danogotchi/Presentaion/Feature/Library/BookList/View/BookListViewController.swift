@@ -3,23 +3,11 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-
-struct MyBook: Hashable, Identifiable {
-    let id = UUID()
-    let title: String
-}
-
-struct Recommend: Hashable, Identifiable {
-    let id = UUID()
-    let title: String
-}
-
 protocol BookListViewControllerDelegate: AnyObject {
     func bookListDidTapClose()
     func bookListDidSelectActiveBook()
     func bookListDidTapMore()
 }
-
 
 final class BookListViewController: BaseViewController {
     private let disposeBag = DisposeBag()
@@ -36,7 +24,6 @@ final class BookListViewController: BaseViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     private enum Section {
         case myBook
@@ -58,7 +45,6 @@ final class BookListViewController: BaseViewController {
     private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, BookListViewModel.RecommendItem>!
     
     private var headerRegistration: UICollectionView.SupplementaryRegistration<UICollectionViewListCell>!
-    
     
     
     // MARK: UI 프로퍼티
@@ -191,9 +177,7 @@ final class BookListViewController: BaseViewController {
             
             cell.onTouchDownload
                 .bind(with: self) { owner, _ in
-                    // .notDownloaded 상태일 때만 트리거 발생
                     if case .notDownloaded(let mockBook) = item {
-                        // ViewModel의 트리거로 mockBook 전달
                         owner.viewModel.downloadBookTrigger.accept(mockBook)
                     }
                 }.disposed(by: cell.disposeBag)
@@ -293,7 +277,6 @@ final class BookListViewController: BaseViewController {
                     for: indexPath,
                     item: recommendItem)
             }
-            
         }
         
         dataSource.supplementaryViewProvider = { [weak self]
@@ -307,23 +290,18 @@ final class BookListViewController: BaseViewController {
     }
     
     private func applySnapshot(myBook: WordBook?, recommendItems: [BookListViewModel.RecommendItem]) {
-        
         var snapshot = Snapshot()
         
-        // 1. '내 단어장' 섹션
         snapshot.appendSections([.myBook])
         if let myBook = myBook {
             snapshot.appendItems([.currentBook(myBook)], toSection: .myBook)
         }
-        
-        // 2. '추천 단어장' 섹션
+
         if !recommendItems.isEmpty {
             snapshot.appendSections([.recommend])
-            // 💡 7. RecommendItem을 .recommend()로 래핑하여 추가
             snapshot.appendItems(recommendItems.map { .recommend($0) }, toSection: .recommend)
         }
         
-        // 💡 8. animatingDifferences: true로 변경 (다운로드 후 자연스러운 갱신)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     

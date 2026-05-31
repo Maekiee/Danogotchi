@@ -25,13 +25,6 @@ extension LibraryCoordinator {
         navigationController.setViewControllers([vc], animated: false)
         navigationController.presentationController?.delegate = self
     }
-    
-    func showMyBookDetail() {
-        let vm = DIContainer.makeMyBookDetailViewModel()
-        let vc = MyBookDetailViewController(viewModel: vm)
-        vc.delegate = self
-        navigationController.pushViewController(vc, animated: true)
-    }
 }
 
 
@@ -49,7 +42,10 @@ extension LibraryCoordinator: BookListViewControllerDelegate {
     }
 
     func bookListDidTapMore() {
-        showMyBookDetail()
+        let vm = DIContainer.makeMyBookDetailViewModel()
+        let vc = MyBookDetailViewController(viewModel: vm)
+        vc.delegate = self
+        navigationController.pushViewController(vc, animated: true)
     }
 }
 

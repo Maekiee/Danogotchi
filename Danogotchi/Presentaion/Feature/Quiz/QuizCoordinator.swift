@@ -35,6 +35,7 @@ final class QuizCoordinator: Coordinator {
     }
 }
 
+// 학습 화면
 extension QuizCoordinator: QuizViewControllerDelegate {
     func quizDidComplete(originalData: QuizData, result: QuizResult) {
         let vm = container.makeCompleteQuizViewModel(result: result)
@@ -54,6 +55,7 @@ extension QuizCoordinator: QuizViewControllerDelegate {
     }
 }
 
+// 퀴즈 완료
 extension QuizCoordinator: CompleteQuizViewControllerDelegate {
     func completeQuizDidSelectAction(
         _ action: CompleteQuizViewModel.ActionType,
