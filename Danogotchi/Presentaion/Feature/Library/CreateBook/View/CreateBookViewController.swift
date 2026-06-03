@@ -3,6 +3,12 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
+
+protocol CreateBookViewControllerDelegate: AnyObject {
+    func createBookDidFinishCreating()
+    func createBookDidCancel()
+}
+
 final class CreateBookViewController: BaseViewController {
     let disposeBag = DisposeBag()
 //    private let viewModel = CreateBookViewModel()
@@ -32,7 +38,6 @@ final class CreateBookViewController: BaseViewController {
         return view
     }()
     
-    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "새 단어장"
@@ -48,7 +53,6 @@ final class CreateBookViewController: BaseViewController {
         tf.isUserInteractionEnabled = true
         return tf
     }()
-    
     
     private let createButton = PrimaryFillButton(title: "확인")
     private let cancelButton = PrimaryFillButton(title: "취소")

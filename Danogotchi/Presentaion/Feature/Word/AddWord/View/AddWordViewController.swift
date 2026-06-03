@@ -4,10 +4,16 @@ import RxSwift
 import RxCocoa
 import Kingfisher
 
+
+protocol AddWordViewControllerDelegate: AnyObject {
+    func addWordDidTapBack()
+}
+
 final class AddWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: AddWordViewModel
     private let entryPoint: EntryPoint
+    weak var delegate: AddWordViewControllerDelegate?
     
     init(viewModel: AddWordViewModel, entryPoint: EntryPoint) {
         self.viewModel = viewModel
@@ -128,10 +134,10 @@ extension AddWordViewController {
         
         backButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.navigationController?.popViewController(animated: true)
+                owner.delegate?.addWordDidTapBack()
             }.disposed(by: disposeBag)
         
-        
+        // 레거시 코드 정리 예정
         output.wordImageUrl
             .drive(with: self) { owner, url in
                 currentImageUrl = url

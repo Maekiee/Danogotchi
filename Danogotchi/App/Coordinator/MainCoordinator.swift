@@ -73,9 +73,18 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     func wordTabDidTapEditWord(wordItem: CreateWord) {
         let vm = container.makeAddWordViewModel(wordItem: wordItem)
         let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
+        vc.delegate = self
         vc.modalPresentationStyle = .fullScreen
         navigationController.present(vc, animated: true)
     }
+}
+
+extension MainCoordinator: AddWordViewControllerDelegate {
+    func addWordDidTapBack() {
+        navigationController.dismiss(animated: true)
+    }
+    
+    
 }
 
 extension MainCoordinator: LibraryCoordinatorDelegate {
