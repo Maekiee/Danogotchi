@@ -36,7 +36,7 @@ final class SearchThemeViewController: BaseViewController {
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()
     
-    
+
     private let backButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
@@ -183,14 +183,13 @@ extension SearchThemeViewController {
             .drive(with: self) { owner, imageList in
                 owner.imageDataList = imageList
                 owner.waterfallLayout.invalidateLayout()
-                
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
         
         if entryMode == .settings {
             backButton.rx.tap
                 .bind(with: self) { owner, _ in
-                    owner.navigationController?.popViewController(animated: true)
+                    owner.delegate?.didTapBack()
                 }.disposed(by: disposeBag)
         }
         
@@ -274,7 +273,8 @@ extension SearchThemeViewController {
         UserInfoManager.shared.currentThemeUrl = selectedTheme
         
         // 설정 화면으로 돌아가기
-        navigationController?.popViewController(animated: true)
+        delegate?.didSelectTheme()
+//        navigationController?.popViewController(animated: true)
     }
 }
 

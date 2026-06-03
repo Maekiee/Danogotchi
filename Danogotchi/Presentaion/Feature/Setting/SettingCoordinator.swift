@@ -40,6 +40,7 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
     func didTapSearchTheme() {
         let vm = container.makeSearchThemeViewModel(mode: .settings)
         let vc = SearchThemeViewController(mode: .settings, viewModel: vm)
+        vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
     
@@ -68,5 +69,17 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
             self.delegate?.settingCoordinatorDidFinish()
         }
     }
+    
+}
+
+extension SettingCoordinator: SearchThemeViewControllerDelegate {
+    func didSelectTheme() {
+        navigationController.popViewController(animated: true)
+    }
+    
+    func didTapBack() {
+        navigationController.popViewController(animated: true)
+    }
+    
     
 }
