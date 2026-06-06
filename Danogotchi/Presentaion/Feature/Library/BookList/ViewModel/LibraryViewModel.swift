@@ -3,7 +3,7 @@ import RxSwift
 import RxCocoa
 import RealmSwift
 
-final class BookListViewModel: BaseViewModel {
+final class LibraryViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     private let activeManager = ActiveLearningManager.shared

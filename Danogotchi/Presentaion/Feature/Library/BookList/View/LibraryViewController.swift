@@ -3,19 +3,19 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-protocol BookListViewControllerDelegate: AnyObject {
-    func bookListDidTapClose()
-    func bookListDidSelectActiveBook()
-    func bookListDidTapMore()
+protocol LibraryViewControllerDelegate: AnyObject {
+    func libraryDidTapClose()
+    func libraryDidSelectActiveBook()
+    func libraryDidTapMore()
 }
 
-final class BookListViewController: BaseViewController {
+final class LibraryViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel: BookListViewModel
+    private let viewModel: LibraryViewModel
     private var selectedBookId: String?
-    weak var delegate: BookListViewControllerDelegate?
+    weak var delegate: LibraryViewControllerDelegate?
     
-    init(viewModel: BookListViewModel) {
+    init(viewModel: LibraryViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
@@ -32,7 +32,7 @@ final class BookListViewController: BaseViewController {
     
     private enum Item: Hashable {
         case currentBook(WordBook)
-        case recommend(BookListViewModel.RecommendItem)
+        case recommend(LibraryViewModel.RecommendItem)
     }
     
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, Item>
@@ -42,7 +42,7 @@ final class BookListViewController: BaseViewController {
     // MARK: Cell Registration
     private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook>!
     
-    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, BookListViewModel.RecommendItem>!
+    private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, LibraryViewModel.RecommendItem>!
     
     private var headerRegistration: UICollectionView.SupplementaryRegistration<UICollectionViewListCell>!
     
@@ -164,7 +164,7 @@ final class BookListViewController: BaseViewController {
             cell.binding(with: item, isSelected: isSelected)
         }
         
-        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, BookListViewModel.RecommendItem> { [weak self] cell, indexPath, item in
+        recommendCellRegistration = UICollectionView.CellRegistration<RecommendBookCollectionViewCell, LibraryViewModel.RecommendItem> { [weak self] cell, indexPath, item in
             guard let self = self else { return }
             
             var isSelected = false
@@ -289,7 +289,7 @@ final class BookListViewController: BaseViewController {
         }
     }
     
-    private func applySnapshot(myBook: WordBook?, recommendItems: [BookListViewModel.RecommendItem]) {
+    private func applySnapshot(myBook: WordBook?, recommendItems: [LibraryViewModel.RecommendItem]) {
         var snapshot = Snapshot()
         
         snapshot.appendSections([.myBook])
@@ -308,7 +308,7 @@ final class BookListViewController: BaseViewController {
 }
 
 
-extension BookListViewController {
+extension LibraryViewController {
     private func bind() {
         
         selectedBookId = ActiveLearningManager.shared.activeBook.value?.id
@@ -320,7 +320,7 @@ extension BookListViewController {
             }.disposed(by: disposeBag)
         
         
-        let input = BookListViewModel.Input(
+        let input = LibraryViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
         )
         let output = viewModel.transform(input: input)
@@ -353,12 +353,12 @@ extension BookListViewController {
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
 //                owner.dismiss(animated: true)
-                owner.delegate?.bookListDidTapClose()
+                owner.delegate?.libraryDidTapClose()
             }.disposed(by: disposeBag)
         
         moreButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.delegate?.bookListDidTapMore()
+                owner.delegate?.libraryDidTapMore()
             }.disposed(by: disposeBag)
         
         collectionView.rx.itemSelected
@@ -395,7 +395,7 @@ extension BookListViewController {
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
 //                    owner.dismiss(animated: true)
-                    owner.delegate?.bookListDidSelectActiveBook()
+                    owner.delegate?.libraryDidSelectActiveBook()
                 }
                 
             }.disposed(by: disposeBag)

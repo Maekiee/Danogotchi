@@ -19,8 +19,8 @@ final class LibraryCoordinator:NSObject, Coordinator {
 
 extension LibraryCoordinator {
     func start() {
-        let vm = DIContainer.makeBookListViewModel()
-        let vc = BookListViewController(viewModel: vm)
+        let vm = DIContainer.makeLibraryViewModel()
+        let vc = LibraryViewController(viewModel: vm)
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
         navigationController.presentationController?.delegate = self
@@ -28,20 +28,20 @@ extension LibraryCoordinator {
 }
 
 
-extension LibraryCoordinator: BookListViewControllerDelegate {
-    func bookListDidTapClose() {
+extension LibraryCoordinator: LibraryViewControllerDelegate {
+    func libraryDidTapClose() {
         navigationController.dismiss(animated: true) { [weak self] in
             self?.delegate?.libraryCoordinatorDidFinish()
         }
     }
 
-    func bookListDidSelectActiveBook() {
+    func libraryDidSelectActiveBook() {
         navigationController.dismiss(animated: true) { [weak self] in
             self?.delegate?.libraryCoordinatorDidFinish()
         }
     }
 
-    func bookListDidTapMore() {
+    func libraryDidTapMore() {
         let vm = DIContainer.makeMyBookDetailViewModel()
         let vc = MyBookDetailViewController(viewModel: vm)
         vc.delegate = self

@@ -50,12 +50,12 @@ extension DIContainer {
         return RecommendBookRepository()
     }
     
-    func makeBookListViewModel() -> BookListViewModel {
+    func makeLibraryViewModel() -> LibraryViewModel {
         let wordBookRepository = makeWordBookRepository()
         let recommendBookRepository = makeRecommendBookRepository()
         let wordRepository = makeWordRepository()
-        
-        return BookListViewModel(
+
+        return LibraryViewModel(
             recommendBookRepository: recommendBookRepository,
             wordBookRepository: wordBookRepository,
             wordRepository: wordRepository
