@@ -72,13 +72,6 @@ extension DIContainer {
             learningHistoryRepository: learningHistoryRepository
         )
     }
-    
-    func makeCreateBookViewModel() -> CreateBookViewModel {
-        let wordBookRepository = makeWordBookRepository()
-        return CreateBookViewModel(
-            wordBookRepository: wordBookRepository
-        )
-    }
 }
 
 // MARK: - Quiz

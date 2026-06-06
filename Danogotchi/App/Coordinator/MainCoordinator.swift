@@ -34,13 +34,6 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
-    func wordTabDidTapCreateBook() {
-        let vm = container.makeCreateBookViewModel()
-        let vc = CreateBookViewController(viewModel: vm)
-        vc.modalPresentationStyle = .fullScreen
-        navigationController.present(vc, animated: true)
-    }
-    
     func wordTabDidTapSetting() {
         let nav = UINavigationController()
         let settingCoordinator = SettingCoordinator(

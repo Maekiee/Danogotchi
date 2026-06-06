@@ -8,7 +8,6 @@ import UIKit
 
 protocol WordTabViewControllerDelegate: AnyObject {
     func wordTabDidTapBookList()
-    func wordTabDidTapCreateBook()
     func wordTabDidTapSetting()
     func wordTabDidTapStartQuiz(quizData: QuizData)
     func wordTabDidTapEditWord(wordItem: CreateWord)
@@ -116,8 +115,6 @@ final class WordTabViewController: BaseViewController {
         label.textColor = .white
         return label
     }()
-    
-    private let showCreateBookButton = PrimaryFillButton(title: "단어장 만들기")
 
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
@@ -257,12 +254,6 @@ extension WordTabViewController {
             .bind(with: self) { owner, _ in
                 print("Hello world!!!")
                 owner.delegate?.wordTabDidTapBookList()
-            }.disposed(by: disposeBag)
-
-        // 단어장 생성
-        showCreateBookButton.rx.tap
-            .bind(with: self) { owner, _ in
-                owner.delegate?.wordTabDidTapCreateBook()
             }.disposed(by: disposeBag)
         
         settingTabButton.rx.tap
