@@ -60,12 +60,9 @@ final class QuizViewModel: BaseViewModel {
             quizDataRelay
         ).map { [weak self] index, quizData -> (Word, [String], Int)? in
             guard let self else { return nil }
-            guard let wordIds = self.userInfo.currentQuizWordIds,
-                    index < wordIds.count else { return nil }
-            
-            let currentWordId = wordIds[index]
-            guard let word = quizData.allWord.first(where: { $0.id == currentWordId }) else { return nil }
-            
+            guard index < quizData.words.count else { return nil }
+
+            let word = quizData.words[index]
             let (choices, correctIndex) = self.generateChoices(
                 for: word, allWords: quizData.allWord)
             return (word, choices, correctIndex)
@@ -141,7 +138,7 @@ final class QuizViewModel: BaseViewModel {
                 
                 owner.userInfo.currentQuizIndex = nextIndex
                 
-                if nextIndex >= owner.userInfo.currentQuizWordIds!.count {
+                if nextIndex >= quizData.words.count {
                     owner.userInfo.clearQuizState()
                     let result = QuizResult(
                         correct: correctCount,

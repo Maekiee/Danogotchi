@@ -296,8 +296,8 @@ extension WordTabViewController {
                 var wordsForQuiz: [Word]
 
                 if let currentWordIds = owner.userInfo.currentQuizWordIds {
-                    let wordIdSet = Set(currentWordIds)
-                    wordsForQuiz = allWords.filter { wordIdSet.contains($0.id) }
+                    let wordMap = Dictionary(uniqueKeysWithValues: allWords.map { ($0.id, $0) })
+                    wordsForQuiz = currentWordIds.compactMap { wordMap[$0] }
                 } else {
                     wordsForQuiz = allWords
                     let wordIds = wordsForQuiz.map { $0.id }
