@@ -222,7 +222,6 @@ final class LibraryViewController: BaseViewController {
                 )
                 return section
             case .recommend:
-                // 2열 그리드
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(0.5),
                     heightDimension: .absolute(200)
@@ -352,7 +351,6 @@ extension LibraryViewController {
         
         closeButton.rx.tap
             .bind(with: self) { owner, _ in
-//                owner.dismiss(animated: true)
                 owner.delegate?.libraryDidTapClose()
             }.disposed(by: disposeBag)
         
@@ -394,7 +392,6 @@ extension LibraryViewController {
                 owner.dataSource.apply(snapshot, animatingDifferences: false)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-//                    owner.dismiss(animated: true)
                     owner.delegate?.libraryDidSelectActiveBook()
                 }
                 

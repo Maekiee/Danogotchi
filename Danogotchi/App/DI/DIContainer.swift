@@ -20,10 +20,10 @@ extension DIContainer {
         return WordRepository()
     }
     
-    func makeWordTabViewModel() -> WordTabViewModel {
+    func makeExploreVocabViewModel() -> ExploreVocabViewModel {
         let wordRepository = makeWordRepository()
         let learnHistoryRepository = makeLearningHistoryRepository()
-        return WordTabViewModel(
+        return ExploreVocabViewModel(
             wordRepository: wordRepository,
             learnHistoryRepository: learnHistoryRepository
         )

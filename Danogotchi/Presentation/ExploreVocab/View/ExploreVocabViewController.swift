@@ -6,20 +6,20 @@ import SnapKit
 import UIKit
 
 
-protocol WordTabViewControllerDelegate: AnyObject {
-    func wordTabDidTapBookList()
-    func wordTabDidTapSetting()
-    func wordTabDidTapStartQuiz(quizData: QuizData)
-    func wordTabDidTapEditWord(wordItem: CreateWord)
+protocol ExploreVocabViewControllerDelegate: AnyObject {
+    func ExploreVocabDidTapBookList()
+    func ExploreVocabDidTapSetting()
+    func ExploreVocabDidTapStartQuiz(quizData: QuizData)
+    func ExploreVocabDidTapEditWord(wordItem: CreateWord)
 }
 
-final class WordTabViewController: BaseViewController {
+final class ExploreVocabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel: WordTabViewModel
+    private let viewModel: ExploreVocabViewModel
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
     private var allWordsInfo: [WordDisplayInfo] = []
-    weak var delegate: WordTabViewControllerDelegate?
+    weak var delegate: ExploreVocabViewControllerDelegate?
 
     private enum Section {
         case main
@@ -30,7 +30,7 @@ final class WordTabViewController: BaseViewController {
 
     private var dataSource: DataSource!
 
-    init(viewModel: WordTabViewModel) {
+    init(viewModel: ExploreVocabViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -154,7 +154,7 @@ final class WordTabViewController: BaseViewController {
     private let collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
-            collectionViewLayout: WordTabViewController.layout()
+            collectionViewLayout: ExploreVocabViewController.layout()
         )
         view.isPagingEnabled = true
         view.showsVerticalScrollIndicator = false
@@ -223,9 +223,9 @@ final class WordTabViewController: BaseViewController {
     }
 }
 
-extension WordTabViewController {
+extension ExploreVocabViewController {
     private func bind() {
-        let input = WordTabViewModel.Input(
+        let input = ExploreVocabViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
             },
@@ -253,12 +253,12 @@ extension WordTabViewController {
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 print("Hello world!!!")
-                owner.delegate?.wordTabDidTapBookList()
+                owner.delegate?.ExploreVocabDidTapBookList()
             }.disposed(by: disposeBag)
         
         settingTabButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.delegate?.wordTabDidTapSetting()
+                owner.delegate?.ExploreVocabDidTapSetting()
             }.disposed(by: disposeBag)
 
         // 학습 시작하기
@@ -300,7 +300,7 @@ extension WordTabViewController {
                 
                 let quizData = QuizData(words: wordsForQuiz, allWord: allWords)
 
-                owner.delegate?.wordTabDidTapStartQuiz(quizData: quizData)
+                owner.delegate?.ExploreVocabDidTapStartQuiz(quizData: quizData)
             }.disposed(by: disposeBag)
     }
     
@@ -316,7 +316,7 @@ extension WordTabViewController {
 }
 
 // MARK: - CollectionView
-extension WordTabViewController {
+extension ExploreVocabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
             MainWordCardCollectionViewCell, WordDisplayInfo
@@ -346,7 +346,7 @@ extension WordTabViewController {
                             actionType: .edit
                         )
                         
-                        owner.delegate?.wordTabDidTapEditWord(wordItem: createWordModel)
+                        owner.delegate?.ExploreVocabDidTapEditWord(wordItem: createWordModel)
                     },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }

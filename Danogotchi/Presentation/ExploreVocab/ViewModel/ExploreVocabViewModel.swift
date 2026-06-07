@@ -4,7 +4,7 @@ import RxCocoa
 import RealmSwift
 
 
-final class WordTabViewModel: BaseViewModel {
+final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     private let wordRepository: WordRepositoryProtocol

@@ -14,15 +14,15 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
-        let wordTabVm = container.makeWordTabViewModel()
-        let wordTabVc = WordTabViewController(viewModel: wordTabVm)
-        wordTabVc.delegate = self
-        navigationController.setViewControllers([wordTabVc], animated: false)
+        let ExploreVocabVm = container.makeExploreVocabViewModel()
+        let ExploreVocabVc = ExploreVocabViewController(viewModel: ExploreVocabVm)
+        ExploreVocabVc.delegate = self
+        navigationController.setViewControllers([ExploreVocabVc], animated: false)
     }
 }
 
-extension MainCoordinator: WordTabViewControllerDelegate {
-    func wordTabDidTapBookList() {
+extension MainCoordinator: ExploreVocabViewControllerDelegate {
+    func ExploreVocabDidTapBookList() {
         let nav = UINavigationController()
         let libraryCoordinator = LibraryCoordinator(
             container: container,
@@ -34,7 +34,7 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
-    func wordTabDidTapSetting() {
+    func ExploreVocabDidTapSetting() {
         let nav = UINavigationController()
         let settingCoordinator = SettingCoordinator(
             container: container,
@@ -47,7 +47,7 @@ extension MainCoordinator: WordTabViewControllerDelegate {
     }
     
     // 학습하기
-    func wordTabDidTapStartQuiz(quizData: QuizData) {
+    func ExploreVocabDidTapStartQuiz(quizData: QuizData) {
         let nav = UINavigationController()
         nav.setNavigationBarHidden(true, animated: false)
         nav.modalPresentationStyle = .fullScreen
@@ -63,7 +63,7 @@ extension MainCoordinator: WordTabViewControllerDelegate {
         
     }
     
-    func wordTabDidTapEditWord(wordItem: CreateWord) {
+    func ExploreVocabDidTapEditWord(wordItem: CreateWord) {
         let vm = container.makeAddWordViewModel(wordItem: wordItem)
         let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
