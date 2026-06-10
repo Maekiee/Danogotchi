@@ -3,7 +3,7 @@ import RxSwift
 import RxCocoa
 import RealmSwift
 
-final class AddWordViewModel: BaseViewModel {
+final class CreateWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     
     private let wordItem: CreateWord?

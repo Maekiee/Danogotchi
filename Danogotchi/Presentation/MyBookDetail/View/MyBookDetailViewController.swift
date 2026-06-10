@@ -7,7 +7,7 @@ import RealmSwift
 
 protocol MyBookDetailViewControllerDelegate: AnyObject {
     func myBookDetailDidTapBack()
-    func myBookDetailDidTapAddWord(with createWordModel: CreateWord)
+    func myBookDetailDidTapCreateWord(with createWordModel: CreateWord)
     func myBookDetailDidTapEditWord(with createWordModel: CreateWord)
 }
 
@@ -175,7 +175,7 @@ extension MyBookDetailViewController {
                     actionType: .add
                 )
                 // 코디네이터 적용
-                owner.delegate?.myBookDetailDidTapAddWord(with: createWordModel)
+                owner.delegate?.myBookDetailDidTapCreateWord(with: createWordModel)
             }.disposed(by: disposeBag)
     }
 }

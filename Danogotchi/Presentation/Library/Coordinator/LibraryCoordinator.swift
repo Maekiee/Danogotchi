@@ -55,16 +55,16 @@ extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
         navigationController.popViewController(animated: true)
     }
     
-    func myBookDetailDidTapAddWord(with createWordModel: CreateWord) {
-        let vm = DIContainer.makeAddWordViewModel(wordItem: createWordModel)
-        let vc = AddWordViewController(viewModel: vm, entryPoint: .add)
+    func myBookDetailDidTapCreateWord(with createWordModel: CreateWord) {
+        let vm = DIContainer.makeCreateWordViewModel(wordItem: createWordModel)
+        let vc = CreateWordViewController(viewModel: vm, entryPoint: .add)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
     
     func myBookDetailDidTapEditWord(with createWordModel: CreateWord) {
-        let vm = DIContainer.makeAddWordViewModel(wordItem: createWordModel)
-        let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
+        let vm = DIContainer.makeCreateWordViewModel(wordItem: createWordModel)
+        let vc = CreateWordViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
@@ -76,8 +76,8 @@ extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
     }
 }
 
-extension LibraryCoordinator: AddWordViewControllerDelegate {
-    func addWordDidTapBack() {
+extension LibraryCoordinator: CreateWordViewControllerDelegate {
+    func createWordDidTapBack() {
         navigationController.popViewController(animated: true)
     }
 }

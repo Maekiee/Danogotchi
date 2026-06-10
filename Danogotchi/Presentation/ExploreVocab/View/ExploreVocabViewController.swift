@@ -7,10 +7,10 @@ import UIKit
 
 
 protocol ExploreVocabViewControllerDelegate: AnyObject {
-    func ExploreVocabDidTapBookList()
-    func ExploreVocabDidTapSetting()
-    func ExploreVocabDidTapStartQuiz(quizData: QuizData)
-    func ExploreVocabDidTapEditWord(wordItem: CreateWord)
+    func exploreVocabDidTapLibrary()
+    func exploreVocabDidTapSetting()
+    func exploreVocabDidTapStartQuiz(quizData: QuizData)
+    func exploreVocabDidTapEditWord(wordItem: CreateWord)
 }
 
 final class ExploreVocabViewController: BaseViewController {
@@ -253,12 +253,12 @@ extension ExploreVocabViewController {
         showWordBookButton.rx.tap
             .bind(with: self) { owner, _ in
                 print("Hello world!!!")
-                owner.delegate?.ExploreVocabDidTapBookList()
+                owner.delegate?.exploreVocabDidTapLibrary()
             }.disposed(by: disposeBag)
         
         settingTabButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.delegate?.ExploreVocabDidTapSetting()
+                owner.delegate?.exploreVocabDidTapSetting()
             }.disposed(by: disposeBag)
 
         // 학습 시작하기
@@ -300,7 +300,7 @@ extension ExploreVocabViewController {
                 
                 let quizData = QuizData(words: wordsForQuiz, allWord: allWords)
 
-                owner.delegate?.ExploreVocabDidTapStartQuiz(quizData: quizData)
+                owner.delegate?.exploreVocabDidTapStartQuiz(quizData: quizData)
             }.disposed(by: disposeBag)
     }
     
@@ -346,7 +346,7 @@ extension ExploreVocabViewController {
                             actionType: .edit
                         )
                         
-                        owner.delegate?.ExploreVocabDidTapEditWord(wordItem: createWordModel)
+                        owner.delegate?.exploreVocabDidTapEditWord(wordItem: createWordModel)
                     },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }

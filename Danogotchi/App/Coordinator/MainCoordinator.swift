@@ -14,15 +14,15 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
-        let ExploreVocabVm = container.makeExploreVocabViewModel()
-        let ExploreVocabVc = ExploreVocabViewController(viewModel: ExploreVocabVm)
-        ExploreVocabVc.delegate = self
-        navigationController.setViewControllers([ExploreVocabVc], animated: false)
+        let exploreVocabVm = container.makeExploreVocabViewModel()
+        let exploreVocabVc = ExploreVocabViewController(viewModel: exploreVocabVm)
+        exploreVocabVc.delegate = self
+        navigationController.setViewControllers([exploreVocabVc], animated: false)
     }
 }
 
 extension MainCoordinator: ExploreVocabViewControllerDelegate {
-    func ExploreVocabDidTapBookList() {
+    func exploreVocabDidTapLibrary() {
         let nav = UINavigationController()
         let libraryCoordinator = LibraryCoordinator(
             container: container,
@@ -34,7 +34,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
-    func ExploreVocabDidTapSetting() {
+    func exploreVocabDidTapSetting() {
         let nav = UINavigationController()
         let settingCoordinator = SettingCoordinator(
             container: container,
@@ -47,7 +47,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     }
     
     // 학습하기
-    func ExploreVocabDidTapStartQuiz(quizData: QuizData) {
+    func exploreVocabDidTapStartQuiz(quizData: QuizData) {
         let nav = UINavigationController()
         nav.setNavigationBarHidden(true, animated: false)
         nav.modalPresentationStyle = .fullScreen
@@ -63,17 +63,17 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         
     }
     
-    func ExploreVocabDidTapEditWord(wordItem: CreateWord) {
-        let vm = container.makeAddWordViewModel(wordItem: wordItem)
-        let vc = AddWordViewController(viewModel: vm, entryPoint: .edit)
+    func exploreVocabDidTapEditWord(wordItem: CreateWord) {
+        let vm = container.makeCreateWordViewModel(wordItem: wordItem)
+        let vc = CreateWordViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         vc.modalPresentationStyle = .fullScreen
         navigationController.present(vc, animated: true)
     }
 }
 
-extension MainCoordinator: AddWordViewControllerDelegate {
-    func addWordDidTapBack() {
+extension MainCoordinator: CreateWordViewControllerDelegate {
+    func createWordDidTapBack() {
         navigationController.dismiss(animated: true)
     }
     

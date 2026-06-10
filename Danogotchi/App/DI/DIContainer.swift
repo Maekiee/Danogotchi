@@ -29,10 +29,10 @@ extension DIContainer {
         )
     }
     
-    func makeAddWordViewModel(wordItem: CreateWord) -> AddWordViewModel {
+    func makeCreateWordViewModel(wordItem: CreateWord) -> CreateWordViewModel {
         let wordRepository = makeWordRepository()
         let wordBookRepository = makeWordBookRepository()
-        return AddWordViewModel(
+        return CreateWordViewModel(
             wordItem: wordItem,
             wordBookRepository: wordBookRepository,
             wordRepository: wordRepository

@@ -5,17 +5,17 @@ import RxCocoa
 import Kingfisher
 
 
-protocol AddWordViewControllerDelegate: AnyObject {
-    func addWordDidTapBack()
+protocol CreateWordViewControllerDelegate: AnyObject {
+    func createWordDidTapBack()
 }
 
-final class AddWordViewController: BaseViewController {
+final class CreateWordViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel: AddWordViewModel
+    private let viewModel: CreateWordViewModel
     private let entryPoint: EntryPoint
-    weak var delegate: AddWordViewControllerDelegate?
+    weak var delegate: CreateWordViewControllerDelegate?
     
-    init(viewModel: AddWordViewModel, entryPoint: EntryPoint) {
+    init(viewModel: CreateWordViewModel, entryPoint: EntryPoint) {
         self.viewModel = viewModel
         self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
@@ -118,12 +118,12 @@ final class AddWordViewController: BaseViewController {
     }
 }
 
-extension AddWordViewController {
+extension CreateWordViewController {
     private func bind() {
         let selectedImage = PublishRelay<String>()
         var currentImageUrl = ""
         
-        let input = AddWordViewModel.Input(
+        let input = CreateWordViewModel.Input(
             wordBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
             wordTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),
@@ -134,7 +134,7 @@ extension AddWordViewController {
         
         backButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.delegate?.addWordDidTapBack()
+                owner.delegate?.createWordDidTapBack()
             }.disposed(by: disposeBag)
         
         // 레거시 코드 정리 예정
