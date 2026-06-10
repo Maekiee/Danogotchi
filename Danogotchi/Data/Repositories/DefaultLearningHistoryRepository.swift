@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-final class LearningHistoryRepository: LearningHistoryRepositoryProtocol{
+final class DefaultLearningHistoryRepository: LearningHistoryRepository{
     private let realm: Realm
     
     init(realm: Realm = try! Realm()) {

@@ -7,8 +7,8 @@ final class CreateWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     
     private let wordItem: CreateWord?
-    private let wordBookRepository: WordBookRepositoryProtocol
-    private let wordRepository: WordRepositoryProtocol
+    private let wordBookRepository: WordBookRepository
+    private let wordRepository: WordRepository
     private let userInfoManager = UserInfoManager.shared
     
     private var isWordBookId: ObjectId?
@@ -17,8 +17,8 @@ final class CreateWordViewModel: BaseViewModel {
     
     init(
         wordItem: CreateWord? = nil,
-        wordBookRepository: WordBookRepositoryProtocol,
-        wordRepository: WordRepositoryProtocol
+        wordBookRepository: WordBookRepository,
+        wordRepository: WordRepository
     ) {
         self.wordItem = wordItem
         self.wordBookRepository = wordBookRepository

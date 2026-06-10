@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-protocol WordRepositoryProtocol {
+protocol WordRepository {
     func create(thumbnail: String, word: String, meaning: String) -> WordObject
     func readAll() -> [WordObject]
     func read(id: ObjectId) -> WordObject?

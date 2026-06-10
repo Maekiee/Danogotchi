@@ -18,14 +18,14 @@ final class ActiveLearningManager {
     // ViewModels가 구독할 'WordBook' 출처
     let activeBookSource = BehaviorRelay<WordBookSource?>(value: nil)
 
-    private let wordBookRepo: WordBookRepositoryProtocol
-    private let recommendRepo: RecommendBookRepoProtocol
+    private let wordBookRepo: WordBookRepository
+    private let recommendRepo: RecommendBookRepository
     private let userInfo: UserInfoManager
     private let disposeBag = DisposeBag()
 
     init(
-        wordBookRepo: WordBookRepositoryProtocol = WordBookRepository(),
-        recommendRepo: RecommendBookRepoProtocol = RecommendBookRepository(),
+        wordBookRepo: WordBookRepository = DefaultWordBookRepository(),
+        recommendRepo: RecommendBookRepository = DefaultRecommendBookRepository(),
         userInfo: UserInfoManager = UserInfoManager.shared
     ) {
         self.wordBookRepo = wordBookRepo

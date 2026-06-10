@@ -5,7 +5,7 @@ import RealmSwift
 
 final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let learningHistoryRepository: LearningHistoryRepositoryProtocol
+    private let learningHistoryRepository: LearningHistoryRepository
     private let userInfo = UserInfoManager.shared
     
     private let quizDataRelay: BehaviorRelay<QuizData>
@@ -22,7 +22,7 @@ final class QuizViewModel: BaseViewModel {
     }
     
     init(
-        learningHistoryRepository: LearningHistoryRepositoryProtocol,
+        learningHistoryRepository: LearningHistoryRepository,
         quizData: QuizData
     ) {
         self.learningHistoryRepository = learningHistoryRepository

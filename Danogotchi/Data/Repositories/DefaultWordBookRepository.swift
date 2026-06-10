@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-final class WordBookRepository: WordBookRepositoryProtocol {
+final class DefaultWordBookRepository: WordBookRepository {
     private let realm: Realm
     
     init(realm: Realm = try! Realm()) {

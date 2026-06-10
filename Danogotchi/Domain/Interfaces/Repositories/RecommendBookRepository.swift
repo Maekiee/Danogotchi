@@ -1,6 +1,6 @@
 import Foundation
 import RxSwift
 
-protocol RecommendBookRepoProtocol {
+protocol RecommendBookRepository {
     func fetchRecommendBooks() -> Observable<[WordBook]>
 }

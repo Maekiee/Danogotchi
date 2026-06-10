@@ -22,7 +22,7 @@ final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: SearchThemeViewModel
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
-    private let wordBookRepo = WordBookRepository()
+    private let wordBookRepo = DefaultWordBookRepository()
     private let userInfo = UserInfoManager.shared
     
     private enum Section {

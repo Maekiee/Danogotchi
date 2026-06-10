@@ -7,16 +7,16 @@ final class MyBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
     
-    private let wordBookRepository: WordBookRepositoryProtocol
-    private let wordRepository: WordRepositoryProtocol
-    private let learningHistoryRepository: LearningHistoryRepositoryProtocol
+    private let wordBookRepository: WordBookRepository
+    private let wordRepository: WordRepository
+    private let learningHistoryRepository: LearningHistoryRepository
     
     private let myBookObjectId = BehaviorRelay<ObjectId?>(value: nil)
     
     init(
-        wordBookRepository: WordBookRepositoryProtocol,
-        wordRepository: WordRepositoryProtocol,
-        learningHistoryRepository: LearningHistoryRepositoryProtocol
+        wordBookRepository: WordBookRepository,
+        wordRepository: WordRepository,
+        learningHistoryRepository: LearningHistoryRepository
     ) {
         self.wordBookRepository = wordBookRepository
         self.wordRepository = wordRepository

@@ -10,10 +10,10 @@ final class SettingCoordinator: NSObject, Coordinator {
     var navigationController: UINavigationController
     weak var delegate: SettingCoordinatorDelegate?
     
-    private let container: DIContainer
+    private let container: AppDIContainer
     
     init(
-        container: DIContainer,
+        container: AppDIContainer,
         navigationController: UINavigationController
     ) {
         self.container = container

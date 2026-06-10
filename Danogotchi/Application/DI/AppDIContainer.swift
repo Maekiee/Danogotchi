@@ -1,6 +1,6 @@
 import Foundation
 
-final class DIContainer {
+final class AppDIContainer {
     // MARK: - Managers
     let userInfoManager: UserInfoManager
     let ttsManager: TTSManager
@@ -14,10 +14,10 @@ final class DIContainer {
 }
 
 // MARK: - Word
-extension DIContainer {
+extension AppDIContainer {
     
-    func makeWordRepository() -> WordRepositoryProtocol {
-        return WordRepository()
+    func makeWordRepository() -> WordRepository {
+        return DefaultWordRepository()
     }
     
     func makeExploreVocabViewModel() -> ExploreVocabViewModel {
@@ -41,13 +41,13 @@ extension DIContainer {
 }
 
 // MARK: - Library
-extension DIContainer {
-    func makeWordBookRepository() -> WordBookRepositoryProtocol {
-        return WordBookRepository()
+extension AppDIContainer {
+    func makeWordBookRepository() -> WordBookRepository {
+        return DefaultWordBookRepository()
     }
     
-    func makeRecommendBookRepository() -> RecommendBookRepoProtocol {
-        return RecommendBookRepository()
+    func makeRecommendBookRepository() -> RecommendBookRepository {
+        return DefaultRecommendBookRepository()
     }
     
     func makeLibraryViewModel() -> LibraryViewModel {
@@ -75,9 +75,9 @@ extension DIContainer {
 }
 
 // MARK: - Quiz
-extension DIContainer {
-    func makeLearningHistoryRepository() -> LearningHistoryRepositoryProtocol {
-        return LearningHistoryRepository()
+extension AppDIContainer {
+    func makeLearningHistoryRepository() -> LearningHistoryRepository {
+        return DefaultLearningHistoryRepository()
     }
     
     func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
@@ -94,9 +94,9 @@ extension DIContainer {
 }
 
 // MARK: - Setting Tab
-extension DIContainer {
-    func makeSearchThemeRepository() -> SearchThemeRepoProtocol {
-        return SearchThemeRepository()
+extension AppDIContainer {
+    func makeSearchThemeRepository() -> SearchThemeRepository {
+        return DefaultSearchThemeRepository()
     }
     
     func makeSearchThemeViewModel(mode: SearchThemeViewController.EntryMode) -> SearchThemeViewModel {
@@ -109,7 +109,7 @@ extension DIContainer {
 }
 
 
-extension DIContainer {
+extension AppDIContainer {
     func makeAppEnvProvider() -> AppEnvProvider {
         return DefaultAppEnvProvider()
     }

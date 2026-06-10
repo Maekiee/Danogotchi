@@ -2,7 +2,7 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class RecommendBookRepository: RecommendBookRepoProtocol {
+final class DefaultRecommendBookRepository: RecommendBookRepository {
     
     func fetchRecommendBooks() -> RxSwift.Observable<[WordBook]> {
         let travelBook = createWordBook(

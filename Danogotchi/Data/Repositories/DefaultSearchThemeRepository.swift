@@ -1,7 +1,7 @@
 import Foundation
 import RxSwift
 
-final class SearchThemeRepository: SearchThemeRepoProtocol {
+final class DefaultSearchThemeRepository: SearchThemeRepository {
     func searchPhotos(query: String, page: Int) -> RxSwift.Single<Result<SearchPhotoEntity, Error>> {
         let api = ApiRouter.searchPhoto(word: query, page: page)
         

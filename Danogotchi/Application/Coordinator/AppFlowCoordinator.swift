@@ -1,13 +1,13 @@
 import UIKit
 
-final class AppCoordinator: Coordinator {
+final class AppFlowCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     
     private let window: UIWindow
-    private let container: DIContainer
+    private let container: AppDIContainer
     
-    init(window: UIWindow, container: DIContainer) {
+    init(window: UIWindow, container: AppDIContainer) {
         self.window = window
         self.navigationController = UINavigationController()
         self.container = container
@@ -15,7 +15,7 @@ final class AppCoordinator: Coordinator {
 }
 
 
-extension AppCoordinator {
+extension AppFlowCoordinator {
     func start() {
         if UserInfoManager.shared.currentThemeUrl != nil {
             startMainFlow()
@@ -57,7 +57,7 @@ extension AppCoordinator {
     }
 }
 
-extension AppCoordinator: OnboardingCoordinatorDelegate {
+extension AppFlowCoordinator: OnboardingCoordinatorDelegate {
     func onboardingDidComplete() {
         childCoordinators.removeAll { $0 is OnboardingCoordinator }
         switchToMainScene()

@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-protocol WordBookRepositoryProtocol {
+protocol WordBookRepository {
     func create(title: String)
     func readAll() -> [WordBook]
     func read(id: ObjectId) -> WordBookObject?

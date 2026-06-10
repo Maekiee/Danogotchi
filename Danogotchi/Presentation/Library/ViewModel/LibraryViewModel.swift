@@ -8,14 +8,14 @@ final class LibraryViewModel: BaseViewModel {
     private let userInfo = UserInfoManager.shared
     private let activeManager = ActiveLearningManager.shared
     
-    private let recommendBookRepository: RecommendBookRepoProtocol
-    private let wordBookRepository: WordBookRepositoryProtocol
-    private let wordRepository: WordRepositoryProtocol
+    private let recommendBookRepository: RecommendBookRepository
+    private let wordBookRepository: WordBookRepository
+    private let wordRepository: WordRepository
     
     init (
-        recommendBookRepository: RecommendBookRepoProtocol,
-        wordBookRepository: WordBookRepositoryProtocol,
-        wordRepository: WordRepositoryProtocol
+        recommendBookRepository: RecommendBookRepository,
+        wordBookRepository: WordBookRepository,
+        wordRepository: WordRepository
     ) {
         self.recommendBookRepository = recommendBookRepository
         self.wordBookRepository = wordBookRepository

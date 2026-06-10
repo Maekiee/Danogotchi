@@ -8,10 +8,10 @@ final class OnboardingCoordinator: Coordinator, SearchThemeViewControllerDelegat
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     weak var delegate: OnboardingCoordinatorDelegate?
-    private let container: DIContainer
+    private let container: AppDIContainer
     
     init(navigationController: UINavigationController,
-         container: DIContainer) {
+         container: AppDIContainer) {
         self.navigationController = navigationController
         self.container = container
     }

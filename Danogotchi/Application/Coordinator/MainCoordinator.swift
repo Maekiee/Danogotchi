@@ -3,10 +3,10 @@ import UIKit
 final class MainCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let container: DIContainer
+    private let container: AppDIContainer
     
     init(
-        container: DIContainer,
+        container: AppDIContainer,
         navigationController: UINavigationController
     ) {
         self.container = container

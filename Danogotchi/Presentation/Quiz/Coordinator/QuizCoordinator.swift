@@ -9,11 +9,11 @@ final class QuizCoordinator: Coordinator {
     var navigationController: UINavigationController
     weak var delegate: QuizCoordinatorDelegate?
     
-    private let container: DIContainer
+    private let container: AppDIContainer
     private let quizData: QuizData
     
     init(
-        container: DIContainer,
+        container: AppDIContainer,
         navigationController: UINavigationController,
         quizData: QuizData
     ) {

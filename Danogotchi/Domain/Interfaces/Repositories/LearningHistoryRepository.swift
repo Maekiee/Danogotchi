@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-protocol LearningHistoryRepositoryProtocol {
+protocol LearningHistoryRepository {
     func addHistory(wordObjectId: ObjectId, isCorrect: Bool)
     func fetchAllHistory() -> [LearningHistoryModel]
 }

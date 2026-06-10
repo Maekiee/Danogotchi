@@ -7,12 +7,12 @@ import RealmSwift
 final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
-    private let wordRepository: WordRepositoryProtocol
-    private let learnHistoryRepository: LearningHistoryRepositoryProtocol
+    private let wordRepository: WordRepository
+    private let learnHistoryRepository: LearningHistoryRepository
     
     init(
-        wordRepository: WordRepositoryProtocol,
-        learnHistoryRepository: LearningHistoryRepositoryProtocol
+        wordRepository: WordRepository,
+        learnHistoryRepository: LearningHistoryRepository
     ) {
         self.wordRepository = wordRepository
         self.learnHistoryRepository = learnHistoryRepository

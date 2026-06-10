@@ -7,11 +7,11 @@ protocol LibraryCoordinatorDelegate: AnyObject {
 final class LibraryCoordinator:NSObject, Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let DIContainer: DIContainer
+    private let AppDIContainer: AppDIContainer
     weak var delegate: LibraryCoordinatorDelegate?
     
-    init(container: DIContainer, navigationController: UINavigationController) {
-        self.DIContainer = container
+    init(container: AppDIContainer, navigationController: UINavigationController) {
+        self.AppDIContainer = container
         self.navigationController = navigationController
         super.init()
     }
@@ -19,7 +19,7 @@ final class LibraryCoordinator:NSObject, Coordinator {
 
 extension LibraryCoordinator {
     func start() {
-        let vm = DIContainer.makeLibraryViewModel()
+        let vm = AppDIContainer.makeLibraryViewModel()
         let vc = LibraryViewController(viewModel: vm)
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
@@ -42,7 +42,7 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
     }
 
     func libraryDidTapMore() {
-        let vm = DIContainer.makeMyBookDetailViewModel()
+        let vm = AppDIContainer.makeMyBookDetailViewModel()
         let vc = MyBookDetailViewController(viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
@@ -56,14 +56,14 @@ extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
     }
     
     func myBookDetailDidTapCreateWord(with createWordModel: CreateWord) {
-        let vm = DIContainer.makeCreateWordViewModel(wordItem: createWordModel)
+        let vm = AppDIContainer.makeCreateWordViewModel(wordItem: createWordModel)
         let vc = CreateWordViewController(viewModel: vm, entryPoint: .add)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
     
     func myBookDetailDidTapEditWord(with createWordModel: CreateWord) {
-        let vm = DIContainer.makeCreateWordViewModel(wordItem: createWordModel)
+        let vm = AppDIContainer.makeCreateWordViewModel(wordItem: createWordModel)
         let vc = CreateWordViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
