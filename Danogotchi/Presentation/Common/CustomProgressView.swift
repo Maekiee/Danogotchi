@@ -12,8 +12,6 @@ final class CustomProgressView: UIView {
         view.layer.borderWidth = 1
         return view
     }()
-    
-    
     private let progressFillView: UIView = {
         let view = UIView()
         view.backgroundColor = AppColor.oxfordBlue
@@ -22,7 +20,8 @@ final class CustomProgressView: UIView {
     
     
     private var progressWidthConstraint: Constraint?
-    
+    private var currentProgress: Float = 0.0
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupLayout()
@@ -56,15 +55,18 @@ final class CustomProgressView: UIView {
         
         trackView.layer.cornerRadius = cornerRadius
         progressFillView.layer.cornerRadius = cornerRadius
-        
-        trackView.clipsToBounds = true
-    }
-    
-    func setProgress(_ progress: Float, animated: Bool) {
-        let newProgress = max(0.0, min(1.0, progress))
 
-        let newWidth = trackView.bounds.width * CGFloat(newProgress)
-        
+        trackView.clipsToBounds = true
+
+        // bounds 확정 후 저장된 progress로 채움 너비 재계산
+        progressWidthConstraint?.update(offset: trackView.bounds.width * CGFloat(currentProgress))
+    }
+
+    func setProgress(_ progress: Float, animated: Bool) {
+        currentProgress = max(0.0, min(1.0, progress))
+
+        let newWidth = trackView.bounds.width * CGFloat(currentProgress)
+
         progressWidthConstraint?.update(offset: newWidth)
         
         if animated {
