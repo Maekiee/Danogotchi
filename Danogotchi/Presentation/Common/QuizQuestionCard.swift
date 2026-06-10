@@ -78,12 +78,3 @@ final class QuisQuestionCard: UIView {
         backgroundColor = .clear
     }
 }
-
-// MARK: - Usage Example
-extension QuisQuestionCard {
-    static func createExample() -> QuisQuestionCard {
-        let view = QuisQuestionCard()
-        view.frame = CGRect(x: 0, y: 0, width: 400, height: 200)
-        return view
-    }
-}

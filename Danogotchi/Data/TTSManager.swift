@@ -14,14 +14,6 @@ final class TTSManager: NSObject {
         return _currentSpeakingText.asObservable()
     }
     
-    enum SpeechEvent {
-        case started
-        case finished
-        case paused
-        case continued
-        case cancelled
-    }
-    
     private override init() {
         super.init()
         synthesizer.delegate = self

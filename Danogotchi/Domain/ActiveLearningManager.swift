@@ -99,11 +99,4 @@ final class ActiveLearningManager {
         // -> 이 변경이 (1)번의 구독 로직을 트리거하여 activeBook이 자동 갱신됨
         userInfo.activeBookIdentifier = identifier
     }
-    
-    // 단어 삭제 시 인메모리 캐시 업데이트
-//    func removeWordFromActiveBook(wordId: String) {
-//        guard var currentBook = activeBook.value else { return }
-//        currentBook.wordList.removeAll { $0.id == wordId }
-//        activeBook.accept(currentBook) // 캐시된 객체 갱신
-//    }
 }
