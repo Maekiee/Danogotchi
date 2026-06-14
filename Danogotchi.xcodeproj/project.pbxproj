@@ -46,7 +46,6 @@
 		76615D082FAE1036005706B5 /* conventions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = conventions.md; sourceTree = "<group>"; };
 		76615D092FAE1036005706B5 /* environment.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = environment.md; sourceTree = "<group>"; };
 		76615D0B2FAE1100005706B5 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
-		76615D0C2FAE18CD005706B5 /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
 		76AF708B2FC2C67B004FE796 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,7 +106,6 @@
 				76615D062FAE04A1005706B5 /* CLAUDE.md */,
 				76615D0A2FAE1036005706B5 /* docs */,
 				76615D0B2FAE1100005706B5 /* TODO.md */,
-				76615D0C2FAE18CD005706B5 /* migration.md */,
 			);
 			sourceTree = "<group>";
 		};
