@@ -35,13 +35,13 @@ final class SettingTabViewController: BaseViewController {
         let label = UILabel()
         label.text = "설정"
         label.font = .systemFont(ofSize: 28, weight: .bold)
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         return label
     }()
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         view.alwaysBounceVertical = false
         view.bounces = true
         return view
@@ -98,13 +98,13 @@ final class SettingTabViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
     
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
-        configuration.backgroundColor = AppColor.backgroundBeige
+        configuration.backgroundColor = AppColor.background
         
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         
@@ -131,7 +131,7 @@ extension SettingTabViewController {
             
             if setting.action == .appVersion {
                 contentConfiguration.secondaryText = currentAppVersion
-                contentConfiguration.secondaryTextProperties.color = .gray
+                contentConfiguration.secondaryTextProperties.color = AppColor.textSecondary
                 cell.accessories = []
             } else {
                 contentConfiguration.secondaryText = nil

@@ -12,13 +12,13 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .boldSystemFont(ofSize: 20)
         return label
     }()
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.pointDarkGray
+        label.textColor = AppColor.textSecondary
         label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()

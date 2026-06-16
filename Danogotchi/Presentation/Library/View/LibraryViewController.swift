@@ -65,7 +65,7 @@ final class LibraryViewController: BaseViewController {
     private let closeButton: UIButton = {
         let button = UIButton()
         button.setTitle("닫기", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         return button
     }()
@@ -73,7 +73,7 @@ final class LibraryViewController: BaseViewController {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
         config.title = "단어 보기"
-        config.baseForegroundColor = AppColor.pointDarkGray
+        config.baseForegroundColor = AppColor.textSecondary
         config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
             pointSize: 10,
             weight: .semibold
@@ -97,7 +97,7 @@ final class LibraryViewController: BaseViewController {
             collectionViewLayout: layout()
         )
         view.alwaysBounceVertical = false
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         return view
     }()
     
@@ -153,7 +153,7 @@ final class LibraryViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
     
     private func setupCellRegistrations() {

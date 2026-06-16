@@ -89,7 +89,7 @@ final class UnderlineTextField: UIView {
         // TextField 설정
         textField.borderStyle = .none
         textField.autocapitalizationType = .none
-        textField.textColor = .label
+        textField.textColor = AppColor.textPrimary
         textField.font = .systemFont(ofSize: 20, weight: .semibold)
         
         textField.backgroundColor = AppColor.appWhite // 배경색을 회색으로 설정
@@ -106,7 +106,7 @@ final class UnderlineTextField: UIView {
         
         // Title Label 설정
         titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
-        titleLabel.textColor = .black//.secondaryLabel
+        titleLabel.textColor = AppColor.textPrimary//.secondaryLabel
         titleLabel.isHidden = true // 기본적으로 숨김
         
         // 뷰 추가

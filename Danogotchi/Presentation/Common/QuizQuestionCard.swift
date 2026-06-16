@@ -26,7 +26,7 @@ final class QuisQuestionCard: UIView {
         let label = UILabel()
         label.text = "Random Access"
         label.font = UIFont.boldSystemFont(ofSize: 24)
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.textAlignment = .center
         return label
     }()

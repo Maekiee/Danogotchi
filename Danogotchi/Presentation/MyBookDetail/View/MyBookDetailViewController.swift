@@ -44,7 +44,7 @@ final class MyBookDetailViewController: BaseViewController {
         config.image = UIImage(systemName: "chevron.backward")
         config.title = "Back"
         config.imagePadding = 4
-        config.baseForegroundColor = .black
+        config.baseForegroundColor = AppColor.textPrimary
         button.configuration = config
         return button
     }()
@@ -68,7 +68,7 @@ final class MyBookDetailViewController: BaseViewController {
             frame: .zero,
             collectionViewLayout: MyBookDetailViewController.layout()
         )
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         view.showsVerticalScrollIndicator = false
         return view
     }()
@@ -126,7 +126,7 @@ final class MyBookDetailViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         collectionView.contentInset.bottom = 100
     }
 }

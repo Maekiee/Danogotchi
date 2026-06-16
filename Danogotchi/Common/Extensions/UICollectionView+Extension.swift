@@ -6,7 +6,7 @@ extension UICollectionView {
             let label = UILabel()
             label.text = title
             label.textAlignment = .center
-            label.textColor = .black
+            label.textColor = AppColor.textPrimary
             label.font = .systemFont(ofSize: 14)
             return label
         }()

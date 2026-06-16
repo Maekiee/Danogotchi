@@ -6,7 +6,7 @@ class CustomHeaderView: UICollectionReusableView {
     private let label: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .medium)
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         return label
     }()
     

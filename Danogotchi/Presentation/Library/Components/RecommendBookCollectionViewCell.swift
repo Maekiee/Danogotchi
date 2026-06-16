@@ -22,7 +22,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     }()
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .boldSystemFont(ofSize: 18)
         return label
     }()
@@ -165,7 +165,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
             symbolIconImage.isHidden = true
             
             // 다운로드 버튼이 보일 때 제목을 흐리게 처리 (선택 사항)
-            titleLabel.textColor = .black.withAlphaComponent(0.4)
+            titleLabel.textColor = AppColor.textSecondary
         }
         
         

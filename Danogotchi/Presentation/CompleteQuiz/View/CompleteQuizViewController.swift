@@ -38,7 +38,7 @@ final class CompleteQuizViewController: BaseViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "학습 완료"
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .boldSystemFont(ofSize: 24)
         label.textAlignment = .center
         return label
@@ -46,7 +46,7 @@ final class CompleteQuizViewController: BaseViewController {
     
     private let scoreLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .systemFont(ofSize: 18, weight: .medium)
         label.textAlignment = .center
         label.numberOfLines = 0
@@ -111,7 +111,7 @@ final class CompleteQuizViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
 }
 

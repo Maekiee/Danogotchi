@@ -43,7 +43,7 @@ final class SearchThemeViewController: BaseViewController {
         config.image = UIImage(systemName: "chevron.backward")
         config.title = "Back"
         config.imagePadding = 4
-        config.baseForegroundColor = .black
+        config.baseForegroundColor = AppColor.textPrimary
         button.configuration = config
         return button
     }()
@@ -51,7 +51,7 @@ final class SearchThemeViewController: BaseViewController {
         let label = UILabel()
         label.text = "배경 테마를 골라주세요"
         label.font = .systemFont(ofSize: 28, weight: .semibold)
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         return label
     }()
     private let textField: UnderlineTextField = {
@@ -68,7 +68,7 @@ final class SearchThemeViewController: BaseViewController {
             collectionViewLayout: waterfallLayout // 추가
         )
         view.showsVerticalScrollIndicator = false
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         return view
     }()
     private lazy var  submitButton: PrimaryFillButton = {
@@ -157,7 +157,7 @@ final class SearchThemeViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
     
 }

@@ -32,7 +32,7 @@ final class CreateWordViewController: BaseViewController {
         config.image = UIImage(systemName: "chevron.backward")
         config.title = "Back"
         config.imagePadding = 4
-        config.baseForegroundColor = .black
+        config.baseForegroundColor = AppColor.textPrimary
         button.configuration = config
         return button
     }()
@@ -113,7 +113,7 @@ final class CreateWordViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         
     }
 }

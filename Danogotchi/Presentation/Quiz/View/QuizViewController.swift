@@ -34,14 +34,14 @@ final class QuizViewController: BaseViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "단어 학습"
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .boldSystemFont(ofSize: 17)
         label.textAlignment = .center
         return label
     }()
     private let currentQuestionLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
     }()
@@ -63,7 +63,7 @@ final class QuizViewController: BaseViewController {
 //    }()
     private let totalQuestionLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
     }()
@@ -79,7 +79,7 @@ final class QuizViewController: BaseViewController {
     private let questionLabel: UILabel = {
         let label = UILabel()
         label.text = "단어의 뜻을 선택하세요"
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .systemFont(ofSize: 20, weight: .semibold)
         label.textAlignment = .center
         label.numberOfLines = 0
@@ -88,7 +88,7 @@ final class QuizViewController: BaseViewController {
     private let choice1Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 1", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
         button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
@@ -105,7 +105,7 @@ final class QuizViewController: BaseViewController {
     private let choice2Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 2", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
         button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
@@ -122,7 +122,7 @@ final class QuizViewController: BaseViewController {
     private let choice3Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 3", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
         button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
@@ -139,7 +139,7 @@ final class QuizViewController: BaseViewController {
     private let choice4Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 4", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
         button.layer.cornerRadius = 20
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
@@ -234,7 +234,7 @@ final class QuizViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
 }
 
@@ -290,7 +290,7 @@ extension QuizViewController {
                 [owner.choice1Button, owner.choice2Button,
                  owner.choice3Button, owner.choice4Button].forEach {
                     $0.backgroundColor = AppColor.appWhite
-                    $0.setTitleColor(.black, for: .normal)
+                    $0.setTitleColor(AppColor.textPrimary, for: .normal)
                     $0.isEnabled = true
                 }
             }.disposed(by: disposeBag)

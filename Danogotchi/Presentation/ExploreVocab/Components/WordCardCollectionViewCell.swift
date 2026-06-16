@@ -47,7 +47,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textPrimaryColor
+        label.textColor = AppColor.textPrimary
         label.font = .systemFont(ofSize: 18, weight: .semibold)
         label.numberOfLines = 0
         return label
@@ -55,7 +55,7 @@ final class WordCardCollectionViewCell: UICollectionViewCell {
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textSecondaryColor
+        label.textColor = AppColor.textSecondary
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.numberOfLines = 0
         return label

@@ -9,7 +9,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "나의 단어장"
-        label.textColor = .black
+        label.textColor = AppColor.textPrimary
         label.font = .boldSystemFont(ofSize: 24)
         return label
     }()

@@ -72,7 +72,7 @@ final class UICircleProgress: UIView {
     private func setupPercentageLabel() {
         addSubview(percentageLabel)
         percentageLabel.font = .systemFont(ofSize: 10, weight: .bold)
-        percentageLabel.textColor = .darkGray
+        percentageLabel.textColor = AppColor.textSecondary
         percentageLabel.textAlignment = .center
         updatePercentageLabel()
 
