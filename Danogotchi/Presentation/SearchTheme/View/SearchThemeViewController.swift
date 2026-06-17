@@ -68,7 +68,7 @@ final class SearchThemeViewController: BaseViewController {
             collectionViewLayout: waterfallLayout // 추가
         )
         view.showsVerticalScrollIndicator = false
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
         return view
     }()
     private lazy var  submitButton: PrimaryFillButton = {
@@ -157,7 +157,7 @@ final class SearchThemeViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
     }
     
 }

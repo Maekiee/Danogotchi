@@ -234,7 +234,7 @@ final class QuizViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
     }
 }
 

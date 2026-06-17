@@ -41,7 +41,7 @@ final class SettingTabViewController: BaseViewController {
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
         view.alwaysBounceVertical = false
         view.bounces = true
         return view
@@ -98,13 +98,13 @@ final class SettingTabViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
     }
     
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
-        configuration.backgroundColor = AppColor.background
+        configuration.backgroundColor = AppColor.backgroundBeige
         
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         

@@ -113,7 +113,7 @@ final class CreateWordViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
         
     }
 }

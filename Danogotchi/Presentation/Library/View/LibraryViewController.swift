@@ -97,7 +97,7 @@ final class LibraryViewController: BaseViewController {
             collectionViewLayout: layout()
         )
         view.alwaysBounceVertical = false
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
         return view
     }()
     
@@ -153,7 +153,7 @@ final class LibraryViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
     }
     
     private func setupCellRegistrations() {

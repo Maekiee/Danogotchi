@@ -68,7 +68,7 @@ final class MyBookDetailViewController: BaseViewController {
             frame: .zero,
             collectionViewLayout: MyBookDetailViewController.layout()
         )
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
         view.showsVerticalScrollIndicator = false
         return view
     }()
@@ -126,7 +126,7 @@ final class MyBookDetailViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.backgroundBeige
         collectionView.contentInset.bottom = 100
     }
 }
