@@ -339,7 +339,6 @@ extension ExploreVocabViewController {
                         let createWordModel = CreateWord(
                             wordBookId: bookObjectId,
                             wordId: try! ObjectId(string: item.word.id),
-                            thumbnail: item.word.thumbnail,
                             bookTitle: owner.bookTitle,
                             word: item.word.word,
                             meaning: item.word.meaning,

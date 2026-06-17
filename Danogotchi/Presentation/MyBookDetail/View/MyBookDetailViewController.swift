@@ -168,7 +168,6 @@ extension MyBookDetailViewController {
                 let createWordModel = CreateWord(
                     wordBookId: bookObjectId,
                     wordId: nil,
-                    thumbnail: "",
                     bookTitle: "나의 단어장",
                     word: "",
                     meaning: "",
@@ -200,7 +199,6 @@ extension MyBookDetailViewController {
                         let createWordModel = CreateWord(
                             wordBookId: bookObjectId,
                             wordId: try! ObjectId(string: item.word.id),
-                            thumbnail: item.word.thumbnail,
                             bookTitle: "",
                             word: item.word.word,
                             meaning: item.word.meaning,

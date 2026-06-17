@@ -42,7 +42,6 @@ final class QuizViewModel: BaseViewModel {
         let currentQuestion: Driver<Int>
         let totalQuestion: Driver<Int>
         let progress: Driver<Float>
-        let wordImage: Driver<String>
         let questionWord: Driver<String>
         let choices: Driver<[String]>
         let answerResult: Signal<AnswerResult>
@@ -82,11 +81,6 @@ final class QuizViewModel: BaseViewModel {
                 Float(index + 1) / Float(max(1, quizData.words.count))
             }
             .asDriver(onErrorJustReturn: 0)
-        
-        // 이미지
-        let wordImage = currentQuizData
-            .compactMap { $0?.0.thumbnail }
-            .asDriver(onErrorJustReturn: "")
         
         // 단어
         let questionWord = currentQuizData
@@ -156,7 +150,6 @@ final class QuizViewModel: BaseViewModel {
             currentQuestion: currentQuestionCount,
             totalQuestion: totalQuestionCount,
             progress: progress,
-            wordImage: wordImage,
             questionWord: questionWord,
             choices: choices,
             answerResult: answerResultRelay.asSignal(),

@@ -8,8 +8,8 @@ final class DefaultWordRepository: WordRepository {
         self.realm = realm
     }
     
-    func create(thumbnail: String, word: String, meaning: String) -> WordObject {
-        let word = WordObject(thumbnail: thumbnail, word: word, meaning: meaning, createAt: Date())
+    func create(word: String, meaning: String) -> WordObject {
+        let word = WordObject(word: word, meaning: meaning, createAt: Date())
         try? realm.write {
             realm.add(word)
         }
@@ -26,12 +26,9 @@ final class DefaultWordRepository: WordRepository {
         return realm.object(ofType: WordObject.self, forPrimaryKey: id)
     }
     
-    func update(id: RealmSwift.ObjectId, thumbnail: String?, word: String?, meaning: String?) {
+    func update(id: RealmSwift.ObjectId, word: String?, meaning: String?) {
         guard let targetWord = read(id: id) else { return }
         try? realm.write {
-            if let thumbnail = thumbnail {
-                targetWord.thumbnail = thumbnail
-            }
             if let word = word {
                 targetWord.word = word
             }

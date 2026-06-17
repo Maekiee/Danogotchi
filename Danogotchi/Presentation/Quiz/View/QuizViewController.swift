@@ -2,7 +2,6 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import Kingfisher
 
 
 protocol QuizViewControllerDelegate: AnyObject {
@@ -66,14 +65,6 @@ final class QuizViewController: BaseViewController {
         label.textColor = AppColor.textPrimary
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
-    }()
-    private let thumbnailImage: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 12
-        imageView.backgroundColor = .systemGray6
-        return imageView
     }()
     private let quizQuestionCard = QuisQuestionCard()
     private let questionLabel: UILabel = {
@@ -192,7 +183,6 @@ final class QuizViewController: BaseViewController {
             progressView,
             //            progressStackView,
             quizQuestionCard,
-            //            thumbnailImage,
             //            questionLabel,
             choiceStackView
         ].forEach { view.addSubview($0) }
@@ -262,15 +252,6 @@ extension QuizViewController {
             .map { "\($0) / \($1)" }
             .drive(titleLabel.rx.text)
             .disposed(by: disposeBag)
-        
-        output.wordImage
-            .drive(with: self) { owner, urlString in
-                if let url = URL(string: urlString) {
-                    owner.thumbnailImage.kf.setImage(with: url)
-                } else {
-                    owner.thumbnailImage.image = nil
-                }
-            }.disposed(by: disposeBag)
         
         output.questionWord
             .drive(with: self) { owner, text in

@@ -43,7 +43,6 @@ final class DefaultRecommendBookRepository: RecommendBookRepository {
         return data.enumerated().map { (index, item) in
             Word(
                 id: "mock_word_\(item.0)_\(index)",
-                thumbnail: "",
                 word: item.0,
                 meaning: item.1,
                 createAt: Date()

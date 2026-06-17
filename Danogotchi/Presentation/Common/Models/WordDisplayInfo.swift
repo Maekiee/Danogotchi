@@ -11,7 +11,6 @@ struct WordDisplayInfo: Hashable {
 extension WordDisplayInfo: CardDisplayable {
    
     
-    var cardThumbnail: String? { word.thumbnail }
     var cardTitle: String { word.word }
     var cardSubtitle: String { word.meaning }
     var cardChipText: Int? { learningCount }

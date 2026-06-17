@@ -2,7 +2,6 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import Kingfisher
 
 
 protocol CreateWordViewControllerDelegate: AnyObject {
@@ -120,14 +119,10 @@ final class CreateWordViewController: BaseViewController {
 
 extension CreateWordViewController {
     private func bind() {
-        let selectedImage = PublishRelay<String>()
-        var currentImageUrl = ""
-        
         let input = CreateWordViewModel.Input(
             wordBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
             wordTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),
-            selectedImage: selectedImage.asObservable(),
             savedButtonTapped: addWordButton.rx.tap.asObservable()
         )
         let output = viewModel.transform(input: input)
@@ -135,12 +130,6 @@ extension CreateWordViewController {
         backButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.createWordDidTapBack()
-            }.disposed(by: disposeBag)
-        
-        // 레거시 코드 정리 예정
-        output.wordImageUrl
-            .drive(with: self) { owner, url in
-                currentImageUrl = url
             }.disposed(by: disposeBag)
         
         output.bookTitle
@@ -180,8 +169,7 @@ extension CreateWordViewController {
                 // 단어장 제목을 제외한 나머지 필드를 초기화
                 owner.wordTextField.text = ""
                 owner.meanTextField.text = ""
-                currentImageUrl = ""
-                
+
                 let message = owner.entryPoint == .add ? "단어가 추가 되었습니다." : "단어가 수정 되었습니다."
                 owner.showToast(message, duration: .short)
             }.disposed(by: disposeBag)

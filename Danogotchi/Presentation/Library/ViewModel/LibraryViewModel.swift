@@ -116,7 +116,6 @@ final class LibraryViewModel: BaseViewModel {
                     
                     for word in bookToCopy.wordList {
                         let newWordObject = owner.wordRepository.create(
-                            thumbnail: "",
                             word: word.word,
                             meaning: word.meaning
                         )

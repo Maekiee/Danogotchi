@@ -30,13 +30,10 @@ final class CreateWordViewModel: BaseViewModel {
         let wordBookTitleTextField: Observable<String>
         let wordTextField: Observable<String>
         let meanTextField: Observable<String>
-        let selectedImage: Observable<String>
         let savedButtonTapped: Observable<Void>
     }
     
     struct Output {
-        let wordImageUrl: Driver<String>
-        let itemSet: Observable<(SearchPhotoDTO, String)>
         let translateWord: Driver<String>
         let isValidSave: Driver<Bool>
         let resetTrigger: Signal<Void>
@@ -46,9 +43,6 @@ final class CreateWordViewModel: BaseViewModel {
     }
     
     func transform(input: Input) -> Output {
-        let wordImageUrl = BehaviorRelay<String>(value: "")
-        let wordImageItems = PublishRelay<SearchPhotoDTO>()
-        let wordText = BehaviorRelay<String>(value: "")
         let validWord = BehaviorRelay<String>(value: "")
         let translatedWord = BehaviorRelay<String>(value: "")
         let isValidSaved = BehaviorRelay<Bool>(value: false)
@@ -58,25 +52,10 @@ final class CreateWordViewModel: BaseViewModel {
         let actionType = BehaviorRelay<EntryPoint>(value: .add)
         
         if let item = wordItem {
-            wordImageUrl.accept(item.thumbnail)
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
-            wordText.accept(item.word)
             meanText.accept(item.meaning)
             actionType.accept(item.actionType)
-            
-            if item.actionType == .edit && !item.word.isEmpty {
-                ApiService.searchPhoto(api: .searchPhoto(word: item.word, page: 1), type: SearchPhotoDTO.self)
-                    .subscribe { result in
-                        switch result {
-                        case .success(let value):
-                            wordImageItems.accept(value)
-                        case .failure:
-                            print("이미지 검색 실패")
-                        }
-                    }.disposed(by: disposeBag)
-            }
-            
         }
         
         // 단어장 이름
@@ -100,9 +79,7 @@ final class CreateWordViewModel: BaseViewModel {
             .filter{ $0.count >= 2 }
             .distinctUntilChanged()
             .debounce(.seconds(2), scheduler: MainScheduler.instance)
-            .do { text in
-                wordText.accept(text)
-            }.share()
+            .share()
         
         // 뜻
         input.meanTextField
@@ -111,25 +88,6 @@ final class CreateWordViewModel: BaseViewModel {
             .bind(to: meanText)
             .disposed(by: disposeBag)
         
-        
-        // 이미지
-        input.selectedImage
-            .bind(to: wordImageUrl)
-            .disposed(by: disposeBag)
-        
-        // 이미지 검색
-        learningWord
-            .flatMap{
-                ApiService.searchPhoto(api: .searchPhoto(word: $0, page: 1), type: SearchPhotoDTO.self)
-            }
-            .bind(with: self) { owner, responseValue in
-                switch responseValue {
-                case .success(let value):
-                    wordImageItems.accept(value)
-                case .failure(_):
-                    print("네트워크 에러")
-                }
-            }.disposed(by: disposeBag)
         
         // 번역 검색
         learningWord
@@ -146,7 +104,6 @@ final class CreateWordViewModel: BaseViewModel {
         
         // 단어장 유효성 검사
         let allInputData = Observable.combineLatest(
-//            wordImageUrl,
             validWord,
 //            wordBookTitle,
             meanText,
@@ -176,19 +133,15 @@ final class CreateWordViewModel: BaseViewModel {
                 owner.saveWord(
                     actionType: actionType,
                     wordBookTitle: "나의 단어장",
-                    url: "",
                     word: word,
                     meaning: finalMeaning)
                 
                 meanText.accept("")
                 translatedWord.accept("")
                 resetTrigger.accept(())
-                wordImageUrl.accept("")
             }.disposed(by: disposeBag)
         
         return Output(
-            wordImageUrl: wordImageUrl.asDriver(onErrorJustReturn: ""),
-            itemSet: Observable.combineLatest(wordImageItems, wordText),
             translateWord: translatedWord.asDriver(onErrorJustReturn: ""),
             isValidSave: isValidSaved.asDriver(),
             resetTrigger: resetTrigger.asSignal(),
@@ -198,7 +151,7 @@ final class CreateWordViewModel: BaseViewModel {
         )
     }
     
-    private func saveWord(actionType: EntryPoint, wordBookTitle: String, url: String, word: String, meaning: String) {
+    private func saveWord(actionType: EntryPoint, wordBookTitle: String, word: String, meaning: String) {
         let bookObjectId: ObjectId
         
         
@@ -226,14 +179,14 @@ final class CreateWordViewModel: BaseViewModel {
         switch actionType {
             // 단어 추가 로직
         case .add:
-            let newWord = wordRepository.create(thumbnail: url, word: word, meaning: meaning)
+            let newWord = wordRepository.create(word: word, meaning: meaning)
             wordBookRepository.addWord(bookId: bookObjectId, word: newWord)
             userInfoManager.notifyWordBookUpdate()
             // 단어 수정 ㅇ로직
         case .edit:
             // 단어 수정
             guard let wordId = wordItem?.wordId else { return }
-            wordRepository.update(id: wordId, thumbnail: url, word: word, meaning: meaning)
+            wordRepository.update(id: wordId, word: word, meaning: meaning)
             userInfoManager.notifyWordBookUpdate()
         }
         
