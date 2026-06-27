@@ -152,13 +152,6 @@ extension CreateWordViewController {
             }.disposed(by: disposeBag)
         
         
-        output.translateWord
-            .map { valueText in
-                return valueText.isEmpty ? "단어의 뜻을 입력해 주세요" : valueText
-            }
-            .drive(meanTextField.rx.placeholder)
-            .disposed(by: disposeBag)
-        
         output.isValidSave
             .drive(addWordButton.rx.isEnabled)
             .disposed(by: disposeBag)

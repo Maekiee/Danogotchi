@@ -4,13 +4,6 @@
 <dict>
 	<key>UnsplashPhotoSearch</key>
 	<string>$(UNSPLASH_PHOTO_SEARCH_URL)</string>
-	<key>DeepLAPIKeys</key>
-	<array>
-		<string>$(DEEPL_API_KEY1)</string>
-		<string>$(DEEPL_API_KEY2)</string>
-	</array>
-	<key>DeepLBaseURL</key>
-	<string>$(DEEPL_BASE_URL)</string>
 	<key>UnsplashAPIKeys</key>
 	<array>
 		<string>$(UNSPLASH_API_KEY1)</string>

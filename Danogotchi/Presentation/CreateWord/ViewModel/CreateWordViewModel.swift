@@ -34,7 +34,6 @@ final class CreateWordViewModel: BaseViewModel {
     }
     
     struct Output {
-        let translateWord: Driver<String>
         let isValidSave: Driver<Bool>
         let resetTrigger: Signal<Void>
         let bookTitle: Driver<String>
@@ -44,7 +43,6 @@ final class CreateWordViewModel: BaseViewModel {
     
     func transform(input: Input) -> Output {
         let validWord = BehaviorRelay<String>(value: "")
-        let translatedWord = BehaviorRelay<String>(value: "")
         let isValidSaved = BehaviorRelay<Bool>(value: false)
         let meanText = BehaviorRelay<String>(value: "")
         let resetTrigger = PublishRelay<Void>()
@@ -70,48 +68,28 @@ final class CreateWordViewModel: BaseViewModel {
         
         
         // 단어
-        let learningWord = input.wordTextField
+        input.wordTextField
             .skip(1)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .do { text in
-                validWord.accept(text)
-            }
-            .filter{ $0.count >= 2 }
-            .distinctUntilChanged()
-            .debounce(.seconds(2), scheduler: MainScheduler.instance)
-            .share()
-        
+            .bind(to: validWord)
+            .disposed(by: disposeBag)
+
         // 뜻
         input.meanTextField
             .filter { !$0.isEmpty }
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .bind(to: meanText)
             .disposed(by: disposeBag)
-        
-        
-        // 번역 검색
-        learningWord
-            .flatMap {
-                ApiService.searcMeaning(api: .translate(text: $0), type: TranslatedDTO.self)
-            }.bind(with: self) { owner, responseValue in
-                switch responseValue {
-                case .success(let value):
-                    translatedWord.accept(value.translations.first!.text)
-                case .failure(_):
-                    print("네트워크 에러")
-                }
-            }.disposed(by: disposeBag)
-        
+
         // 단어장 유효성 검사
         let allInputData = Observable.combineLatest(
             validWord,
 //            wordBookTitle,
-            meanText,
-            translatedWord)
-        
+            meanText)
+
         allInputData
-            .map {  word, mean, translate in
-                let hasMeaning = !mean.isEmpty || !translate.isEmpty
+            .map {  word, mean in
+                let hasMeaning = !mean.isEmpty
                 let hasWord = !word.isEmpty
                 return hasWord && hasMeaning
 //                return !title.isEmpty && !url.isEmpty && !word.isEmpty && hasMeaning
@@ -122,27 +100,21 @@ final class CreateWordViewModel: BaseViewModel {
         input.savedButtonTapped
             .withLatestFrom(allInputData)
             .bind(with: self) { owner, validData in
-//                let (imageUrl, word, bookTitle, mean, translate) = validData
-//                let finalMeaning = !mean.isEmpty ? mean : translate
-                
-                let (word, mean, translate) = validData
-                let finalMeaning = !mean.isEmpty ? mean : translate
-             
+                let (word, mean) = validData
+
                 let actionType = actionType.value
-                
+
                 owner.saveWord(
                     actionType: actionType,
                     wordBookTitle: "나의 단어장",
                     word: word,
-                    meaning: finalMeaning)
-                
+                    meaning: mean)
+
                 meanText.accept("")
-                translatedWord.accept("")
                 resetTrigger.accept(())
             }.disposed(by: disposeBag)
         
         return Output(
-            translateWord: translatedWord.asDriver(onErrorJustReturn: ""),
             isValidSave: isValidSaved.asDriver(),
             resetTrigger: resetTrigger.asSignal(),
             bookTitle: bookTitleText.asDriver(onErrorJustReturn: ""),
