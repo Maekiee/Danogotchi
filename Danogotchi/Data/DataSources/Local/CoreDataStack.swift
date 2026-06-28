@@ -18,7 +18,7 @@ final class CoreDataStack {
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
-    func savceContext() {
+    func saveContext() {
         guard viewContext.hasChanges else { return }
         do {
             try viewContext.save()

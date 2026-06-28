@@ -5,11 +5,13 @@ final class AppDIContainer {
     let userInfoManager: UserInfoManager
     let ttsManager: TTSManager
     let activeLearningManager: ActiveLearningManager
+    let coreDataStack: CoreDataStack
     
     init() {
         userInfoManager = UserInfoManager.shared
         ttsManager = TTSManager.shared
         activeLearningManager = ActiveLearningManager.shared
+        coreDataStack = CoreDataStack.shared
     }
 }
 
