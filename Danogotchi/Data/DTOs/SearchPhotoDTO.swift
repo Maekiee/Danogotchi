@@ -1,6 +1,6 @@
 import Foundation
 
-
+//
 struct SearchPhotoDTO: Decodable {
     let total: Int
     let total_pages: Int
