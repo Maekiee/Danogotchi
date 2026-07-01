@@ -1,6 +1,5 @@
 import UIKit
 import SnapKit
-import RealmSwift
 import RxSwift
 import RxCocoa
 

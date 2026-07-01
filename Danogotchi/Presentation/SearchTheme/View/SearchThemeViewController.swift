@@ -22,7 +22,7 @@ final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: SearchThemeViewModel
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
-    private let wordBookRepo = DefaultWordBookRepository()
+    private let vocabBookRepo = DefaultVocabBookRepository(context: CoreDataStack.shared.viewContext)
     private let userInfo = UserInfoManager.shared
     
     private enum Section {
@@ -249,21 +249,16 @@ extension SearchThemeViewController {
         
         UserInfoManager.shared.currentThemeUrl = selectedTheme
         
-        let existingBooks = wordBookRepo.readAll()
+        let existingBooks = vocabBookRepo.readAllBooks(type: .mine)
         
-        if let existingBooks = existingBooks.first {
-            userInfo.selectedBookId = existingBooks.id
+        if let existingBook = existingBooks.first {
+            userInfo.selectedBookId = existingBook.id.uuidString
             delegate?.didSelectTheme()
         } else {
             // 새로 생성
-            wordBookRepo.create(title: "나의 단어장")
-    
-            if let newBook = wordBookRepo.readAll().last {
-                userInfo.selectedBookId = newBook.id
-                delegate?.didSelectTheme()
-            } else {
-                // 사용자에게 에러 알림
-            }
+            let newBook = vocabBookRepo.createBook(title: "나의 단어장", type: .mine, originBookId: nil)
+            userInfo.selectedBookId = newBook.id.uuidString
+            delegate?.didSelectTheme()
         }
     }
     

@@ -1,5 +1,4 @@
 import Foundation
-import RealmSwift
 import RxSwift
 import RxCocoa
 
@@ -11,7 +10,7 @@ final class CompleteQuizViewModel: BaseViewModel {
     // MARK: - ActionType 재정의
     enum ActionType {
         case restart
-        case retryIncorrect(words: [Word])
+        case retryIncorrect(words: [Vocab])
         case finish
         case dismiss
     }

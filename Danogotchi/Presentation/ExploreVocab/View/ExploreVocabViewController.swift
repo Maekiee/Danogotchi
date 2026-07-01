@@ -1,5 +1,4 @@
 import Kingfisher
-import RealmSwift
 import RxCocoa
 import RxSwift
 import SnapKit
@@ -164,7 +163,7 @@ final class ExploreVocabViewController: BaseViewController {
         return view
     }()
 
-    private let deleteWordTrigger = PublishRelay<Word>()
+    private let deleteWordTrigger = PublishRelay<Vocab>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -284,14 +283,14 @@ extension ExploreVocabViewController {
                     return
                 }
 
-                var wordsForQuiz: [Word]
+                var wordsForQuiz: [Vocab]
 
                 if let currentWordIds = owner.userInfo.currentQuizWordIds {
-                    let wordMap = Dictionary(uniqueKeysWithValues: allWords.map { ($0.id, $0) })
+                    let wordMap = Dictionary(uniqueKeysWithValues: allWords.map { ($0.id.uuidString, $0) })
                     wordsForQuiz = currentWordIds.compactMap { wordMap[$0] }
                 } else {
                     wordsForQuiz = allWords
-                    let wordIds = wordsForQuiz.map { $0.id }
+                    let wordIds = wordsForQuiz.map { $0.id.uuidString }
                     owner.userInfo.currentQuizWordIds = wordIds
                     owner.userInfo.currentQuizIndex = 0
                     owner.userInfo.currentCorrectCount = 0

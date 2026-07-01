@@ -1,18 +1,17 @@
 import Foundation
 import RxSwift
 import RxCocoa
-import RealmSwift
 
 final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let learningHistoryRepository: LearningHistoryRepository
+    private let learningHistoryRepository: VocabLearningHistoryRepository
     private let userInfo = UserInfoManager.shared
     
     private let quizDataRelay: BehaviorRelay<QuizData>
     
     private let currentIndex: BehaviorRelay<Int>
     private let nextQuestionTrigger = PublishRelay<Void>()
-    private var incorrectWords: [Word] = []
+    private var incorrectWords: [Vocab] = []
     
     
     struct AnswerResult {
@@ -22,7 +21,7 @@ final class QuizViewModel: BaseViewModel {
     }
     
     init(
-        learningHistoryRepository: LearningHistoryRepository,
+        learningHistoryRepository: VocabLearningHistoryRepository,
         quizData: QuizData
     ) {
         self.learningHistoryRepository = learningHistoryRepository
@@ -30,7 +29,7 @@ final class QuizViewModel: BaseViewModel {
         self.currentIndex = BehaviorRelay(value: userInfo.currentQuizIndex)
         
         if let incorrectWordIds = userInfo.currentIncorrectWordIds {
-            self.incorrectWords = quizData.allWord.filter { incorrectWordIds.contains($0.id) }
+            self.incorrectWords = quizData.allWord.filter { incorrectWordIds.contains($0.id.uuidString) }
         }
     }
 
@@ -57,7 +56,7 @@ final class QuizViewModel: BaseViewModel {
         let currentQuizData = Observable.combineLatest(
             currentIndex,
             quizDataRelay
-        ).map { [weak self] index, quizData -> (Word, [String], Int)? in
+        ).map { [weak self] index, quizData -> (Vocab, [String], Int)? in
             guard let self else { return nil }
             guard index < quizData.words.count else { return nil }
 
@@ -103,9 +102,7 @@ final class QuizViewModel: BaseViewModel {
                 let isCorrect = selectedIndex == correctIndex
                 
                 // LearningHistory 저장
-                if let wordObjectId = try? ObjectId(string: word.id) {
-                    learningHistoryRepository.addHistory(wordObjectId: wordObjectId, isCorrect: isCorrect)
-                }
+                learningHistoryRepository.addHistory(vocabId: word.id, isCorrect: isCorrect)
                 
                 if isCorrect {
                     correctCount += 1
@@ -114,7 +111,7 @@ final class QuizViewModel: BaseViewModel {
                 }
                 
                 userInfo.currentCorrectCount = correctCount
-                userInfo.currentIncorrectWordIds = incorrectWords.map { $0.id }
+                userInfo.currentIncorrectWordIds = incorrectWords.map { $0.id.uuidString }
                 
                 return AnswerResult(
                     isCorrect: isCorrect,
@@ -161,7 +158,7 @@ final class QuizViewModel: BaseViewModel {
         nextQuestionTrigger.accept(())
     }
     
-    private func generateChoices(for word: Word, allWords: [Word]) -> ([String], Int) {
+    private func generateChoices(for word: Vocab, allWords: [Vocab]) -> ([String], Int) {
         // 오답 3개 만들기
         var wrongChoices = allWords
             .filter { $0.id != word.id } // 정답 제외

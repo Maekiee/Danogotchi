@@ -23,10 +23,8 @@ extension AppDIContainer {
     }
     
     func makeExploreVocabViewModel() -> ExploreVocabViewModel {
-        let wordRepository = makeWordRepository()
-        let learnHistoryRepository = makeLearningHistoryRepository()
+        let learnHistoryRepository = makeVocabLearningHistoryRepository()
         return ExploreVocabViewModel(
-            wordRepository: wordRepository,
             learnHistoryRepository: learnHistoryRepository
         )
     }
@@ -81,7 +79,7 @@ extension AppDIContainer {
     }
     
     func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
-        let learningHistoryRepository = makeLearningHistoryRepository()
+        let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return QuizViewModel(
             learningHistoryRepository: learningHistoryRepository,
             quizData: quizData

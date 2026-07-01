@@ -1,26 +1,22 @@
 import Foundation
 import RxSwift
 import RxCocoa
-import RealmSwift
 
 
 final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
-    private let wordRepository: WordRepository
-    private let learnHistoryRepository: LearningHistoryRepository
-    
+    private let learnHistoryRepository: VocabLearningHistoryRepository
+
     init(
-        wordRepository: WordRepository,
-        learnHistoryRepository: LearningHistoryRepository
+        learnHistoryRepository: VocabLearningHistoryRepository
     ) {
-        self.wordRepository = wordRepository
         self.learnHistoryRepository = learnHistoryRepository
     }
     
     struct Input {
         let viewWillAppear: Observable<Void>
-        let selectedWordCard: Observable<Word> // 단어 삭제
+        let selectedWordCard: Observable<Vocab> // 단어 삭제
     }
     
     struct Output {
@@ -42,10 +38,10 @@ final class ExploreVocabViewModel: BaseViewModel {
             .bind(with: self) { owner, book in
                 
                 
-                let wordList = book.wordList.reversed()
-                
+                let wordList = book.vocabList.reversed()
+
                 let histories = owner.learnHistoryRepository.fetchAllHistory()
-                let historiesByWord = Dictionary(grouping: histories, by: { $0.wordId })
+                let historiesByWord = Dictionary(grouping: histories, by: { $0.vocabId })
                 
                 let historyStats = historiesByWord.mapValues { historyModels -> (correct: Int, total: Int) in
                     let correctCount = historyModels.filter { $0.isCorrect }.count
