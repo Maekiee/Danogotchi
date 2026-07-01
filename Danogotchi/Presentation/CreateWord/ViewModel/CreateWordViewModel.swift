@@ -1,34 +1,29 @@
 import Foundation
 import RxSwift
 import RxCocoa
-import RealmSwift
 
 final class CreateWordViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    
-    private let wordItem: CreateWord?
-    private let wordBookRepository: WordBookRepository
-    private let wordRepository: WordRepository
+
+    private let vocabItem: CreateVocab?
+    private let vocabBookRepository: VocabBookRepository
+    private let vocabRepository: VocabRepository
     private let userInfoManager = UserInfoManager.shared
-    
-    private var isWordBookId: ObjectId?
-    
-    
-    
+
     init(
-        wordItem: CreateWord? = nil,
-        wordBookRepository: WordBookRepository,
-        wordRepository: WordRepository
+        vocabItem: CreateVocab? = nil,
+        vocabBookRepository: VocabBookRepository,
+        vocabRepository: VocabRepository
     ) {
-        self.wordItem = wordItem
-        self.wordBookRepository = wordBookRepository
-        self.wordRepository = wordRepository
+        self.vocabItem = vocabItem
+        self.vocabBookRepository = vocabBookRepository
+        self.vocabRepository = vocabRepository
     }
     
     
     struct Input {
-        let wordBookTitleTextField: Observable<String>
-        let wordTextField: Observable<String>
+        let vocabBookTitleTextField: Observable<String>
+        let vocabTextField: Observable<String>
         let meanTextField: Observable<String>
         let savedButtonTapped: Observable<Void>
     }
@@ -49,7 +44,7 @@ final class CreateWordViewModel: BaseViewModel {
         let bookTitleText = BehaviorRelay<String>(value: "")
         let actionType = BehaviorRelay<EntryPoint>(value: .add)
         
-        if let item = wordItem {
+        if let item = vocabItem {
             bookTitleText.accept(item.bookTitle)
             validWord.accept(item.word)
             meanText.accept(item.meaning)
@@ -59,7 +54,7 @@ final class CreateWordViewModel: BaseViewModel {
         // 단어장 이름
         let wordBookTitle = Observable.merge(
             bookTitleText.asObservable(),
-            input.wordBookTitleTextField
+            input.vocabBookTitleTextField
                 .skip(1)
         )
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -68,7 +63,7 @@ final class CreateWordViewModel: BaseViewModel {
         
         
         // 단어
-        input.wordTextField
+        input.vocabTextField
             .skip(1)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .bind(to: validWord)
@@ -124,44 +119,27 @@ final class CreateWordViewModel: BaseViewModel {
     }
     
     private func saveWord(actionType: EntryPoint, wordBookTitle: String, word: String, meaning: String) {
-        let bookObjectId: ObjectId
-        
-        
-        if let bookId = wordItem?.wordBookId {
-            // 기존 단어장 타이틀 업데이트
-//            wordBookRepo.update(id: bookId, title: wordBookTitle)
-            bookObjectId = bookId
-        } else {
-//            // 신규 단어장 생성
-//            wordBookRepo.create(title: wordBookTitle)
-//            // 새 단어장 불러오기
-//            guard let newBook = wordBookRepo.readAll().last else { return }
-//            
-//            bookObjectId = try! ObjectId(string: newBook.id) // ObjectId로 변경해서 값 할당
-//            self.isWordBookId = bookObjectId
-//            userInfoManager.selectedBookId = newBook.id
-            
-            guard let bookId = wordItem?.wordBookId else {
-                print("Error: wordBookId가 없습니다.")
-                return
-            }
-            bookObjectId = bookId
+        guard let bookId = vocabItem?.vocabBookId else {
+            print("Error: vocabBookId가 없습니다.")
+            return
         }
-        
+
         switch actionType {
             // 단어 추가 로직
         case .add:
-            let newWord = wordRepository.create(word: word, meaning: meaning)
-            wordBookRepository.addWord(bookId: bookObjectId, word: newWord)
+            _ = vocabBookRepository.addVocab(
+                bookId: bookId,
+                word: word,
+                meaning: meaning,
+                originWordId: nil
+            )
             userInfoManager.notifyWordBookUpdate()
-            // 단어 수정 ㅇ로직
+            // 단어 수정 로직
         case .edit:
             // 단어 수정
-            guard let wordId = wordItem?.wordId else { return }
-            wordRepository.update(id: wordId, word: word, meaning: meaning)
+            guard let vocabId = vocabItem?.vocabId else { return }
+            vocabRepository.updateVocab(id: vocabId, word: word, meaning: meaning)
             userInfoManager.notifyWordBookUpdate()
         }
-        
-        
     }
 }

@@ -10,7 +10,7 @@ protocol ExploreVocabViewControllerDelegate: AnyObject {
     func exploreVocabDidTapLibrary()
     func exploreVocabDidTapSetting()
     func exploreVocabDidTapStartQuiz(quizData: QuizData)
-    func exploreVocabDidTapEditWord(wordItem: CreateWord)
+    func exploreVocabDidTapEditWord(vocabItem: CreateVocab)
 }
 
 final class ExploreVocabViewController: BaseViewController {
@@ -332,20 +332,20 @@ extension ExploreVocabViewController {
                         guard self != nil else { return }
                         
                         guard
-                            let bookObjectId = owner.userInfo.selectedBookId
-                                .flatMap({ try? ObjectId(string: $0) })
+                            let bookId = owner.userInfo.selectedBookId
+                                .flatMap({ UUID(uuidString: $0) })
                         else { return }
-                        
-                        let createWordModel = CreateWord(
-                            wordBookId: bookObjectId,
-                            wordId: try! ObjectId(string: item.word.id),
+
+                        let createVocabModel = CreateVocab(
+                            vocabBookId: bookId,
+                            vocabId: item.word.id,
                             bookTitle: owner.bookTitle,
                             word: item.word.word,
                             meaning: item.word.meaning,
                             actionType: .edit
                         )
-                        
-                        owner.delegate?.exploreVocabDidTapEditWord(wordItem: createWordModel)
+
+                        owner.delegate?.exploreVocabDidTapEditWord(vocabItem: createVocabModel)
                     },
                     deleteAction: { [weak self] in
                         guard let self = self else { return }

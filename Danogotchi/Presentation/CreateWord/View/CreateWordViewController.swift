@@ -120,8 +120,8 @@ final class CreateWordViewController: BaseViewController {
 extension CreateWordViewController {
     private func bind() {
         let input = CreateWordViewModel.Input(
-            wordBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
-            wordTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
+            vocabBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
+            vocabTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),
             savedButtonTapped: addWordButton.rx.tap.asObservable()
         )

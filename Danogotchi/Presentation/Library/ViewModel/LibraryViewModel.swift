@@ -1,7 +1,6 @@
 import Foundation
 import RxSwift
 import RxCocoa
-import RealmSwift
 
 final class LibraryViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
@@ -9,24 +8,21 @@ final class LibraryViewModel: BaseViewModel {
     private let activeManager = ActiveLearningManager.shared
     
     private let recommendBookRepository: RecommendBookRepository
-    private let wordBookRepository: WordBookRepository
-    private let wordRepository: WordRepository
-    
-    init (
+    private let vocabBookRepository: VocabBookRepository
+
+    init(
         recommendBookRepository: RecommendBookRepository,
-        wordBookRepository: WordBookRepository,
-        wordRepository: WordRepository
+        vocabBookRepository: VocabBookRepository
     ) {
         self.recommendBookRepository = recommendBookRepository
-        self.wordBookRepository = wordBookRepository
-        self.wordRepository = wordRepository
+        self.vocabBookRepository = vocabBookRepository
     }
     
-    let downloadBookTrigger = PublishRelay<WordBook>()
+    let downloadBookTrigger = PublishRelay<VocabBook>()
     
     enum RecommendItem: Hashable {
-        case downloaded(WordBook)
-        case notDownloaded(WordBook)
+        case downloaded(VocabBook)
+        case notDownloaded(VocabBook)
     }
     
     struct Input {
@@ -34,14 +30,14 @@ final class LibraryViewModel: BaseViewModel {
     }
     
     struct Output {
-        let myBook: Driver<WordBook?>
+        let myBook: Driver<VocabBook?>
         let recommendItems: Driver<[RecommendItem]>
         let downloadComplete: Signal<Void>
         let isLoading: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
-        let myBookRelay = BehaviorRelay<WordBook?>(value: nil)
+        let myBookRelay = BehaviorRelay<VocabBook?>(value: nil)
         let recommendItemsRelay = BehaviorRelay<[RecommendItem]>(value: [])
         let downloadCompleteRelay = PublishRelay<Void>()
         let isLoadingRelay = BehaviorRelay<Bool>(value: false)
@@ -52,13 +48,13 @@ final class LibraryViewModel: BaseViewModel {
         ).startWith(())
         
         refreshTrigger.bind(with: self) { owner, _ in
-            guard let myBookStruct = owner.wordBookRepository.readAll().first(where: { $0.title == "나의 단어장" }) else {
+            guard let myBook = owner.vocabBookRepository.readAllBooks(type: .mine).first else {
                 myBookRelay.accept(nil)
                 return
             }
-            
-            myBookRelay.accept(myBookStruct)
-            
+
+            myBookRelay.accept(myBook)
+
         }.disposed(by: disposeBag)
         
         
@@ -66,23 +62,20 @@ final class LibraryViewModel: BaseViewModel {
         refreshTrigger
             .flatMapLatest { [weak self] _ -> Observable<[RecommendItem]> in
                 guard let self = self else { return .just([]) }
-                
-                let myBooks = self.wordBookRepository.readAll()
-                
+
+                let downloadedBooks = self.vocabBookRepository.readAllBooks(type: .recommended)
+
                 return self.recommendBookRepository.fetchRecommendBooks()
-                    .map { mockBooks in
-                        mockBooks.map { mockBook in
-                            if let matchingRealmBook = myBooks.first(where: { $0.title == mockBook.title }) {
-                                if matchingRealmBook.title == "나의 단어장" {
-                                    return nil
-                                } else {
-                                    return .downloaded(matchingRealmBook)
-                                }
+                    .map { recommendBooks in
+                        recommendBooks.map { recommendBook in
+                            if let downloadedBook = downloadedBooks.first(where: {
+                                $0.originBookId == recommendBook.originBookId
+                            }) {
+                                return .downloaded(downloadedBook)
                             } else {
-                                return .notDownloaded(mockBook)
+                                return .notDownloaded(recommendBook)
                             }
                         }
-                        .compactMap { $0 }
                     }
             }
             .bind(to: recommendItemsRelay)
@@ -94,35 +87,29 @@ final class LibraryViewModel: BaseViewModel {
                 
                 
                 DispatchQueue.main.async {
-                    let allMyBooks = owner.wordBookRepository.readAll()
-                    if allMyBooks.contains(where: { $0.title == bookToCopy.title }) {
-                        DispatchQueue.main.async {
-                            ToastManager.shared.show("이미 '내 단어장'에 존재합니다.")
-                            isLoadingRelay.accept(false)
-                            downloadCompleteRelay.accept(())
-                        }
+                    let downloadedBooks = owner.vocabBookRepository.readAllBooks(type: .recommended)
+                    if downloadedBooks.contains(where: { $0.originBookId == bookToCopy.originBookId }) {
+                        ToastManager.shared.show("이미 '내 단어장'에 존재합니다.")
+                        isLoadingRelay.accept(false)
+                        downloadCompleteRelay.accept(())
                         return
                     }
-                    
-                    owner.wordBookRepository.create(title: bookToCopy.title)
-                    
-                    guard let newBookObject = owner.wordBookRepository.readAll().last(where: {
-                        $0.title == bookToCopy.title })?.toObject() else {
-                        DispatchQueue.main.async {
-                            isLoadingRelay.accept(false)
-                        }
-                        return
-                    }
-                    
-                    for word in bookToCopy.wordList {
-                        let newWordObject = owner.wordRepository.create(
-                            word: word.word,
-                            meaning: word.meaning
+
+                    let newBook = owner.vocabBookRepository.createBook(
+                        title: bookToCopy.title,
+                        type: .recommended,
+                        originBookId: bookToCopy.originBookId
+                    )
+
+                    for vocab in bookToCopy.vocabList {
+                        _ = owner.vocabBookRepository.addVocab(
+                            bookId: newBook.id,
+                            word: vocab.word,
+                            meaning: vocab.meaning,
+                            originWordId: vocab.id.uuidString
                         )
-                        
-                        owner.wordBookRepository.addWord(bookId: newBookObject.id, word: newWordObject)
                     }
-                    
+
                     ToastManager.shared.show("'\(bookToCopy.title)' 단어장이 추가되었습니다.")
                     isLoadingRelay.accept(false)
                     downloadCompleteRelay.accept(())

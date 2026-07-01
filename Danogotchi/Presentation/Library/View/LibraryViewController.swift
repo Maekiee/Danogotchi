@@ -12,7 +12,7 @@ protocol LibraryViewControllerDelegate: AnyObject {
 final class LibraryViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: LibraryViewModel
-    private var selectedBookId: String?
+    private var selectedBookId: UUID?
     weak var delegate: LibraryViewControllerDelegate?
     
     init(viewModel: LibraryViewModel) {
@@ -31,7 +31,7 @@ final class LibraryViewController: BaseViewController {
     }
     
     private enum Item: Hashable {
-        case currentBook(WordBook)
+        case currentBook(VocabBook)
         case recommend(LibraryViewModel.RecommendItem)
     }
     
@@ -40,7 +40,7 @@ final class LibraryViewController: BaseViewController {
     private var dataSource: DataSource!
     
     // MARK: Cell Registration
-    private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook>!
+    private var myBookCellRegistration: UICollectionView.CellRegistration<MyBookCollectionViewCell, VocabBook>!
     
     private var recommendCellRegistration: UICollectionView.CellRegistration<RecommendBookCollectionViewCell, LibraryViewModel.RecommendItem>!
     
@@ -157,7 +157,7 @@ final class LibraryViewController: BaseViewController {
     }
     
     private func setupCellRegistrations() {
-        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, WordBook> {
+        myBookCellRegistration = UICollectionView.CellRegistration<MyBookCollectionViewCell, VocabBook> {
             [weak self] cell, indexPath, item in
             guard let self = self else { return }
             let isSelected = selectedBookId == item.id
@@ -288,7 +288,7 @@ final class LibraryViewController: BaseViewController {
         }
     }
     
-    private func applySnapshot(myBook: WordBook?, recommendItems: [LibraryViewModel.RecommendItem]) {
+    private func applySnapshot(myBook: VocabBook?, recommendItems: [LibraryViewModel.RecommendItem]) {
         var snapshot = Snapshot()
         
         snapshot.appendSections([.myBook])
@@ -363,28 +363,28 @@ extension LibraryViewController {
             .bind(with: self) { owner, indexPath in
                 guard let selectedCell = owner.dataSource.itemIdentifier(for: indexPath) else { return }
                 
-                let wordBook: WordBook
-                let source: WordBookSource
-                
+                let vocabBook: VocabBook
+                let source: VocabularyBookType
+
                 switch selectedCell {
                 case .currentBook(let book):
-                    wordBook = book
-                    source = .realm(id: book.id)
-                    
+                    vocabBook = book
+                    source = .mine(id: book.id)
+
                 case .recommend(let item):
                     switch item {
-                    case .downloaded(let realmBook):
-                        wordBook = realmBook
-                        source = .realm(id: realmBook.id)
-                        
+                    case .downloaded(let downloadedBook):
+                        vocabBook = downloadedBook
+                        source = .mine(id: downloadedBook.id)
+
                     case .notDownloaded:
                         return
                     }
                 }
-                
-                ActiveLearningManager.shared.setActiveBook(wordBook, source: source)
-                
-                owner.selectedBookId = wordBook.id
+
+                ActiveLearningManager.shared.setActiveBook(vocabBook, source: source)
+
+                owner.selectedBookId = vocabBook.id
                 
                 var snapshot = owner.dataSource.snapshot()
                 let sections = snapshot.sectionIdentifiers

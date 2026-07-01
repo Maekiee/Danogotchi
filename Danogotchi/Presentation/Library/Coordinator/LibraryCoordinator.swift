@@ -55,15 +55,15 @@ extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
         navigationController.popViewController(animated: true)
     }
     
-    func myBookDetailDidTapCreateWord(with createWordModel: CreateWord) {
-        let vm = AppDIContainer.makeCreateWordViewModel(wordItem: createWordModel)
+    func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab) {
+        let vm = AppDIContainer.makeCreateWordViewModel(vocabItem: createVocabModel)
         let vc = CreateWordViewController(viewModel: vm, entryPoint: .add)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
-    
-    func myBookDetailDidTapEditWord(with createWordModel: CreateWord) {
-        let vm = AppDIContainer.makeCreateWordViewModel(wordItem: createWordModel)
+
+    func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab) {
+        let vm = AppDIContainer.makeCreateWordViewModel(vocabItem: createVocabModel)
         let vc = CreateWordViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)

@@ -87,7 +87,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with: WordBook, isSelected: Bool) {
+    func binding(with: VocabBook, isSelected: Bool) {
         checkIcon.isHidden = !isSelected
     }
 }

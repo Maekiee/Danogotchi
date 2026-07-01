@@ -2,13 +2,12 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import RealmSwift
 
 
 protocol MyBookDetailViewControllerDelegate: AnyObject {
     func myBookDetailDidTapBack()
-    func myBookDetailDidTapCreateWord(with createWordModel: CreateWord)
-    func myBookDetailDidTapEditWord(with createWordModel: CreateWord)
+    func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab)
+    func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab)
 }
 
 final class MyBookDetailViewController: BaseViewController {
@@ -26,8 +25,8 @@ final class MyBookDetailViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let deleteWordTrigger = PublishRelay<Word>()
-    private let myBookObjectId = BehaviorRelay<ObjectId?>(value: nil)
+    private let deleteWordTrigger = PublishRelay<Vocab>()
+    private let myBookObjectId = BehaviorRelay<UUID?>(value: nil)
     
     private enum Section {
         case main
@@ -165,16 +164,16 @@ extension MyBookDetailViewController {
             .withLatestFrom(myBookObjectId)
             .compactMap{ $0 }
             .bind(with: self) { owner, bookObjectId in
-                let createWordModel = CreateWord(
-                    wordBookId: bookObjectId,
-                    wordId: nil,
+                let createVocabModel = CreateVocab(
+                    vocabBookId: bookObjectId,
+                    vocabId: nil,
                     bookTitle: "나의 단어장",
                     word: "",
                     meaning: "",
                     actionType: .add
                 )
                 // 코디네이터 적용
-                owner.delegate?.myBookDetailDidTapCreateWord(with: createWordModel)
+                owner.delegate?.myBookDetailDidTapCreateWord(with: createVocabModel)
             }.disposed(by: disposeBag)
     }
 }
@@ -196,16 +195,16 @@ extension MyBookDetailViewController {
                             return
                         }
                         
-                        let createWordModel = CreateWord(
-                            wordBookId: bookObjectId,
-                            wordId: try! ObjectId(string: item.word.id),
+                        let createVocabModel = CreateVocab(
+                            vocabBookId: bookObjectId,
+                            vocabId: item.word.id,
                             bookTitle: "",
                             word: item.word.word,
                             meaning: item.word.meaning,
                             actionType: .edit
                         )
                         // 코디네이터 적용
-                        owner.delegate?.myBookDetailDidTapEditWord(with: createWordModel)
+                        owner.delegate?.myBookDetailDidTapEditWord(with: createVocabModel)
                     },
                     deleteAction: {
                         owner.deleteWordTrigger.accept(item.word)

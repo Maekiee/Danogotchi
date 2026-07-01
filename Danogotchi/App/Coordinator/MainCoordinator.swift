@@ -63,8 +63,8 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         
     }
     
-    func exploreVocabDidTapEditWord(wordItem: CreateWord) {
-        let vm = container.makeCreateWordViewModel(wordItem: wordItem)
+    func exploreVocabDidTapEditWord(vocabItem: CreateVocab) {
+        let vm = container.makeCreateWordViewModel(vocabItem: vocabItem)
         let vc = CreateWordViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         vc.modalPresentationStyle = .fullScreen

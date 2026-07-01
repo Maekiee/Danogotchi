@@ -31,13 +31,13 @@ extension AppDIContainer {
         )
     }
     
-    func makeCreateWordViewModel(wordItem: CreateWord) -> CreateWordViewModel {
-        let wordRepository = makeWordRepository()
-        let wordBookRepository = makeWordBookRepository()
+    func makeCreateWordViewModel(vocabItem: CreateVocab) -> CreateWordViewModel {
+        let vocabRepository = makeVocabRepository()
+        let vocabBookRepository = makeVocabBookRepository()
         return CreateWordViewModel(
-            wordItem: wordItem,
-            wordBookRepository: wordBookRepository,
-            wordRepository: wordRepository
+            vocabItem: vocabItem,
+            vocabBookRepository: vocabBookRepository,
+            vocabRepository: vocabRepository
         )
     }
 }
@@ -53,24 +53,22 @@ extension AppDIContainer {
     }
     
     func makeLibraryViewModel() -> LibraryViewModel {
-        let wordBookRepository = makeWordBookRepository()
+        let vocabBookRepository = makeVocabBookRepository()
         let recommendBookRepository = makeRecommendBookRepository()
-        let wordRepository = makeWordRepository()
 
         return LibraryViewModel(
             recommendBookRepository: recommendBookRepository,
-            wordBookRepository: wordBookRepository,
-            wordRepository: wordRepository
+            vocabBookRepository: vocabBookRepository
         )
     }
     
     func makeMyBookDetailViewModel() -> MyBookDetailViewModel {
-        let wordBookRepository = makeWordBookRepository()
-        let wordRepository = makeWordRepository()
-        let learningHistoryRepository = makeLearningHistoryRepository()
+        let vocabBookRepository = makeVocabBookRepository()
+        let vocabRepository = makeVocabRepository()
+        let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return MyBookDetailViewModel(
-            wordBookRepository: wordBookRepository,
-            wordRepository: wordRepository,
+            vocabBookRepository: vocabBookRepository,
+            vocabRepository: vocabRepository,
             learningHistoryRepository: learningHistoryRepository
         )
     }
@@ -120,4 +118,18 @@ extension AppDIContainer {
         return SettingTabViewModel(appEnv: envProvider)
     }
     
+}
+
+extension AppDIContainer {
+    func makeVocabRepository() -> VocabRepository {
+        return DefaultVocabRepository(context: coreDataStack.viewContext)
+    }
+
+    func makeVocabBookRepository() -> VocabBookRepository {
+        return DefaultVocabBookRepository(context: coreDataStack.viewContext)
+    }
+
+    func makeVocabLearningHistoryRepository() -> VocabLearningHistoryRepository {
+        return DefaultVocabLearningHistoryRepository(context: coreDataStack.viewContext)
+    }
 }
