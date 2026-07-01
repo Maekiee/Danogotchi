@@ -2,7 +2,7 @@ import Foundation
 
 
 struct WordDisplayInfo: Hashable {
-    let word: Word
+    let word: Vocab
     let learningCount: Int
     let accuracy: Double
 }

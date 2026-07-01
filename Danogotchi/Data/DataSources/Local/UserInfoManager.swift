@@ -7,7 +7,7 @@ final class UserInfoManager: UserInfoProtocol {
     
     
     enum ActiveBookType: String {
-        case realm
+        case mine
         case recommended
     }
     
@@ -20,8 +20,6 @@ final class UserInfoManager: UserInfoProtocol {
     private enum Keys {
         static let username = "username"
         static let userId = "userId"
-        
-        static let defaultRealmBookIdKey = "WordBookId"
         
         static let activeBookId = "activeBookId"
         static let activeBookType = "activeBookType"
@@ -57,8 +55,6 @@ final class UserInfoManager: UserInfoProtocol {
 
     
     private init () {
-        UserInfoManager.migrateOldKey()
-        
         let initialIdentifier: ActiveBookIdentifier?
         if let id = UserDefaults.standard.string(forKey: Keys.activeBookId),
            let typeRaw = UserDefaults.standard.string(forKey: Keys.activeBookType),
@@ -96,32 +92,17 @@ final class UserInfoManager: UserInfoProtocol {
     
     var selectedBookId: String? {
         get {
-            return UserDefaults.standard.string(forKey: Keys.defaultRealmBookIdKey)
+            guard activeBookIdentifier?.type == .mine else { return nil }
+            return activeBookIdentifier?.id
         }
         set {
-            
-            UserDefaults.standard.set(newValue, forKey: Keys.defaultRealmBookIdKey)
-            
             if let newValue = newValue {
-                activeBookIdentifier = ActiveBookIdentifier(id: newValue, type: .realm)
+                activeBookIdentifier = ActiveBookIdentifier(id: newValue, type: .mine)
             } else {
-                if activeBookIdentifier?.type == .realm {
+                if activeBookIdentifier?.type == .mine {
                     activeBookIdentifier = nil
                 }
             }
-        }
-    }
-    
-    private static func migrateOldKey() {
-        let defaults = UserDefaults.standard
-        
-        guard defaults.string(forKey: Keys.activeBookId) == nil else {
-            return
-        }
-        
-        if let defaultRealmId = defaults.string(forKey: Keys.defaultRealmBookIdKey) {
-            defaults.set(defaultRealmId, forKey: Keys.activeBookId)
-            defaults.set(ActiveBookType.realm.rawValue, forKey: Keys.activeBookType)
         }
     }
     
@@ -202,9 +183,6 @@ final class UserInfoManager: UserInfoProtocol {
     // 아직 사용 안함
     func removeUserInfo() {
         activeBookIdentifier = nil
-        
-        // '기본 내 단어장' ID도 함께 삭제
-        UserDefaults.standard.removeObject(forKey: Keys.defaultRealmBookIdKey)
         
         UserDefaults.standard.removeObject(forKey: Keys.username)
         UserDefaults.standard.removeObject(forKey: Keys.userId)

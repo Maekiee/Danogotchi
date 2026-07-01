@@ -2,6 +2,6 @@ import Foundation
 
 
 struct QuizData {
-    let words: [Word]
-    let allWord: [Word]
+    let words: [Vocab]
+    let allWord: [Vocab]
 }
