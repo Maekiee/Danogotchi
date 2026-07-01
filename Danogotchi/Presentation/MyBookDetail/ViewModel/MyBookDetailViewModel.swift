@@ -10,7 +10,7 @@ final class MyBookDetailViewModel: BaseViewModel {
     private let vocabRepository: VocabRepository
     private let learningHistoryRepository: VocabLearningHistoryRepository
 
-    private let myBookObjectId = BehaviorRelay<UUID?>(value: nil)
+    private let myBookId = BehaviorRelay<UUID?>(value: nil)
 
     init(
         vocabBookRepository: VocabBookRepository,
@@ -29,7 +29,7 @@ final class MyBookDetailViewModel: BaseViewModel {
 
     struct Output {
         let wordList: Driver<[WordDisplayInfo]>
-        let myBookObjectId: Observable<UUID?>
+        let myBookId: Observable<UUID?>
     }
     
     func transform(input: Input) -> Output {
@@ -41,12 +41,12 @@ final class MyBookDetailViewModel: BaseViewModel {
                 guard let myBook = owner.vocabBookRepository.readAllBooks(type: .mine).first else {
                     // "나의 단어장"이 없는 경우 빈 배열 처리
                     wordList.accept([])
-                    owner.myBookObjectId.accept(nil)
+                    owner.myBookId.accept(nil)
                     return
                 }
 
                 let bookId = myBook.id
-                owner.myBookObjectId.accept(bookId)
+                owner.myBookId.accept(bookId)
 
                 let myWordList = owner.vocabBookRepository.fetchVocabs(inBookId: bookId).reversed()
                 let histories = owner.learningHistoryRepository.fetchAllHistory()
@@ -80,9 +80,9 @@ final class MyBookDetailViewModel: BaseViewModel {
 
 
                 if let activeBookId = UserInfoManager.shared.activeBookIdentifier?.id,
-                   let myBookId = owner.myBookObjectId.value?.uuidString {
+                   let activeMyBookId = owner.myBookId.value?.uuidString {
 
-                    if activeBookId == myBookId {
+                    if activeBookId == activeMyBookId {
                         UserInfoManager.shared.clearQuizState()
                     }
                 }
@@ -91,7 +91,7 @@ final class MyBookDetailViewModel: BaseViewModel {
         
         return Output(
             wordList: wordList.asDriver(),
-            myBookObjectId: myBookObjectId.asObservable()
+            myBookId: myBookId.asObservable()
         )
     }
 }

@@ -15,13 +15,9 @@ final class AppDIContainer {
     }
 }
 
-// MARK: - Word
+// MARK: - Explore / CreateWord
 extension AppDIContainer {
-    
-    func makeWordRepository() -> WordRepository {
-        return DefaultWordRepository()
-    }
-    
+
     func makeExploreVocabViewModel() -> ExploreVocabViewModel {
         let learnHistoryRepository = makeVocabLearningHistoryRepository()
         return ExploreVocabViewModel(
@@ -42,10 +38,6 @@ extension AppDIContainer {
 
 // MARK: - Library
 extension AppDIContainer {
-    func makeWordBookRepository() -> WordBookRepository {
-        return DefaultWordBookRepository()
-    }
-    
     func makeRecommendBookRepository() -> RecommendBookRepository {
         return DefaultRecommendBookRepository()
     }
@@ -74,10 +66,6 @@ extension AppDIContainer {
 
 // MARK: - Quiz
 extension AppDIContainer {
-    func makeLearningHistoryRepository() -> LearningHistoryRepository {
-        return DefaultLearningHistoryRepository()
-    }
-    
     func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
         let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return QuizViewModel(

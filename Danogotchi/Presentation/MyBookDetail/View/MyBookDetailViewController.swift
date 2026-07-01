@@ -26,7 +26,7 @@ final class MyBookDetailViewController: BaseViewController {
     }
     
     private let deleteWordTrigger = PublishRelay<Vocab>()
-    private let myBookObjectId = BehaviorRelay<UUID?>(value: nil)
+    private let myBookId = BehaviorRelay<UUID?>(value: nil)
     
     private enum Section {
         case main
@@ -150,8 +150,8 @@ extension MyBookDetailViewController {
                 owner.applaySnapshot(items: items)
             }.disposed(by: disposeBag)
         
-        output.myBookObjectId
-            .bind(to: myBookObjectId)
+        output.myBookId
+            .bind(to: myBookId)
             .disposed(by: disposeBag)
         
         backButton.rx.tap
@@ -161,11 +161,11 @@ extension MyBookDetailViewController {
             }.disposed(by: disposeBag)
         
         addBookButton.rx.tap
-            .withLatestFrom(myBookObjectId)
+            .withLatestFrom(myBookId)
             .compactMap{ $0 }
-            .bind(with: self) { owner, bookObjectId in
+            .bind(with: self) { owner, bookId in
                 let createVocabModel = CreateVocab(
-                    vocabBookId: bookObjectId,
+                    vocabBookId: bookId,
                     vocabId: nil,
                     bookTitle: "나의 단어장",
                     word: "",
@@ -190,13 +190,13 @@ extension MyBookDetailViewController {
                 owner.showActionSheet(
                     title: item.word.word,
                     editAction: {
-                        guard let bookObjectId = owner.myBookObjectId.value else {
+                        guard let bookId = owner.myBookId.value else {
                             print("Error: '나의 단어장' ID가 없습니다.")
                             return
                         }
                         
                         let createVocabModel = CreateVocab(
-                            vocabBookId: bookObjectId,
+                            vocabBookId: bookId,
                             vocabId: item.word.id,
                             bookTitle: "",
                             word: item.word.word,

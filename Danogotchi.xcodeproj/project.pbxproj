@@ -19,8 +19,6 @@
 		76BE05012E9FF93600F80D8A /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05002E9FF93600F80D8A /* FirebaseCrashlytics */; };
 		76BE05032E9FF93600F80D8A /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05022E9FF93600F80D8A /* FirebaseMessaging */; };
 		76BE05052E9FF93600F80D8A /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 76BE05042E9FF93600F80D8A /* FirebaseRemoteConfig */; };
-		76C9E3762E966239001B37B2 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 76D9D2742E8C11F500B8104A /* RealmSwift */; };
 		76E1F07B2EA77E640087A4E6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 76E1F07A2EA77E640087A4E6 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
@@ -31,7 +29,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				76C9E3762E966239001B37B2 /* RealmSwift in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -71,7 +68,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				76D9D2752E8C11F500B8104A /* RealmSwift in Frameworks */,
 				76E1F07B2EA77E640087A4E6 /* FirebaseFirestore in Frameworks */,
 				76BC852D2E86CBA7009EEE9C /* IQKeyboardManagerSwift in Frameworks */,
 				7651837D2E844260005EE2F7 /* Toast in Frameworks */,
@@ -137,7 +133,6 @@
 				765183792E844257005EE2F7 /* Kingfisher */,
 				7651837C2E844260005EE2F7 /* Toast */,
 				76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */,
-				76D9D2742E8C11F500B8104A /* RealmSwift */,
 				76BE04FE2E9FF93600F80D8A /* FirebaseAnalyticsCore */,
 				76BE05002E9FF93600F80D8A /* FirebaseCrashlytics */,
 				76BE05022E9FF93600F80D8A /* FirebaseMessaging */,
@@ -179,7 +174,6 @@
 				765183782E844257005EE2F7 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				7651837B2E844260005EE2F7 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
 				76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
-				76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */,
 				76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -544,14 +538,6 @@
 				minimumVersion = 12.4.0;
 			};
 		};
-		76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/realm/realm-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 20.0.4;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -609,11 +595,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
-		};
-		76D9D2742E8C11F500B8104A /* RealmSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 76D9D2732E8C11F500B8104A /* XCRemoteSwiftPackageReference "realm-swift" */;
-			productName = RealmSwift;
 		};
 		76E1F07A2EA77E640087A4E6 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;

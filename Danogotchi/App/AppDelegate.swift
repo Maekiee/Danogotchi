@@ -3,7 +3,6 @@ import FirebaseCore
 import FirebaseMessaging
 import IQKeyboardManagerSwift
 import FirebaseFirestore
-import RealmSwift
 
 
 @main
@@ -16,12 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         FirebaseApp.configure()
         let firebaseDB = Firestore.firestore()
-        
-#if DEBUG
-        let realm = try? Realm()
-        print("Realm is located at:", realm!.configuration.fileURL!)
-#endif
-        
+
         IQKeyboardManager.shared.isEnabled = true
         
         UNUserNotificationCenter.current().delegate = self
