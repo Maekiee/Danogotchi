@@ -169,8 +169,8 @@ final class LibraryViewController: BaseViewController {
             
             var isSelected = false
             
-            if case .downloaded(let realmBook) = item {
-                isSelected = (self.selectedBookId == realmBook.id)
+            if case .downloaded(let downloadedBook) = item {
+                isSelected = (self.selectedBookId == downloadedBook.id)
             }
             
             cell.binding(with: item, isSelected: isSelected, indexRow: indexPath.row)

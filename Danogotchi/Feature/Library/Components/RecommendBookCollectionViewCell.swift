@@ -148,16 +148,16 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         
         
         switch item {
-        case .downloaded(let realmBook):
-            // 1. 이미 Realm에 있는 경우 (기존 로직)
-            titleLabel.text = realmBook.title
+        case .downloaded(let downloadedBook):
+            // 1. 이미 로컬 DB에 저장된 경우 (기존 로직)
+            titleLabel.text = downloadedBook.title
             checkIcon.isHidden = !isSelected
             downloadButton.isHidden = true
             symbolIconImage.isHidden = false
             titleLabel.isHidden = false
             
         case .notDownloaded(let mockBook):
-            // 2. Realm에 없는 경우 (다운로드 UI)
+            // 2. 로컬 DB에 없는 경우 (다운로드 UI)
             titleLabel.text = mockBook.title // 제목은 흐리게 표시
             titleLabel.isHidden = false
             checkIcon.isHidden = true
