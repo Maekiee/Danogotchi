@@ -8,14 +8,14 @@ final class MyBookDetailViewModel: BaseViewModel {
 
     private let vocabBookRepository: VocabBookRepository
     private let vocabRepository: VocabRepository
-    private let learningHistoryRepository: VocabLearningHistoryRepository
+    private let learningHistoryRepository: LearningHistoryRepository
 
     private let myBookId = BehaviorRelay<UUID?>(value: nil)
 
     init(
         vocabBookRepository: VocabBookRepository,
         vocabRepository: VocabRepository,
-        learningHistoryRepository: VocabLearningHistoryRepository
+        learningHistoryRepository: LearningHistoryRepository
     ) {
         self.vocabBookRepository = vocabBookRepository
         self.vocabRepository = vocabRepository
@@ -28,12 +28,12 @@ final class MyBookDetailViewModel: BaseViewModel {
     }
 
     struct Output {
-        let wordList: Driver<[WordDisplayInfo]>
+        let wordList: Driver<[VocabDisplayInfo]>
         let myBookId: Observable<UUID?>
     }
     
     func transform(input: Input) -> Output {
-        let wordList = BehaviorRelay<[WordDisplayInfo]>(value: [])
+        let wordList = BehaviorRelay<[VocabDisplayInfo]>(value: [])
         
         input.viewWillAppear
             .bind(with: self) { owner, _ in
@@ -55,12 +55,12 @@ final class MyBookDetailViewModel: BaseViewModel {
                     let correctCount = historyModels.filter { $0.isCorrect }.count
                     return (correct: correctCount, total: historyModels.count)
                 }
-                let displayItems = myWordList.map { vocab -> WordDisplayInfo in
+                let displayItems = myWordList.map { vocab -> VocabDisplayInfo in
                     if let stats = historyStats[vocab.id] {
                         let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
-                        return WordDisplayInfo(word: vocab, learningCount: stats.total, accuracy: accuracy)
+                        return VocabDisplayInfo(word: vocab, learningCount: stats.total, accuracy: accuracy)
                     } else {
-                        return WordDisplayInfo(word: vocab, learningCount: 0, accuracy: 0.0)
+                        return VocabDisplayInfo(word: vocab, learningCount: 0, accuracy: 0.0)
                     }
                 }
                 wordList.accept(Array(displayItems))

@@ -17,15 +17,15 @@ final class ExploreVocabViewController: BaseViewController {
     private let viewModel: ExploreVocabViewModel
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
-    private var allWordsInfo: [WordDisplayInfo] = []
+    private var allWordsInfo: [VocabDisplayInfo] = []
     weak var delegate: ExploreVocabViewControllerDelegate?
 
     private enum Section {
         case main
     }
 
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordDisplayInfo>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordDisplayInfo>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, VocabDisplayInfo>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
 
     private var dataSource: DataSource!
 
@@ -318,7 +318,7 @@ extension ExploreVocabViewController {
 extension ExploreVocabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
-            MainWordCardCollectionViewCell, WordDisplayInfo
+            MainWordCardCollectionViewCell, VocabDisplayInfo
         > { [weak self] cell, indexPath, item in
             guard let self = self else { return }
             
@@ -371,7 +371,7 @@ extension ExploreVocabViewController {
         }
     }
 
-    private func applySnapshot(items: [WordDisplayInfo]) {
+    private func applySnapshot(items: [VocabDisplayInfo]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)

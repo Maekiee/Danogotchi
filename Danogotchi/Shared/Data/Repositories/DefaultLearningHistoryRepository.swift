@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-final class DefaultVocabLearningHistoryRepository {
+final class DefaultLearningHistoryRepository {
     private let context: NSManagedObjectContext
     
     init(context: NSManagedObjectContext) {
@@ -25,7 +25,7 @@ final class DefaultVocabLearningHistoryRepository {
     }
 }
 
-extension DefaultVocabLearningHistoryRepository: VocabLearningHistoryRepository {
+extension DefaultLearningHistoryRepository: LearningHistoryRepository {
     func addHistory(vocabId: UUID, isCorrect: Bool) {
         guard let vocabEntity = fetchVocabEntity(id: vocabId) else { return }
         

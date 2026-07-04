@@ -65,14 +65,14 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     
     func exploreVocabDidTapEditWord(vocabItem: CreateVocab) {
         let vm = container.makeCreateWordViewModel(vocabItem: vocabItem)
-        let vc = CreateWordViewController(viewModel: vm, entryPoint: .edit)
+        let vc = CreateVocabViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         vc.modalPresentationStyle = .fullScreen
         navigationController.present(vc, animated: true)
     }
 }
 
-extension MainCoordinator: CreateWordViewControllerDelegate {
+extension MainCoordinator: CreateVocabViewControllerDelegate {
     func createWordDidTapBack() {
         navigationController.dismiss(animated: true)
     }

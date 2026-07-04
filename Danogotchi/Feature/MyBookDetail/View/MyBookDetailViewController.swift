@@ -32,8 +32,8 @@ final class MyBookDetailViewController: BaseViewController {
         case main
     }
     
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, WordDisplayInfo>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, WordDisplayInfo>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, VocabDisplayInfo>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
     private var dataSource: DataSource!
     
     // MARK: UI 프로퍼티
@@ -181,7 +181,7 @@ extension MyBookDetailViewController {
 // MARK: 컬렉션 뷰
 extension MyBookDetailViewController {
     private func configDataSource() {
-        let cellregistration = UICollectionView.CellRegistration<MyBookDetailCollectionViewCell, WordDisplayInfo> { [weak self]
+        let cellregistration = UICollectionView.CellRegistration<MyBookDetailCollectionViewCell, VocabDisplayInfo> { [weak self]
             cell, indexPath, item in
             guard let self = self else { return }
             cell.binding(with: item)
@@ -223,7 +223,7 @@ extension MyBookDetailViewController {
         }
     }
     
-    private func applaySnapshot(items: [WordDisplayInfo]) {
+    private func applaySnapshot(items: [VocabDisplayInfo]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)

@@ -25,10 +25,10 @@ extension AppDIContainer {
         )
     }
     
-    func makeCreateWordViewModel(vocabItem: CreateVocab) -> CreateWordViewModel {
+    func makeCreateWordViewModel(vocabItem: CreateVocab) -> CreateVocabViewModel {
         let vocabRepository = makeVocabRepository()
         let vocabBookRepository = makeVocabBookRepository()
-        return CreateWordViewModel(
+        return CreateVocabViewModel(
             vocabItem: vocabItem,
             vocabBookRepository: vocabBookRepository,
             vocabRepository: vocabRepository
@@ -115,7 +115,7 @@ extension AppDIContainer {
         return DefaultVocabBookRepository(context: coreDataStack.viewContext)
     }
 
-    func makeVocabLearningHistoryRepository() -> VocabLearningHistoryRepository {
-        return DefaultVocabLearningHistoryRepository(context: coreDataStack.viewContext)
+    func makeVocabLearningHistoryRepository() -> LearningHistoryRepository {
+        return DefaultLearningHistoryRepository(context: coreDataStack.viewContext)
     }
 }

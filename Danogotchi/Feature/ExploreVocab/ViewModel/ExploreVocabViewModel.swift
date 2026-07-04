@@ -6,10 +6,10 @@ import RxCocoa
 final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let userInfo = UserInfoManager.shared
-    private let learnHistoryRepository: VocabLearningHistoryRepository
+    private let learnHistoryRepository: LearningHistoryRepository
 
     init(
-        learnHistoryRepository: VocabLearningHistoryRepository
+        learnHistoryRepository: LearningHistoryRepository
     ) {
         self.learnHistoryRepository = learnHistoryRepository
     }
@@ -20,14 +20,14 @@ final class ExploreVocabViewModel: BaseViewModel {
     }
     
     struct Output {
-        let wordItems: Driver<[WordDisplayInfo]>
+        let wordItems: Driver<[VocabDisplayInfo]>
     }
     
     func transform(input: Input) -> Output {
         let activeBookRelay = ActiveLearningManager.shared.activeBook
         let activeBookSourceRelay = ActiveLearningManager.shared.activeBookSource
         
-        let allWordItems = BehaviorRelay<[WordDisplayInfo]>(value: [])
+        let allWordItems = BehaviorRelay<[VocabDisplayInfo]>(value: [])
         
         let bookChangedTrigger = activeBookRelay.compactMap { $0 }.map { _ in () }
     
@@ -48,12 +48,12 @@ final class ExploreVocabViewModel: BaseViewModel {
                     return (correct: correctCount, total: historyModels.count)
                 }
                 
-                let displayItems = wordList.map { word -> WordDisplayInfo in
+                let displayItems = wordList.map { word -> VocabDisplayInfo in
                     if let stats = historyStats[word.id] {
                         let accuracy = stats.total > 0 ? Double(stats.correct) / Double(stats.total) : 0.0
-                        return WordDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
+                        return VocabDisplayInfo(word: word, learningCount: stats.total, accuracy: accuracy)
                     } else {
-                        return WordDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
+                        return VocabDisplayInfo(word: word, learningCount: 0, accuracy: 0.0)
                     }
                 }
                 allWordItems.accept(Array(displayItems))

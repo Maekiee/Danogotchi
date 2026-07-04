@@ -4,7 +4,7 @@ import RxCocoa
 
 final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let learningHistoryRepository: VocabLearningHistoryRepository
+    private let learningHistoryRepository: LearningHistoryRepository
     private let userInfo = UserInfoManager.shared
     
     private let quizDataRelay: BehaviorRelay<QuizData>
@@ -21,7 +21,7 @@ final class QuizViewModel: BaseViewModel {
     }
     
     init(
-        learningHistoryRepository: VocabLearningHistoryRepository,
+        learningHistoryRepository: LearningHistoryRepository,
         quizData: QuizData
     ) {
         self.learningHistoryRepository = learningHistoryRepository

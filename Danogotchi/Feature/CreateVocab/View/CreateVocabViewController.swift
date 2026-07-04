@@ -4,17 +4,17 @@ import RxSwift
 import RxCocoa
 
 
-protocol CreateWordViewControllerDelegate: AnyObject {
+protocol CreateVocabViewControllerDelegate: AnyObject {
     func createWordDidTapBack()
 }
 
-final class CreateWordViewController: BaseViewController {
+final class CreateVocabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
-    private let viewModel: CreateWordViewModel
+    private let viewModel: CreateVocabViewModel
     private let entryPoint: EntryPoint
-    weak var delegate: CreateWordViewControllerDelegate?
+    weak var delegate: CreateVocabViewControllerDelegate?
     
-    init(viewModel: CreateWordViewModel, entryPoint: EntryPoint) {
+    init(viewModel: CreateVocabViewModel, entryPoint: EntryPoint) {
         self.viewModel = viewModel
         self.entryPoint = entryPoint
         super.init(nibName: nil, bundle: nil)
@@ -117,9 +117,9 @@ final class CreateWordViewController: BaseViewController {
     }
 }
 
-extension CreateWordViewController {
+extension CreateVocabViewController {
     private func bind() {
-        let input = CreateWordViewModel.Input(
+        let input = CreateVocabViewModel.Input(
             vocabBookTitleTextField: wordBookTitleTextField.tf.rx.text.orEmpty.asObservable(),
             vocabTextField: wordTextField.tf.rx.text.orEmpty.asObservable(),
             meanTextField: meanTextField.tf.rx.text.orEmpty.asObservable(),

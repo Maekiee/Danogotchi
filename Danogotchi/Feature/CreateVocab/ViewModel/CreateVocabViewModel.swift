@@ -2,7 +2,7 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class CreateWordViewModel: BaseViewModel {
+final class CreateVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
 
     private let vocabItem: CreateVocab?
