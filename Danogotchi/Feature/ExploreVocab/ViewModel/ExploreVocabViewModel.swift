@@ -16,7 +16,6 @@ final class ExploreVocabViewModel: BaseViewModel {
     
     struct Input {
         let viewWillAppear: Observable<Void>
-        let selectedWordCard: Observable<Vocab> // 단어 삭제
     }
     
     struct Output {

@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct CardBlurView: View {
-    
     var title: String = ""
     var subtitle: String = ""
     var learningCount: Int = 0

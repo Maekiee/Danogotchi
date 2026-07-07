@@ -44,112 +44,63 @@ final class ExploreVocabViewController: BaseViewController {
         view.contentMode = .scaleAspectFill
         return view
     }()
-
     private let settingTabButton: UIButton = {
         var config = UIButton.Configuration.filled()
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
         config.image = UIImage(systemName: "gearshape", withConfiguration: symbolConfig)
-        config.baseForegroundColor = .black
-        config.baseForegroundColor = .white
-        // 어두운 반투명
-        config.background.backgroundColor = .black.withAlphaComponent(
+        config.baseForegroundColor = AppColor.white
+        config.background.backgroundColor = AppColor.black.withAlphaComponent(
             0.25
         )
-        config.background.cornerRadius = 24
+        config.background.cornerRadius = AppSpacing.space24
         config.background.visualEffect = UIBlurEffect(
             style: .systemMaterialDark
         )
         let button = UIButton(configuration: config)
         return button
     }()
-    
-    private let addWordButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
-        config.image = UIImage(systemName: "plus", withConfiguration: symbolConfig)
-        config.baseForegroundColor = .black
-        config.baseForegroundColor = .white
-        // 어두운 반투명
-        config.background.backgroundColor = .black.withAlphaComponent(
-            0.25
-        )
-        config.background.cornerRadius = 24
-        config.background.visualEffect = UIBlurEffect(
-            style: .systemMaterialDark
-        )
-        let button = UIButton(configuration: config)
-        return button
-    }()
-
-    private let showWordBookButton: UIButton = {
+    private let showLibraryVCButton: UIButton = {
         var config = UIButton.Configuration.filled()
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
         config.image = UIImage(systemName: "square.grid.2x2", withConfiguration: symbolConfig)
-        config.baseForegroundColor = .black
-        config.baseForegroundColor = .white
-
-        // 어두운 반투명
-        config.background.backgroundColor = .black.withAlphaComponent(0.25)
-        config.background.cornerRadius = 24
+        config.baseForegroundColor = AppColor.white
+        config.background.backgroundColor = AppColor.black.withAlphaComponent(0.25)
+        config.background.cornerRadius = AppSpacing.space24
         config.background.visualEffect = UIBlurEffect(
             style: .systemMaterialDark
         )
         let button = UIButton(configuration: config)
         return button
     }()
-    
-    
-    private let noBookInfoContainer: UIVisualEffectView = {
-        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        let view = UIVisualEffectView(effect: blurEffect)
-        view.layer.cornerRadius = 20
-        view.layer.masksToBounds = true
-        return view
-    }()
-    
-    private let noWordBookLabel: UILabel = {
-        let label = UILabel()
-        label.text = "학습할 단어장을 만들어 주세요"
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = .white
-        return label
-    }()
-
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
-
-        // 텍스트 설정
         config.title = "학습하기"
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium, scale: .default)
         config.image = UIImage(systemName: "graduationcap", withConfiguration: symbolConfig)
-        config.imagePadding = 4
-        config.baseForegroundColor = .white
-
-        // 하얀색 유리 효과 배경 설정
-        config.background.backgroundColor = UIColor.black.withAlphaComponent(
+        config.imagePadding = AppSpacing.space4
+        config.baseForegroundColor = AppColor.white
+        config.background.backgroundColor = AppColor.black.withAlphaComponent(
             0.25
         )
-        config.background.cornerRadius = 24
+        config.background.cornerRadius = AppSpacing.space24
         config.background.visualEffect = UIBlurEffect(
             style: .systemMaterialDark
         )
         config.contentInsets = NSDirectionalEdgeInsets(
-            top: 12,
-            leading: 12,
-            bottom: 12,
-            trailing: 16
+            top: AppSpacing.space12,
+            leading: AppSpacing.space12,
+            bottom: AppSpacing.space12,
+            trailing: AppSpacing.space16
         )
         let button = UIButton(configuration: config)
-        // 폰트 설정
         button.configuration?.titleTextAttributesTransformer =
             UIConfigurationTextAttributesTransformer { incoming in
                 var outgoing = incoming
-                outgoing.font = .systemFont(ofSize: 14, weight: .semibold)
+                outgoing.font = AppFont.label
                 return outgoing
             }
         return button
     }()
-
     private let collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
@@ -178,7 +129,7 @@ final class ExploreVocabViewController: BaseViewController {
         [
             themeBackgroundImage,
             collectionView,
-            showWordBookButton,
+            showLibraryVCButton,
             settingTabButton,
             startLearningButton,
             
@@ -191,10 +142,10 @@ final class ExploreVocabViewController: BaseViewController {
             make.edges.equalToSuperview()
         }
         
-        showWordBookButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
-            make.size.equalTo(48)
+        showLibraryVCButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space20)
+            make.size.equalTo(AppSpacing.space24 * 2)
         }
         
         collectionView.snp.makeConstraints { make in
@@ -202,20 +153,19 @@ final class ExploreVocabViewController: BaseViewController {
         }
         
         startLearningButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
             make.centerX.equalToSuperview()
-            make.height.equalTo(48)
+            make.height.equalTo(AppSpacing.space24 * 2)
         }
         
         settingTabButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.size.equalTo(48)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.size.equalTo(AppSpacing.space24 * 2)
         }
     }
 
     override func configView() {
-        
         if let themeUrl = userInfo.currentThemeUrl {
             themeBackgroundImage.kf.setImage(with: URL(string: themeUrl))
         }
@@ -223,16 +173,22 @@ final class ExploreVocabViewController: BaseViewController {
 }
 
 extension ExploreVocabViewController {
+    private func updateBackgroundImage(with urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        themeBackgroundImage.kf.setImage(
+            with: url,
+            options: [.transition(.fade(0.3)), .cacheOriginalImage]
+        )
+    }
+    
     private func bind() {
         let input = ExploreVocabViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
             },
-            selectedWordCard: deleteWordTrigger.asObservable(),
         )
 
         let output = viewModel.transform(input: input)
-        
         
         UserInfoManager.shared.themeUrlObservable
             .compactMap { $0 }
@@ -249,9 +205,8 @@ extension ExploreVocabViewController {
                 owner.applySnapshot(items: wordList)
             }.disposed(by: disposeBag)
 
-        showWordBookButton.rx.tap
+        showLibraryVCButton.rx.tap
             .bind(with: self) { owner, _ in
-                print("Hello world!!!")
                 owner.delegate?.exploreVocabDidTapLibrary()
             }.disposed(by: disposeBag)
         
@@ -260,7 +215,6 @@ extension ExploreVocabViewController {
                 owner.delegate?.exploreVocabDidTapSetting()
             }.disposed(by: disposeBag)
 
-        // 학습 시작하기
         startLearningButton.rx.tap
             .bind(with: self) { owner, _ in
                 let allWords = owner.allWordsInfo.map { $0.word }
@@ -302,16 +256,6 @@ extension ExploreVocabViewController {
                 owner.delegate?.exploreVocabDidTapStartQuiz(quizData: quizData)
             }.disposed(by: disposeBag)
     }
-    
-    private func updateBackgroundImage(with urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        
-        themeBackgroundImage.kf.setImage(
-            with: url,
-            options: [.transition(.fade(0.3)), .cacheOriginalImage]
-        )
-    }
-
 }
 
 // MARK: - CollectionView
@@ -324,37 +268,7 @@ extension ExploreVocabViewController {
             
             cell.configure(with: item, parentVC: self)
             
-            cell.onTouchImageIcon.bind(with: self) { owner, _ in
-                owner.showActionSheet(
-                    title: item.word.word,
-                    editAction: { [weak self] in
-                        guard self != nil else { return }
-                        
-                        guard
-                            let bookId = owner.userInfo.selectedBookId
-                                .flatMap({ UUID(uuidString: $0) })
-                        else { return }
-
-                        let createVocabModel = CreateVocab(
-                            vocabBookId: bookId,
-                            vocabId: item.word.id,
-                            bookTitle: owner.bookTitle,
-                            word: item.word.word,
-                            meaning: item.word.meaning,
-                            actionType: .edit
-                        )
-
-                        owner.delegate?.exploreVocabDidTapEditWord(vocabItem: createVocabModel)
-                    },
-                    deleteAction: { [weak self] in
-                        guard let self = self else { return }
-                        deleteWordTrigger.accept(item.word)
-                    }
-                )
-            }.disposed(by: cell.disposeBag)
-            
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                // 음성 출력
                 TTSManager.shared.speak(item.cardTitle)
             }.disposed(by: cell.disposeBag)
         }
