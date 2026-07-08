@@ -1,6 +1,6 @@
 import UIKit
 
-enum AlertUtils {
+enum AlertPresenter {
     static func showActionSheet(
         on viewController: UIViewController,
         title: String? = nil,
@@ -14,7 +14,6 @@ enum AlertUtils {
             preferredStyle: .actionSheet
         )
         
-        // 수정하기
         if let editAction = editAction {
             let edit = UIAlertAction(title: "수정하기", style: .default) { _ in
                 editAction()
@@ -22,7 +21,6 @@ enum AlertUtils {
             alert.addAction(edit)
         }
         
-        // 지우기
         if let deleteAction = deleteAction {
             let delete = UIAlertAction(title: "지우기", style: .destructive) { _ in
                 deleteAction()
@@ -30,7 +28,6 @@ enum AlertUtils {
             alert.addAction(delete)
         }
         
-        // 취소
         let cancel = UIAlertAction(title: "취소", style: .cancel)
         alert.addAction(cancel)
         

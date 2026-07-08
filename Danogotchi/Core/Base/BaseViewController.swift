@@ -28,7 +28,6 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
                 owner.showToast(toast.message, duration: toast.duration)
             }.disposed(by: disposeBag)
     }
-    
 }
 
 extension ToastPresentable where Self: UIViewController {

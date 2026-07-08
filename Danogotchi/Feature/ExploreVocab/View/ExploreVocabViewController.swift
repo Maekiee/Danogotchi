@@ -220,7 +220,7 @@ extension ExploreVocabViewController {
                 let allWords = owner.allWordsInfo.map { $0.word }
 
                 guard !allWords.isEmpty else {
-                    AlertUtils.showNotificationAlert(
+                    AlertPresenter.showNotificationAlert(
                         on: owner,
                         title: "알림",
                         message: "학습할 단어가 없습니다."
@@ -229,7 +229,7 @@ extension ExploreVocabViewController {
                 }
 
                 guard allWords.count >= 4 else {
-                    AlertUtils.showNotificationAlert(
+                    AlertPresenter.showNotificationAlert(
                         on: owner,
                         title: "알림",
                         message: "최소 4개 이상의 단어가 필요합니다."

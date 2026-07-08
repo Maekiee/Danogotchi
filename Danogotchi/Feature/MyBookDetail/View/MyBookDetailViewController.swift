@@ -187,7 +187,8 @@ extension MyBookDetailViewController {
             cell.binding(with: item)
             
             cell.onTouchIcon.bind(with: self) { owner, _ in
-                owner.showActionSheet(
+                AlertPresenter.showActionSheet(
+                    on: owner,
                     title: item.word.word,
                     editAction: {
                         guard let bookId = owner.myBookId.value else {
@@ -203,7 +204,7 @@ extension MyBookDetailViewController {
                             meaning: item.word.meaning,
                             actionType: .edit
                         )
-                        // 코디네이터 적용
+                        
                         owner.delegate?.myBookDetailDidTapEditWord(with: createVocabModel)
                     },
                     deleteAction: {

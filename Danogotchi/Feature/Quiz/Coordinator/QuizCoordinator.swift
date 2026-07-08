@@ -89,7 +89,7 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
     }
     
     private func showInterruptAlert() {
-        AlertUtils.showAlert(
+        AlertPresenter.showAlert(
             on: navigationController,
             title: "학습 중단",
             message: "정말로 학습을 중단하시겠습니까?",
