@@ -34,8 +34,8 @@ struct CardBlurView: View {
             Text("\(learningCount)번 학습")
                 .font(.caption)
                 .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
+                .padding(.horizontal, AppSpacing.space12)
+                .padding(.vertical, AppSpacing.space4)
                 .fontWeight(.regular)
                 .background(.black.opacity(0.4))
                 .clipShape(Capsule())
@@ -49,8 +49,8 @@ struct CardBlurView: View {
                     .foregroundStyle(.white)
                     .fontWeight(.regular)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 8)
+            .padding(.horizontal, AppSpacing.space24)
+            .padding(.bottom, AppSpacing.space8)
         }
         .frame(height: 180)
         .frame(maxWidth: .infinity)
@@ -59,7 +59,7 @@ struct CardBlurView: View {
                 .blur(radius: 5, opaque: true)
                 .background(.white.opacity(0.15))
         }
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .clipShape(RoundedRectangle(cornerRadius: AppRadius.radius20))
     }
 }
 

@@ -10,7 +10,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.text = "나의 단어장"
         label.textColor = AppColor.textPrimary
-        label.font = .boldSystemFont(ofSize: 24)
+        label.font = AppFont.title1
         return label
     }()
     private let checkIcon: UIImageView = {
@@ -18,7 +18,7 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         view.image = UIImage(systemName: "checkmark.circle.fill")
         view.tintColor = AppColor.oxfordBlue
         view.backgroundColor = AppColor.backgroundBeige2
-        view.layer.cornerRadius = 12
+        view.layer.cornerRadius = AppRadius.radius12
         view.clipsToBounds = true
         view.isHidden = true
         return view
@@ -58,8 +58,8 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         
         imageIcon.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
-            make.leading.equalToSuperview().offset(20)
-            make.trailing.lessThanOrEqualTo(titleLabel.snp.leading).offset(-4)
+            make.leading.equalToSuperview().offset(AppSpacing.space20)
+            make.trailing.lessThanOrEqualTo(titleLabel.snp.leading).offset(-AppSpacing.space4)
             make.size.equalTo(80)
         }
         
@@ -68,16 +68,16 @@ final class MyBookCollectionViewCell: UICollectionViewCell {
         }
         
         checkIcon.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(12)
-            make.trailing.equalToSuperview().inset(12)
+            make.top.equalToSuperview().offset(AppSpacing.space12)
+            make.trailing.equalToSuperview().inset(AppSpacing.space12)
         }
     }
     
     private func configView() {
         backgroundColor = AppColor.backgroundBeige2
-        layer.borderWidth = 1.5
+        layer.borderWidth = AppBorder.regular
         layer.borderColor = AppColor.pointBlack.cgColor
-        layer.cornerRadius = 20
+        layer.cornerRadius = AppRadius.radius20
         
         // 그림자 (cell의 layer에 적용)
         layer.shadowColor = AppColor.pointBlack.cgColor

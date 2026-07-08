@@ -34,7 +34,7 @@ final class SettingTabViewController: BaseViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "설정"
-        label.font = .systemFont(ofSize: 28, weight: .bold)
+        label.font = AppFont.display
         label.textColor = AppColor.textPrimary
         return label
     }()
@@ -87,12 +87,12 @@ final class SettingTabViewController: BaseViewController {
     
     override func configLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.leading.equalToSuperview().offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
+            make.leading.equalToSuperview().offset(AppSpacing.space20)
         }
-        
+
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }

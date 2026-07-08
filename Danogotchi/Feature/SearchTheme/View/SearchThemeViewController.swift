@@ -42,7 +42,7 @@ final class SearchThemeViewController: BaseViewController {
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "chevron.backward")
         config.title = "Back"
-        config.imagePadding = 4
+        config.imagePadding = AppSpacing.space4
         config.baseForegroundColor = AppColor.textPrimary
         button.configuration = config
         return button
@@ -50,14 +50,14 @@ final class SearchThemeViewController: BaseViewController {
     private let titleText: UILabel = {
         let label = UILabel()
         label.text = "배경 테마를 골라주세요"
-        label.font = .systemFont(ofSize: 28, weight: .semibold)
+        label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
         return label
     }()
     private let textField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.placeholder = "이미지를 검색해주세요"
-        tf.font = .systemFont(ofSize: 16, weight: .regular)
+        tf.font = AppFont.body
         tf.isUserInteractionEnabled = true
         return tf
     }()
@@ -121,36 +121,36 @@ final class SearchThemeViewController: BaseViewController {
     override func configLayout() {
         if entryMode == .settings {
             backButton.snp.makeConstraints { make in
-                make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-                make.leading.equalToSuperview().inset(8)
+                make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
+                make.leading.equalToSuperview().inset(AppSpacing.space8)
             }
         }
         
         titleText.snp.makeConstraints { make in
             if entryMode == .settings {
-                make.top.equalTo(backButton.snp.bottom).offset(8)
+                make.top.equalTo(backButton.snp.bottom).offset(AppSpacing.space8)
             } else {
-                make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+                make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
             }
             
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
         }
         
         textField.snp.makeConstraints { make in
-            make.top.equalTo(titleText.snp.bottom).offset(12)
-            make.horizontalEdges.equalToSuperview().inset(16)
+            make.top.equalTo(titleText.snp.bottom).offset(AppSpacing.space12)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space16)
             make.height.equalTo(48)
         }
         
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(textField.snp.bottom).offset(4)
+            make.top.equalTo(textField.snp.bottom).offset(AppSpacing.space4)
             make.horizontalEdges.equalToSuperview()
             make.bottom.equalToSuperview()
         }
         
         submitButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.height.equalTo(44)
         }
         

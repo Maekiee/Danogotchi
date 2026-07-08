@@ -8,7 +8,7 @@ final class QuisQuestionCard: UIView {
         let view = UIView()
         view.backgroundColor = AppColor.appWhite
         view.layer.cornerRadius = 30
-        view.layer.borderWidth = 1.5
+        view.layer.borderWidth = AppBorder.regular
         view.layer.borderColor = UIColor.black.cgColor
         return view
     }()
@@ -16,8 +16,8 @@ final class QuisQuestionCard: UIView {
     private let circleView: UIView = {
         let view = UIView()
         view.backgroundColor = AppColor.backgroundBeige
-        view.layer.cornerRadius = 12
-        view.layer.borderWidth = 1.5
+        view.layer.cornerRadius = AppRadius.radius12
+        view.layer.borderWidth = AppBorder.regular
         view.layer.borderColor = UIColor.black.cgColor
         return view
     }()
@@ -25,7 +25,7 @@ final class QuisQuestionCard: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Random Access"
-        label.font = UIFont.boldSystemFont(ofSize: 24)
+        label.font = AppFont.title1
         label.textColor = AppColor.textPrimary
         label.textAlignment = .center
         return label
@@ -64,8 +64,8 @@ final class QuisQuestionCard: UIView {
         }
         
         circleView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(16)
-            make.leading.equalToSuperview().offset(16)
+            make.top.equalToSuperview().offset(AppSpacing.space16)
+            make.leading.equalToSuperview().offset(AppSpacing.space16)
             make.width.height.equalTo(24)
         }
         

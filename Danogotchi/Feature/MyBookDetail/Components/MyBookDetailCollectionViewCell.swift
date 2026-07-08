@@ -13,13 +13,13 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
-        label.font = .boldSystemFont(ofSize: 20)
+        label.font = AppFont.font(.bold, size: 20)
         return label
     }()
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textSecondary
-        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.font = AppFont.footnote
         return label
     }()
     private let iconButton: UIButton = {
@@ -33,7 +33,7 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     private let chip: UIChip = {
         let view = UIChip(text: "")
         view.layer.cornerRadius = 10
-        view.setFont(.systemFont(ofSize: 10))
+        view.setFont(AppFont.caption)
         return view
     }()
     private let circleProgress = UICircleProgress()
@@ -67,10 +67,10 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     
     private func configLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(12)
+            make.top.equalToSuperview().inset(AppSpacing.space12)
             make.horizontalEdges.equalToSuperview().inset(18)
         }
-        
+
         subtitleLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(6)
             make.horizontalEdges.equalToSuperview().inset(18)
@@ -89,9 +89,9 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
     
     private func configView() {
         backgroundColor = AppColor.backgroundBeige2
-        layer.borderWidth = 1.5
+        layer.borderWidth = AppBorder.regular
         layer.borderColor = AppColor.pointDarkGray.cgColor
-        layer.cornerRadius = 20
+        layer.cornerRadius = AppRadius.radius20
         
         layer.shadowColor = AppColor.pointDarkGray.cgColor
         layer.shadowOpacity = 1

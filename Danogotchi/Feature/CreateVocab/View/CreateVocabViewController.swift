@@ -30,7 +30,7 @@ final class CreateVocabViewController: BaseViewController {
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "chevron.backward")
         config.title = "Back"
-        config.imagePadding = 4
+        config.imagePadding = AppSpacing.space4
         config.baseForegroundColor = AppColor.textPrimary
         button.configuration = config
         return button
@@ -38,7 +38,7 @@ final class CreateVocabViewController: BaseViewController {
     private let wordBookTitleTextField: UnderlineTextField = {
         let tf = UnderlineTextField()
         tf.title = "단어장 세트 이름"
-        tf.font = .systemFont(ofSize: 16, weight: .regular)
+        tf.font = AppFont.body
         tf.isUserInteractionEnabled = true
         return tf
     }()
@@ -46,7 +46,7 @@ final class CreateVocabViewController: BaseViewController {
         let tf = UnderlineTextField()
         tf.title = "단어"
         tf.placeholder = "단어를 입력해 주세요"
-        tf.font = .systemFont(ofSize: 16, weight: .regular)
+        tf.font = AppFont.body
         tf.isUserInteractionEnabled = true
         return tf
     }()
@@ -54,7 +54,7 @@ final class CreateVocabViewController: BaseViewController {
         let tf = UnderlineTextField()
         tf.title = "뜻"
         tf.placeholder = "단어의 뜻을 입력해 주세요"
-        tf.font = .systemFont(ofSize: 16, weight: .regular)
+        tf.font = AppFont.body
         tf.isUserInteractionEnabled = true
         return tf
     }()
@@ -81,18 +81,18 @@ final class CreateVocabViewController: BaseViewController {
     override func configLayout() {
         
         backButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(8)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
         }
         
         wordTextField.snp.makeConstraints { make in
-            make.top.equalTo(backButton.snp.bottom).offset(16)
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.top.equalTo(backButton.snp.bottom).offset(AppSpacing.space16)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
         }
         
         meanTextField.snp.makeConstraints { make in
-            make.top.equalTo(wordTextField.snp.bottom).offset(8)
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.top.equalTo(wordTextField.snp.bottom).offset(AppSpacing.space8)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
         }
         
         [
@@ -105,8 +105,8 @@ final class CreateVocabViewController: BaseViewController {
         }
         
         addWordButton.snp.makeConstraints { make in
-            make.top.equalTo(meanTextField.snp.bottom).offset(24)
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.top.equalTo(meanTextField.snp.bottom).offset(AppSpacing.space24)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.height.equalTo(48)
         }
     }

@@ -90,10 +90,10 @@ final class UnderlineTextField: UIView {
         textField.borderStyle = .none
         textField.autocapitalizationType = .none
         textField.textColor = AppColor.textPrimary
-        textField.font = .systemFont(ofSize: 20, weight: .semibold)
-        
+        textField.font = AppFont.title2
+
         textField.backgroundColor = AppColor.appWhite // 배경색을 회색으로 설정
-        textField.layer.cornerRadius = 20 // 모서리를 둥글게
+        textField.layer.cornerRadius = AppRadius.radius20 // 모서리를 둥글게
         
         // 텍스트 필드에 좌우 패딩 추가
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
@@ -105,7 +105,7 @@ final class UnderlineTextField: UIView {
 //        underlineView.backgroundColor = .systemGray3
         
         // Title Label 설정
-        titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.font = AppFont.headline
         titleLabel.textColor = AppColor.textPrimary//.secondaryLabel
         titleLabel.isHidden = true // 기본적으로 숨김
         
@@ -116,7 +116,7 @@ final class UnderlineTextField: UIView {
         
         titleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview()
-            make.horizontalEdges.equalToSuperview().inset(4)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space4)
         }
         
         // AutoLayout 설정
@@ -125,12 +125,12 @@ final class UnderlineTextField: UIView {
             if titleLabel.isHidden {
                 make.top.equalToSuperview()
             } else {
-                make.top.equalTo(titleLabel.snp.bottom).offset(4)
+                make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space4)
             }
         }
-        
+
         underlineView.snp.makeConstraints { make in
-            make.top.equalTo(textField.snp.bottom).offset(4)
+            make.top.equalTo(textField.snp.bottom).offset(AppSpacing.space4)
             make.horizontalEdges.equalToSuperview()
             make.height.equalTo(2)
             make.bottom.equalToSuperview()
@@ -144,7 +144,7 @@ final class UnderlineTextField: UIView {
             if titleLabel.isHidden {
                 make.top.equalToSuperview()
             } else {
-                make.top.equalTo(titleLabel.snp.bottom).offset(8)
+                make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space8)
             }
         }
     }

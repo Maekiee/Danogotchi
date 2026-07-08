@@ -7,7 +7,7 @@ extension UICollectionView {
             label.text = title
             label.textAlignment = .center
             label.textColor = AppColor.textPrimary
-            label.font = .systemFont(ofSize: 14)
+            label.font = AppFont.footnote
             return label
         }()
         self.backgroundView = titleLabel

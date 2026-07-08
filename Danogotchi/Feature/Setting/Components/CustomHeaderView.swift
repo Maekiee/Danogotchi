@@ -5,7 +5,7 @@ class CustomHeaderView: UICollectionReusableView {
     
     private let label: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .medium)
+        label.font = AppFont.font(.medium, size: 17)
         label.textColor = AppColor.textPrimary
         return label
     }()
@@ -14,9 +14,9 @@ class CustomHeaderView: UICollectionReusableView {
         super.init(frame: frame)
         addSubview(label)
         label.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(4)
-            make.top.equalToSuperview().offset(8)
-            make.bottom.equalToSuperview().offset(-8)
+            make.leading.equalToSuperview().offset(AppSpacing.space4)
+            make.top.equalToSuperview().offset(AppSpacing.space8)
+            make.bottom.equalToSuperview().offset(-AppSpacing.space8)
         }
     }
     

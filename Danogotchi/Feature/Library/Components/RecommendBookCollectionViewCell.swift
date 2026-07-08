@@ -23,7 +23,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
-        label.font = .boldSystemFont(ofSize: 18)
+        label.font = AppFont.font(.bold, size: 18)
         return label
     }()
     private let checkIcon: UIImageView = {
@@ -31,7 +31,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         view.image = UIImage(systemName: "checkmark.circle.fill")
         view.tintColor = AppColor.oxfordBlue
         view.backgroundColor = AppColor.backgroundBeige2
-        view.layer.cornerRadius = 12
+        view.layer.cornerRadius = AppRadius.radius12
         view.clipsToBounds = true
         view.isHidden = true
         return view
@@ -62,7 +62,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         
         symbolIconImage.snp.remakeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview().offset(-16)
+            make.centerY.equalToSuperview().offset(-AppSpacing.space16)
             make.height.equalTo(112)
             make.width.equalTo(200)
         }
@@ -91,23 +91,23 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     
     private func configLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-20)
-            make.leading.equalToSuperview().offset(20)
+            make.bottom.equalToSuperview().offset(-AppSpacing.space20)
+            make.leading.equalToSuperview().offset(AppSpacing.space20)
         }
         
         checkIcon.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(12)
-            make.trailing.equalToSuperview().inset(12)
+            make.top.equalToSuperview().inset(AppSpacing.space12)
+            make.trailing.equalToSuperview().inset(AppSpacing.space12)
         }
-        
+
         downloadButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview().offset(-16)
+            make.centerY.equalToSuperview().offset(-AppSpacing.space16)
         }
         
         symbolIconImage.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview().offset(-16)
+            make.centerY.equalToSuperview().offset(-AppSpacing.space16)
             make.height.equalTo(112)
             make.width.equalTo(200)
         }
@@ -115,9 +115,9 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     
     private func configView() {
         backgroundColor = AppColor.backgroundBeige2
-        layer.borderWidth = 1.5
+        layer.borderWidth = AppBorder.regular
         layer.borderColor = AppColor.pointBlack.cgColor
-        layer.cornerRadius = 20
+        layer.cornerRadius = AppRadius.radius20
         
         // 그림자 (cell의 layer에 적용)
         layer.shadowColor = AppColor.pointBlack.cgColor
@@ -133,14 +133,14 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
         if indexRow == 2 {
             symbolIconImage.snp.remakeConstraints { make in
                 make.centerX.equalToSuperview()
-                make.centerY.equalToSuperview().offset(-4)
+                make.centerY.equalToSuperview().offset(-AppSpacing.space4)
                 make.height.equalTo(88)
                 make.width.equalTo(180)
             }
         } else {
             symbolIconImage.snp.remakeConstraints { make in
                 make.centerX.equalToSuperview()
-                make.centerY.equalToSuperview().offset(-16)
+                make.centerY.equalToSuperview().offset(-AppSpacing.space16)
                 make.height.equalTo(112)
                 make.width.equalTo(200)
             }

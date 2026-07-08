@@ -51,7 +51,7 @@ final class LibraryViewController: BaseViewController {
     private let loadingContinaer: UIView = {
         let view = UIView()
         view.backgroundColor = .black.withAlphaComponent(0.7)
-        view.layer.cornerRadius = 20
+        view.layer.cornerRadius = AppRadius.radius20
         view.isHidden = true
         return view
     }()
@@ -66,7 +66,7 @@ final class LibraryViewController: BaseViewController {
         let button = UIButton()
         button.setTitle("닫기", for: .normal)
         button.setTitleColor(AppColor.textPrimary, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        button.titleLabel?.font = AppFont.bodyEmphasis
         return button
     }()
     private let moreButton: UIButton = {
@@ -80,11 +80,11 @@ final class LibraryViewController: BaseViewController {
         )
         config.image = UIImage(systemName: "chevron.right")
         config.imagePlacement = .trailing
-        config.imagePadding = 8
+        config.imagePadding = AppSpacing.space8
         
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
-            outgoing.font = .systemFont(ofSize: 13, weight: .semibold)
+            outgoing.font = AppFont.font(.semibold, size: 13)
             return outgoing
         }
         
@@ -127,18 +127,18 @@ final class LibraryViewController: BaseViewController {
     
     override func configLayout() {
         closeButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.leading.equalToSuperview().offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
+            make.leading.equalToSuperview().offset(AppSpacing.space20)
         }
-        
+
         moreButton.snp.makeConstraints { make in
             make.top.equalTo(closeButton.snp.bottom)
-            make.trailing.equalToSuperview().offset(-20)
+            make.trailing.equalToSuperview().offset(-AppSpacing.space20)
         }
-        
+
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(moreButton.snp.bottom).offset(2)
-            make.horizontalEdges.equalToSuperview().inset(16)
+            make.top.equalTo(moreButton.snp.bottom).offset(AppSpacing.space2)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space16)
             make.bottom.equalToSuperview()
         }
         
@@ -188,7 +188,7 @@ final class LibraryViewController: BaseViewController {
         ) { supplementaryView, elementKind, indexPath in
             var config = supplementaryView.defaultContentConfiguration()
             config.text = "추천 단어장"
-            config.textProperties.font = .boldSystemFont(ofSize: 20)
+            config.textProperties.font = AppFont.font(.bold, size: 20)
             config.textProperties.color = .black
             supplementaryView.contentConfiguration = config
         }
@@ -218,7 +218,7 @@ final class LibraryViewController: BaseViewController {
                 
                 let section = NSCollectionLayoutSection(group: group)
                 section.contentInsets = NSDirectionalEdgeInsets(
-                    top: 0, leading: 0, bottom: 16, trailing: 0
+                    top: 0, leading: 0, bottom: AppSpacing.space16, trailing: 0
                 )
                 return section
             case .recommend:
@@ -252,7 +252,7 @@ final class LibraryViewController: BaseViewController {
                 let section = NSCollectionLayoutSection(group: group)
                 section.boundarySupplementaryItems = [header]
                 section.contentInsets = NSDirectionalEdgeInsets(
-                    top: 0, leading: 0, bottom: 4, trailing: 0
+                    top: 0, leading: 0, bottom: AppSpacing.space4, trailing: 0
                 )
                 return section
             }

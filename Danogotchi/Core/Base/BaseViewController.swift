@@ -36,10 +36,10 @@ extension ToastPresentable where Self: UIViewController {
         var style = ToastStyle()
         style.backgroundColor = .black.withAlphaComponent(0.8)
         style.messageColor = .white
-        style.messageFont = .systemFont(ofSize: 14, weight: .regular)
-        style.cornerRadius = 8
-        style.verticalPadding = 12
-        style.horizontalPadding = 16
+        style.messageFont = AppFont.footnote
+        style.cornerRadius = AppRadius.radius8
+        style.verticalPadding = AppSpacing.space12
+        style.horizontalPadding = AppSpacing.space16
         
         view.makeToast(
             message,

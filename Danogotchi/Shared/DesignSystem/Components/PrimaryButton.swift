@@ -6,7 +6,7 @@ final class PrimaryFillButton: UIButton {
         var config = UIButton.Configuration.filled()
         config.title = title
         config.titleAlignment = .center
-        config.attributedTitle?.font = .systemFont(ofSize: 15, weight: .bold)
+        config.attributedTitle?.font = AppFont.font(.bold, size: 15)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = AppColor.oxfordBlue
         config.background.cornerRadius = 24

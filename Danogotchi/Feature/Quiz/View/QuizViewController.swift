@@ -34,14 +34,14 @@ final class QuizViewController: BaseViewController {
         let label = UILabel()
         label.text = "단어 학습"
         label.textColor = AppColor.textPrimary
-        label.font = .boldSystemFont(ofSize: 17)
+        label.font = AppFont.font(.bold, size: 17)
         label.textAlignment = .center
         return label
     }()
     private let currentQuestionLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.font = AppFont.label
         return label
     }()
     private let progressView = CustomProgressView()
@@ -63,7 +63,7 @@ final class QuizViewController: BaseViewController {
     private let totalQuestionLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.font = AppFont.label
         return label
     }()
     private let quizQuestionCard = QuisQuestionCard()
@@ -71,7 +71,7 @@ final class QuizViewController: BaseViewController {
         let label = UILabel()
         label.text = "단어의 뜻을 선택하세요"
         label.textColor = AppColor.textPrimary
-        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.font = AppFont.title2
         label.textAlignment = .center
         label.numberOfLines = 0
         return label
@@ -81,10 +81,10 @@ final class QuizViewController: BaseViewController {
         button.setTitle("선택지 1", for: .normal)
         button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
-        button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
+        button.layer.cornerRadius = AppRadius.radius20
+        button.titleLabel?.font = AppFont.title2
         
-        button.layer.borderWidth = 1.5
+        button.layer.borderWidth = AppBorder.regular
         button.layer.borderColor = UIColor.black.cgColor
         
         button.layer.shadowColor = AppColor.pointDarkGray.cgColor
@@ -98,10 +98,10 @@ final class QuizViewController: BaseViewController {
         button.setTitle("선택지 2", for: .normal)
         button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
-        button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
+        button.layer.cornerRadius = AppRadius.radius20
+        button.titleLabel?.font = AppFont.title2
         
-        button.layer.borderWidth = 1.5
+        button.layer.borderWidth = AppBorder.regular
         button.layer.borderColor = UIColor.black.cgColor
         
         button.layer.shadowColor = AppColor.pointDarkGray.cgColor
@@ -115,10 +115,10 @@ final class QuizViewController: BaseViewController {
         button.setTitle("선택지 3", for: .normal)
         button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
-        button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
+        button.layer.cornerRadius = AppRadius.radius20
+        button.titleLabel?.font = AppFont.title2
         
-        button.layer.borderWidth = 1.5
+        button.layer.borderWidth = AppBorder.regular
         button.layer.borderColor = UIColor.black.cgColor
         
         button.layer.shadowColor = AppColor.pointDarkGray.cgColor
@@ -132,10 +132,10 @@ final class QuizViewController: BaseViewController {
         button.setTitle("선택지 4", for: .normal)
         button.setTitleColor(AppColor.textPrimary, for: .normal)
         button.backgroundColor = AppColor.appWhite
-        button.layer.cornerRadius = 20
-        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
+        button.layer.cornerRadius = AppRadius.radius20
+        button.titleLabel?.font = AppFont.title2
         
-        button.layer.borderWidth = 1.5
+        button.layer.borderWidth = AppBorder.regular
         button.layer.borderColor = UIColor.black.cgColor
         
         button.layer.shadowColor = AppColor.pointDarkGray.cgColor
@@ -147,7 +147,7 @@ final class QuizViewController: BaseViewController {
     private lazy var progressStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
-        stack.spacing = 8
+        stack.spacing = AppSpacing.space8
         stack.alignment = .center
         stack.addArrangedSubview(progressView)
         return stack
@@ -155,7 +155,7 @@ final class QuizViewController: BaseViewController {
     private lazy var choiceStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = 12
+        stack.spacing = AppSpacing.space12
         stack.distribution = .fillEqually
         
         [
@@ -196,26 +196,26 @@ final class QuizViewController: BaseViewController {
         
         closeButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(12)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space12)
             make.size.equalTo(44)
         }
         
         progressView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
-            make.horizontalEdges.equalToSuperview().inset(24)
+            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
             make.height.equalTo(12)  // 두께 조정 (기본 2 → 8)
         }
         
         quizQuestionCard.snp.makeConstraints { make in
-            make.top.equalTo(progressView.snp.bottom).offset(16)
-            make.horizontalEdges.equalToSuperview().inset(20)
+            make.top.equalTo(progressView.snp.bottom).offset(AppSpacing.space16)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.height.equalTo(160)
         }
         
         choiceStackView.snp.makeConstraints { make in
-            make.top.equalTo(quizQuestionCard.snp.bottom).offset(32)
-            make.horizontalEdges.equalToSuperview().inset(24)
-            make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-24)
+            make.top.equalTo(quizQuestionCard.snp.bottom).offset(AppSpacing.space32)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
+            make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space24)
         }
         
         choice1Button.snp.makeConstraints { make in

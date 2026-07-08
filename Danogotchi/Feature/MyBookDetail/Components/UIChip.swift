@@ -5,7 +5,7 @@ final class UIChip: UIView {
     
     private let label: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.font = AppFont.label
         label.textColor = .white
         label.textAlignment = .center
         return label
@@ -28,8 +28,8 @@ final class UIChip: UIView {
         addSubview(label)
         
         label.snp.makeConstraints { make in
-            make.verticalEdges.equalToSuperview().inset(4)
-            make.horizontalEdges.equalToSuperview().inset(8)
+            make.verticalEdges.equalToSuperview().inset(AppSpacing.space4)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space8)
         }
     }
     

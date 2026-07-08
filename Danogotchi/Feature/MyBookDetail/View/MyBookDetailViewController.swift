@@ -42,7 +42,7 @@ final class MyBookDetailViewController: BaseViewController {
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "chevron.backward")
         config.title = "Back"
-        config.imagePadding = 4
+        config.imagePadding = AppSpacing.space4
         config.baseForegroundColor = AppColor.textPrimary
         button.configuration = config
         return button
@@ -76,7 +76,7 @@ final class MyBookDetailViewController: BaseViewController {
         label.text = "아직 단어를 추가하지 않았어요\n단어를 추가해 주세요"
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.font = AppFont.title3
         return label
     }()
     
@@ -102,24 +102,24 @@ final class MyBookDetailViewController: BaseViewController {
     override func configLayout() {
         
         backButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(12)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space12)
         }
-        
+
         addBookButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-28)
-            make.trailing.equalToSuperview().offset(-20)
+            make.trailing.equalToSuperview().offset(-AppSpacing.space20)
             make.size.equalTo(44)
         }
-        
+
         emptyTextLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview().offset(-20)
+            make.centerY.equalToSuperview().offset(-AppSpacing.space20)
         }
-        
+
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(backButton.snp.bottom).offset(8)
-            make.horizontalEdges.equalToSuperview().inset(16)
+            make.top.equalTo(backButton.snp.bottom).offset(AppSpacing.space8)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space16)
             make.bottom.equalToSuperview()
         }
     }
@@ -248,8 +248,8 @@ extension MyBookDetailViewController {
         )
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0)
-        section.interGroupSpacing = 12
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: AppSpacing.space16, trailing: 0)
+        section.interGroupSpacing = AppSpacing.space12
         
         
         let config = UICollectionViewCompositionalLayoutConfiguration()

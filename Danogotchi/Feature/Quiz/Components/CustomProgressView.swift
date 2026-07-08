@@ -9,7 +9,7 @@ final class CustomProgressView: UIView {
         let view = UIView()
         view.backgroundColor = AppColor.appWhite
         view.layer.borderColor = UIColor.black.cgColor
-        view.layer.borderWidth = 1
+        view.layer.borderWidth = AppBorder.thin
         return view
     }()
     private let progressFillView: UIView = {

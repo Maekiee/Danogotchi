@@ -38,7 +38,7 @@ final class CompleteQuizViewController: BaseViewController {
         let label = UILabel()
         label.text = "학습 완료"
         label.textColor = AppColor.textPrimary
-        label.font = .boldSystemFont(ofSize: 24)
+        label.font = AppFont.title1
         label.textAlignment = .center
         return label
     }()
@@ -46,7 +46,7 @@ final class CompleteQuizViewController: BaseViewController {
     private let scoreLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
-        label.font = .systemFont(ofSize: 18, weight: .medium)
+        label.font = AppFont.font(.medium, size: 18)
         label.textAlignment = .center
         label.numberOfLines = 0
         return label
@@ -59,7 +59,7 @@ final class CompleteQuizViewController: BaseViewController {
     private lazy var buttonStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = 12
+        stack.spacing = AppSpacing.space12
         stack.distribution = .fillEqually
         [primaryButton, secondaryButton, endLearningButton].forEach { stack.addArrangedSubview($0) }
         return stack
@@ -90,13 +90,13 @@ final class CompleteQuizViewController: BaseViewController {
         }
         
         scoreLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
             make.centerX.equalToSuperview()
         }
-        
+
         buttonStackView.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.horizontalEdges.equalToSuperview().inset(24)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
         }
         
         [primaryButton,
