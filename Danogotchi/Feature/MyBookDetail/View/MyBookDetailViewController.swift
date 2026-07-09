@@ -95,7 +95,8 @@ final class MyBookDetailViewController: BaseViewController {
             collectionView,
             emptyTextLabel,
             addBookButton,
-        ].forEach { view.addSubview($0)
+        ].forEach {
+            view.addSubview($0)
         }
     }
     

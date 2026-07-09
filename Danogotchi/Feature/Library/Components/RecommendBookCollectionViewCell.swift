@@ -127,7 +127,7 @@ final class RecommendBookCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with item: LibraryViewModel.RecommendItem, isSelected: Bool, indexRow: Int) {
+    func binding(with item: OldLibraryViewModel.RecommendItem, isSelected: Bool, indexRow: Int) {
         symbolIconImage.image = UIImage(named: "book_image_\(indexRow)")
         
         if indexRow == 2 {

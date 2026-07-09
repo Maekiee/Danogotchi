@@ -7,11 +7,11 @@ protocol LibraryCoordinatorDelegate: AnyObject {
 final class LibraryCoordinator:NSObject, Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let AppDIContainer: AppDIContainer
+    private let appDIContainer: AppDIContainer
     weak var delegate: LibraryCoordinatorDelegate?
     
     init(container: AppDIContainer, navigationController: UINavigationController) {
-        self.AppDIContainer = container
+        self.appDIContainer = container
         self.navigationController = navigationController
         super.init()
     }
@@ -19,7 +19,15 @@ final class LibraryCoordinator:NSObject, Coordinator {
 
 extension LibraryCoordinator {
     func start() {
-        let vm = AppDIContainer.makeLibraryViewModel()
+        let vm = appDIContainer.makeOldLibraryViewModel()
+        let vc = OldLibraryViewController(viewModel: vm)
+        vc.delegate = self
+        navigationController.setViewControllers([vc], animated: false)
+        navigationController.presentationController?.delegate = self
+    }
+    
+    func start2() {
+        let vm = appDIContainer.makeLibraryViewModel()
         let vc = LibraryViewController(viewModel: vm)
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
@@ -42,7 +50,7 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
     }
 
     func libraryDidTapMore() {
-        let vm = AppDIContainer.makeMyBookDetailViewModel()
+        let vm = appDIContainer.makeMyBookDetailViewModel()
         let vc = MyBookDetailViewController(viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
@@ -56,14 +64,14 @@ extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
     }
     
     func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab) {
-        let vm = AppDIContainer.makeCreateWordViewModel(vocabItem: createVocabModel)
+        let vm = appDIContainer.makeCreateWordViewModel(vocabItem: createVocabModel)
         let vc = CreateVocabViewController(viewModel: vm, entryPoint: .add)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
 
     func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab) {
-        let vm = AppDIContainer.makeCreateWordViewModel(vocabItem: createVocabModel)
+        let vm = appDIContainer.makeCreateWordViewModel(vocabItem: createVocabModel)
         let vc = CreateVocabViewController(viewModel: vm, entryPoint: .edit)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)

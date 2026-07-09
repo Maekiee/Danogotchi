@@ -30,7 +30,8 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         )
         libraryCoordinator.delegate = self
         addChild(libraryCoordinator)
-        libraryCoordinator.start()
+//        libraryCoordinator.start()
+        libraryCoordinator.start2() // 새로운 라이브러리 탭 이동
         navigationController.present(nav, animated: true)
     }
     

@@ -208,6 +208,7 @@ extension ExploreVocabViewController {
         showLibraryVCButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.exploreVocabDidTapLibrary()
+//                owner.delegate?.
             }.disposed(by: disposeBag)
         
         settingTabButton.rx.tap

@@ -43,10 +43,14 @@ extension AppDIContainer {
     }
     
     func makeLibraryViewModel() -> LibraryViewModel {
+        return LibraryViewModel()
+    }
+    
+    func makeOldLibraryViewModel() -> OldLibraryViewModel {
         let vocabBookRepository = makeVocabBookRepository()
         let recommendBookRepository = makeRecommendBookRepository()
 
-        return LibraryViewModel(
+        return OldLibraryViewModel(
             recommendBookRepository: recommendBookRepository,
             vocabBookRepository: vocabBookRepository
         )
