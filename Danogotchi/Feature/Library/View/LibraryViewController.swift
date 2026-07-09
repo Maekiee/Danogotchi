@@ -47,5 +47,9 @@ final class LibraryViewController: BaseViewController {
     }
     
     override func configView() {
+        navigationItem.title = "라이브러리"
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            title: "닫기", style: .plain, target: nil, action: nil
+        )
     }
 }
