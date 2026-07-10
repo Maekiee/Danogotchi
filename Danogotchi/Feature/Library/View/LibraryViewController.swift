@@ -18,29 +18,6 @@ final class LibraryViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    enum BookTopic: CaseIterable, Hashable {
-        case myBook
-        case travel
-        case emotion
-        case life
-        case business
-        
-        var title: String {
-            switch self {
-            case .myBook:
-                return "My Vocabulary"
-            case .travel:
-                return "Travel"
-            case .emotion:
-                return "Emotion"
-            case .life:
-                return "Life"
-            case .business:
-                return "Business"
-            }
-        }
-    }
-    
     private enum Section {
         case main
     }
@@ -75,7 +52,18 @@ final class LibraryViewController: BaseViewController {
             bottom: AppSpacing.space16,
             trailing: AppSpacing.space16,
         )
-        
+
+        let headerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(44)
+        )
+        let header = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
+        section.boundarySupplementaryItems = [header]
+
         return UICollectionViewCompositionalLayout(section: section)
     }
     
@@ -85,13 +73,31 @@ final class LibraryViewController: BaseViewController {
             cell.binding(with: item)
         }
         
+        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { supplementaryView, _, _ in
+            var config = supplementaryView.defaultContentConfiguration()
+            config.text = "Vocabulary"
+            config.textProperties.font = AppFont.headline
+            config.textProperties.color = AppColor.textPrimary
+            config.directionalLayoutMargins = .zero
+            supplementaryView.contentConfiguration = config
+        }
+
         dataSource = DataSource(collectionView: collectionView) {
             collectionView, indexPath, itemIdentifier in
-            
+
             collectionView.dequeueConfiguredReusableCell(
                 using: registration,
                 for: indexPath,
                 item: itemIdentifier
+            )
+        }
+
+        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
+            collectionView.dequeueConfiguredReusableSupplementary(
+                using: headerRegistration,
+                for: indexPath
             )
         }
     }
@@ -108,12 +114,6 @@ final class LibraryViewController: BaseViewController {
         let label = UILabel()
         label.text = "Vocabulary"
         label.font = AppFont.label
-        return label
-    }()
-    private let headerTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Vocabulary"
-        label.font = AppFont.headline
         return label
     }()
     private lazy var collectionView: UICollectionView = {
@@ -139,19 +139,13 @@ final class LibraryViewController: BaseViewController {
     
     override func configHierarchy() {
         [
-            headerTitleLabel,
             collectionView
         ].forEach { view.addSubview($0) }
     }
-    
+
     override func configLayout() {
-        headerTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.leading.equalToSuperview().offset(AppSpacing.space16)
-        }
-        
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(headerTitleLabel.snp.bottom)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.horizontalEdges.bottom.equalToSuperview()
         }
     }

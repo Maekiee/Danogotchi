@@ -45,7 +45,7 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         
     }
     
-    func binding(with item: LibraryViewController.BookTopic) {
+    func binding(with item: BookTopic) {
         textLabel.text = item.title
     }
     
