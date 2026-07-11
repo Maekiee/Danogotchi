@@ -18,6 +18,7 @@ final class LibraryViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    //MARK: 컬렉션 뷰
     private enum Section {
         case main
     }
@@ -27,87 +28,6 @@ final class LibraryViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, BookTopic>
     
     private var dataSource: DataSource!
-    
-    private func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalHeight(1)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1),
-            heightDimension: .absolute(160)
-        )
-        let group = NSCollectionLayoutGroup.vertical(
-            layoutSize: groupSize,
-            subitems: [item]
-        )
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = AppSpacing.space16
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: AppSpacing.space16,
-            leading: AppSpacing.space16,
-            bottom: AppSpacing.space16,
-            trailing: AppSpacing.space16,
-        )
-
-        let headerSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(44)
-        )
-        let header = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
-        section.boundarySupplementaryItems = [header]
-
-        return UICollectionViewCompositionalLayout(section: section)
-    }
-    
-    private func configDataSource() {
-        let registration = UICollectionView.CellRegistration
-        <VocabTopicCardCollectionViewCell, BookTopic> { cell, _ ,item in
-            cell.binding(with: item)
-        }
-        
-        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
-            elementKind: UICollectionView.elementKindSectionHeader
-        ) { supplementaryView, _, _ in
-            var config = supplementaryView.defaultContentConfiguration()
-            config.text = "Vocabulary"
-            config.textProperties.font = AppFont.headline
-            config.textProperties.color = AppColor.textPrimary
-            config.directionalLayoutMargins = .zero
-            supplementaryView.contentConfiguration = config
-        }
-
-        dataSource = DataSource(collectionView: collectionView) {
-            collectionView, indexPath, itemIdentifier in
-
-            collectionView.dequeueConfiguredReusableCell(
-                using: registration,
-                for: indexPath,
-                item: itemIdentifier
-            )
-        }
-
-        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
-            collectionView.dequeueConfiguredReusableSupplementary(
-                using: headerRegistration,
-                for: indexPath
-            )
-        }
-    }
-    
-    private func applySnapshot() {
-        var snapshot = Snapshot()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(BookTopic.allCases, toSection: .main)
-        dataSource.apply(snapshot, animatingDifferences: false)
-    }
     
     //MARK: UI 프로퍼티
     private let navigationTitleLabel: UILabel = {
@@ -124,8 +44,6 @@ final class LibraryViewController: BaseViewController {
         view.alwaysBounceVertical = false
         return view
     }()
-   
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -193,6 +111,98 @@ extension LibraryViewController {
             .bind(with: self) { owner, _ in
                 owner.delegate?.libraryDidTapClose()
             }.disposed(by: disposeBag)
+    }
+}
+
+// MARK: CollectionView Layout
+extension LibraryViewController {
+    private func createLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalHeight(1)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .absolute(160)
+        )
+        let group = NSCollectionLayoutGroup.vertical(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = AppSpacing.space16
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: AppSpacing.space16,
+            leading: AppSpacing.space16,
+            bottom: AppSpacing.space16,
+            trailing: AppSpacing.space16,
+        )
+
+        let headerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(44)
+        )
+        let header = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
+        section.boundarySupplementaryItems = [header]
+
+        return UICollectionViewCompositionalLayout(section: section)
+    }
+    
+    private func configDataSource() {
+        let registration = UICollectionView.CellRegistration
+        <VocabTopicCardCollectionViewCell, BookTopic> { [weak self] cell, _ ,item in
+            guard let self else { return }
+            cell.binding(with: item)
+            
+            cell.buttonTap
+                .map { item }
+                .bind(with: self) { owner, topic in
+                    print("셀 버튼 탭: \(topic.title)")
+                }.disposed(by: cell.disposeBag)
+        }
+        
+        
+        
+        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { supplementaryView, _, _ in
+            var config = supplementaryView.defaultContentConfiguration()
+            config.text = "Vocabulary"
+            config.textProperties.font = AppFont.headline
+            config.textProperties.color = AppColor.textPrimary
+            config.directionalLayoutMargins = .zero
+            supplementaryView.contentConfiguration = config
+        }
+
+        dataSource = DataSource(collectionView: collectionView) {
+            collectionView, indexPath, itemIdentifier in
+
+            collectionView.dequeueConfiguredReusableCell(
+                using: registration,
+                for: indexPath,
+                item: itemIdentifier
+            )
+        }
+
+        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
+            collectionView.dequeueConfiguredReusableSupplementary(
+                using: headerRegistration,
+                for: indexPath
+            )
+        }
+    }
+    
+    private func applySnapshot() {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(BookTopic.allCases, toSection: .main)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
