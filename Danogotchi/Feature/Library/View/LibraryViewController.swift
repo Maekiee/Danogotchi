@@ -151,7 +151,8 @@ final class LibraryViewController: BaseViewController {
     }
     
     override func configView() {
-        navigationItem.title = navigationTitleLabel.text
+        navigationTitleLabel.alpha = 0
+        navigationItem.titleView = navigationTitleLabel
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: "닫기", style: .plain, target: nil, action: nil
         )
@@ -163,6 +164,35 @@ extension LibraryViewController {
         let input = LibraryViewModel.Input()
         let output = viewModel.transform(input: input)
         
+        collectionView.rx.contentOffset
+            .compactMap { [weak self] contentOffset in
+                guard let self else { return nil }
+                let headerIndexPath = IndexPath(item: 0, section: 0)
+                
+                guard let attributes = collectionView.collectionViewLayout
+                    .layoutAttributesForSupplementaryView(
+                        ofKind: UICollectionView.elementKindSectionHeader,
+                        at: headerIndexPath
+                    ) else { return nil }
+                
+                let visibleTop = contentOffset.y + collectionView.adjustedContentInset.top
+                return attributes.frame.maxY <= visibleTop
+            }
+            .distinctUntilChanged()
+            .bind(with: self) { owner, shouldShowNavBarTitle in
+                UIView.animate(
+                    withDuration: 0.2,
+                    delay: 0,
+                    options: [.beginFromCurrentState, .allowUserInteraction]
+                ) {
+                    owner.navigationTitleLabel.alpha = shouldShowNavBarTitle ? 1 : 0
+                }
+            }.disposed(by: disposeBag)
+        
+        navigationItem.rightBarButtonItem?.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.delegate?.libraryDidTapClose()
+            }.disposed(by: disposeBag)
         
     }
 }
