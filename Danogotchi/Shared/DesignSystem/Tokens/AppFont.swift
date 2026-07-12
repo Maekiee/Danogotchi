@@ -13,6 +13,7 @@ enum AppFont {
         return UIFont(name: weight.rawValue, size: size) ?? .systemFont(ofSize: size, weight: weight.systemFallback)
     }
     
+    static var largeDisplay: UIFont { font(.bold, size: 32) }
     static var display: UIFont { font(.bold, size: 28) }
     static var title1: UIFont { font(.bold, size: 24) }
     static var title2: UIFont { font(.semibold, size: 20) }

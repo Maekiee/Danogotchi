@@ -33,7 +33,7 @@ final class LibraryViewController: BaseViewController {
     private let navigationTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "Vocabulary"
-        label.font = AppFont.label
+        label.font = AppFont.headline
         return label
     }()
     private lazy var collectionView: UICollectionView = {
@@ -42,6 +42,7 @@ final class LibraryViewController: BaseViewController {
             collectionViewLayout: createLayout()
         )
         view.alwaysBounceVertical = false
+        view.backgroundColor = AppColor.background
         return view
     }()
     
@@ -125,7 +126,7 @@ extension LibraryViewController {
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .absolute(160)
+            heightDimension: .absolute(144)
         )
         let group = NSCollectionLayoutGroup.vertical(
             layoutSize: groupSize,
@@ -175,7 +176,7 @@ extension LibraryViewController {
         ) { supplementaryView, _, _ in
             var config = supplementaryView.defaultContentConfiguration()
             config.text = "Vocabulary"
-            config.textProperties.font = AppFont.headline
+            config.textProperties.font = AppFont.title1
             config.textProperties.color = AppColor.textPrimary
             config.directionalLayoutMargins = .zero
             supplementaryView.contentConfiguration = config

@@ -13,14 +13,15 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
     
     private let textLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.black
-        label.font = AppFont.display
+        label.textColor = AppColor.textPrimary
+        label.font = AppFont.largeDisplay
         return label
     }()
     private let icon: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
+        imageView.tintColor = AppColor.textPrimary
         return imageView
     }()
     private let button: UIButton = {
@@ -28,13 +29,14 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         config.image = UIImage(
             systemName: "arrow.right",
             withConfiguration: UIImage.SymbolConfiguration(
-                pointSize: 14, weight: .medium
+                pointSize: 11, weight: .medium
             )
         )
         
+        config.baseForegroundColor = AppColor.textPrimary
         config.cornerStyle = .capsule
         config.background.backgroundColor = .clear
-        config.background.strokeColor = AppColor.background
+        config.background.strokeColor = AppColor.textPrimary
         config.background.strokeWidth = 2
         
         let button = UIButton(configuration: config)
@@ -82,6 +84,7 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         button.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(AppSpacing.space16)
             make.trailing.equalToSuperview().offset(-AppSpacing.space16)
+            make.size.equalTo(40)
         }
     }
     
@@ -92,7 +95,8 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
     }
     
     func binding(with item: BookTopic) {
-        icon.image = UIImage(named: item.icon)
+        icon.image = UIImage(named: item.icon)?
+            .withRenderingMode(.alwaysTemplate)
         textLabel.text = item.title
     }
     
