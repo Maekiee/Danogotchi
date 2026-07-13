@@ -66,6 +66,10 @@ extension AppDIContainer {
             learningHistoryRepository: learningHistoryRepository
         )
     }
+    
+    func makeVocabDetailViewController() -> VocabBookDetailViewModel {
+        return VocabBookDetailViewModel()
+    }
 }
 
 // MARK: - Quiz
