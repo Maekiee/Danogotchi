@@ -34,6 +34,7 @@ final class LibraryViewController: BaseViewController {
         let label = UILabel()
         label.text = "Vocabulary"
         label.font = AppFont.headline
+        label.alpha = 0
         return label
     }()
     private lazy var collectionView: UICollectionView = {
@@ -61,7 +62,7 @@ final class LibraryViewController: BaseViewController {
             collectionView
         ].forEach { view.addSubview($0) }
     }
-
+    
     override func configLayout() {
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
@@ -70,7 +71,6 @@ final class LibraryViewController: BaseViewController {
     }
     
     override func configView() {
-        navigationTitleLabel.alpha = 0
         navigationItem.titleView = navigationTitleLabel
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: "닫기", style: .plain, target: nil, action: nil
@@ -83,30 +83,24 @@ extension LibraryViewController {
         let input = LibraryViewModel.Input()
         let output = viewModel.transform(input: input)
         
-        collectionView.rx.contentOffset
-            .compactMap { [weak self] contentOffset in
-                guard let self else { return nil }
-                let headerIndexPath = IndexPath(item: 0, section: 0)
-                
-                guard let attributes = collectionView.collectionViewLayout
-                    .layoutAttributesForSupplementaryView(
-                        ofKind: UICollectionView.elementKindSectionHeader,
-                        at: headerIndexPath
-                    ) else { return nil }
-                
-                let visibleTop = contentOffset.y + collectionView.adjustedContentInset.top
-                return attributes.frame.maxY <= visibleTop
+        Observable.merge(
+            collectionView.rx.didEndDisplayingSupplementaryView
+                .filter { $0.elementKind == UICollectionView.elementKindSectionHeader }
+                .map { _ in true },
+            collectionView.rx.willDisplaySupplementaryView
+                .filter { $0.elementKind == UICollectionView.elementKindSectionHeader }
+                .map { _ in false }
+        )
+        .distinctUntilChanged()
+        .bind(with: self) { owner, shouldShowNavBarTitle in
+            UIView.animate(
+                withDuration: 0.2,
+                delay: 0,
+                options: [.beginFromCurrentState, .allowUserInteraction]
+            ) {
+                owner.navigationTitleLabel.alpha = shouldShowNavBarTitle ? 1 : 0
             }
-            .distinctUntilChanged()
-            .bind(with: self) { owner, shouldShowNavBarTitle in
-                UIView.animate(
-                    withDuration: 0.2,
-                    delay: 0,
-                    options: [.beginFromCurrentState, .allowUserInteraction]
-                ) {
-                    owner.navigationTitleLabel.alpha = shouldShowNavBarTitle ? 1 : 0
-                }
-            }.disposed(by: disposeBag)
+        }.disposed(by: disposeBag)
         
         navigationItem.rightBarButtonItem?.rx.tap
             .bind(with: self) { owner, _ in
@@ -141,7 +135,7 @@ extension LibraryViewController {
             bottom: AppSpacing.space16,
             trailing: AppSpacing.space16,
         )
-
+        
         let headerSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .estimated(44)
@@ -152,7 +146,7 @@ extension LibraryViewController {
             alignment: .top
         )
         section.boundarySupplementaryItems = [header]
-
+        
         return UICollectionViewCompositionalLayout(section: section)
     }
     
@@ -169,8 +163,6 @@ extension LibraryViewController {
                 }.disposed(by: cell.disposeBag)
         }
         
-        
-        
         let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
             elementKind: UICollectionView.elementKindSectionHeader
         ) { supplementaryView, _, _ in
@@ -181,17 +173,17 @@ extension LibraryViewController {
             config.directionalLayoutMargins = .zero
             supplementaryView.contentConfiguration = config
         }
-
+        
         dataSource = DataSource(collectionView: collectionView) {
             collectionView, indexPath, itemIdentifier in
-
+            
             collectionView.dequeueConfiguredReusableCell(
                 using: registration,
                 for: indexPath,
                 item: itemIdentifier
             )
         }
-
+        
         dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
             collectionView.dequeueConfiguredReusableSupplementary(
                 using: headerRegistration,
