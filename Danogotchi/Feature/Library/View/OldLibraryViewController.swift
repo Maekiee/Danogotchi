@@ -3,11 +3,11 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-protocol LibraryViewControllerDelegate: AnyObject {
-    func libraryDidTapClose()
-    func libraryDidSelectActiveBook()
-    func libraryDidTapMore()
-}
+//protocol LibraryViewControllerDelegate: AnyObject {
+//    func libraryDidTapClose()
+//    func libraryDidSelectActiveBook()
+//    func libraryDidTapMore()
+//}
 
 final class OldLibraryViewController: BaseViewController {
     private let disposeBag = DisposeBag()
@@ -356,7 +356,7 @@ extension OldLibraryViewController {
         
         moreButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.delegate?.libraryDidTapMore()
+//                owner.delegate?.libraryDidTapMore()
             }.disposed(by: disposeBag)
         
         collectionView.rx.itemSelected

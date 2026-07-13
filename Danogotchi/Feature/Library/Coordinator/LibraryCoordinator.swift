@@ -49,16 +49,18 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
         }
     }
 
-    func libraryDidTapMore() {
-        let vm = appDIContainer.makeMyBookDetailViewModel()
-        let vc = MyBookDetailViewController(viewModel: vm)
+    func libraryDidTapMore(topic: BookTopic) {
+//        let vm = appDIContainer.makeMyBookDetailViewModel()
+//        let vc = MyBookDetailViewController(viewModel: vm)
+        let vm = appDIContainer.makeVocabDetailViewModel(topic: topic)
+        let vc = VocabBookDetailViewController(viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
 }
 
 
-extension LibraryCoordinator: MyBookDetailViewControllerDelegate {
+extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
     func myBookDetailDidTapBack() {
         navigationController.popViewController(animated: true)
     }

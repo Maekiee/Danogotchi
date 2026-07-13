@@ -4,14 +4,10 @@ import RxSwift
 import RxCocoa
 
 
-protocol MyBookDetailViewControllerDelegate: AnyObject {
-    func myBookDetailDidTapBack()
-    func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab)
-    func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab)
-}
+
 
 final class MyBookDetailViewController: BaseViewController {
-    weak var delegate: MyBookDetailViewControllerDelegate?
+    weak var delegate: VocabBookDetailViewControllerDelegate?
     private let disposeBag = DisposeBag()
     private let viewModel: MyBookDetailViewModel
     private let userInfo = UserInfoManager.shared

@@ -67,8 +67,8 @@ extension AppDIContainer {
         )
     }
     
-    func makeVocabDetailViewController() -> VocabBookDetailViewModel {
-        return VocabBookDetailViewModel()
+    func makeVocabDetailViewModel(topic: BookTopic) -> VocabBookDetailViewModel {
+        return VocabBookDetailViewModel(topic: topic)
     }
 }
 

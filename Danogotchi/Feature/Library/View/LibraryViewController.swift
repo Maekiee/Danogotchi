@@ -4,6 +4,12 @@ import RxSwift
 import RxCocoa
 
 
+protocol LibraryViewControllerDelegate: AnyObject {
+    func libraryDidTapClose()
+    func libraryDidSelectActiveBook()
+    func libraryDidTapMore(topic: BookTopic)
+}
+
 final class LibraryViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: LibraryViewModel
@@ -161,6 +167,7 @@ extension LibraryViewController {
                 .map { item }
                 .bind(with: self) { owner, topic in
                     print("셀 버튼 탭: \(topic.title)")
+                    owner.delegate?.libraryDidTapMore(topic: topic)
                 }.disposed(by: cell.disposeBag)
         }
         
