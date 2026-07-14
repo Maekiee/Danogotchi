@@ -38,7 +38,7 @@ final class MyBookDetailViewModel: BaseViewModel {
         input.viewWillAppear
             .bind(with: self) { owner, _ in
                 
-                guard let myBook = owner.vocabBookRepository.readAllBooks(type: .mine).first else {
+                guard let myBook = owner.vocabBookRepository.readAllBooks(bookType: .myBook).first else {
                     // "나의 단어장"이 없는 경우 빈 배열 처리
                     wordList.accept([])
                     owner.myBookId.accept(nil)

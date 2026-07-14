@@ -1,12 +1,12 @@
 import Foundation
 
-enum BookTopic: CaseIterable, Hashable {
+enum BookTopic: String, CaseIterable, Hashable {
     case myBook
     case travel
     case emotion
     case life
     case business
-    
+
     var title: String {
         switch self {
         case .myBook:
@@ -34,16 +34,6 @@ enum BookTopic: CaseIterable, Hashable {
             return "life"
         case .business:
             return "business"
-        }
-    }
-    
-    var recommendBookId: String? {
-        switch self {
-        case .myBook: return nil
-        case .travel: return "rec_travel_001"
-        case .emotion: return "rec_emotion_003"
-        case .life: return "rec_life_004"
-        case .business: return "rec_business_002"
         }
     }
 }

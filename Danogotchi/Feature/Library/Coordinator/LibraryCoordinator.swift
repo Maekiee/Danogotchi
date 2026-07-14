@@ -19,14 +19,6 @@ final class LibraryCoordinator:NSObject, Coordinator {
 
 extension LibraryCoordinator {
     func start() {
-        let vm = appDIContainer.makeOldLibraryViewModel()
-        let vc = OldLibraryViewController(viewModel: vm)
-        vc.delegate = self
-        navigationController.setViewControllers([vc], animated: false)
-        navigationController.presentationController?.delegate = self
-    }
-    
-    func start2() {
         let vm = appDIContainer.makeLibraryViewModel()
         let vc = LibraryViewController(viewModel: vm)
         vc.delegate = self

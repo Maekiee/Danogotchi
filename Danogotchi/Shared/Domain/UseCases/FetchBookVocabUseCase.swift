@@ -8,30 +8,24 @@ protocol FetchVocabBookUseCase {
 
 final class DefaultFetchVocabBookUseCase {
     private let vocabBookRepository: VocabBookRepository
-    private let recommendBookRepository: RecommendBookRepository
     private let learningHistoryRepository: LearningHistoryRepository
-    
+
     init(
         vocabBookRepository: VocabBookRepository,
-        recommendBookRepository: RecommendBookRepository,
         learningHistoryRepository: LearningHistoryRepository
     ) {
         self.vocabBookRepository = vocabBookRepository
-        self.recommendBookRepository = recommendBookRepository
         self.learningHistoryRepository = learningHistoryRepository
     }
-    
+
     private func fetchVocabs(topic: BookTopic) -> Observable<[Vocab]> {
         switch topic {
         case .myBook:
-            let vocabs = vocabBookRepository.readAllBooks(type: .mine).first
+            let vocabs = vocabBookRepository.readAllBooks(bookType: .myBook).first
                 .map { vocabBookRepository.fetchVocabs(inBookId: $0.id).reversed() } ?? []
             return .just(Array(vocabs))
         default:
-            return recommendBookRepository.fetchRecommendBooks()
-                .map { books in
-                    books.first { $0.originBookId == topic.recommendBookId }?.vocabList ?? []
-                }
+            return .just(vocabBookRepository.readAllBooks(bookType: topic).first?.vocabList ?? [])
         }
     }
     

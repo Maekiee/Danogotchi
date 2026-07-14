@@ -38,24 +38,10 @@ extension AppDIContainer {
 
 // MARK: - Library
 extension AppDIContainer {
-    func makeRecommendBookRepository() -> RecommendBookRepository {
-        return DefaultRecommendBookRepository()
-    }
-    
     func makeLibraryViewModel() -> LibraryViewModel {
         return LibraryViewModel()
     }
-    
-    func makeOldLibraryViewModel() -> OldLibraryViewModel {
-        let vocabBookRepository = makeVocabBookRepository()
-        let recommendBookRepository = makeRecommendBookRepository()
 
-        return OldLibraryViewModel(
-            recommendBookRepository: recommendBookRepository,
-            vocabBookRepository: vocabBookRepository
-        )
-    }
-    
     func makeMyBookDetailViewModel() -> MyBookDetailViewModel {
         let vocabBookRepository = makeVocabBookRepository()
         let vocabRepository = makeVocabRepository()
@@ -76,11 +62,9 @@ extension AppDIContainer {
     
     func makeFetchVocabBooksUseCase() -> FetchVocabBookUseCase {
         let vocabBookRepository = makeVocabBookRepository()
-        let recommendBookRepository = makeRecommendBookRepository()
         let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return DefaultFetchVocabBookUseCase(
             vocabBookRepository: vocabBookRepository,
-            recommendBookRepository: recommendBookRepository,
             learningHistoryRepository: learningHistoryRepository
         )
     }
