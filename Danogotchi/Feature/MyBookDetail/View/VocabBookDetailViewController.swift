@@ -24,13 +24,25 @@ final class VocabBookDetailViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: Collection View
+    private enum Section {
+        case main
+    }
+    
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, VocabDisplayInfo>
+    
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
+    
+    private var dataSource: DataSource!
+    
     // MARK: UI 프로퍼티
-    private let test: UILabel = {
-        let label = UILabel()
-        label.text = "vocab book deatil View"
-        label.font = AppFont.display
-        label.textColor = AppColor.textPrimary
-        return label
+    private lazy var collectionView: UICollectionView = {
+        let view = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: createLayout()
+        )
+        view.backgroundColor = AppColor.appRed
+        return view
     }()
     
     override func viewDidLoad() {
@@ -43,14 +55,14 @@ final class VocabBookDetailViewController: BaseViewController {
     
     override func configHierarchy() {
         [
-            test
+            collectionView
         ].forEach { view.addSubview($0) }
     }
     
     override func configLayout() {
-        test.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview()
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.horizontalEdges.bottom.equalToSuperview()
         }
     }
     
@@ -59,6 +71,7 @@ final class VocabBookDetailViewController: BaseViewController {
     }
 }
 
+// MARK: 바인딩
 extension VocabBookDetailViewController {
     private func bind() {
         let input = VocabBookDetailViewModel.Input(
@@ -70,6 +83,41 @@ extension VocabBookDetailViewController {
             .drive(with: self) { owner, list in
                 print("뷰컨에서 단어장 리스트: \(list)")
             }.disposed(by: disposeBag)
+        
+    }
+}
+
+// MARK: CollectionView Layout
+extension VocabBookDetailViewController {
+    private func createLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalHeight(1.0)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(120)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = AppSpacing.space16
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: AppSpacing.space16,
+            leading: AppSpacing.space16,
+            bottom: AppSpacing.space16,
+            trailing: AppSpacing.space16,
+        )
+        
+        return UICollectionViewCompositionalLayout(section: section)
+    }
+    
+    private func configDataSource() {
         
     }
 }
