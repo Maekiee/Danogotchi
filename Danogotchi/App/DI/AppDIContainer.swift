@@ -63,7 +63,7 @@ extension AppDIContainer {
     func makeFetchVocabsUseCase() -> FetchVocabsUseCase {
         let vocabBookRepository = makeVocabBookRepository()
         let learningHistoryRepository = makeVocabLearningHistoryRepository()
-        return FetchVocabsUseCaseImpl(
+        return DefaultFetchVocabsUseCase(
             vocabBookRepository: vocabBookRepository,
             learningHistoryRepository: learningHistoryRepository
         )

@@ -5,7 +5,7 @@ protocol FetchVocabsUseCase {
     func execute(topic: BookTopic) -> Observable<[VocabDisplayInfo]>
 }
 
-final class FetchVocabsUseCaseImpl: FetchVocabsUseCase {
+final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
     private let vocabBookRepository: VocabBookRepository
     private let learningHistoryRepository: LearningHistoryRepository
 
