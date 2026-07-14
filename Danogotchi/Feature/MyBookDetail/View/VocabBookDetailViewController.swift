@@ -118,10 +118,27 @@ extension VocabBookDetailViewController {
     }
     
     private func configDataSource() {
+        let registration = UICollectionView.CellRegistration<
+            MyBookDetailCollectionViewCell, VocabDisplayInfo> {
+                [weak self] cell, indexPath, item in
+                guard let self else { return }
+                cell.binding(with: item)
+        }
         
+        dataSource = DataSource(collectionView: collectionView) {
+            collectionView, indexPath, itemIdentifier in
+            return collectionView.dequeueConfiguredReusableCell(
+                using: registration,
+                for: indexPath,
+                item: itemIdentifier
+            )
+        }
     }
     
-    private func applySnapshot() {
-        
-    }
+//    private func applySnapshot() {
+//        var snapshot = Snapshot()
+//        snapshot.appendSections([.main])
+//        snapshot.appendItems(items)
+//        dataSource.apply(snapshot, animatingDifferences: true)
+//    }
 }
