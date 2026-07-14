@@ -7,18 +7,19 @@
         <relationship name="vocab" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="VocabEntity" inverseName="histories" inverseEntity="VocabEntity"/>
     </entity>
     <entity name="VocabBookEntity" representedClassName="VocabBookEntity" syncable="YES">
+        <attribute name="bookType" attributeType="String"/>
         <attribute name="createAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="originBookId" optional="YES" attributeType="String"/>
+        <attribute name="level" optional="YES" attributeType="String"/>
         <attribute name="title" attributeType="String"/>
-        <attribute name="type" attributeType="String"/>
         <relationship name="vocabs" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="VocabEntity" inverseName="vocabBook" inverseEntity="VocabEntity"/>
     </entity>
     <entity name="VocabEntity" representedClassName="VocabEntity" syncable="YES">
+        <attribute name="bookType" attributeType="String"/>
         <attribute name="createAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="level" optional="YES" attributeType="String"/>
         <attribute name="meaning" attributeType="String"/>
-        <attribute name="originWordId" optional="YES" attributeType="String"/>
         <attribute name="word" attributeType="String"/>
         <relationship name="histories" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LearningHistoryEntity" inverseName="vocab" inverseEntity="LearningHistoryEntity"/>
         <relationship name="vocabBook" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="VocabBookEntity" inverseName="vocabs" inverseEntity="VocabBookEntity"/>

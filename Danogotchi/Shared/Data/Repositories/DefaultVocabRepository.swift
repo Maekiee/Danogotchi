@@ -29,12 +29,12 @@ final class DefaultVocabRepository {
 }
 
 extension DefaultVocabRepository: VocabRepository {
-    func createVocab(vocab: String, meaning: String, originWordId: String?) -> Vocab {
+    func createVocab(vocab: String, meaning: String) -> Vocab {
         let vocabEntity = VocabEntity(context: context)
         vocabEntity.id = UUID()
         vocabEntity.word = vocab
         vocabEntity.meaning = meaning
-        vocabEntity.originWordId = originWordId
+        vocabEntity.bookType = BookTopic.myBook.rawValue
         vocabEntity.createAt = Date()
         
         

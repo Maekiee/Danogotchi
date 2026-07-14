@@ -10,10 +10,10 @@ extension VocabBookEntity {
         return NSFetchRequest<VocabBookEntity>(entityName: "VocabBookEntity")
     }
 
+    @NSManaged public var bookType: String?
     @NSManaged public var createAt: Date?
     @NSManaged public var id: UUID?
-    @NSManaged public var originBookId: String?
-    @NSManaged public var type: String?
+    @NSManaged public var level: String?
     @NSManaged public var title: String?
     @NSManaged public var vocabs: NSSet?
 

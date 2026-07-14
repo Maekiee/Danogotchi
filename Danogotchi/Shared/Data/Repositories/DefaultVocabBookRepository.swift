@@ -27,12 +27,12 @@ final class DefaultVocabBookRepository {
 }
 
 extension DefaultVocabBookRepository: VocabBookRepository {
-    func createBook(title: String, type: VocabBookType, originBookId: String?) -> VocabBook {
+    func createBook(title: String, bookType: BookTopic, level: VocabLevel?) -> VocabBook {
         let vocabBookEntity = VocabBookEntity(context: context)
         vocabBookEntity.id = UUID()
         vocabBookEntity.title = title
-        vocabBookEntity.type = type.rawValue
-        vocabBookEntity.originBookId = originBookId
+        vocabBookEntity.bookType = bookType.rawValue
+        vocabBookEntity.level = level?.rawValue
         vocabBookEntity.createAt = Date()
         
         saveContext()
@@ -50,9 +50,9 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         return vocabBookEntities.map { $0.toDomain() }
     }
     
-    func readAllBooks(type: VocabBookType) -> [VocabBook] {
+    func readAllBooks(bookType: BookTopic) -> [VocabBook] {
         let request = VocabBookEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "type == %@", type.rawValue)
+        request.predicate = NSPredicate(format: "bookType == %@", bookType.rawValue)
         request.sortDescriptors = [
             NSSortDescriptor(key: "createAt", ascending: true)
         ]
@@ -76,13 +76,14 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         saveContext()
     }
     
-    func addVocab(bookId: UUID, word: String, meaning: String, originWordId: String?) -> Vocab? {
+    func addVocab(bookId: UUID, word: String, meaning: String, bookType: BookTopic, level: VocabLevel?) -> Vocab? {
         guard let vocabBookEntity = fetchBookEntity(id: bookId) else { return nil }
         let vocabEntity = VocabEntity(context: context)
         vocabEntity.id = UUID()
         vocabEntity.word = word
         vocabEntity.meaning = meaning
-        vocabEntity.originWordId = originWordId
+        vocabEntity.bookType = bookType.rawValue
+        vocabEntity.level = level?.rawValue
         vocabEntity.createAt = Date()
         
         vocabBookEntity.addToVocabs(vocabEntity)

@@ -249,14 +249,14 @@ extension SearchThemeViewController {
         
         UserInfoManager.shared.currentThemeUrl = selectedTheme
         
-        let existingBooks = vocabBookRepo.readAllBooks(type: .mine)
-        
+        let existingBooks = vocabBookRepo.readAllBooks(bookType: .myBook)
+
         if let existingBook = existingBooks.first {
             userInfo.selectedBookId = existingBook.id.uuidString
             delegate?.didSelectTheme()
         } else {
-            // 새로 생성
-            let newBook = vocabBookRepo.createBook(title: "나의 단어장", type: .mine, originBookId: nil)
+            // 시드 실패 시 폴백 생성
+            let newBook = vocabBookRepo.createBook(title: BookTopic.myBook.title, bookType: .myBook, level: nil)
             userInfo.selectedBookId = newBook.id.uuidString
             delegate?.didSelectTheme()
         }

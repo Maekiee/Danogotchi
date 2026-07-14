@@ -17,6 +17,8 @@ final class AppFlowCoordinator: Coordinator {
 
 extension AppFlowCoordinator {
     func start() {
+        DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
+
         if UserInfoManager.shared.currentThemeUrl != nil {
             startMainFlow()
         } else {

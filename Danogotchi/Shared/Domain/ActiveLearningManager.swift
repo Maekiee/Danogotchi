@@ -16,7 +16,6 @@ final class ActiveLearningManager {
     let activeBookSource = BehaviorRelay<VocabularyBookType?>(value: nil)
 
     private let vocabBookRepo: VocabBookRepository
-    private let recommendRepo: RecommendBookRepository
     private let userInfo: UserInfoManager
     private let disposeBag = DisposeBag()
 
@@ -24,30 +23,28 @@ final class ActiveLearningManager {
         wordBookRepo: VocabBookRepository = DefaultVocabBookRepository(
             context: CoreDataStack.shared.viewContext
         ),
-        recommendRepo: RecommendBookRepository = DefaultRecommendBookRepository(),
         userInfo: UserInfoManager = UserInfoManager.shared
     ) {
         self.vocabBookRepo = wordBookRepo
-        self.recommendRepo = recommendRepo
         self.userInfo = userInfo
-        
+
         userInfo.activeBookIdentifierRelay
             .flatMapLatest { [weak self] identifier -> Observable<(VocabBook?, VocabularyBookType?)> in
-                guard let self = self, let identifier = identifier else {
+                guard let self = self, let identifier = identifier,
+                      let uuid = UUID(uuidString: identifier.id) else {
                     return .just((nil, nil)) // 선택된 책 없음
                 }
-                
+
+                // 시드 이후 모든 단어장이 DB에 있으므로 타입 구분 없이 id로 로드
+                let source: VocabularyBookType
                 switch identifier.type {
                 case .mine:
-                    guard let uuid = UUID(uuidString: identifier.id) else {
-                        return .just((nil, nil))
-                    }
-                    let source: VocabularyBookType = .mine(id: uuid)
-                    return self.loadMyBook(id: uuid).map { ($0, $0 != nil ? source : nil) }
+                    source = .mine(id: uuid)
                 case .recommended:
-                    let source: VocabularyBookType = .recommended(id: identifier.id)
-                    return self.loadRecommendedBook(id: identifier.id).map { ($0, $0 != nil ? source : nil) }
+                    source = .recommended(id: identifier.id)
                 }
+                let book = self.vocabBookRepo.readBook(id: uuid)
+                return .just((book, book != nil ? source : nil))
             }
             .subscribe(with: self, onNext: { owner, result in
                 let (book, source) = result
@@ -55,32 +52,6 @@ final class ActiveLearningManager {
                 owner.activeBookSource.accept(source)
             })
             .disposed(by: disposeBag)
-    }
-
-    private func loadMyBook(id: UUID) -> Observable<VocabBook?> {
-        guard let book = vocabBookRepo.readBook(id: id) else {
-            return .just(nil)
-        }
-
-        let vocabs = vocabBookRepo.fetchVocabs(inBookId: id)
-        let vocabBook = VocabBook(
-            id: book.id,
-            title: book.title,
-            type: book.type,
-            originBookId: book.originBookId,
-            vocabList: vocabs,
-            createAt: book.createAt
-        )
-
-        return .just(vocabBook)
-    }
-    
-    // Helper: 추천 단어장 로드 (MockRepo에서 ID로 검색)
-    private func loadRecommendedBook(id: String) -> Observable<VocabBook?> {
-        return recommendRepo.fetchRecommendBooks()
-            .map { allBooks in
-                allBooks.first(where: { $0.originBookId == id || $0.id.uuidString == id })
-            }
     }
 
     // '활성 단어장' 변경 (ViewControllers에서 호출)
