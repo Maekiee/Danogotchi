@@ -120,4 +120,8 @@ extension VocabBookDetailViewController {
     private func configDataSource() {
         
     }
+    
+    private func applySnapshot() {
+        
+    }
 }
