@@ -36,4 +36,14 @@ enum BookTopic: CaseIterable, Hashable {
             return "business"
         }
     }
+    
+    var recommendBookId: String? {
+        switch self {
+        case .myBook: return nil
+        case .travel: return "rec_travel_001"
+        case .emotion: return "rec_emotion_003"
+        case .life: return "rec_life_004"
+        case .business: return "rec_business_002"
+        }
+    }
 }

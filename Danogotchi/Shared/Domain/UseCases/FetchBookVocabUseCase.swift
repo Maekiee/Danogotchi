@@ -1,12 +1,12 @@
 import Foundation
 import RxSwift
 
-protocol FetchBookVocabsUseCase {
+protocol FetchVocabBookUseCase {
     func execute(topic: BookTopic) -> Observable<[VocabDisplayInfo]>
 }
 
 
-final class DefaultFetchBookVocabsUseCase {
+final class DefaultFetchVocabBookUseCase {
     private let vocabBookRepository: VocabBookRepository
     private let recommendBookRepository: RecommendBookRepository
     private let learningHistoryRepository: LearningHistoryRepository
@@ -55,7 +55,7 @@ final class DefaultFetchBookVocabsUseCase {
     }
 }
 
-extension DefaultFetchBookVocabsUseCase: FetchBookVocabsUseCase {
+extension DefaultFetchVocabBookUseCase: FetchVocabBookUseCase {
     func execute(topic: BookTopic) -> RxSwift.Observable<[VocabDisplayInfo]> {
         fetchVocabs(topic: topic)
             .map { [weak self] vocabs in
