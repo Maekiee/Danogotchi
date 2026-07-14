@@ -5,23 +5,29 @@ import RxCocoa
 final class VocabBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let topic: BookTopic
-    private let fetchVocabBooksUseCase: FetchVocabBookUseCase
+    private let fetchVocabsUseCase: FetchVocabsUseCase
     var navigationBarTitle: String { topic.title }
     
-    init(topic: BookTopic, fetchVocabBooksUseCase: FetchVocabBookUseCase) {
+    init(topic: BookTopic, fetchVocabsUseCase: FetchVocabsUseCase) {
         self.topic = topic
-        self.fetchVocabBooksUseCase = fetchVocabBooksUseCase
+        self.fetchVocabsUseCase = fetchVocabsUseCase
     }
     
     struct Input {
-        
+        let viewWillAppear: Observable<Void>
     }
     
     struct Output {
-        
+        let vocabList: Driver<[VocabDisplayInfo]>
     }
     
     func transform(input: Input) -> Output {
-        return Output()
+        let vocabList = input.viewWillAppear
+            .flatMapLatest { [weak self] _ -> Observable<[VocabDisplayInfo]> in
+                guard let self else { return .just([]) }
+                return fetchVocabsUseCase.execute(topic: self.topic)
+            }.asDriver(onErrorJustReturn: [])
+        
+        return Output(vocabList: vocabList)
     }
 }

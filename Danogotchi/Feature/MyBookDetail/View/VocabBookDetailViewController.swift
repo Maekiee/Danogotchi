@@ -61,6 +61,15 @@ final class VocabBookDetailViewController: BaseViewController {
 
 extension VocabBookDetailViewController {
     private func bind() {
+        let input = VocabBookDetailViewModel.Input(
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+        )
+        let output = viewModel.transform(input: input)
+        
+        output.vocabList
+            .drive(with: self) { owner, list in
+                print("뷰컨에서 단어장 리스트: \(list)")
+            }.disposed(by: disposeBag)
         
     }
 }
