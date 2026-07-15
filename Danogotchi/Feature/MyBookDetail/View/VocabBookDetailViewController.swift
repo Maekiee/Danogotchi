@@ -50,6 +50,9 @@ final class VocabBookDetailViewController: BaseViewController {
         configHierarchy()
         configLayout()
         configView()
+        
+        configDataSource()
+        
         bind()
     }
     
@@ -81,7 +84,7 @@ extension VocabBookDetailViewController {
         
         output.vocabList
             .drive(with: self) { owner, list in
-                print("뷰컨에서 단어장 리스트: \(list)")
+                owner.applySnapshot(items: list)
             }.disposed(by: disposeBag)
         
     }
@@ -135,10 +138,10 @@ extension VocabBookDetailViewController {
         }
     }
     
-//    private func applySnapshot() {
-//        var snapshot = Snapshot()
-//        snapshot.appendSections([.main])
-//        snapshot.appendItems(items)
-//        dataSource.apply(snapshot, animatingDifferences: true)
-//    }
+    private func applySnapshot(items: [VocabDisplayInfo]) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(items, toSection: .main)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
 }
