@@ -104,7 +104,7 @@ extension VocabBookDetailViewController {
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(144)
+            heightDimension: .absolute(168)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,

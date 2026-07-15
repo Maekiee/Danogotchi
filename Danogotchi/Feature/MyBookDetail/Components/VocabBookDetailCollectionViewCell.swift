@@ -13,7 +13,8 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
-        label.font = AppFont.font(.bold, size: 20)
+        label.font = AppFont.title1
+        label.numberOfLines = 2
         return label
     }()
     private let subtitleLabel: UILabel = {
@@ -27,10 +28,10 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "ellipsis")
         config.baseForegroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0)
+        config.contentInsets = .zero
         button.configuration = config
         return button
     }()
-    private let circleProgress = UICircleProgress()
     private let lavelTag: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -87,30 +88,38 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     private func configLayout() {
         lavelTag.snp.makeConstraints { make in
             make.size.equalTo(36)
-            make.top.equalToSuperview().inset(8)
-            make.leading.equalToSuperview().inset(8)
+            make.top.equalToSuperview().inset(18)
+            make.leading.equalToSuperview().inset(18)
         }
-        
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(lavelTag.snp.bottom).offset(AppSpacing.space12)
-            make.horizontalEdges.equalToSuperview().inset(18)
+
+        iconButton.snp.makeConstraints { make in
+            make.centerY.equalTo(lavelTag)
+            make.trailing.equalToSuperview().inset(18)
+        }
+
+        correctRateLabel.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(18)
+            make.bottom.equalToSuperview().inset(20)
         }
 
         subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(6)
             make.leading.equalToSuperview().inset(18)
+            make.bottom.equalToSuperview().inset(20)
         }
-        
-        iconButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(10)
-            make.trailing.equalToSuperview().offset(-18)
-        }
-        
+
         learningCountLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(6)
-            make.leading.equalTo(subtitleLabel.snp.trailing).offset(8)
+            make.leading.equalTo(subtitleLabel.snp.trailing)
+            make.centerY.equalTo(subtitleLabel)
+            make.trailing.lessThanOrEqualTo(correctRateLabel.snp.leading).offset(-8)
         }
-      
+
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().inset(18)
+            make.bottom.equalTo(subtitleLabel.snp.top).offset(-6)
+            make.trailing.lessThanOrEqualTo(correctRateLabel.snp.leading).offset(-8)
+        }
+
+        correctRateLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
     
     private func configView() {
@@ -124,18 +133,19 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         subtitleLabel.text = item.cardSubtitle
         
         if let learningCount = item.cardChipText {
-            learningCountLabel.text = " | \(learningCount)번 학습"
+            learningCountLabel.text = " · \(learningCount)번 학습"
         }
-        
+
         if let accuracyValue = item.cardAccuracy {
-            correctRateLabel.text = "\(accuracyValue)%"
-            circleProgress.setProgress(accuracyValue, animated: false)
-        }
-        
-        correctRateLabel.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().inset(10)
-            make.trailing.equalToSuperview().inset(18)
-            make.size.equalTo(40)
+            let percentText = NSMutableAttributedString(
+                string: "\(Int(accuracyValue * 100))",
+                attributes: [.font: AppFont.largeDisplay]
+            )
+            percentText.append(NSAttributedString(
+                string: "%",
+                attributes: [.font: AppFont.font(.bold, size: 14)]
+            ))
+            correctRateLabel.attributedText = percentText
         }
     }
 }
