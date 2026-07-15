@@ -3,7 +3,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class MyBookDetailCollectionViewCell: UICollectionViewCell {
+final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     
     var onTouchIcon: Observable<Void> {
@@ -30,13 +30,31 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
         button.configuration = config
         return button
     }()
-    private let chip: UIChip = {
-        let view = UIChip(text: "")
-        view.layer.cornerRadius = 10
-        view.setFont(AppFont.caption)
-        return view
-    }()
     private let circleProgress = UICircleProgress()
+    private let lavelTag: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.layer.cornerRadius = 18
+        label.layer.borderColor = AppColor.textPrimary.cgColor
+        label.layer.borderWidth = AppBorder.regular
+        label.textColor = AppColor.textPrimary
+        label.font = AppFont.label
+        label.clipsToBounds = true
+        label.text = "H1"
+        return label
+    }()
+    private let learningCountLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = AppColor.textSecondary
+        label.font = AppFont.footnote
+        return label
+    }()
+    private let correctRateLabel: UILabel = {
+        let label = UILabel()
+        label.font = AppFont.largeDisplay
+        label.textColor = AppColor.textPrimary
+        return label
+    }()
     
     
     override func prepareForReuse() {
@@ -60,20 +78,27 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
             titleLabel,
             subtitleLabel,
             iconButton,
-            chip,
-            circleProgress,
+            correctRateLabel,
+            lavelTag,
+            learningCountLabel,
         ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
+        lavelTag.snp.makeConstraints { make in
+            make.size.equalTo(36)
+            make.top.equalToSuperview().inset(8)
+            make.leading.equalToSuperview().inset(8)
+        }
+        
         titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(AppSpacing.space12)
+            make.top.equalTo(lavelTag.snp.bottom).offset(AppSpacing.space12)
             make.horizontalEdges.equalToSuperview().inset(18)
         }
 
         subtitleLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(6)
-            make.horizontalEdges.equalToSuperview().inset(18)
+            make.leading.equalToSuperview().inset(18)
         }
         
         iconButton.snp.makeConstraints { make in
@@ -81,22 +106,16 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
             make.trailing.equalToSuperview().offset(-18)
         }
         
-        chip.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().inset(10)
-            make.leading.equalToSuperview().inset(18)
+        learningCountLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(6)
+            make.leading.equalTo(subtitleLabel.snp.trailing).offset(8)
         }
+      
     }
     
     private func configView() {
         backgroundColor = AppColor.backgroundBeige2
-        layer.borderWidth = AppBorder.regular
-        layer.borderColor = AppColor.pointDarkGray.cgColor
         layer.cornerRadius = AppRadius.radius20
-        
-        layer.shadowColor = AppColor.pointDarkGray.cgColor
-        layer.shadowOpacity = 1
-        layer.shadowOffset = CGSize(width: 0, height: 4)
-        layer.shadowRadius = 0
     }
     
     
@@ -105,14 +124,15 @@ final class MyBookDetailCollectionViewCell: UICollectionViewCell {
         subtitleLabel.text = item.cardSubtitle
         
         if let learningCount = item.cardChipText {
-            chip.setText("\(learningCount)번 학습")
+            learningCountLabel.text = " | \(learningCount)번 학습"
         }
         
         if let accuracyValue = item.cardAccuracy {
+            correctRateLabel.text = "\(accuracyValue)%"
             circleProgress.setProgress(accuracyValue, animated: false)
         }
         
-        circleProgress.snp.makeConstraints { make in
+        correctRateLabel.snp.makeConstraints { make in
             make.bottom.equalToSuperview().inset(10)
             make.trailing.equalToSuperview().inset(18)
             make.size.equalTo(40)

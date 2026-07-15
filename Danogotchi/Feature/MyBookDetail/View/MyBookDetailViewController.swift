@@ -178,7 +178,7 @@ extension MyBookDetailViewController {
 // MARK: 컬렉션 뷰
 extension MyBookDetailViewController {
     private func configDataSource() {
-        let cellregistration = UICollectionView.CellRegistration<MyBookDetailCollectionViewCell, VocabDisplayInfo> { [weak self]
+        let cellregistration = UICollectionView.CellRegistration<VocabBookDetailCollectionViewCell, VocabDisplayInfo> { [weak self]
             cell, indexPath, item in
             guard let self = self else { return }
             cell.binding(with: item)

@@ -41,7 +41,7 @@ final class VocabBookDetailViewController: BaseViewController {
             frame: .zero,
             collectionViewLayout: createLayout()
         )
-        view.backgroundColor = AppColor.appRed
+        view.backgroundColor = AppColor.background
         return view
     }()
     
@@ -71,6 +71,9 @@ final class VocabBookDetailViewController: BaseViewController {
     
     override func configView() {
         navigationItem.title = viewModel.navigationBarTitle
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "학습하기", style: .plain, target: nil, action: nil
+        )
     }
 }
 
@@ -101,7 +104,7 @@ extension VocabBookDetailViewController {
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(120)
+            heightDimension: .absolute(144)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
@@ -122,9 +125,9 @@ extension VocabBookDetailViewController {
     
     private func configDataSource() {
         let registration = UICollectionView.CellRegistration<
-            MyBookDetailCollectionViewCell, VocabDisplayInfo> {
+            VocabBookDetailCollectionViewCell, VocabDisplayInfo> {
                 [weak self] cell, indexPath, item in
-                guard let self else { return }
+                guard let self = self else { return }
                 cell.binding(with: item)
         }
         
