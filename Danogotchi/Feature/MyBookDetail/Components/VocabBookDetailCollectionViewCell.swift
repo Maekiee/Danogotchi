@@ -19,7 +19,7 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     }()
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textSecondary
+        label.textColor = AppColor.textPrimary
         label.font = AppFont.footnote
         return label
     }()
@@ -46,7 +46,7 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     }()
     private let learningCountLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textSecondary
+        label.textColor = AppColor.textPrimary
         label.font = AppFont.footnote
         return label
     }()
@@ -131,6 +131,12 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     func binding(with item: CardDisplayable) {
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
+        backgroundColor = UIColor(
+            hue: CGFloat(abs(item.cardTitle.hashValue % 300)) / 360.0,
+            saturation: 0.30,
+            brightness: 0.95,
+            alpha: 1.0
+        )
         
         if let learningCount = item.cardChipText {
             learningCountLabel.text = " · \(learningCount)번 학습"
@@ -147,6 +153,8 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
             ))
             correctRateLabel.attributedText = percentText
         }
+        
+        
     }
 }
 
