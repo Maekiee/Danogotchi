@@ -89,7 +89,6 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
     }
     
     private func configView() {
-        backgroundColor = AppColor.lavender
         layer.cornerRadius = AppRadius.radius20
         layer.masksToBounds = true
     }
@@ -98,6 +97,7 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         icon.image = UIImage(named: item.icon)?
             .withRenderingMode(.alwaysTemplate)
         textLabel.text = item.title
+        backgroundColor = item.color
     }
     
 }
