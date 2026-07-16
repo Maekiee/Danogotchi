@@ -70,6 +70,18 @@ extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
+    
+    func myBookDetailDidTapMenu() {
+        let vc = VocabBookDetailSheetViewController()
+        vc.delegate = self
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [.custom { context in
+                context.maximumDetentValue * 0.2
+            }]
+            sheet.prefersGrabberVisible = true
+        }
+        navigationController.present(vc, animated: true)
+    }
 }
 
 extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
@@ -81,5 +93,15 @@ extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
 extension LibraryCoordinator: CreateVocabViewControllerDelegate {
     func createWordDidTapBack() {
         navigationController.popViewController(animated: true)
+    }
+}
+
+extension LibraryCoordinator: VocabBookDetailSheetViewControllerDelegate {
+    func sheetDidTapAddVocab() {
+        
+    }
+    
+    func sheetDidTapLearning() {
+        navigationController.dismiss(animated: true)
     }
 }

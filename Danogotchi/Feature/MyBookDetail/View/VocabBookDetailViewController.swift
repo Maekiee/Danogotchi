@@ -5,6 +5,7 @@ import RxCocoa
 
 protocol VocabBookDetailViewControllerDelegate: AnyObject {
     func myBookDetailDidTapBack()
+    func myBookDetailDidTapMenu()
     func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab)
     func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab)
 }
@@ -73,7 +74,11 @@ final class VocabBookDetailViewController: BaseViewController {
         navigationItem.title = viewModel.topic.title
         if viewModel.topic == .myBook {
             navigationItem.rightBarButtonItem = UIBarButtonItem(
-                image: UIImage(systemName: "ellipsis"), style: .plain, target: nil, action: nil)
+                image: UIImage(systemName: "ellipsis"),
+                style: .plain,
+                target: nil,
+                action: nil
+            )
         } else {
             navigationItem.rightBarButtonItem = UIBarButtonItem(
                 title: "학습하기", style: .plain, target: nil, action: nil
@@ -93,6 +98,15 @@ extension VocabBookDetailViewController {
         output.vocabList
             .drive(with: self) { owner, list in
                 owner.applySnapshot(items: list)
+            }.disposed(by: disposeBag)
+        
+        navigationItem.rightBarButtonItem?.rx.tap
+            .bind(with: self) { owner, _ in
+                if owner.viewModel.topic == .myBook {
+                    owner.delegate?.myBookDetailDidTapMenu()
+                } else {
+                    print("추천 학습")
+                }
             }.disposed(by: disposeBag)
         
     }
