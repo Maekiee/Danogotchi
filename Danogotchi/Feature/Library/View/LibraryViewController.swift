@@ -80,7 +80,7 @@ final class LibraryViewController: BaseViewController {
     override func configView() {
         navigationItem.titleView = navigationTitleLabel
         navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "닫기", style: .plain, target: nil, action: nil
+            image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
     }
 }

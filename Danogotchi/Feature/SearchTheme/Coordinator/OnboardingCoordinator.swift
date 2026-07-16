@@ -31,8 +31,4 @@ extension OnboardingCoordinator {
     func didSelectTheme() {
         delegate?.onboardingDidComplete()
     }
-    
-    func didTapBack() {
-        print("")
-    }
 }

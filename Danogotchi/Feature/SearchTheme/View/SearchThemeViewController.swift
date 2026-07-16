@@ -6,7 +6,6 @@ import UIKit
 
 protocol SearchThemeViewControllerDelegate: AnyObject {
     func didSelectTheme()
-    func didTapBack()
 }
 
 final class SearchThemeViewController: BaseViewController {
@@ -37,16 +36,6 @@ final class SearchThemeViewController: BaseViewController {
     private let waterfallLayout = WaterfallLayout()
     
 
-    private let backButton: UIButton = {
-        let button = UIButton()
-        var config = UIButton.Configuration.plain()
-        config.image = UIImage(systemName: "chevron.backward")
-        config.title = "Back"
-        config.imagePadding = AppSpacing.space4
-        config.baseForegroundColor = AppColor.textPrimary
-        button.configuration = config
-        return button
-    }()
     private let titleText: UILabel = {
         let label = UILabel()
         label.text = "배경 테마를 골라주세요"
@@ -106,10 +95,6 @@ final class SearchThemeViewController: BaseViewController {
     }
     
     override func configHierarchy() {
-        if entryMode == .settings {
-            view.addSubview(backButton)
-        }
-        
         [
             titleText,
             textField,
@@ -119,20 +104,8 @@ final class SearchThemeViewController: BaseViewController {
     }
     
     override func configLayout() {
-        if entryMode == .settings {
-            backButton.snp.makeConstraints { make in
-                make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
-                make.leading.equalToSuperview().inset(AppSpacing.space8)
-            }
-        }
-        
         titleText.snp.makeConstraints { make in
-            if entryMode == .settings {
-                make.top.equalTo(backButton.snp.bottom).offset(AppSpacing.space8)
-            } else {
-                make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
-            }
-            
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
         }
         
@@ -185,13 +158,6 @@ extension SearchThemeViewController {
                 owner.waterfallLayout.invalidateLayout()
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
-        
-        if entryMode == .settings {
-            backButton.rx.tap
-                .bind(with: self) { owner, _ in
-                    owner.delegate?.didTapBack()
-                }.disposed(by: disposeBag)
-        }
         
         // 스크롤 하단 체크
         collectionView.rx.contentOffset

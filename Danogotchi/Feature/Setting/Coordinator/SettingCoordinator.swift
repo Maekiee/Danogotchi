@@ -76,10 +76,4 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
     func didSelectTheme() {
         navigationController.popViewController(animated: true)
     }
-    
-    func didTapBack() {
-        navigationController.popViewController(animated: true)
-    }
-    
-    
 }

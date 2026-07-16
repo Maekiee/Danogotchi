@@ -24,6 +24,7 @@ final class MainCoordinator: Coordinator {
 extension MainCoordinator: ExploreVocabViewControllerDelegate {
     func exploreVocabDidTapLibrary() {
         let nav = UINavigationController()
+        nav.modalPresentationStyle = .fullScreen
         let libraryCoordinator = LibraryCoordinator(
             container: container,
             navigationController: nav
@@ -36,6 +37,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     
     func exploreVocabDidTapSetting() {
         let nav = UINavigationController()
+        nav.modalPresentationStyle = .fullScreen
         let settingCoordinator = SettingCoordinator(
             container: container,
             navigationController: nav

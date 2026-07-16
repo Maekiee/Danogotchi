@@ -50,9 +50,7 @@ final class SettingTabViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navigationController?.setNavigationBarHidden(true, animated: false)
-        
+
         configHierarchy()
         configLayout()
         configView()
@@ -99,6 +97,9 @@ final class SettingTabViewController: BaseViewController {
     
     override func configView() {
         view.backgroundColor = AppColor.backgroundBeige
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
+        )
     }
     
     private func createLayout() -> UICollectionViewLayout {
@@ -178,7 +179,12 @@ extension SettingTabViewController {
             }
         )
         let output = viewModel.transform(input: input)
-        
+
+        navigationItem.rightBarButtonItem?.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.delegate?.didTapClose()
+            }.disposed(by: disposeBag)
+
         // 앱 버전
         output.appVersion
             .drive(with: self) { owner, version in
