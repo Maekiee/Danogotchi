@@ -4,9 +4,8 @@ import RxCocoa
 
 final class VocabBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let topic: BookTopic
     private let fetchVocabsUseCase: FetchVocabsUseCase
-    var navigationBarTitle: String { topic.title }
+    let topic: BookTopic
     
     init(topic: BookTopic, fetchVocabsUseCase: FetchVocabsUseCase) {
         self.topic = topic

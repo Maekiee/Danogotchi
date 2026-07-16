@@ -70,10 +70,15 @@ final class VocabBookDetailViewController: BaseViewController {
     }
     
     override func configView() {
-        navigationItem.title = viewModel.navigationBarTitle
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "학습하기", style: .plain, target: nil, action: nil
-        )
+        navigationItem.title = viewModel.topic.title
+        if viewModel.topic == .myBook {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                image: UIImage(systemName: "ellipsis"), style: .plain, target: nil, action: nil)
+        } else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                title: "학습하기", style: .plain, target: nil, action: nil
+            )
+        }
     }
 }
 
