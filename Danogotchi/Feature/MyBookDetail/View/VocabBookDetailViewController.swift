@@ -72,6 +72,8 @@ final class VocabBookDetailViewController: BaseViewController {
     
     override func configView() {
         navigationItem.title = viewModel.topic.title
+        // 다음 화면의 백버튼을 텍스트 없이 chevron만 표시
+        navigationItem.backButtonDisplayMode = .minimal
         if viewModel.topic == .myBook {
             navigationItem.rightBarButtonItem = UIBarButtonItem(
                 image: UIImage(systemName: "ellipsis"),
