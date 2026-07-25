@@ -50,7 +50,7 @@ final class MyBookDetailViewController: BaseViewController {
                 pointSize: 16,
                 weight: .medium
             )
-        config.image = UIImage(systemName: "plus")
+        config.image = UIImage(systemName: "addBookButtonplus")
         
         config.baseForegroundColor = AppColor.appWhite
         config.baseBackgroundColor = AppColor.oxfordBlue

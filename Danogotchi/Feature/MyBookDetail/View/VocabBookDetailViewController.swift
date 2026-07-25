@@ -45,6 +45,23 @@ final class VocabBookDetailViewController: BaseViewController {
         view.backgroundColor = AppColor.background
         return view
     }()
+    private let addVocabButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.filled()
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+                pointSize: 22,
+                weight: .semibold
+            )
+        config.image = UIImage(systemName: "plus")
+
+        config.baseForegroundColor = AppColor.appWhite
+        config.baseBackgroundColor = AppColor.black
+        config.cornerStyle = .capsule
+        config.contentInsets = .zero
+        button.configuration = config
+
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,7 +76,8 @@ final class VocabBookDetailViewController: BaseViewController {
     
     override func configHierarchy() {
         [
-            collectionView
+            collectionView,
+            addVocabButton
         ].forEach { view.addSubview($0) }
     }
     
@@ -68,12 +86,21 @@ final class VocabBookDetailViewController: BaseViewController {
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.horizontalEdges.bottom.equalToSuperview()
         }
+        
+        addVocabButton.snp.makeConstraints { make in
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(AppSpacing.space24)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).inset(AppSpacing.space20)
+            make.size.equalTo(48)
+        }
     }
     
     override func configView() {
         navigationItem.title = viewModel.topic.title
-        // 다음 화면의 백버튼을 텍스트 없이 chevron만 표시
+
         navigationItem.backButtonDisplayMode = .minimal
+        // 마지막 셀이 플로팅 버튼에 가리지 않도록 하단 여백 확보
+        collectionView.contentInset.bottom = 48 + AppSpacing.space24
+        collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         if viewModel.topic == .myBook {
             navigationItem.rightBarButtonItem = UIBarButtonItem(
                 image: UIImage(systemName: "ellipsis"),
@@ -109,6 +136,11 @@ extension VocabBookDetailViewController {
                 } else {
                     print("추천 학습")
                 }
+            }.disposed(by: disposeBag)
+        
+        addVocabButton.rx.tap
+            .bind(with: self) { owner, _ in
+                
             }.disposed(by: disposeBag)
         
     }
