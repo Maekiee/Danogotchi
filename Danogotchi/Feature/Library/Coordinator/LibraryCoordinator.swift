@@ -98,10 +98,13 @@ extension LibraryCoordinator: CreateVocabViewControllerDelegate {
 
 extension LibraryCoordinator: VocabBookDetailSheetViewControllerDelegate {
     func sheetDidTapAddVocab() {
-        
+        let vc = AddVocabViewController()
+        navigationController.dismiss(animated: true)
+        navigationController.pushViewController(vc, animated: true)
     }
     
     func sheetDidTapLearning() {
         navigationController.dismiss(animated: true)
+        print("단어장 학습 하기")
     }
 }

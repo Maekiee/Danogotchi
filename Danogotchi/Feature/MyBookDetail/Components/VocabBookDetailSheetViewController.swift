@@ -57,5 +57,7 @@ final class VocabBookDetailSheetViewController: BaseViewController {
             .bind(with: self) { owner, _ in
                 owner.delegate?.sheetDidTapLearning()
             }.disposed(by: disposeBag)
+        
+        
     }
 }
