@@ -8,6 +8,7 @@ protocol VocabBookDetailViewControllerDelegate: AnyObject {
     func myBookDetailDidTapMenu()
     func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab)
     func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab)
+    func floatingButtonDidTap()
 }
 
 final class VocabBookDetailViewController: BaseViewController {
@@ -101,18 +102,19 @@ final class VocabBookDetailViewController: BaseViewController {
         // 마지막 셀이 플로팅 버튼에 가리지 않도록 하단 여백 확보
         collectionView.contentInset.bottom = 48 + AppSpacing.space24
         collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
-        if viewModel.topic == .myBook {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
-                image: UIImage(systemName: "ellipsis"),
-                style: .plain,
-                target: nil,
-                action: nil
-            )
-        } else {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
-                title: "학습하기", style: .plain, target: nil, action: nil
-            )
-        }
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "학습하기", style: .plain, target: nil, action: nil
+        )
+//        if viewModel.topic == .myBook {
+//            navigationItem.rightBarButtonItem = UIBarButtonItem(
+//                image: UIImage(systemName: "ellipsis"),
+//                style: .plain,
+//                target: nil,
+//                action: nil
+//            )
+//        } else {
+//            
+//        }
     }
 }
 
@@ -131,16 +133,12 @@ extension VocabBookDetailViewController {
         
         navigationItem.rightBarButtonItem?.rx.tap
             .bind(with: self) { owner, _ in
-                if owner.viewModel.topic == .myBook {
-                    owner.delegate?.myBookDetailDidTapMenu()
-                } else {
-                    print("추천 학습")
-                }
+                print("단어장 학습하기로 변경")
             }.disposed(by: disposeBag)
         
         addVocabButton.rx.tap
             .bind(with: self) { owner, _ in
-                
+                owner.delegate?.floatingButtonDidTap()
             }.disposed(by: disposeBag)
         
     }

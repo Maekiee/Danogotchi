@@ -82,6 +82,11 @@ extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
         }
         navigationController.present(vc, animated: true)
     }
+    
+    func floatingButtonDidTap() {
+        let vc = AddVocabViewController()
+        navigationController.pushViewController(vc, animated: true)
+    }
 }
 
 extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
