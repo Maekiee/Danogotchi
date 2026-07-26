@@ -45,33 +45,17 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         button.configuration = config
         return button
     }()
-    /// 텍스트 유무와 무관하게 아이콘 정렬 기준이 흔들리지 않도록 고정
-    private static let tagHeight = AppSpacing.space4 * 2 + ceil(AppFont.label.lineHeight)
-
-    private static func makeTagTitle(_ text: String) -> AttributedString {
-        var container = AttributeContainer()
-        container.font = AppFont.label
-        return AttributedString(text, attributes: container)
-    }
-
-    private let partOfSpeechTag: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.attributedTitle = VocabBookDetailCollectionViewCell.makeTagTitle("")
-        config.baseForegroundColor = AppColor.textPrimary
-        config.cornerStyle = .capsule
-        config.background.backgroundColor = .clear
-        config.background.strokeColor = AppColor.textPrimary
-        config.background.strokeWidth = AppBorder.regular
-        config.contentInsets = NSDirectionalEdgeInsets(
-            top: AppSpacing.space4,
-            leading: AppSpacing.space12,
-            bottom: AppSpacing.space4,
-            trailing: AppSpacing.space12
-        )
-
-        let button = UIButton(configuration: config)
-        button.isUserInteractionEnabled = false
-        return button
+    private let vocabTypeTag: PaddingLabel = {
+        let label = PaddingLabel()
+        label.textAlignment = .center
+        label.contentInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        label.layer.cornerRadius = 12
+        label.layer.borderColor = AppColor.textPrimary.cgColor
+        label.layer.borderWidth = AppBorder.regular
+        label.textColor = AppColor.textPrimary
+        label.font = AppFont.label
+        label.text = ""
+        return label
     }()
     private let learningCountLabel: UILabel = {
         let label = UILabel()
@@ -110,25 +94,25 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
             moreIconButton,
             saveVocabButton,
             correctRateLabel,
-            partOfSpeechTag,
+            vocabTypeTag,
             learningCountLabel,
         ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
-        partOfSpeechTag.snp.makeConstraints { make in
+        vocabTypeTag.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(18)
             make.leading.equalToSuperview().inset(18)
-            make.height.equalTo(Self.tagHeight)
+            make.height.equalTo(24)
         }
 
         moreIconButton.snp.makeConstraints { make in
-            make.centerY.equalTo(partOfSpeechTag)
+            make.centerY.equalTo(vocabTypeTag)
             make.trailing.equalToSuperview().inset(18)
         }
         
         saveVocabButton.snp.makeConstraints { make in
-            make.centerY.equalTo(partOfSpeechTag)
+            make.centerY.equalTo(vocabTypeTag)
             make.trailing.equalToSuperview().inset(18)
         }
 
@@ -176,10 +160,11 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         )
         
         if let partOfSpeech = item.cardPartOfSpeech {
-            partOfSpeechTag.configuration?.attributedTitle = Self.makeTagTitle(partOfSpeech)
-            partOfSpeechTag.isHidden = false
+            vocabTypeTag.text = partOfSpeech
+            vocabTypeTag.isHidden = false
         } else {
-            partOfSpeechTag.isHidden = true
+            vocabTypeTag.text = nil
+            vocabTypeTag.isHidden = true
         }
 
         if let learningCount = item.cardChipText {
