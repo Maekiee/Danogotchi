@@ -7,7 +7,11 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     
     var onTouchIcon: Observable<Void> {
-        return iconButton.rx.tap.asObservable()
+        return moreIconButton.rx.tap.asObservable()
+    }
+    
+    var onSaveVocab: Observable<Void> {
+        return saveVocabButton.rx.tap.asObservable()
     }
     
     private let titleLabel: UILabel = {
@@ -23,26 +27,45 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         label.font = AppFont.footnote
         return label
     }()
-    private let iconButton: UIButton = {
+    private let moreIconButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "ellipsis")
-        config.baseForegroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.62, alpha: 1.0)
+        config.baseForegroundColor = AppColor.black
         config.contentInsets = .zero
         button.configuration = config
         return button
     }()
-    private let lavelTag: UILabel = {
-        let label = UILabel()
-        label.textAlignment = .center
-        label.layer.cornerRadius = 18
-        label.layer.borderColor = AppColor.textPrimary.cgColor
-        label.layer.borderWidth = AppBorder.regular
-        label.textColor = AppColor.textPrimary
-        label.font = AppFont.label
-        label.clipsToBounds = true
-        label.text = "H1"
-        return label
+    private let saveVocabButton: UIButton = {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "bookmark")
+        config.baseForegroundColor = AppColor.black
+        config.contentInsets = .zero
+        button.configuration = config
+        return button
+    }()
+    private let partOfSpeechTag: UIButton = {
+        var container = AttributeContainer()
+        container.font = AppFont.label
+
+        var config = UIButton.Configuration.plain()
+        config.attributedTitle = AttributedString("adv.", attributes: container)
+        config.baseForegroundColor = AppColor.textPrimary
+        config.cornerStyle = .capsule
+        config.background.backgroundColor = .clear
+        config.background.strokeColor = AppColor.textPrimary
+        config.background.strokeWidth = AppBorder.regular
+        config.contentInsets = NSDirectionalEdgeInsets(
+            top: AppSpacing.space4,
+            leading: AppSpacing.space12,
+            bottom: AppSpacing.space4,
+            trailing: AppSpacing.space12
+        )
+
+        let button = UIButton(configuration: config)
+        button.isUserInteractionEnabled = false
+        return button
     }()
     private let learningCountLabel: UILabel = {
         let label = UILabel()
@@ -78,22 +101,27 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         [
             titleLabel,
             subtitleLabel,
-            iconButton,
+            moreIconButton,
+            saveVocabButton,
             correctRateLabel,
-            lavelTag,
+            partOfSpeechTag,
             learningCountLabel,
         ].forEach { contentView.addSubview($0) }
     }
     
     private func configLayout() {
-        lavelTag.snp.makeConstraints { make in
-            make.size.equalTo(36)
+        partOfSpeechTag.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(18)
             make.leading.equalToSuperview().inset(18)
         }
 
-        iconButton.snp.makeConstraints { make in
-            make.centerY.equalTo(lavelTag)
+        moreIconButton.snp.makeConstraints { make in
+            make.centerY.equalTo(partOfSpeechTag)
+            make.trailing.equalToSuperview().inset(18)
+        }
+        
+        saveVocabButton.snp.makeConstraints { make in
+            make.centerY.equalTo(partOfSpeechTag)
             make.trailing.equalToSuperview().inset(18)
         }
 
@@ -128,7 +156,11 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with item: CardDisplayable) {
+    func binding(with item: CardDisplayable, isMyBook: Bool) {
+        // 나의 단어장은 편집(ellipsis), 추천 단어장은 저장(bookmark)
+        moreIconButton.isHidden = !isMyBook
+        saveVocabButton.isHidden = isMyBook
+
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
         backgroundColor = UIColor(

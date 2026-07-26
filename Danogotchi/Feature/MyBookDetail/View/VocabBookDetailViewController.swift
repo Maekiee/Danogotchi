@@ -99,22 +99,15 @@ final class VocabBookDetailViewController: BaseViewController {
         navigationItem.title = viewModel.topic.title
 
         navigationItem.backButtonDisplayMode = .minimal
+
+        let isMyBook = viewModel.topic == .myBook
+        addVocabButton.isHidden = !isMyBook
         // 마지막 셀이 플로팅 버튼에 가리지 않도록 하단 여백 확보
-        collectionView.contentInset.bottom = 48 + AppSpacing.space24
+        collectionView.contentInset.bottom = isMyBook ? 48 + AppSpacing.space24 : 0
         collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: "학습하기", style: .plain, target: nil, action: nil
         )
-//        if viewModel.topic == .myBook {
-//            navigationItem.rightBarButtonItem = UIBarButtonItem(
-//                image: UIImage(systemName: "ellipsis"),
-//                style: .plain,
-//                target: nil,
-//                action: nil
-//            )
-//        } else {
-//            
-//        }
     }
 }
 
@@ -179,7 +172,17 @@ extension VocabBookDetailViewController {
             VocabBookDetailCollectionViewCell, VocabDisplayInfo> {
                 [weak self] cell, indexPath, item in
                 guard let self = self else { return }
-                cell.binding(with: item)
+                cell.binding(with: item, isMyBook: self.viewModel.topic == .myBook)
+                
+                cell.onTouchIcon
+                    .bind(with: self) { owner, _ in
+                        print("내 단어 더보기")
+                    }.disposed(by: self.disposeBag)
+                
+                cell.onSaveVocab
+                    .bind(with: self) { owner, _ in
+                        print("단어 저장")
+                    }.disposed(by: self.disposeBag)
         }
         
         dataSource = DataSource(collectionView: collectionView) {

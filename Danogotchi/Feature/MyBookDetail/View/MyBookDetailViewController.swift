@@ -181,7 +181,7 @@ extension MyBookDetailViewController {
         let cellregistration = UICollectionView.CellRegistration<VocabBookDetailCollectionViewCell, VocabDisplayInfo> { [weak self]
             cell, indexPath, item in
             guard let self = self else { return }
-            cell.binding(with: item)
+            cell.binding(with: item, isMyBook: true)
             
             cell.onTouchIcon.bind(with: self) { owner, _ in
                 AlertPresenter.showActionSheet(
