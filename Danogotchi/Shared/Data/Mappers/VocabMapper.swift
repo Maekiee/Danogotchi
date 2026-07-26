@@ -14,6 +14,7 @@ extension VocabEntity {
             meaning: meaning,
             bookType: bookType,
             level: level.flatMap(VocabLevel.init(rawValue:)),
+            partOfSpeech: partOfSpeech.flatMap(PartOfSpeech.init(rawValue:)),
             createAt: createAt
         )
     }

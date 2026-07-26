@@ -6,5 +6,6 @@ struct Vocab: Hashable {
     let meaning: String
     let bookType: BookTopic
     let level: VocabLevel?
+    let partOfSpeech: PartOfSpeech?
     let createAt: Date
 }

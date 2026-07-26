@@ -15,6 +15,7 @@ extension VocabEntity {
     @NSManaged public var id: UUID?
     @NSManaged public var level: String?
     @NSManaged public var meaning: String?
+    @NSManaged public var partOfSpeech: String?
     @NSManaged public var word: String?
     @NSManaged public var histories: NSSet?
     @NSManaged public var vocabBook: VocabBookEntity?

@@ -13,4 +13,5 @@ extension VocabDisplayInfo: CardDisplayable {
     var cardSubtitle: String { word.meaning }
     var cardChipText: Int? { learningCount }
     var cardAccuracy: Double? { accuracy }
+    var cardPartOfSpeech: String? { word.partOfSpeech?.title }
 }

@@ -5,4 +5,5 @@ protocol CardDisplayable {
     var cardSubtitle: String { get }
     var cardChipText: Int? { get }
     var cardAccuracy: Double? { get }
+    var cardPartOfSpeech: String? { get }
 }

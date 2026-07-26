@@ -45,12 +45,18 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         button.configuration = config
         return button
     }()
-    private let partOfSpeechTag: UIButton = {
+    /// 텍스트 유무와 무관하게 아이콘 정렬 기준이 흔들리지 않도록 고정
+    private static let tagHeight = AppSpacing.space4 * 2 + ceil(AppFont.label.lineHeight)
+
+    private static func makeTagTitle(_ text: String) -> AttributedString {
         var container = AttributeContainer()
         container.font = AppFont.label
+        return AttributedString(text, attributes: container)
+    }
 
+    private let partOfSpeechTag: UIButton = {
         var config = UIButton.Configuration.plain()
-        config.attributedTitle = AttributedString("adv.", attributes: container)
+        config.attributedTitle = VocabBookDetailCollectionViewCell.makeTagTitle("")
         config.baseForegroundColor = AppColor.textPrimary
         config.cornerStyle = .capsule
         config.background.backgroundColor = .clear
@@ -113,6 +119,7 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         partOfSpeechTag.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(18)
             make.leading.equalToSuperview().inset(18)
+            make.height.equalTo(Self.tagHeight)
         }
 
         moreIconButton.snp.makeConstraints { make in
@@ -151,13 +158,11 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     }
     
     private func configView() {
-        backgroundColor = AppColor.backgroundBeige2
         layer.cornerRadius = AppRadius.radius20
     }
     
     
     func binding(with item: CardDisplayable, isMyBook: Bool) {
-        // 나의 단어장은 편집(ellipsis), 추천 단어장은 저장(bookmark)
         moreIconButton.isHidden = !isMyBook
         saveVocabButton.isHidden = isMyBook
 
@@ -170,8 +175,17 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
             alpha: 1.0
         )
         
+        if let partOfSpeech = item.cardPartOfSpeech {
+            partOfSpeechTag.configuration?.attributedTitle = Self.makeTagTitle(partOfSpeech)
+            partOfSpeechTag.isHidden = false
+        } else {
+            partOfSpeechTag.isHidden = true
+        }
+
         if let learningCount = item.cardChipText {
             learningCountLabel.text = " · \(learningCount)번 학습"
+        } else {
+            learningCountLabel.text = nil
         }
 
         if let accuracyValue = item.cardAccuracy {
@@ -184,9 +198,9 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
                 attributes: [.font: AppFont.font(.bold, size: 14)]
             ))
             correctRateLabel.attributedText = percentText
+        } else {
+            correctRateLabel.attributedText = nil
         }
-        
-        
     }
 }
 

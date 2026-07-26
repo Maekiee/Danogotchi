@@ -9,9 +9,9 @@ final class AddVocabViewController: BaseViewController {
 
     // MARK: - UI 프로퍼티
     private let wordSectionLabel = AddVocabViewController.makeSectionLabel("WORD")
-    private let wordTextField = AddVocabViewController.makeTextField(placeholder: "단어를 입력해 주세요")
+    private let wordTextField = AddVocabViewController.makeTextField(placeholder: "단어")
     private let meaningSectionLabel = AddVocabViewController.makeSectionLabel("MEANING")
-    private let meaningTextField = AddVocabViewController.makeTextField(placeholder: "뜻을 입력해 주세요")
+    private let meaningTextField = AddVocabViewController.makeTextField(placeholder: "뜻")
     private let saveButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.title = "저장"
