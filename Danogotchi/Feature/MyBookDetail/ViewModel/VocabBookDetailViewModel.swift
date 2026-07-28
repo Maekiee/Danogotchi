@@ -6,21 +6,25 @@ final class VocabBookDetailViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let fetchVocabsUseCase: FetchVocabsUseCase
     private let toggleSaveVocabUseCase: ToggleSaveVocabUseCase
+    private let deleteVocabUseCase: DeleteVocabUseCase
     let topic: BookTopic
 
     init(
         topic: BookTopic,
         fetchVocabsUseCase: FetchVocabsUseCase,
-        toggleSaveVocabUseCase: ToggleSaveVocabUseCase
+        toggleSaveVocabUseCase: ToggleSaveVocabUseCase,
+        deleteVocabUseCase: DeleteVocabUseCase
     ) {
         self.topic = topic
         self.fetchVocabsUseCase = fetchVocabsUseCase
         self.toggleSaveVocabUseCase = toggleSaveVocabUseCase
+        self.deleteVocabUseCase = deleteVocabUseCase
     }
 
     struct Input {
         let viewWillAppear: Observable<Void>
         let saveVocabTrigger: Observable<VocabDisplayInfo>
+        let deleteVocabTrigger: Observable<Vocab>
     }
     
     struct Output {
@@ -56,6 +60,13 @@ final class VocabBookDetailViewModel: BaseViewModel {
                     )
                 }
                 vocabList.accept(updatedList)
+            }
+            .disposed(by: disposeBag)
+
+        input.deleteVocabTrigger
+            .bind(with: self) { owner, vocab in
+                vocabList.accept(vocabList.value.filter { $0.word.id != vocab.id })
+                owner.deleteVocabUseCase.execute(vocab: vocab)
             }
             .disposed(by: disposeBag)
 

@@ -71,16 +71,9 @@ extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
         navigationController.pushViewController(vc, animated: true)
     }
     
-    func myBookDetailDidTapMenu() {
-        let vc = VocabBookDetailSheetViewController()
-        vc.delegate = self
-        if let sheet = vc.sheetPresentationController {
-            sheet.detents = [.custom { context in
-                context.maximumDetentValue * 0.2
-            }]
-            sheet.prefersGrabberVisible = true
-        }
-        navigationController.present(vc, animated: true)
+    func myBookDetailDidTapEditVocab(_ vocab: Vocab) {
+        let vc = AddVocabViewController()
+        navigationController.pushViewController(vc, animated: true)
     }
     
     func floatingButtonDidTap() {
@@ -98,18 +91,5 @@ extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
 extension LibraryCoordinator: CreateVocabViewControllerDelegate {
     func createWordDidTapBack() {
         navigationController.popViewController(animated: true)
-    }
-}
-
-extension LibraryCoordinator: VocabBookDetailSheetViewControllerDelegate {
-    func sheetDidTapAddVocab() {
-        let vc = AddVocabViewController()
-        navigationController.dismiss(animated: true)
-        navigationController.pushViewController(vc, animated: true)
-    }
-    
-    func sheetDidTapLearning() {
-        navigationController.dismiss(animated: true)
-        print("단어장 학습 하기")
     }
 }

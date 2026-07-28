@@ -5,7 +5,7 @@ import RxCocoa
 
 protocol VocabBookDetailViewControllerDelegate: AnyObject {
     func myBookDetailDidTapBack()
-    func myBookDetailDidTapMenu()
+    func myBookDetailDidTapEditVocab(_ vocab: Vocab)
     func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab)
     func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab)
     func floatingButtonDidTap()
@@ -15,6 +15,7 @@ final class VocabBookDetailViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: VocabBookDetailViewModel
     private let saveVocabRelay = PublishRelay<VocabDisplayInfo>()
+    private let deleteVocabRelay = PublishRelay<Vocab>()
     weak var delegate: VocabBookDetailViewControllerDelegate?
     
     init(viewModel: VocabBookDetailViewModel) {
@@ -117,7 +118,8 @@ extension VocabBookDetailViewController {
     private func bind() {
         let input = VocabBookDetailViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
-            saveVocabTrigger: saveVocabRelay.asObservable()
+            saveVocabTrigger: saveVocabRelay.asObservable(),
+            deleteVocabTrigger: deleteVocabRelay.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -136,6 +138,25 @@ extension VocabBookDetailViewController {
                 owner.delegate?.floatingButtonDidTap()
             }.disposed(by: disposeBag)
         
+    }
+}
+
+// MARK: 단어 더보기 메뉴
+extension VocabBookDetailViewController {
+    private func showVocabMenu(for vocab: Vocab) {
+        // 다른 단어장에서 저장해온 단어는 원본이 따로 있으므로 수정할 수 없다.
+        let editAction: (() -> Void)? = vocab.sourceWordId == nil
+            ? { [weak self] in self?.delegate?.myBookDetailDidTapEditVocab(vocab) }
+            : nil
+
+        AlertPresenter.showActionSheet(
+            on: self,
+            title: vocab.word,
+            editAction: editAction,
+            deleteAction: { [weak self] in
+                self?.deleteVocabRelay.accept(vocab)
+            }
+        )
     }
 }
 
@@ -184,7 +205,7 @@ extension VocabBookDetailViewController {
 
                 cell.onTouchIcon
                     .bind(with: self) { owner, _ in
-                        print("내 단어 더보기")
+                        owner.showVocabMenu(for: item.word)
                     }.disposed(by: cell.disposeBag)
 
                 cell.onSaveVocab

@@ -12,8 +12,8 @@ final class VocabBookDetailSheetViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     weak var delegate: VocabBookDetailSheetViewControllerDelegate?
     
-    private let addVocabButton = PrimaryFillButton(title: "단어 추가하기")
-    private let learningButton = PrimaryFillButton(title: "학습하기")
+    private let editVocabButton = PrimaryFillButton(title: "수정하기")
+    private let deleteVocabButton = PrimaryFillButton(title: "삭제하기")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,21 +26,21 @@ final class VocabBookDetailSheetViewController: BaseViewController {
 
     override func configHierarchy() {
         [
-            addVocabButton,
-            learningButton
+            editVocabButton,
+            deleteVocabButton
         ].forEach { view.addSubview($0) }
     }
     override func configLayout() {
-        addVocabButton.snp.makeConstraints { make in
+        editVocabButton.snp.makeConstraints { make in
             make.height.equalTo(48)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space16)
             make.top.equalToSuperview().offset(AppSpacing.space24)
         }
 
-        learningButton.snp.makeConstraints { make in
+        deleteVocabButton.snp.makeConstraints { make in
             make.height.equalTo(48)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space16)
-            make.top.equalTo(addVocabButton.snp.bottom).offset(AppSpacing.space12)
+            make.top.equalTo(editVocabButton.snp.bottom).offset(AppSpacing.space12)
         }
     }
     override func configView() {
@@ -48,12 +48,12 @@ final class VocabBookDetailSheetViewController: BaseViewController {
     }
     
     private func bind() {
-        addVocabButton.rx.tap
+        editVocabButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.sheetDidTapAddVocab()
             }.disposed(by: disposeBag)
         
-        learningButton.rx.tap
+        deleteVocabButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.sheetDidTapLearning()
             }.disposed(by: disposeBag)
