@@ -45,6 +45,7 @@ final class VocabBookDetailViewController: BaseViewController {
             frame: .zero,
             collectionViewLayout: createLayout()
         )
+        view.showsVerticalScrollIndicator = false
         view.backgroundColor = AppColor.background
         return view
     }()

@@ -50,6 +50,7 @@ final class LibraryViewController: BaseViewController {
             collectionViewLayout: createLayout()
         )
         view.alwaysBounceVertical = false
+        view.showsVerticalScrollIndicator = false
         view.backgroundColor = AppColor.background
         return view
     }()
