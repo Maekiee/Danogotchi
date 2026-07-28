@@ -56,16 +56,27 @@ extension AppDIContainer {
     func makeVocabDetailViewModel(topic: BookTopic) -> VocabBookDetailViewModel {
         return VocabBookDetailViewModel(
             topic: topic,
-            fetchVocabsUseCase: makeFetchVocabsUseCase()
+            fetchVocabsUseCase: makeFetchVocabsUseCase(),
+            toggleSaveVocabUseCase: makeToggleSaveVocabUseCase()
         )
     }
-    
+
     func makeFetchVocabsUseCase() -> FetchVocabsUseCase {
         let vocabBookRepository = makeVocabBookRepository()
         let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return DefaultFetchVocabsUseCase(
             vocabBookRepository: vocabBookRepository,
             learningHistoryRepository: learningHistoryRepository
+        )
+    }
+
+    func makeToggleSaveVocabUseCase() -> ToggleSaveVocabUseCase {
+        let vocabBookRepository = makeVocabBookRepository()
+        let vocabRepository = makeVocabRepository()
+        return DefaultToggleSaveVocabUseCase(
+            vocabBookRepository: vocabBookRepository,
+            vocabRepository: vocabRepository,
+            userInfo: userInfoManager
         )
     }
 }

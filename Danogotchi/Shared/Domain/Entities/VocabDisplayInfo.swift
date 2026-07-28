@@ -5,6 +5,7 @@ struct VocabDisplayInfo: Hashable {
     let word: Vocab
     let learningCount: Int
     let accuracy: Double
+    var isSaved: Bool = false /// DB 필드가 아니라 조회 시점에 나의 단어장 멤버십으로 계산되는 표시용 값
 }
 
 

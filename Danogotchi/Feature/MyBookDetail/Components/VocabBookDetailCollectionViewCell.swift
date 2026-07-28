@@ -146,9 +146,12 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     }
     
     
-    func binding(with item: CardDisplayable, isMyBook: Bool) {
+    func binding(with item: CardDisplayable, isMyBook: Bool, isSaved: Bool = false) {
         moreIconButton.isHidden = !isMyBook
         saveVocabButton.isHidden = isMyBook
+        saveVocabButton.configuration?.image = UIImage(
+            systemName: isSaved ? "bookmark.fill" : "bookmark"
+        )
 
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle

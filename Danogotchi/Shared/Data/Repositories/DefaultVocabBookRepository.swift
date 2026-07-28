@@ -76,6 +76,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         saveContext()
     }
     
+    /// 사용자가 직접 입력한 값으로 새 단어를 생성해 단어장에 추가
     func addVocab(bookId: UUID, word: String, meaning: String, bookType: BookTopic, level: VocabLevel?) -> Vocab? {
         guard let vocabBookEntity = fetchBookEntity(id: bookId) else { return nil }
         let vocabEntity = VocabEntity(context: context)
@@ -93,6 +94,28 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         return vocabEntity.toDomain()
     }
     
+    /// 추천 단어장의 기존 단어를 내 단어장으로 복사해 저장 (sourceWordId로 중복 저장 방지).
+    func addVocab(bookId: UUID, from vocab: Vocab) -> Vocab? {
+        guard let vocabBookEntity = fetchBookEntity(id: bookId) else { return nil }
+        guard findVocab(inBookId: bookId, sourceWordId: vocab.id) == nil else { return nil }
+
+        let vocabEntity = VocabEntity(context: context)
+        vocabEntity.id = UUID()
+        vocabEntity.word = vocab.word
+        vocabEntity.meaning = vocab.meaning
+        vocabEntity.bookType = BookTopic.myBook.rawValue
+        vocabEntity.level = vocab.level?.rawValue
+        vocabEntity.partOfSpeech = vocab.partOfSpeech?.rawValue
+        vocabEntity.sourceWordId = vocab.id
+        vocabEntity.createAt = Date()
+
+        vocabBookEntity.addToVocabs(vocabEntity)
+
+        saveContext()
+
+        return vocabEntity.toDomain()
+    }
+
     func fetchVocabs(inBookId id: UUID) -> [Vocab] {
         guard let vocabBookEntity = fetchBookEntity(id: id) else { return [] }
         
@@ -101,5 +124,16 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         return vocabEntities
             .map { $0.toDomain() }
             .sorted { $0.createAt < $1.createAt }
+    }
+
+    func findVocab(inBookId id: UUID, sourceWordId: UUID) -> Vocab? {
+        let request = VocabEntity.fetchRequest()
+        request.predicate = NSPredicate(
+            format: "vocabBook.id == %@ AND sourceWordId == %@",
+            id as CVarArg, sourceWordId as CVarArg
+        )
+        request.fetchLimit = 1
+
+        return (try? context.fetch(request))?.first?.toDomain()
     }
 }

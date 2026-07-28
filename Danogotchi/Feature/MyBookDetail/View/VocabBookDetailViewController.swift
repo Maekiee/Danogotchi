@@ -14,6 +14,7 @@ protocol VocabBookDetailViewControllerDelegate: AnyObject {
 final class VocabBookDetailViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: VocabBookDetailViewModel
+    private let saveVocabRelay = PublishRelay<VocabDisplayInfo>()
     weak var delegate: VocabBookDetailViewControllerDelegate?
     
     init(viewModel: VocabBookDetailViewModel) {
@@ -36,7 +37,7 @@ final class VocabBookDetailViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
     
     private var dataSource: DataSource!
-    
+
     // MARK: UI 프로퍼티
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(
@@ -102,7 +103,7 @@ final class VocabBookDetailViewController: BaseViewController {
 
         let isMyBook = viewModel.topic == .myBook
         addVocabButton.isHidden = !isMyBook
-        // 마지막 셀이 플로팅 버튼에 가리지 않도록 하단 여백 확보
+        
         collectionView.contentInset.bottom = isMyBook ? 48 + AppSpacing.space24 : 0
         collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -115,7 +116,8 @@ final class VocabBookDetailViewController: BaseViewController {
 extension VocabBookDetailViewController {
     private func bind() {
         let input = VocabBookDetailViewModel.Input(
-            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
+            saveVocabTrigger: saveVocabRelay.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -172,17 +174,23 @@ extension VocabBookDetailViewController {
             VocabBookDetailCollectionViewCell, VocabDisplayInfo> {
                 [weak self] cell, indexPath, item in
                 guard let self = self else { return }
-                cell.binding(with: item, isMyBook: self.viewModel.topic == .myBook)
+                cell.disposeBag = DisposeBag()
                 
+                cell.binding(
+                    with: item,
+                    isMyBook: self.viewModel.topic == .myBook,
+                    isSaved: item.isSaved
+                )
+
                 cell.onTouchIcon
                     .bind(with: self) { owner, _ in
                         print("내 단어 더보기")
-                    }.disposed(by: self.disposeBag)
-                
+                    }.disposed(by: cell.disposeBag)
+
                 cell.onSaveVocab
-                    .bind(with: self) { owner, _ in
-                        print("단어 저장")
-                    }.disposed(by: self.disposeBag)
+                    .map { item }
+                    .bind(to: self.saveVocabRelay)
+                    .disposed(by: cell.disposeBag)
         }
         
         dataSource = DataSource(collectionView: collectionView) {
@@ -199,6 +207,6 @@ extension VocabBookDetailViewController {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
