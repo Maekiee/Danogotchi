@@ -34,6 +34,15 @@ extension AppDIContainer {
             vocabRepository: vocabRepository
         )
     }
+
+    func makeAddVocabViewModel() -> AddVocabViewModel {
+        return AddVocabViewModel(addVocabUseCase: makeAddVocabUseCase())
+    }
+
+    func makeAddVocabUseCase() -> AddVocabUseCase {
+        let vocabBookRepository = makeVocabBookRepository()
+        return DefaultAddVocabUseCase(vocabBookRepository: vocabBookRepository)
+    }
 }
 
 // MARK: - Library

@@ -72,12 +72,15 @@ extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
     }
     
     func myBookDetailDidTapEditVocab(_ vocab: Vocab) {
-        let vc = AddVocabViewController()
+        // TODO: 수정 모드 미구현 — 현재는 빈 추가 화면이 열린다.
+        let vm = appDIContainer.makeAddVocabViewModel()
+        let vc = AddVocabViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)
     }
-    
+
     func floatingButtonDidTap() {
-        let vc = AddVocabViewController()
+        let vm = appDIContainer.makeAddVocabViewModel()
+        let vc = AddVocabViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)
     }
 }

@@ -77,7 +77,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
     }
     
     /// 사용자가 직접 입력한 값으로 새 단어를 생성해 단어장에 추가
-    func addVocab(bookId: UUID, word: String, meaning: String, bookType: BookTopic, level: VocabLevel?) -> Vocab? {
+    func addVocab(bookId: UUID, word: String, meaning: String, bookType: BookTopic, level: VocabLevel?, partOfSpeech: PartOfSpeech?) -> Vocab? {
         guard let vocabBookEntity = fetchBookEntity(id: bookId) else { return nil }
         let vocabEntity = VocabEntity(context: context)
         vocabEntity.id = UUID()
@@ -85,6 +85,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         vocabEntity.meaning = meaning
         vocabEntity.bookType = bookType.rawValue
         vocabEntity.level = level?.rawValue
+        vocabEntity.partOfSpeech = partOfSpeech?.rawValue
         vocabEntity.createAt = Date()
         
         vocabBookEntity.addToVocabs(vocabEntity)

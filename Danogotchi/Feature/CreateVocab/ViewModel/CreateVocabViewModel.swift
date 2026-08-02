@@ -132,7 +132,8 @@ final class CreateVocabViewModel: BaseViewModel {
                 word: word,
                 meaning: meaning,
                 bookType: .myBook,
-                level: nil
+                level: nil,
+                partOfSpeech: nil
             )
             userInfoManager.notifyWordBookUpdate()
             // 단어 수정 로직
