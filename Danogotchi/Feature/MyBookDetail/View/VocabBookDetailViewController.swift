@@ -6,8 +6,6 @@ import RxCocoa
 protocol VocabBookDetailViewControllerDelegate: AnyObject {
     func myBookDetailDidTapBack()
     func myBookDetailDidTapEditVocab(_ vocab: Vocab)
-    func myBookDetailDidTapCreateWord(with createVocabModel: CreateVocab)
-    func myBookDetailDidTapEditWord(with createVocabModel: CreateVocab)
     func floatingButtonDidTap()
 }
 

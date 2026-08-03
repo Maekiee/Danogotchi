@@ -25,16 +25,6 @@ extension AppDIContainer {
         )
     }
     
-    func makeCreateWordViewModel(vocabItem: CreateVocab) -> CreateVocabViewModel {
-        let vocabRepository = makeVocabRepository()
-        let vocabBookRepository = makeVocabBookRepository()
-        return CreateVocabViewModel(
-            vocabItem: vocabItem,
-            vocabBookRepository: vocabBookRepository,
-            vocabRepository: vocabRepository
-        )
-    }
-
     func makeAddVocabViewModel(editingVocab: Vocab? = nil) -> AddVocabViewModel {
         return AddVocabViewModel(
             addVocabUseCase: makeAddVocabUseCase(),
@@ -60,17 +50,6 @@ extension AppDIContainer {
         return LibraryViewModel()
     }
 
-    func makeMyBookDetailViewModel() -> MyBookDetailViewModel {
-        let vocabBookRepository = makeVocabBookRepository()
-        let vocabRepository = makeVocabRepository()
-        let learningHistoryRepository = makeVocabLearningHistoryRepository()
-        return MyBookDetailViewModel(
-            vocabBookRepository: vocabBookRepository,
-            vocabRepository: vocabRepository,
-            learningHistoryRepository: learningHistoryRepository
-        )
-    }
-    
     func makeVocabDetailViewModel(topic: BookTopic) -> VocabBookDetailViewModel {
         return VocabBookDetailViewModel(
             topic: topic,

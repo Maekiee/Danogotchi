@@ -35,22 +35,12 @@ final class UserInfoManager: UserInfoProtocol {
     // `ActiveLearningManager`가 구독할 Relay
     let activeBookIdentifierRelay: BehaviorRelay<ActiveBookIdentifier?>
     
-    private let wordBookRefreshRelay = PublishRelay<Void>()
-    
     private let themeUrlRelay = BehaviorRelay<String?>(value: nil)
-    
+
     var themeUrlObservable: Observable<String?> {
         return themeUrlRelay.asObservable()
     }
-    
-    var wordBookRefreshObservable: Observable<Void> {
-        return wordBookRefreshRelay.asObservable()
-    }
-    
-    func notifyWordBookUpdate() {
-        wordBookRefreshRelay.accept(())
-    }
-    
+
     static let shared = UserInfoManager()
 
     

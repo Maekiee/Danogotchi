@@ -9,7 +9,6 @@ protocol ExploreVocabViewControllerDelegate: AnyObject {
     func exploreVocabDidTapLibrary()
     func exploreVocabDidTapSetting()
     func exploreVocabDidTapStartQuiz(quizData: QuizData)
-    func exploreVocabDidTapEditWord(vocabItem: CreateVocab)
 }
 
 final class ExploreVocabViewController: BaseViewController {
