@@ -4,9 +4,14 @@ import RxSwift
 import RxCocoa
 
 
+protocol AddVocabViewControllerDelegate: AnyObject {
+    func addVocabDidFinishEditing()
+}
+
 final class AddVocabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: AddVocabViewModel
+    weak var delegate: AddVocabViewControllerDelegate?
 
     init(viewModel: AddVocabViewModel) {
         self.viewModel = viewModel
@@ -22,9 +27,9 @@ final class AddVocabViewController: BaseViewController {
     private let wordTextField = AddVocabViewController.makeTextField(placeholder: "단어")
     private let meaningTextField = AddVocabViewController.makeTextField(placeholder: "뜻")
     private let partOfSpeechSegmentedControl = AddVocabViewController.makePartOfSpeechSegmentedControl()
-    private let saveButton: UIButton = {
+    private lazy var saveButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "저장"
+        config.title = viewModel.isEditing ? "수정" : "저장"
         config.baseBackgroundColor = AppColor.black
         config.baseForegroundColor = AppColor.white
         config.background.cornerRadius = AppRadius.radius20
@@ -89,7 +94,14 @@ final class AddVocabViewController: BaseViewController {
 
     override func configView() {
         view.backgroundColor = AppColor.background
-        navigationItem.title = "Add a word"
+        navigationItem.title = viewModel.isEditing ? "Edit a word" : "Add a word"
+
+        // bind()보다 먼저 채워야 rx.text / rx.selectedSegmentIndex의 초기 방출에 값이 실린다.
+        if let form = viewModel.initialForm {
+            wordTextField.text = form.word
+            meaningTextField.text = form.meaning
+            partOfSpeechSegmentedControl.selectedSegmentIndex = form.partOfSpeechIndex
+        }
     }
 }
 
@@ -168,6 +180,11 @@ extension AddVocabViewController {
                 owner.meaningTextField.text = ""
                 owner.partOfSpeechSegmentedControl.selectedSegmentIndex = 0
                 owner.showToast("단어가 추가 되었습니다.")
+            }.disposed(by: disposeBag)
+
+        output.editCompleted
+            .emit(with: self) { owner, _ in
+                owner.delegate?.addVocabDidFinishEditing()
             }.disposed(by: disposeBag)
     }
 }

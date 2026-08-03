@@ -35,13 +35,22 @@ extension AppDIContainer {
         )
     }
 
-    func makeAddVocabViewModel() -> AddVocabViewModel {
-        return AddVocabViewModel(addVocabUseCase: makeAddVocabUseCase())
+    func makeAddVocabViewModel(editingVocab: Vocab? = nil) -> AddVocabViewModel {
+        return AddVocabViewModel(
+            addVocabUseCase: makeAddVocabUseCase(),
+            updateVocabUseCase: makeUpdateVocabUseCase(),
+            editingVocab: editingVocab
+        )
     }
 
     func makeAddVocabUseCase() -> AddVocabUseCase {
         let vocabBookRepository = makeVocabBookRepository()
         return DefaultAddVocabUseCase(vocabBookRepository: vocabBookRepository)
+    }
+
+    func makeUpdateVocabUseCase() -> UpdateVocabUseCase {
+        let vocabRepository = makeVocabRepository()
+        return DefaultUpdateVocabUseCase(vocabRepository: vocabRepository)
     }
 }
 

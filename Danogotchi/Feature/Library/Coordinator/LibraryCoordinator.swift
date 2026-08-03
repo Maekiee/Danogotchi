@@ -72,9 +72,9 @@ extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
     }
     
     func myBookDetailDidTapEditVocab(_ vocab: Vocab) {
-        // TODO: 수정 모드 미구현 — 현재는 빈 추가 화면이 열린다.
-        let vm = appDIContainer.makeAddVocabViewModel()
+        let vm = appDIContainer.makeAddVocabViewModel(editingVocab: vocab)
         let vc = AddVocabViewController(viewModel: vm)
+        vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
 
@@ -94,5 +94,14 @@ extension LibraryCoordinator: UIAdaptivePresentationControllerDelegate {
 extension LibraryCoordinator: CreateVocabViewControllerDelegate {
     func createWordDidTapBack() {
         navigationController.popViewController(animated: true)
+    }
+}
+
+extension LibraryCoordinator: AddVocabViewControllerDelegate {
+    func addVocabDidFinishEditing() {
+        navigationController.popViewController(animated: true)
+        // showToast는 VC 자기 view에 붙으므로, pop으로 노출되는 화면에 띄운다.
+        (navigationController.topViewController as? BaseViewController)?
+            .showToast("단어가 수정 되었습니다.")
     }
 }

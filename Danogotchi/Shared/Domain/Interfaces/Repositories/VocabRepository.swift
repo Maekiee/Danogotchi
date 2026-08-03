@@ -4,6 +4,6 @@ protocol VocabRepository {
     func createVocab(vocab: String, meaning: String) -> Vocab
     func readAllVocab() -> [Vocab]
     func readVocab(id: UUID) -> Vocab?
-    func updateVocab(id: UUID, word: String?, meaning: String?)
+    func updateVocab(id: UUID, word: String?, meaning: String?, partOfSpeech: PartOfSpeech?)
     func deleteVocab(id: UUID)
 }

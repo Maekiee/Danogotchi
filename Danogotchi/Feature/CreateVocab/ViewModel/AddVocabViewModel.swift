@@ -5,9 +5,26 @@ import RxCocoa
 final class AddVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let addVocabUseCase: AddVocabUseCase
+    private let updateVocabUseCase: UpdateVocabUseCase
+    private let editingVocab: Vocab?
 
-    init(addVocabUseCase: AddVocabUseCase) {
+    init(
+        addVocabUseCase: AddVocabUseCase,
+        updateVocabUseCase: UpdateVocabUseCase,
+        editingVocab: Vocab? = nil
+    ) {
         self.addVocabUseCase = addVocabUseCase
+        self.updateVocabUseCase = updateVocabUseCase
+        self.editingVocab = editingVocab
+    }
+
+    var isEditing: Bool { editingVocab != nil }
+
+    /// 수정 모드 진입 시 화면에 채울 초기값. 추가 모드면 nil.
+    var initialForm: (word: String, meaning: String, partOfSpeechIndex: Int)? {
+        guard let vocab = editingVocab else { return nil }
+        let index = vocab.partOfSpeech.flatMap { PartOfSpeech.allCases.firstIndex(of: $0) } ?? 0
+        return (vocab.word, vocab.meaning, index)
     }
 
     struct Input {
@@ -20,6 +37,7 @@ final class AddVocabViewModel: BaseViewModel {
     struct Output {
         let isValidSave: Driver<Bool>
         let resetTrigger: Signal<Void>
+        let editCompleted: Signal<Void>
     }
 
     func transform(input: Input) -> Output {
@@ -27,6 +45,7 @@ final class AddVocabViewModel: BaseViewModel {
         let meaningText = BehaviorRelay<String>(value: "")
         let partOfSpeech = BehaviorRelay<PartOfSpeech>(value: PartOfSpeech.allCases[0])
         let resetTrigger = PublishRelay<Void>()
+        let editCompleted = PublishRelay<Void>()
 
         input.wordTextField
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -55,6 +74,17 @@ final class AddVocabViewModel: BaseViewModel {
             .bind(with: self) { owner, validData in
                 let (word, meaning, selectedPartOfSpeech) = validData
 
+                if let vocab = owner.editingVocab {
+                    owner.updateVocabUseCase.execute(
+                        id: vocab.id,
+                        word: word,
+                        meaning: meaning,
+                        partOfSpeech: selectedPartOfSpeech
+                    )
+                    editCompleted.accept(())
+                    return
+                }
+
                 guard owner.addVocabUseCase.execute(
                     word: word,
                     meaning: meaning,
@@ -69,7 +99,8 @@ final class AddVocabViewModel: BaseViewModel {
 
         return Output(
             isValidSave: isValidSave.asDriver(onErrorJustReturn: false),
-            resetTrigger: resetTrigger.asSignal()
+            resetTrigger: resetTrigger.asSignal(),
+            editCompleted: editCompleted.asSignal()
         )
     }
 }

@@ -57,7 +57,7 @@ extension DefaultVocabRepository: VocabRepository {
         return fetchEntity(id: id)?.toDomain()
     }
     
-    func updateVocab(id: UUID, word: String?, meaning: String?) {
+    func updateVocab(id: UUID, word: String?, meaning: String?, partOfSpeech: PartOfSpeech?) {
         guard let vocabEntity = fetchEntity(id: id) else { return }
         
         if let word = word {
@@ -66,6 +66,10 @@ extension DefaultVocabRepository: VocabRepository {
         
         if let meaning = meaning {
             vocabEntity.meaning = meaning
+        }
+        
+        if let partOfSpeech = partOfSpeech {
+            vocabEntity.partOfSpeech = partOfSpeech.rawValue
         }
         
         saveContext()

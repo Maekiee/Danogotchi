@@ -140,7 +140,7 @@ final class CreateVocabViewModel: BaseViewModel {
         case .edit:
             // 단어 수정
             guard let vocabId = vocabItem?.vocabId else { return }
-            vocabRepository.updateVocab(id: vocabId, word: word, meaning: meaning)
+            vocabRepository.updateVocab(id: vocabId, word: word, meaning: meaning, partOfSpeech: nil)
             userInfoManager.notifyWordBookUpdate()
         }
     }
