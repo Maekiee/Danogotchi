@@ -15,9 +15,13 @@
 - 학습을 중간에 종료해도 이미 푼 단어의 학습 카운트·정오답은 저장된다
 - 학습중 단어장은 Explore 카드로 표시되고, 단어장 목록/상세에 "학습중"으로 표시된다
 
-**진행률: A-1 / A-2 완료(커밋 `e0c744c`) · A-3 완료(빌드·수동검증 대기) · 잔여 8장 19h**
+**진행률: A-1 / A-2 완료(`e0c744c`) · A-3 완료(`e9b71db`) · B-1 + B-2(일부) 완료(커밋 대기) · 잔여 8장 17h**
 
-착수 순서: `B-1` → `B-2` → `B-3` → `C-1` → `C-2` → `C-3` → `C-4` → `D-1` → `D-2`
+> ⚠️ **A-3에서 CoreData 모델을 in-place 수정했다. 기존 스토어를 가진 기기는 앱 삭제 후
+> 재설치해야 한다**(안 하면 `CoreDataStack.swift:14` 의 `fatalError`). **팀원 기기도 동일.**
+> A-1~A-3의 런타임 수동 검증은 아직 미실행 — 각 카드 하단 체크리스트 참조.
+
+착수 순서: `B-2`(잔여) → `B-3` → `C-1` → `C-2` → `C-3` → `C-4` → `D-1` → `D-2`
 
 ---
 
@@ -44,9 +48,10 @@
 > 부활해 A-3에서 다시 지워야 한다. 현재 상태는 A-3이 지울 대상을 `activeBookId` 키 하나로
 > 줄여놓은 선행 작업이다.
 
-### 커밋 전 남은 확인 (수동 검증 미실행)
+### 남은 수동 검증 (미실행)
 
 > A-3에서 같은 경로를 다시 건드렸으므로 **아래 검증은 A-3 완료 조건에 흡수**되었다.
+> A-3 재설치 검증 시 함께 소화한다.
 
 - [ ] 앱 삭제 후 재설치 → 온보딩 테마 선택 → Explore에 나의 단어장 카드가 표시된다
 - [ ] 단어 4개 이상 추가 → 학습 2~3문제 후 X로 종료 → 다시 학습하기 시 **1번 문제부터** 시작
@@ -55,7 +60,7 @@
 
 ---
 
-## ✅ A-3. 활성 단어장을 CoreData `isActive` 필드로 이전 — 코드 완료 · 빌드/수동검증 대기 · 4h
+## ✅ A-3. 활성 단어장을 CoreData `isActive` 필드로 이전 — 완료 · 커밋 `e9b71db` · 4h
 
 > **왜**: 지금은 "활성 단어장 id는 UserDefaults, 단어장 실체는 CoreData"로 진실원본이 쪼개져
 > 있다. 활성 단어장을 삭제하면 UserDefaults에 죽은 UUID가 남고 `readBook(id:)` 이 nil을
@@ -129,7 +134,7 @@
 
 ### 완료 조건
 - [x] grep `ActiveLearningManager|activeBookIdentifier|Keys.activeBookId` **0건**
-- [ ] **빌드 통과** (Xcode ⌘B — 사용자 검증)
+- [x] **BUILD SUCCEEDED** (커밋 `e9b71db`)
 - [ ] 앱 삭제 재설치 → 온보딩 완료 → Explore에 나의 단어장 카드 표시
 - [ ] 단어 추가 → Explore 목록에 **즉시 반영** (stale 스냅샷 수정 확인)
 - [ ] 설정 → 테마 변경 시 테마만 바뀌고 활성 단어장 유지 (`.settings` 경로 회귀 없음)
@@ -138,20 +143,35 @@
 
 ---
 
-## B-1. 단어장 상세의 학습하기 → 활성 단어장 지정 — **1.5h** · 선행 A-3
+## ✅ B-1. 단어장 상세의 학습하기 → 활성 단어장 지정 — 완료 · 커밋 대기 · 1.5h
 
-현재 `VocabBookDetailViewController:132` 의 학습하기 버튼은 `print` 만 실행한다.
+`VocabBookDetailViewController` 의 학습하기 버튼이 `print` 만 실행하던 문제.
+`setActiveBook(id:)` 의 호출자가 온보딩 1곳뿐이라 앱 안에서 학습 대상을 바꿀 방법이 없었다.
 
-- [ ] `VocabBookDetailViewController` — `print` 제거 → ViewModel Input으로 전달
-- [ ] `VocabBookDetailViewModel` — `topic` 으로 단어장 id를 얻어 `setActiveBook(id:)` 호출.
-      id 조회는 `readAllBooks(bookType: topic).first` (`FetchBookVocabUseCase:31` 의 기존 패턴 재사용)
-- [ ] `AppDIContainer.makeVocabDetailViewModel` 에 repo 주입 추가
-- [ ] 지정 완료 후 Library 모달을 닫고 Explore로 복귀 — `LibraryCoordinator` 의 기존 delegate 재사용
-      (신규 delegate 추가 불필요)
+- [x] **`Shared/Domain/UseCases/SetActiveBookUseCase.swift` 신설** — `execute(topic:) -> Observable<Bool>`.
+      `readAllBooks(bookType: topic).first` 로 id를 얻어 `setActiveBook(id:)` 호출, 단어장 없으면 false
+- [x] `VocabBookDetailViewController` — `print` 제거, `startLearningRelay`(기존 `saveVocabRelay` 패턴)로
+      ViewModel Input 전달
+- [x] `VocabBookDetailViewModel` — `Input.startLearningTrigger` 추가, UseCase 주입
+- [x] `AppDIContainer` — `makeSetActiveBookUseCase()` 추가 + `makeVocabDetailViewModel` 에 주입
+- [x] 죽어 있던 `libraryDidSelectActiveBook()`(호출처 0곳) 을 `LibraryViewControllerDelegate` 에서 제거
 
-**완료 조건**: 추천/나의 단어장 모두에서 지정 동작 · 다른 단어장 지정 시 이전 단어장이 해제됨
+> **원안 대비 변경 2가지**
+> 1. **repo 직접 주입 → `SetActiveBookUseCase` 신설.** ViewModel의 기존 의존성이 전부 UseCase라
+>    레이어 일관성을 지켰고, D-2에서 Mock repo로 검증 가능해진다.
+> 2. **"모달 닫고 Explore 복귀"는 취소.** 실제 사용 시 시트가 닫히는 흐름이 어색해,
+>    **지정 후 상세 화면에 그대로 머무르는 것**으로 변경했다. 이에 따라 `didActivateBook` Output과
+>    `myBookDetailDidActivateBook()` delegate는 만들었다가 다시 제거했다.
+>    Explore는 `activeBookId` Relay를 구독하므로 **모달을 닫는 시점이 아니라 지정 시점에 이미 갱신**된다.
 
-## B-2. "학습중" 표시 (단어장 목록 카드 + 상세 버튼) — **2.5h** · 선행 B-1
+**완료 조건**
+- [x] **BUILD SUCCEEDED**
+- [ ] 추천/나의 단어장 모두에서 지정 동작 · 다른 단어장 지정 시 이전 단어장이 해제됨
+- [ ] 학습하기 탭 시 모달이 닫히지 않고 유지됨
+
+## 🔶 B-2. "학습중" 표시 (단어장 목록 카드 + 상세 버튼) — **잔여 2h** · 선행 B-1
+
+> **상세 버튼은 완료(커밋 대기).** 남은 건 **Library 목록 카드 배지**뿐이다.
 
 > **⚠️ 선행 조사 결과**: `LibraryViewController:207` 이 `snapshot.appendItems(BookTopic.allCases)` 로
 > 카드를 만든다. **DB를 조회하지 않고 enum으로 카드를 생성하고**, DiffableDataSource item 타입도
@@ -163,8 +183,21 @@
 - [ ] `LibraryViewController` — DiffableDataSource item 타입 `BookTopic` → `VocabBookCardInfo` 교체
       (`:33` `:35` `:163` `:207`)
 - [ ] `VocabTopicCardCollectionViewCell.binding(with:)` 시그니처 변경 + 학습중 배지 뷰 추가
-- [ ] `VocabBookDetailViewController` 우상단 버튼 — 활성 단어장이면 "학습중" + disabled
-- [ ] 활성 id를 구독해 내 id와 비교하는 로직은 **필요 없다** — 조회 결과에 `isActive` 가 실려 온다
+- [x] `VocabBookDetailViewController` 우상단 버튼 — 활성 단어장이면 "학습중" + disabled
+- [x] 활성 id를 구독해 내 id와 비교하는 로직은 **필요 없다** — 조회 결과에 `isActive` 가 실려 온다
+
+### ✅ 완료분 — 상세 버튼 "학습중" 표기 (0.5h)
+
+- [x] **`Shared/Domain/UseCases/IsActiveBookUseCase.swift` 신설** —
+      `readAllBooks(bookType: topic).first?.isActive ?? false`. A-3에서 `isActive` 가 도메인까지
+      실려 오므로 별도 비교 로직이 필요 없다
+- [x] `VocabBookDetailViewModel` — `Output.isActiveBook: Driver<Bool>` 추가.
+      **`viewWillAppear`(재진입) + `startLearningTrigger` 성공(화면 유지)** 두 경로가 모두 이 값을 갱신한다
+- [x] `VocabBookDetailViewController` — `configView()` 에서 인라인 생성하던 `UIBarButtonItem` 을
+      저장 프로퍼티 `startLearningButton` 으로 승격(참조가 없으면 상태를 못 바꾼다).
+      `title = isActive ? "학습중" : "학습하기"` · `isEnabled = !isActive`
+- [x] `AppDIContainer` — `makeIsActiveBookUseCase()` 추가 + 주입
+- [x] **BUILD SUCCEEDED**
 
 **완료 조건**: 활성 단어장 카드에만 배지 · 다른 단어장 지정 시 배지가 하나만 이동(동시 2개 없음)
 
@@ -268,6 +301,9 @@ grep -rn "ActiveLearningManager\|activeBookIdentifier\|Keys.activeBookId" --incl
 
 # DI 컨테이너 1곳만 나와야 함 (Relay 단일 인스턴스 보장)
 grep -rn "DefaultVocabBookRepository(" --include="*.swift" Danogotchi/
+
+# B-1 완료 후 0건 (죽은 delegate 제거 + print 제거 + 모달 닫기 취소)
+grep -rn "libraryDidSelectActiveBook\|단어장 학습하기로 변경\|didActivateBook" --include="*.swift" Danogotchi/
 ```
 
 ## 시간 산정
@@ -276,10 +312,11 @@ grep -rn "DefaultVocabBookRepository(" --include="*.swift" Danogotchi/
 |---|---|
 | A-1 + A-2 (완료) | 5h |
 | A-3 (완료) | 4h |
-| B-1 + B-2 + B-3 | 6h |
+| B-1 (완료) + B-2 상세버튼 (완료) | 2h |
+| B-2 잔여(목록 카드 배지) + B-3 | 4h |
 | C-1 + C-2 + C-3 + C-4 | 9.5h |
 | D-1 + D-2 | 3.5h |
-| **잔여** | **19h** |
+| **잔여** | **17h** |
 
 ---
 

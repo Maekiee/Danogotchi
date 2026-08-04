@@ -6,7 +6,6 @@ import RxCocoa
 
 protocol LibraryViewControllerDelegate: AnyObject {
     func libraryDidTapClose()
-    func libraryDidSelectActiveBook()
     func libraryDidTapMore(topic: BookTopic)
 }
 

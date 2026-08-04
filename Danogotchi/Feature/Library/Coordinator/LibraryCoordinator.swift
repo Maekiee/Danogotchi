@@ -35,12 +35,6 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
         }
     }
 
-    func libraryDidSelectActiveBook() {
-        navigationController.dismiss(animated: true) { [weak self] in
-            self?.delegate?.libraryCoordinatorDidFinish()
-        }
-    }
-
     func libraryDidTapMore(topic: BookTopic) {
         let vm = appDIContainer.makeVocabDetailViewModel(topic: topic)
         let vc = VocabBookDetailViewController(viewModel: vm)

@@ -58,7 +58,9 @@ extension AppDIContainer {
             topic: topic,
             fetchVocabsUseCase: makeFetchVocabsUseCase(),
             toggleSaveVocabUseCase: makeToggleSaveVocabUseCase(),
-            deleteVocabUseCase: makeDeleteVocabUseCase()
+            deleteVocabUseCase: makeDeleteVocabUseCase(),
+            setActiveBookUseCase: makeSetActiveBookUseCase(),
+            isActiveBookUseCase: makeIsActiveBookUseCase()
         )
     }
 
@@ -80,6 +82,14 @@ extension AppDIContainer {
 
     func makeDeleteVocabUseCase() -> DeleteVocabUseCase {
         return DefaultDeleteVocabUseCase(vocabRepository: makeVocabRepository())
+    }
+
+    func makeSetActiveBookUseCase() -> SetActiveBookUseCase {
+        return DefaultSetActiveBookUseCase(vocabBookRepository: vocabBookRepository)
+    }
+
+    func makeIsActiveBookUseCase() -> IsActiveBookUseCase {
+        return DefaultIsActiveBookUseCase(vocabBookRepository: vocabBookRepository)
     }
 }
 

@@ -14,6 +14,7 @@ final class VocabBookDetailViewController: BaseViewController {
     private let viewModel: VocabBookDetailViewModel
     private let saveVocabRelay = PublishRelay<VocabDisplayInfo>()
     private let deleteVocabRelay = PublishRelay<Vocab>()
+    private let startLearningRelay = PublishRelay<Void>()
     weak var delegate: VocabBookDetailViewControllerDelegate?
     
     init(viewModel: VocabBookDetailViewModel) {
@@ -64,7 +65,10 @@ final class VocabBookDetailViewController: BaseViewController {
 
         return button
     }()
-    
+    private let startLearningButton = UIBarButtonItem(
+        title: "학습하기", style: .plain, target: nil, action: nil
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configHierarchy()
@@ -106,9 +110,7 @@ final class VocabBookDetailViewController: BaseViewController {
         
         collectionView.contentInset.bottom = isMyBook ? 48 + AppSpacing.space24 : 0
         collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "학습하기", style: .plain, target: nil, action: nil
-        )
+        navigationItem.rightBarButtonItem = startLearningButton
     }
 }
 
@@ -118,20 +120,26 @@ extension VocabBookDetailViewController {
         let input = VocabBookDetailViewModel.Input(
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in },
             saveVocabTrigger: saveVocabRelay.asObservable(),
-            deleteVocabTrigger: deleteVocabRelay.asObservable()
+            deleteVocabTrigger: deleteVocabRelay.asObservable(),
+            startLearningTrigger: startLearningRelay.asObservable()
         )
         let output = viewModel.transform(input: input)
-        
+
         output.vocabList
             .drive(with: self) { owner, list in
                 owner.applySnapshot(items: list)
             }.disposed(by: disposeBag)
-        
-        navigationItem.rightBarButtonItem?.rx.tap
-            .bind(with: self) { owner, _ in
-                print("단어장 학습하기로 변경")
+
+        startLearningButton.rx.tap
+            .bind(to: startLearningRelay)
+            .disposed(by: disposeBag)
+
+        output.isActiveBook
+            .drive(with: self) { owner, isActive in
+                owner.startLearningButton.title = isActive ? "학습중" : "학습하기"
+                owner.startLearningButton.isEnabled = !isActive
             }.disposed(by: disposeBag)
-        
+
         addVocabButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.floatingButtonDidTap()
