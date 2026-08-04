@@ -22,7 +22,7 @@ final class SearchThemeViewController: BaseViewController {
     private let viewModel: SearchThemeViewModel
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
     private let vocabBookRepo = DefaultVocabBookRepository(context: CoreDataStack.shared.viewContext)
-    private let userInfo = UserInfoManager.shared
+    private let activeLearning = ActiveLearningManager.shared
     
     private enum Section {
         case main
@@ -212,18 +212,16 @@ extension SearchThemeViewController {
     }
     
     private func handleOnboardingSubmit(selectedTheme: String) {
-        
         UserInfoManager.shared.currentThemeUrl = selectedTheme
-        
         let existingBooks = vocabBookRepo.readAllBooks(bookType: .myBook)
 
         if let existingBook = existingBooks.first {
-            userInfo.selectedBookId = existingBook.id.uuidString
+            activeLearning.setActiveBook(existingBook)
             delegate?.didSelectTheme()
         } else {
             // 시드 실패 시 폴백 생성
             let newBook = vocabBookRepo.createBook(title: BookTopic.myBook.title, bookType: .myBook, level: nil)
-            userInfo.selectedBookId = newBook.id.uuidString
+            activeLearning.setActiveBook(newBook)
             delegate?.didSelectTheme()
         }
     }

@@ -24,8 +24,7 @@ final class ExploreVocabViewModel: BaseViewModel {
     
     func transform(input: Input) -> Output {
         let activeBookRelay = ActiveLearningManager.shared.activeBook
-        let activeBookSourceRelay = ActiveLearningManager.shared.activeBookSource
-        
+
         let allWordItems = BehaviorRelay<[VocabDisplayInfo]>(value: [])
         
         let bookChangedTrigger = activeBookRelay.compactMap { $0 }.map { _ in () }

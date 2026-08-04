@@ -237,21 +237,7 @@ extension ExploreVocabViewController {
                     return
                 }
 
-                var wordsForQuiz: [Vocab]
-
-                if let currentWordIds = owner.userInfo.currentQuizWordIds {
-                    let wordMap = Dictionary(uniqueKeysWithValues: allWords.map { ($0.id.uuidString, $0) })
-                    wordsForQuiz = currentWordIds.compactMap { wordMap[$0] }
-                } else {
-                    wordsForQuiz = allWords
-                    let wordIds = wordsForQuiz.map { $0.id.uuidString }
-                    owner.userInfo.currentQuizWordIds = wordIds
-                    owner.userInfo.currentQuizIndex = 0
-                    owner.userInfo.currentCorrectCount = 0
-                    owner.userInfo.currentIncorrectWordIds = nil
-                }
-                
-                let quizData = QuizData(words: wordsForQuiz, allWord: allWords)
+                let quizData = QuizData(words: allWords, allWord: allWords)
 
                 owner.delegate?.exploreVocabDidTapStartQuiz(quizData: quizData)
             }.disposed(by: disposeBag)

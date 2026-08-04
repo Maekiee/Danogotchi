@@ -73,19 +73,12 @@ extension AppDIContainer {
         let vocabRepository = makeVocabRepository()
         return DefaultToggleSaveVocabUseCase(
             vocabBookRepository: vocabBookRepository,
-            vocabRepository: vocabRepository,
-            userInfo: userInfoManager
+            vocabRepository: vocabRepository
         )
     }
 
     func makeDeleteVocabUseCase() -> DeleteVocabUseCase {
-        let vocabRepository = makeVocabRepository()
-        let vocabBookRepository = makeVocabBookRepository()
-        return DefaultDeleteVocabUseCase(
-            vocabRepository: vocabRepository,
-            vocabBookRepository: vocabBookRepository,
-            userInfo: userInfoManager
-        )
+        return DefaultDeleteVocabUseCase(vocabRepository: makeVocabRepository())
     }
 }
 

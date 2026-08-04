@@ -5,8 +5,7 @@ import RxCocoa
 final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let learningHistoryRepository: LearningHistoryRepository
-    private let userInfo = UserInfoManager.shared
-    
+
     private let quizDataRelay: BehaviorRelay<QuizData>
     
     private let currentIndex: BehaviorRelay<Int>
@@ -26,11 +25,7 @@ final class QuizViewModel: BaseViewModel {
     ) {
         self.learningHistoryRepository = learningHistoryRepository
         self.quizDataRelay = BehaviorRelay(value: quizData)
-        self.currentIndex = BehaviorRelay(value: userInfo.currentQuizIndex)
-        
-        if let incorrectWordIds = userInfo.currentIncorrectWordIds {
-            self.incorrectWords = quizData.allWord.filter { incorrectWordIds.contains($0.id.uuidString) }
-        }
+        self.currentIndex = BehaviorRelay(value: 0)
     }
 
     struct Input {
@@ -50,7 +45,7 @@ final class QuizViewModel: BaseViewModel {
     func transform(input: Input) -> Output {
         let answerResultRelay = PublishRelay<AnswerResult>()
         let quizCompletedRelay = PublishRelay<(originalData: QuizData, result: QuizResult)>()
-        var correctCount = userInfo.currentCorrectCount
+        var correctCount = 0
 
         // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
         let currentQuizData = Observable.combineLatest(
@@ -109,10 +104,7 @@ final class QuizViewModel: BaseViewModel {
                 } else {
                     incorrectWords.append(word)
                 }
-                
-                userInfo.currentCorrectCount = correctCount
-                userInfo.currentIncorrectWordIds = incorrectWords.map { $0.id.uuidString }
-                
+
                 return AnswerResult(
                     isCorrect: isCorrect,
                     selectedIndex: selectedIndex,
@@ -126,11 +118,8 @@ final class QuizViewModel: BaseViewModel {
             .bind(with: self) { owner, result in
                 let (index, quizData) = result
                 let nextIndex = index + 1
-                
-                owner.userInfo.currentQuizIndex = nextIndex
-                
+
                 if nextIndex >= quizData.words.count {
-                    owner.userInfo.clearQuizState()
                     let result = QuizResult(
                         correct: correctCount,
                         total: quizData.words.count,
