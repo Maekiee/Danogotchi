@@ -4,13 +4,16 @@ final class AppDIContainer {
     // MARK: - Managers
     let userInfoManager: UserInfoManager
     let ttsManager: TTSManager
-    let activeLearningManager: ActiveLearningManager
     let coreDataStack: CoreDataStack
-    
+
+    /// 활성 단어장 변경 신호를 보유하므로 앱 전체에서 인스턴스가 하나여야 한다.
+    lazy var vocabBookRepository: VocabBookRepository = DefaultVocabBookRepository(
+        context: coreDataStack.viewContext
+    )
+
     init() {
         userInfoManager = UserInfoManager.shared
         ttsManager = TTSManager.shared
-        activeLearningManager = ActiveLearningManager.shared
         coreDataStack = CoreDataStack.shared
     }
 }
@@ -21,6 +24,7 @@ extension AppDIContainer {
     func makeExploreVocabViewModel() -> ExploreVocabViewModel {
         let learnHistoryRepository = makeVocabLearningHistoryRepository()
         return ExploreVocabViewModel(
+            vocabBookRepository: vocabBookRepository,
             learnHistoryRepository: learnHistoryRepository
         )
     }
@@ -34,7 +38,6 @@ extension AppDIContainer {
     }
 
     func makeAddVocabUseCase() -> AddVocabUseCase {
-        let vocabBookRepository = makeVocabBookRepository()
         return DefaultAddVocabUseCase(vocabBookRepository: vocabBookRepository)
     }
 
@@ -60,7 +63,6 @@ extension AppDIContainer {
     }
 
     func makeFetchVocabsUseCase() -> FetchVocabsUseCase {
-        let vocabBookRepository = makeVocabBookRepository()
         let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return DefaultFetchVocabsUseCase(
             vocabBookRepository: vocabBookRepository,
@@ -69,7 +71,6 @@ extension AppDIContainer {
     }
 
     func makeToggleSaveVocabUseCase() -> ToggleSaveVocabUseCase {
-        let vocabBookRepository = makeVocabBookRepository()
         let vocabRepository = makeVocabRepository()
         return DefaultToggleSaveVocabUseCase(
             vocabBookRepository: vocabBookRepository,
@@ -107,7 +108,8 @@ extension AppDIContainer {
         let repository = makeSearchThemeRepository()
         return SearchThemeViewModel(
             mode: mode,
-            repository: repository
+            repository: repository,
+            vocabBookRepository: vocabBookRepository
         )
     }
 }
@@ -127,10 +129,6 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeVocabRepository() -> VocabRepository {
         return DefaultVocabRepository(context: coreDataStack.viewContext)
-    }
-
-    func makeVocabBookRepository() -> VocabBookRepository {
-        return DefaultVocabBookRepository(context: coreDataStack.viewContext)
     }
 
     func makeVocabLearningHistoryRepository() -> LearningHistoryRepository {

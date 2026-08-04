@@ -18,6 +18,7 @@ extension VocabBookEntity {
             bookType: bookType,
             level: level.flatMap(VocabLevel.init(rawValue:)),
             vocabList: vocabList,
+            isActive: isActive,
             createAt: createAt
         )
     }

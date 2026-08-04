@@ -1,21 +1,34 @@
 import Foundation
 import CoreData
+import RxSwift
+import RxCocoa
 
 final class DefaultVocabBookRepository {
     private let context: NSManagedObjectContext
-    
+    /// 변경 신호 전용. 내용은 캐시하지 않고 매번 CoreData에서 다시 읽는다.
+    private let activeBookIdRelay = BehaviorRelay<UUID?>(value: nil)
+
     init(context: NSManagedObjectContext) {
         self.context = context
+        activeBookIdRelay.accept(fetchActiveBookEntities().first?.id)
     }
-    
+
     private func fetchBookEntity(id: UUID) -> VocabBookEntity? {
         let request = VocabBookEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
-        
+
         return try? context.fetch(request).first
     }
-    
+
+    /// 불변식상 0~1개지만, 해제 시 잔여물까지 훑도록 fetchLimit을 두지 않는다.
+    private func fetchActiveBookEntities() -> [VocabBookEntity] {
+        let request = VocabBookEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "isActive == YES")
+
+        return (try? context.fetch(request)) ?? []
+    }
+
     private func saveContext() {
         guard context.hasChanges else { return }
         do {
@@ -27,6 +40,26 @@ final class DefaultVocabBookRepository {
 }
 
 extension DefaultVocabBookRepository: VocabBookRepository {
+    var activeBookId: Observable<UUID?> {
+        return activeBookIdRelay.asObservable()
+    }
+
+    func readActiveBook() -> VocabBook? {
+        return fetchActiveBookEntities().first?.toDomain()
+    }
+
+    /// 해제와 지정을 한 트랜잭션으로 처리해 "활성 단어장은 항상 1개" 불변식을 저장 시점에 보장한다.
+    func setActiveBook(id: UUID) {
+        guard let targetEntity = fetchBookEntity(id: id) else { return }
+
+        fetchActiveBookEntities().forEach { $0.isActive = false }
+        targetEntity.isActive = true
+
+        saveContext()
+
+        activeBookIdRelay.accept(id)
+    }
+
     func createBook(title: String, bookType: BookTopic, level: VocabLevel?) -> VocabBook {
         let vocabBookEntity = VocabBookEntity(context: context)
         vocabBookEntity.id = UUID()
@@ -72,8 +105,13 @@ extension DefaultVocabBookRepository: VocabBookRepository {
     
     func deleteBook(id: UUID) {
         guard let vocabBookEntity = fetchBookEntity(id: id) else { return }
+        let wasActive = vocabBookEntity.isActive
         context.delete(vocabBookEntity)
         saveContext()
+
+        if wasActive {
+            activeBookIdRelay.accept(nil)
+        }
     }
     
     /// 사용자가 직접 입력한 값으로 새 단어를 생성해 단어장에 추가

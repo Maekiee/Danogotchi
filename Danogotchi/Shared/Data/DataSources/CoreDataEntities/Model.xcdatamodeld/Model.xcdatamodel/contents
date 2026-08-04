@@ -10,6 +10,7 @@
         <attribute name="bookType" attributeType="String"/>
         <attribute name="createAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isActive" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="level" optional="YES" attributeType="String"/>
         <attribute name="title" attributeType="String"/>
         <relationship name="vocabs" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="VocabEntity" inverseName="vocabBook" inverseEntity="VocabEntity"/>

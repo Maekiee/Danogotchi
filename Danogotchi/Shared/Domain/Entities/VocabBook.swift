@@ -6,5 +6,6 @@ struct VocabBook: Hashable {
     let bookType: BookTopic
     let level: VocabLevel?
     let vocabList: [Vocab]
+    let isActive: Bool
     let createAt: Date
 }

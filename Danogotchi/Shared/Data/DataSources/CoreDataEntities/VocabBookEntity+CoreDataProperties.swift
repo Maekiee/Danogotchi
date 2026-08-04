@@ -13,6 +13,7 @@ extension VocabBookEntity {
     @NSManaged public var bookType: String?
     @NSManaged public var createAt: Date?
     @NSManaged public var id: UUID?
+    @NSManaged public var isActive: Bool
     @NSManaged public var level: String?
     @NSManaged public var title: String?
     @NSManaged public var vocabs: NSSet?

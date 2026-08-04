@@ -21,9 +21,7 @@ final class SearchThemeViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: SearchThemeViewModel
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
-    private let vocabBookRepo = DefaultVocabBookRepository(context: CoreDataStack.shared.viewContext)
-    private let activeLearning = ActiveLearningManager.shared
-    
+
     private enum Section {
         case main
     }
@@ -213,17 +211,8 @@ extension SearchThemeViewController {
     
     private func handleOnboardingSubmit(selectedTheme: String) {
         UserInfoManager.shared.currentThemeUrl = selectedTheme
-        let existingBooks = vocabBookRepo.readAllBooks(bookType: .myBook)
-
-        if let existingBook = existingBooks.first {
-            activeLearning.setActiveBook(existingBook)
-            delegate?.didSelectTheme()
-        } else {
-            // 시드 실패 시 폴백 생성
-            let newBook = vocabBookRepo.createBook(title: BookTopic.myBook.title, bookType: .myBook, level: nil)
-            activeLearning.setActiveBook(newBook)
-            delegate?.didSelectTheme()
-        }
+        viewModel.activateMyBook()
+        delegate?.didSelectTheme()
     }
     
     /// 설정 화면에서 수정하기 버튼 탭 (새로운 로직)

@@ -5,12 +5,14 @@ import RxCocoa
 
 final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let userInfo = UserInfoManager.shared
+    private let vocabBookRepository: VocabBookRepository
     private let learnHistoryRepository: LearningHistoryRepository
 
     init(
+        vocabBookRepository: VocabBookRepository,
         learnHistoryRepository: LearningHistoryRepository
     ) {
+        self.vocabBookRepository = vocabBookRepository
         self.learnHistoryRepository = learnHistoryRepository
     }
     
@@ -23,19 +25,16 @@ final class ExploreVocabViewModel: BaseViewModel {
     }
     
     func transform(input: Input) -> Output {
-        let activeBookRelay = ActiveLearningManager.shared.activeBook
-
         let allWordItems = BehaviorRelay<[VocabDisplayInfo]>(value: [])
-        
-        let bookChangedTrigger = activeBookRelay.compactMap { $0 }.map { _ in () }
-    
+
+        let bookChangedTrigger = vocabBookRepository.activeBookId.map { _ in () }
+
         let viewRefreshTrigger = input.viewWillAppear.startWith(())
-        
+
+        // 트리거마다 CoreData에서 다시 읽는다 — 단어 추가/삭제가 즉시 반영되도록
         Observable.merge(bookChangedTrigger, viewRefreshTrigger)
-            .withLatestFrom(activeBookRelay.compactMap { $0 })
+            .compactMap { [weak self] _ in self?.vocabBookRepository.readActiveBook() }
             .bind(with: self) { owner, book in
-                
-                
                 let wordList = book.vocabList.reversed()
 
                 let histories = owner.learnHistoryRepository.fetchAllHistory()

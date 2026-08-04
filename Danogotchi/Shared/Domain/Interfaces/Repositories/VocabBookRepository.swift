@@ -1,6 +1,10 @@
 import Foundation
+import RxSwift
 
 protocol VocabBookRepository {
+    var activeBookId: Observable<UUID?> { get } /// 활성 단어장 변경 신호. 값 캐시가 아니므로 내용은 `readActiveBook()`으로 다시 읽는다.
+    func readActiveBook() -> VocabBook? /// 현재 활성 단어장. 없으면 nil.
+    func setActiveBook(id: UUID) /// 활성 단어장으로 지정한다. 기존 활성 단어장은 같은 트랜잭션에서 해제된다.
     func createBook(title: String, bookType: BookTopic, level: VocabLevel?) -> VocabBook
     func readAllBooks() -> [VocabBook]
     func readAllBooks(bookType: BookTopic) -> [VocabBook]

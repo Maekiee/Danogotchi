@@ -15,9 +15,9 @@
 - 학습을 중간에 종료해도 이미 푼 단어의 학습 카운트·정오답은 저장된다
 - 학습중 단어장은 Explore 카드로 표시되고, 단어장 목록/상세에 "학습중"으로 표시된다
 
-**진행률: A-1 / A-2 완료(커밋 대기) · 잔여 9장 23h**
+**진행률: A-1 / A-2 완료(커밋 `e0c744c`) · A-3 완료(빌드·수동검증 대기) · 잔여 8장 19h**
 
-착수 순서: `A-3` → `B-1` → `B-2` → `B-3` → `C-1` → `C-2` → `C-3` → `C-4` → `D-1` → `D-2`
+착수 순서: `B-1` → `B-2` → `B-3` → `C-1` → `C-2` → `C-3` → `C-4` → `D-1` → `D-2`
 
 ---
 
@@ -46,8 +46,7 @@
 
 ### 커밋 전 남은 확인 (수동 검증 미실행)
 
-빌드만 통과한 상태다. 리스크 지점은 온보딩 경로 하나 — `SearchThemeViewController` 가
-`setActiveBook` 의 첫 호출자가 되었다.
+> A-3에서 같은 경로를 다시 건드렸으므로 **아래 검증은 A-3 완료 조건에 흡수**되었다.
 
 - [ ] 앱 삭제 후 재설치 → 온보딩 테마 선택 → Explore에 나의 단어장 카드가 표시된다
 - [ ] 단어 4개 이상 추가 → 학습 2~3문제 후 X로 종료 → 다시 학습하기 시 **1번 문제부터** 시작
@@ -56,7 +55,7 @@
 
 ---
 
-## A-3. 활성 단어장을 CoreData `isActive` 필드로 이전 — **4h** · 선행 A-1
+## ✅ A-3. 활성 단어장을 CoreData `isActive` 필드로 이전 — 코드 완료 · 빌드/수동검증 대기 · 4h
 
 > **왜**: 지금은 "활성 단어장 id는 UserDefaults, 단어장 실체는 CoreData"로 진실원본이 쪼개져
 > 있다. 활성 단어장을 삭제하면 UserDefaults에 죽은 UUID가 남고 `readBook(id:)` 이 nil을
@@ -65,70 +64,77 @@
 > 얻는 것: 진실원본 1개(단어장 삭제 시 활성 상태도 함께 소멸) · "활성은 1개"가 저장 시점에
 > 강제되는 스키마 불변식 · `ActiveLearningManager` 클래스 소멸
 
-### A-3-1. CoreData 모델
-- [ ] `Model.xcdatamodeld/Model.xcdatamodel/contents` 의 `VocabBookEntity` 에 속성 추가
+> **설계 변경(구현 시 확정)**: Relay에 `VocabBook` 값을 캐시하면 단어 추가/삭제가 반영되지 않으므로,
+> Relay는 **변경 신호(`UUID?`)만** 나르고 읽기는 매번 `isActive == YES` 술어로 CoreData를 조회한다.
+> 이로써 아래 "함께 고친 버그"가 해소된다.
+
+### ✅ A-3-1. CoreData 모델
+- [x] `Model.xcdatamodeld/Model.xcdatamodel/contents` 의 `VocabBookEntity` 에 속성 추가
   ```xml
   <attribute name="isActive" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
   ```
-- [ ] `VocabBookEntity+CoreDataProperties.swift` 에 `@NSManaged public var isActive: Bool` 추가
-- [ ] `DatabaseSeeder` 는 **수정하지 않는다** — 기본값 NO로 시드되고 온보딩이 나의 단어장을 활성화한다
+- [x] `VocabBookEntity+CoreDataProperties.swift` 에 `@NSManaged public var isActive: Bool` 추가
+- [x] `DatabaseSeeder` 는 **수정하지 않았다** — 기본값 NO로 시드되고 온보딩이 나의 단어장을 활성화한다
 
-> **⚠️ 마이그레이션 주의**: `CoreDataStack.swift` 는 `NSPersistentContainer(name: "Model")` 기본
-> 설정이다. 자동 라이트웨이트 마이그레이션은 켜져 있지만 **소스 모델이 번들에 있어야 동작한다.**
-> `Model.xcdatamodel` 을 in-place 수정하면 구버전 모델이 사라져 스토어 로드가 실패하고
-> `CoreDataStack:12` 의 `fatalError` 로 앱이 죽는다.
-> - **출시본 없음** → in-place 수정 + 개발 기기 앱 삭제 재설치. 시드가 복구하므로 손실은
->   사용자가 직접 추가한 단어뿐. **팀원 기기도 재설치 필요.**
-> - **출시본 있음** → `Model 2.xcdatamodel` 버전 추가 + Current Version 지정 (**+0.5h**)
+> **⚠️ 출시본 없음 확정 → in-place 수정함.** 모델 버전이 `Model.xcdatamodel` 하나뿐이고
+> `.xccurrentversion` 도 없어 구버전 모델이 번들에 남지 않는다. 기존 스토어를 가진 기기는
+> 마이그레이션 소스 모델을 못 찾아 `CoreDataStack.swift:14` 의 `fatalError` 로 죽는다.
+> → **개발 기기·시뮬레이터 앱 삭제 후 재설치 필수. 팀원 기기도 동일.**
 
-### A-3-2. 도메인 엔티티
-- [ ] `Shared/Domain/Entities/VocabBook.swift` 에 `let isActive: Bool` 추가
-- [ ] `Shared/Data/Mappers/VocabBookMapper.swift:15` 의 `VocabBook(...)` 에 `isActive: isActive` 추가
-  — **`VocabBook` 생성처는 이 Mapper 한 곳뿐이므로 수정 지점은 1개다**(grep 확인)
+### ✅ A-3-2. 도메인 엔티티
+- [x] `Shared/Domain/Entities/VocabBook.swift` 에 `let isActive: Bool` 추가 (B-2 배지가 소비)
+- [x] `Shared/Data/Mappers/VocabBookMapper.swift` 의 `VocabBook(...)` 에 `isActive: isActive` 추가
+  — **`VocabBook` 생성처는 이 Mapper 한 곳뿐**(grep 재확인 완료)
 
-### A-3-3. Repository 확장
-- [ ] `Shared/Domain/Interfaces/Repositories/VocabBookRepository.swift`
+### ✅ A-3-3. Repository 확장
+- [x] `Shared/Domain/Interfaces/Repositories/VocabBookRepository.swift` (+ `import RxSwift`)
   ```swift
-  /// 활성 단어장으로 지정한다. 기존 활성 단어장은 같은 트랜잭션에서 해제된다.
+  var activeBookId: Observable<UUID?> { get } /// 변경 신호. 내용은 readActiveBook()으로 다시 읽는다.
+  func readActiveBook() -> VocabBook?
   func setActiveBook(id: UUID)
-  /// 활성 단어장 변경 스트림. 활성 단어장이 없거나 삭제되면 nil을 방출한다.
-  var activeBook: Observable<VocabBook?> { get }
   ```
-- [ ] `Shared/Data/Repositories/DefaultVocabBookRepository.swift`
-  - `private let activeBookRelay: BehaviorRelay<VocabBook?>` — init에서 `isActive == YES` 1회 fetch
-  - `setActiveBook(id:)` — 기존 활성 전부 `isActive = false` → 대상 `true` → `saveContext()` → Relay 갱신
-  - `deleteBook(id:)` — 기존 로직 + 활성 단어장이었으면 Relay에 nil 방출
+- [x] `Shared/Data/Repositories/DefaultVocabBookRepository.swift`
+  - `private let activeBookIdRelay = BehaviorRelay<UUID?>(value: nil)` — init에서 1회 fetch로 채움
+  - `private func fetchActiveBookEntities()` — 술어 `isActive == YES` (해제 시 잔여물까지 훑도록 fetchLimit 없음)
+  - `setActiveBook(id:)` — 기존 활성 전부 해제 → 대상 지정 → `saveContext()` → Relay 갱신 (한 트랜잭션)
+  - `deleteBook(id:)` — 삭제 전 `isActive` 확인 → 활성이었으면 Relay에 nil 방출
   - `ponytail: Relay 직접 갱신 — 앱 외부에서 DB가 바뀌는 경로가 생기면 NSFetchedResultsController로 교체`
 
-### A-3-4. 단일 인스턴스 확보 ⬅️ **가장 놓치기 쉬운 지점**
-`activeBookRelay` 가 Repository 안에 살기 때문에 `DefaultVocabBookRepository` 인스턴스가
-**하나여야 한다.** 지금은 두 곳에서 제각각 만들고 있다.
+### ✅ A-3-4. 단일 인스턴스 확보
+- [x] `AppDIContainer` — `makeVocabBookRepository()` → `lazy var vocabBookRepository` 로 전환,
+      호출 3곳 교체(`makeAddVocabUseCase` / `makeFetchVocabsUseCase` / `makeToggleSaveVocabUseCase`).
+      무상태 repo 2종은 팩토리 그대로
+- [x] `SearchThemeViewController` — `DefaultVocabBookRepository(...)` 직접 생성 제거
+- [x] grep `DefaultVocabBookRepository(` → **DI 컨테이너 1곳만** 남음
 
-- [ ] `AppDIContainer` — `makeVocabBookRepository()` → `lazy var vocabBookRepository` 로 전환,
-      기존 호출 6곳 교체. 무상태 repo(`makeVocabRepository` / `makeVocabLearningHistoryRepository`)는 그대로
-- [ ] `SearchThemeViewController:24` — `DefaultVocabBookRepository(context: CoreDataStack.shared.viewContext)`
-      **직접 생성을 제거**하고 주입으로 교체
-      > 놓치면 별개 Relay를 갖게 되어 온보딩에서 지정한 활성 단어장이 Explore에 반영되지 않는다.
-      > 빌드는 통과하고 런타임에 조용히 깨지는 지점이다.
-
-### A-3-5. 삭제
-- [ ] **`Shared/Domain/ActiveLearningManager.swift` 파일 전체 삭제**
-- [ ] `UserInfoManager` — `activeBookIdentifier` / `activeBookIdentifierRelay` / `Keys.activeBookId` /
+### ✅ A-3-5. 삭제
+- [x] **`Shared/Domain/ActiveLearningManager.swift` 파일 전체 삭제**
+- [x] `UserInfoManager` — `activeBookIdentifier` / `activeBookIdentifierRelay` / `Keys.activeBookId` /
       `removeUserInfo()` 의 `activeBookIdentifier = nil` 삭제
-      → `username` / `userId` / `currentThemeUrl` 전용 UserDefaults 래퍼로 축소
-- [ ] `AppDIContainer:7` — 주입된 적 없는 `activeLearningManager` 프로퍼티 삭제
+      → `username` / `userId` / `currentThemeUrl` 전용 UserDefaults 래퍼로 축소.
+      **`private init()` 은 빈 채로 유지** — 지우면 싱글턴 강제가 풀려 외부에서 생성 가능해진다
+- [x] `AppDIContainer` — 주입된 적 없는 `activeLearningManager` 프로퍼티 삭제
 
-### A-3-6. 소비처 교체
-- [ ] `ExploreVocabViewModel:26` — `ActiveLearningManager.shared.activeBook` → 생성자 주입받은
-      `vocabBookRepository.activeBook`
-- [ ] `SearchThemeViewController` — `activeLearning.setActiveBook(book)` →
-      `vocabBookRepository.setActiveBook(id: book.id)`
+### ✅ A-3-6. 소비처 교체
+- [x] `ExploreVocabViewModel` — `vocabBookRepository` 생성자 주입, 트리거마다 `readActiveBook()` 재조회.
+      미사용 프로퍼티 `userInfo` 도 제거(orphan 정리)
+- [x] `SearchThemeViewModel.activateMyBook()` 신설(나의 단어장 조회 → 없으면 생성 → 활성 지정),
+      `SearchThemeViewController.handleOnboardingSubmit` 은 이를 호출만 한다.
+      두 코디네이터 모두 `makeSearchThemeViewModel(mode:)` 경유라 **코디네이터 수정 불필요**
+
+### ✅ 함께 고친 기존 버그
+- [x] `ExploreVocabViewModel` 의 `withLatestFrom(activeBookRelay)` 가 **stale `VocabBook` 스냅샷**을
+      재사용해, 단어를 추가·삭제해도 `book.vocabList` 가 갱신되지 않던 문제
+      → 트리거마다 CoreData 재조회로 해소
 
 ### 완료 조건
+- [x] grep `ActiveLearningManager|activeBookIdentifier|Keys.activeBookId` **0건**
+- [ ] **빌드 통과** (Xcode ⌘B — 사용자 검증)
 - [ ] 앱 삭제 재설치 → 온보딩 완료 → Explore에 나의 단어장 카드 표시
-- [ ] `isActive == YES` 인 레코드가 항상 정확히 1개 (다른 단어장 지정 후 재확인)
-- [ ] 활성 단어장을 삭제하면 Explore가 빈 상태가 되고 UserDefaults에 잔여물 없음
-- [ ] grep `ActiveLearningManager|activeBookIdentifier|activeBookId` 0건 · 빌드 통과
+- [ ] 단어 추가 → Explore 목록에 **즉시 반영** (stale 스냅샷 수정 확인)
+- [ ] 설정 → 테마 변경 시 테마만 바뀌고 활성 단어장 유지 (`.settings` 경로 회귀 없음)
+- [ ] `ZISACTIVE = 1` 인 레코드가 정확히 1개
+- [ ] 활성 단어장 삭제 경로는 **`deleteBook` 호출처가 0곳**이라 UI 재현 불가 — 코드 리뷰로 대체
 
 ---
 
@@ -246,8 +252,7 @@ C-1의 선정 로직도 같은 집계를 쓰므로 세 번째 복붙 전에 합�
 
 ## 착수 전 확정 필요
 
-- [ ] **① 출시본 존재 여부** (A-3 착수 조건) — 모델 in-place 수정(재설치 필요) vs
-      모델 버전 추가(+0.5h)
+- [x] **① 출시본 존재 여부** — **출시본 없음 확정**. 모델 in-place 수정 완료(+0h), 앱 재설치 필요
 - [ ] **② C-1 가중 랜덤 정책** — 제안: `w = (1 - accuracy) + 1/(total + 1)` 확률 추출.
       정답률순 정렬만 하면 매번 같은 단어가 뽑혀 "랜덤"이 아니게 된다
 - [ ] **③ C-4 재출제 정책** — 제안: 새로 20개 다시 뽑기(직전 학습 결과가 다음 세트에 반영됨).
@@ -258,8 +263,11 @@ C-1의 선정 로직도 같은 집계를 쓰므로 세 번째 복붙 전에 합�
 ```bash
 xcodebuild -scheme Danogotchi-dev build
 
-# A-3 완료 후 0건이어야 함
-grep -rn "ActiveLearningManager\|activeBookIdentifier\|activeBookId" --include="*.swift" Danogotchi/
+# A-3 완료 후 0건 (검증 완료)
+grep -rn "ActiveLearningManager\|activeBookIdentifier\|Keys.activeBookId" --include="*.swift" Danogotchi/
+
+# DI 컨테이너 1곳만 나와야 함 (Relay 단일 인스턴스 보장)
+grep -rn "DefaultVocabBookRepository(" --include="*.swift" Danogotchi/
 ```
 
 ## 시간 산정
@@ -267,13 +275,11 @@ grep -rn "ActiveLearningManager\|activeBookIdentifier\|activeBookId" --include="
 | 구간 | 시간 |
 |---|---|
 | A-1 + A-2 (완료) | 5h |
-| A-3 | 4h |
+| A-3 (완료) | 4h |
 | B-1 + B-2 + B-3 | 6h |
 | C-1 + C-2 + C-3 + C-4 | 9.5h |
 | D-1 + D-2 | 3.5h |
-| **잔여** | **23h** |
-
-출시본이 있어 모델 버전을 추가해야 하면 +0.5h.
+| **잔여** | **19h** |
 
 ---
 
