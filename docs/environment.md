@@ -14,7 +14,10 @@
 
 ### 공통 사항
 - 빌드 페이즈에서 환경에 맞는 `GoogleService-Info.plist`가 자동 복사된다.
-- `Danogotchi/App/Secret/Firebase/`는 `.gitignore`에 포함 — 빌드 전 환경별 plist를 별도 배치해야 한다.
+- **`Danogotchi/App/Secret/` 전체가 `.gitignore` 대상 — 신규 클론은 아래 4개를 배치해야 빌드된다.**
+  - `Secret.swift` — `unsplashBaseURL` / `photoSearchURL` / `unsplashKeys`
+  - `Secrets.xcconfig`
+  - `Firebase/Debug/GoogleService-Info.plist`, `Firebase/Release/GoogleService-Info.plist`
 
 ## 테스트 상태
 
@@ -26,13 +29,14 @@
 
 - CoreData 사용. 스택은 `Core/Storage/CoreDataStack.swift` — `NSPersistentContainer(name: "Model")` 싱글턴, `viewContext`에 자동 머지 + `NSMergeByPropertyObjectTrumpMergePolicy` 적용.
 - 모델 파일: `Shared/Data/DataSources/CoreDataEntities/Model.xcdatamodeld` (엔티티: `VocabEntity` / `VocabBookEntity` / `LearningHistoryEntity`).
-- 스키마 변경 시 마이그레이션 처리 필요.
+- 스키마 변경 시 마이그레이션 처리 필요. **모델을 in-place 수정하면 기존 스토어를 가진 기기는 앱 삭제 후 재설치해야 한다.**
+- 첫 실행 시 `Shared/Data/DatabaseSeeder.swift`가 추천 단어장을 시드한다.
 
 ## 컬렉션뷰 / UI
 
 - `UICollectionView`는 `UICollectionViewDiffableDataSource` 사용.
 - `WaterfallLayout`(`Feature/SearchTheme/Components/WaterFallLayout.swift`)은 워터폴(Masonry) 형태의 커스텀 레이아웃.
-- `CardBlurView`는 SwiftUI로 구현되어 `UIHostingController`로 UIKit 셀에 임베드 (`MainWordCardCollectionViewCell` 참고).
+- `CardBlurView`(`Feature/ExploreVocab/Components/`)는 SwiftUI로 구현되어 `UIHostingController`로 UIKit 셀에 임베드 (같은 폴더 `MainWordCardCollectionViewCell` 참고).
 
 ## 의존성 (Swift Package Manager)
 - RxSwift / RxCocoa: 반응형 프로그래밍, UI 바인딩

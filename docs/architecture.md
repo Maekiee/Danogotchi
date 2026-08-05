@@ -11,7 +11,7 @@
 
 > **배치 규칙**: 도메인 조각·UI가 **2개 이상 Feature에서 쓰이면 `Shared/`**, 정확히 1개 Feature 전용이면 **그 Feature 폴더 안**(예: `Feature/Quiz/Components/CustomProgressView`)에 둔다.
 >
-> **UseCase 레이어**(`Shared/Domain/UseCases/`)는 필요한 순간에만 추가한다. 처음부터 일괄 도입하지 않고, **비즈니스 규칙이 복잡해져 ViewModel에서 분리가 필요한 순간에 만든다**.
+> **UseCase 레이어**(`Shared/Domain/UseCases/`)는 도입 진행 중(현재 7개). 처음부터 일괄 도입하지 않고, **비즈니스 규칙이 복잡해져 ViewModel에서 분리가 필요한 순간에 만든다**.
 
 ## MVVM-C / Coordinator
 - 모든 화면 전환은 `Coordinator` 프로토콜을 통해 수행된다 (직접 `pushViewController` 금지).
@@ -30,25 +30,28 @@
 
 ## 핵심 비즈니스 용어 (Domain Model)
 
-### 단어 (Word)
+### 단어 (Vocab)
 - 위치: `Shared/Domain/Entities/Vocab.swift`
-- 학습 단위. 필드: `id / word / meaning / createAt`
+- 학습 단위. 필드: `id / word / meaning / bookType / level / partOfSpeech / sourceWordId / createAt`
+- `sourceWordId`: 추천 단어를 복사해 저장한 단어면 원본 id, 직접 추가한 단어는 nil.
 
-### 단어장 (WordBook)
+### 단어장 (VocabBook)
 - 위치: `Shared/Domain/Entities/VocabBook.swift`
-- 단어 묶음. 필드: `id / title / wordList / createAt`
+- 단어 묶음. 필드: `id / title / bookType / level / vocabList / isActive / createAt`
 
-### 나의 단어장
-- 식별: `title == "나의 단어장"` 매직 스트링
-- 사용자가 직접 추가하는 기본 단어장. 분기 로직의 핵심 식별자.
+### 단어장 종류 (BookTopic)
+- 위치: `Shared/Domain/Entities/BookTopic.swift`
+- `myBook`(나의 단어장) / `travel` / `emotion` / `life` / `business`.
+- **분기는 항상 `bookType == .myBook`으로 한다. 제목 문자열 비교 금지.**
 
 ### 추천 단어장
-- 위치: `RecommendBookRepository`
-- 큐레이션된 외부 단어장 (Firestore 등).
+- 첫 실행 시 `Shared/Data/DatabaseSeeder.seedIfNeeded`가 `MockData/RecommendBooks.swift`를 CoreData에 시드한다 (로컬, 원격 아님).
+- 추천 단어를 나의 단어장에 담으면 복사본이 생기고 원본 id는 `Vocab.sourceWordId`에 남는다.
 
-### 활성 단어장
-- 위치: `UserInfoManager.activeBookIdentifier`
-- 현재 학습 대상으로 선택된 단어장 (id + 타입: 내것/추천).
+### 활성 단어장 (학습중 단어장)
+- 저장: `VocabBookEntity.isActive` — 앱 전체에서 **항상 1개**. `setActiveBook(id:)`가 같은 트랜잭션에서 기존 것을 해제한다.
+- 읽기: `VocabBookRepository.readActiveBook()` / 변경 신호: `activeBookId: Observable<UUID?>`
+- **신호는 값 캐시가 아니다** — 신호를 받으면 `readActiveBook()`으로 다시 읽는다.
 
 ### 학습 이력
 - 위치: `Shared/Domain/Entities/LearningHistory.swift`
@@ -59,21 +62,17 @@
 - 활성 단어장으로부터 생성되는 학습 세션.
 
 ### 테마 (Theme)
-- 위치: `SearchThemeRepository`
-- 메인 화면 배경(이미지 URL). 사용자 프로필에 저장.
-
-### CreateWord
-- 위치: `Shared/Domain/Entities/CreateVocab.swift`
-- 단어 등록/편집 시점의 입력 DTO.
+- 조회: `SearchThemeRepository` → Unsplash REST (`Core/Network/ApiRouter.searchPhoto`).
+- 선택 결과 URL은 `UserInfoManager.currentThemeUrl`에 저장된다. 메인 화면 배경으로 쓰인다.
 
 ## 핵심 데이터 흐름 (Write 패스)
 
-낙관적 갱신(Optimistic Update) — UI 먼저 갱신 후 영속화. 활성 단어장에 영향이 가면 `clearQuizState()` 등 부수효과를 처리한다.
+UseCase → Repository → CoreData 동기 저장 → `activeBookId` 등 Relay 신호 방출 → 구독 측이 재조회.
+즉 **저장이 먼저, UI 갱신은 신호 기반 재조회**다.
 
 ## 전역 상태 / 싱글턴
 
-- `UserInfoManager` — UserDefaults: 사용자 프로필, 활성 단어장 ID/타입, 테마 URL, 퀴즈 진행 상태
-- `ActiveLearningManager` — 현재 학습 세션의 반응형 상태 (Rx 기반)
+- `UserInfoManager` — UserDefaults: `username` / `userId`(미사용) / `themeUrl` 만. 활성 단어장·퀴즈 상태는 여기 없다(CoreData로 이관됨).
 - `TTSManager` — AVSpeechSynthesizer 래퍼 (단어 발음)
 
 > 싱글턴 직접 참조는 점진적으로 줄여나가는 중. 신규 코드는 가능하면 **AppDIContainer를 통한 주입** 또는 Repository 의존성으로 우회한다.

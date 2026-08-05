@@ -9,7 +9,7 @@
 # 프로젝트 개요
 **Danogotchi (단어고치)** — iOS 단어 학습 앱 (iOS 16.0+, iPhone only)
 - Swift 5.0 / UIKit 기반 프로그래매틱 UI (스토리보드 없음)
-- 로컬: CoreData, 원격: Firebase Firestore
+- 데이터는 전부 로컬 CoreData(추천 단어장 포함 시드). 원격 호출은 테마 이미지용 Unsplash REST 뿐이며, Firestore는 `AppDelegate`에서 초기화만 하고 미사용.
 
 # 빌드
 ```bash
@@ -17,7 +17,10 @@ xcodebuild -scheme Danogotchi-dev build   # Debug — 단어고치[DEV]
 xcodebuild -scheme Danogotchi build        # Release — com.maekie.Danogotchi
 ```
 
-Xcode: 시뮬레이터 또는 실기기 선택 후 ⌘R. 환경별 `GoogleService-Info.plist`·스킴 상세는 `docs/environment.md`.
+Xcode: 시뮬레이터 또는 실기기 선택 후 ⌘R.
+**신규 클론은 `Danogotchi/App/Secret/`(gitignore)에 `Secret.swift`·`Secrets.xcconfig`·환경별 `GoogleService-Info.plist`를 배치해야 빌드된다** — 상세는 `docs/environment.md`.
+
+> 현재 스프린트 계획·진행률은 루트 `TODO.md`.
 
 # 아키텍처 / 도메인
 

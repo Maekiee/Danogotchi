@@ -30,10 +30,10 @@ enum AppFont {
 private extension AppFont.Weight {
     var systemFallback: UIFont.Weight {
         switch self {
-        case .regular:  return .regular
-        case .medium:   return .medium
+        case .regular: return .regular
+        case .medium: return .medium
         case .semibold: return .semibold
-        case .bold:     return .bold
+        case .bold: return .bold
         }
     }
 }
