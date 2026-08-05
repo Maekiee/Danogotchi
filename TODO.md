@@ -15,7 +15,7 @@
 - 학습을 중간에 종료해도 이미 푼 단어의 학습 카운트·정오답은 저장된다
 - 학습중 단어장은 Explore 카드로 표시되고, 단어장 목록/상세에 "학습중"으로 표시된다
 
-**진행률: A-1 / A-2 완료(`e0c744c`) · A-3 완료(`e9b71db`) · B-1 + B-2(일부) 완료(커밋 대기) · 잔여 8장 17h**
+**진행률: A-1 / A-2 완료(`e0c744c`) · A-3 완료(`e9b71db`) · B-1 + B-2(일부) 완료(`365418e`) · 잔여 8장 17h**
 
 > ⚠️ **A-3에서 CoreData 모델을 in-place 수정했다. 기존 스토어를 가진 기기는 앱 삭제 후
 > 재설치해야 한다**(안 하면 `CoreDataStack.swift:14` 의 `fatalError`). **팀원 기기도 동일.**
@@ -143,7 +143,7 @@
 
 ---
 
-## ✅ B-1. 단어장 상세의 학습하기 → 활성 단어장 지정 — 완료 · 커밋 대기 · 1.5h
+## ✅ B-1. 단어장 상세의 학습하기 → 활성 단어장 지정 — 완료 · 커밋 `365418e` · 1.5h
 
 `VocabBookDetailViewController` 의 학습하기 버튼이 `print` 만 실행하던 문제.
 `setActiveBook(id:)` 의 호출자가 온보딩 1곳뿐이라 앱 안에서 학습 대상을 바꿀 방법이 없었다.
@@ -171,17 +171,18 @@
 
 ## 🔶 B-2. "학습중" 표시 (단어장 목록 카드 + 상세 버튼) — **잔여 2h** · 선행 B-1
 
-> **상세 버튼은 완료(커밋 대기).** 남은 건 **Library 목록 카드 배지**뿐이다.
+> **상세 버튼은 완료(커밋 `365418e`).** 남은 건 **Library 목록 카드 배지**뿐이다.
 
-> **⚠️ 선행 조사 결과**: `LibraryViewController:207` 이 `snapshot.appendItems(BookTopic.allCases)` 로
+> **⚠️ 선행 조사 결과**: `LibraryViewController:206` 이 `snapshot.appendItems(BookTopic.allCases)` 로
 > 카드를 만든다. **DB를 조회하지 않고 enum으로 카드를 생성하고**, DiffableDataSource item 타입도
-> `BookTopic` 이다(`:33` `:35` `:163`). 따라서 `isActive` 를 카드에 실으려면 Library를 DB 조회
+> `BookTopic` 이다(`:32` `:34` `:162`). 따라서 `isActive` 를 카드에 실으려면 Library를 DB 조회
 > 기반으로 전환해야 한다. 현재 `LibraryViewModel` 은 `transform` 이 빈 `Output()` 을 반환하는
-> 껍데기라 실제 구현이 필요하다.
+> 껍데기이고 `AppDIContainer:52` 도 `LibraryViewModel()` 로 **의존성 주입이 없다**.
 
 - [ ] `LibraryViewModel` 구현 — `readAllBooks()` → `[VocabBookCardInfo]`(topic + isActive) Output
+      (+ `AppDIContainer.makeLibraryViewModel()` 에 의존성 주입 추가)
 - [ ] `LibraryViewController` — DiffableDataSource item 타입 `BookTopic` → `VocabBookCardInfo` 교체
-      (`:33` `:35` `:163` `:207`)
+      (`:32` `:34` `:162` `:206`)
 - [ ] `VocabTopicCardCollectionViewCell.binding(with:)` 시그니처 변경 + 학습중 배지 뷰 추가
 - [x] `VocabBookDetailViewController` 우상단 버튼 — 활성 단어장이면 "학습중" + disabled
 - [x] 활성 id를 구독해 내 id와 비교하는 로직은 **필요 없다** — 조회 결과에 `isActive` 가 실려 온다
@@ -396,7 +397,8 @@ grep -rn "libraryDidSelectActiveBook\|단어장 학습하기로 변경\|didActiv
 
 ### ✅ 6-3. DI 컨테이너 — 완료
 - [x] `AppDIContainer`: `makeVocabRepository()` / `makeVocabBookRepository()` / `makeVocabLearningHistoryRepository()` 추가 — 각 구현체에 `coreDataStack.viewContext` 주입
-- [x] `makeLibraryViewModel` / `makeMyBookDetailViewModel` / `makeCreateWordViewModel(vocabItem:)` 을 Vocab repo 주입으로 전환
+- [x] `makeMyBookDetailViewModel` / `makeCreateWordViewModel(vocabItem:)` 을 Vocab repo 주입으로 전환
+  - ⚠️ `makeLibraryViewModel` 은 **주입 없음**(`LibraryViewModel()`) — VM이 빈 껍데기라 필요 없었다. B-2 잔여에서 주입한다
 - [x] `ActiveLearningManager` 기본 인자 교체 (`DefaultVocabBookRepository`)
 - [x] 옛 `make*Repository()`(Word/WordBook/LearningHistory) 제거 — *Phase 7에서 `Default*` 구현체·프로토콜과 함께 제거 완료*
 
