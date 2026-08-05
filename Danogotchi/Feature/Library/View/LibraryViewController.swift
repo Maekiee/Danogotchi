@@ -166,7 +166,6 @@ extension LibraryViewController {
             cell.buttonTap
                 .map { item }
                 .bind(with: self) { owner, topic in
-                    print("셀 버튼 탭: \(topic.title)")
                     owner.delegate?.libraryDidTapMore(topic: topic)
                 }.disposed(by: cell.disposeBag)
         }
