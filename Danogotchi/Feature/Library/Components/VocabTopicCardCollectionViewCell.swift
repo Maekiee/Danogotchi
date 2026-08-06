@@ -43,6 +43,18 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    private let activeIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(
+            systemName: "checkmark.circle.fill",
+            withConfiguration: UIImage.SymbolConfiguration(
+                pointSize: 22, weight: .semibold
+            )
+        )
+        imageView.tintColor = AppColor.textPrimary
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -66,7 +78,8 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         [
             textLabel,
             icon,
-            button
+            button,
+            activeIcon
         ].forEach { contentView.addSubview($0) }
     }
     
@@ -86,6 +99,11 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
             make.trailing.equalToSuperview().offset(-AppSpacing.space16)
             make.size.equalTo(40)
         }
+
+        activeIcon.snp.makeConstraints { make in
+            make.leading.equalTo(textLabel.snp.trailing).offset(AppSpacing.space8)
+            make.centerY.equalTo(textLabel)
+        }
     }
     
     private func configView() {
@@ -93,11 +111,12 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         layer.masksToBounds = true
     }
     
-    func binding(with item: BookTopic) {
-        icon.image = UIImage(named: item.icon)?
+    func binding(with item: VocabBookCardInfo) {
+        icon.image = UIImage(named: item.topic.icon)?
             .withRenderingMode(.alwaysTemplate)
-        textLabel.text = item.title
-        backgroundColor = item.color
+        textLabel.text = item.topic.title
+        backgroundColor = item.topic.color
+        activeIcon.isHidden = !item.isActive
     }
     
 }

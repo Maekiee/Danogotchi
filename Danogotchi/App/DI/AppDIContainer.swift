@@ -50,7 +50,7 @@ extension AppDIContainer {
 // MARK: - Library
 extension AppDIContainer {
     func makeLibraryViewModel() -> LibraryViewModel {
-        return LibraryViewModel()
+        return LibraryViewModel(fetchVocabBooksUseCase: makeFetchVocabBooksUseCase())
     }
 
     func makeVocabDetailViewModel(topic: BookTopic) -> VocabBookDetailViewModel {
@@ -90,6 +90,10 @@ extension AppDIContainer {
 
     func makeIsActiveBookUseCase() -> IsActiveBookUseCase {
         return DefaultIsActiveBookUseCase(vocabBookRepository: vocabBookRepository)
+    }
+
+    func makeFetchVocabBooksUseCase() -> FetchVocabBooksUseCase {
+        return DefaultFetchVocabBooksUseCase(vocabBookRepository: vocabBookRepository)
     }
 }
 

@@ -29,9 +29,9 @@ final class LibraryViewController: BaseViewController {
         case main
     }
     
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, BookTopic>
-    
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, BookTopic>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, VocabBookCardInfo>
+
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabBookCardInfo>
     
     private var dataSource: DataSource!
     
@@ -60,7 +60,6 @@ final class LibraryViewController: BaseViewController {
         configLayout()
         configView()
         configDataSource()
-        applySnapshot()
         bind()
     }
     
@@ -87,8 +86,15 @@ final class LibraryViewController: BaseViewController {
 
 extension LibraryViewController {
     private func bind() {
-        let input = LibraryViewModel.Input()
+        let input = LibraryViewModel.Input(
+            viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map { _ in }
+        )
         let output = viewModel.transform(input: input)
+
+        output.bookItems
+            .drive(with: self) { owner, items in
+                owner.applySnapshot(items: items)
+            }.disposed(by: disposeBag)
         
         Observable.merge(
             collectionView.rx.didEndDisplayingSupplementaryView
@@ -159,12 +165,12 @@ extension LibraryViewController {
     
     private func configDataSource() {
         let registration = UICollectionView.CellRegistration
-        <VocabTopicCardCollectionViewCell, BookTopic> { [weak self] cell, _ ,item in
+        <VocabTopicCardCollectionViewCell, VocabBookCardInfo> { [weak self] cell, _ ,item in
             guard let self else { return }
             cell.binding(with: item)
-            
+
             cell.buttonTap
-                .map { item }
+                .map { item.topic }
                 .bind(with: self) { owner, topic in
                     owner.delegate?.libraryDidTapMore(topic: topic)
                 }.disposed(by: cell.disposeBag)
@@ -199,10 +205,10 @@ extension LibraryViewController {
         }
     }
     
-    private func applySnapshot() {
+    private func applySnapshot(items: [VocabBookCardInfo]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
-        snapshot.appendItems(BookTopic.allCases, toSection: .main)
+        snapshot.appendItems(items, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
