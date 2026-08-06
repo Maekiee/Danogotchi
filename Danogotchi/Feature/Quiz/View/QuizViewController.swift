@@ -79,8 +79,8 @@ final class QuizViewController: BaseViewController {
     private let choice1Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 1", for: .normal)
-        button.setTitleColor(AppColor.textPrimary, for: .normal)
-        button.backgroundColor = AppColor.appWhite
+        button.setTitleColor(AppColor.white, for: .normal)
+        button.backgroundColor = AppColor.black
         button.layer.cornerRadius = AppRadius.radius20
         button.titleLabel?.font = AppFont.title2
         
@@ -96,8 +96,8 @@ final class QuizViewController: BaseViewController {
     private let choice2Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 2", for: .normal)
-        button.setTitleColor(AppColor.textPrimary, for: .normal)
-        button.backgroundColor = AppColor.appWhite
+        button.setTitleColor(AppColor.white, for: .normal)
+        button.backgroundColor = AppColor.black
         button.layer.cornerRadius = AppRadius.radius20
         button.titleLabel?.font = AppFont.title2
         
@@ -113,8 +113,8 @@ final class QuizViewController: BaseViewController {
     private let choice3Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 3", for: .normal)
-        button.setTitleColor(AppColor.textPrimary, for: .normal)
-        button.backgroundColor = AppColor.appWhite
+        button.setTitleColor(AppColor.white, for: .normal)
+        button.backgroundColor = AppColor.black
         button.layer.cornerRadius = AppRadius.radius20
         button.titleLabel?.font = AppFont.title2
         
@@ -130,8 +130,8 @@ final class QuizViewController: BaseViewController {
     private let choice4Button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("선택지 4", for: .normal)
-        button.setTitleColor(AppColor.textPrimary, for: .normal)
-        button.backgroundColor = AppColor.appWhite
+        button.setTitleColor(AppColor.white, for: .normal)
+        button.backgroundColor = AppColor.black
         button.layer.cornerRadius = AppRadius.radius20
         button.titleLabel?.font = AppFont.title2
         
@@ -224,7 +224,7 @@ final class QuizViewController: BaseViewController {
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
 }
 

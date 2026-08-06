@@ -1,36 +1,20 @@
 # TODO — 학습하기 재설계 (활성 단어장 기반 출제)
 
 **스프린트 목표**: 단어장 상세에서 "학습하기" → 활성 단어장 지정 → 출제  
-**진행**: A-1/A-2/A-3/B-1 완료 · **B-2 잔여 2h** · 남은 C~D 8.5h
+**진행**: A-1/A-2/A-3/B-1/B-2 완료 · 남은 C~D 13h
 
 ---
 
-## ✅ 완료분 (A-1 ~ B-1)
+## ✅ 완료분 (A-1 ~ B-2)
 - [x] A-1. 이어하기 제거 (2h)
 - [x] A-2. UUID 단일화 (3h)
 - [x] A-3. CoreData `isActive` 필드 이전 · 커밋 `e9b71db` (4h)
 - [x] B-1. 단어장 상세의 학습하기 → 활성 단어장 지정 · 커밋 `365418e` (1.5h)
+- [x] B-2. "학습중" 표시 (단어장 목록 카드 체크 아이콘) · 커밋 `ce07b37` (2h)
+  - `FetchVocabBooksUseCase` 신설 + `VocabBookCardInfo` 엔티티, Library를 DB 조회 기반으로 전환
+  - 활성 단어장 카드 제목 옆 `checkmark.circle.fill`, 다른 단어장 지정 시 하나만 이동 — 동작 확인 완료
 
 > ⚠️ A-3 in-place 수정으로 기존 스토어 마이그레이션 불가 → **앱 삭제 후 재설치 필수** (팀원 기기도 동일)
-
----
-
-## 🔶 B-2. "학습중" 표시 (단어장 목록 카드 배지) — **잔여 2h**
-
-목록 카드 배지만 미완료 (상세 버튼 "학습중" 표기는 완료)
-
-> **⚠️ 조사**: `LibraryViewController:206` 이 `BookTopic` enum으로 카드 생성 → DB 조회 기반으로 전환 필요.
-> 현재 `LibraryViewModel` 은 빈 껍데기(`transform` 이 빈 `Output()` 반환).
-
-- [ ] `LibraryViewModel` 구현 — `readAllBooks()` → `[VocabBookCardInfo]` Output (+ DI 의존성 추가)
-- [ ] `LibraryViewController` — DiffableDataSource item 타입 `BookTopic` → `VocabBookCardInfo` 교체
-- [ ] `VocabTopicCardCollectionViewCell.binding(with:)` 시그니처 변경 + 배지 뷰 추가
-
-**완료 조건**: 활성 단어장 카드에만 배지 · 다른 단어장 지정 시 배지가 하나만 이동
-
-## B-3. 활성 단어장 미선택 상태 처리 — **2h**
-- [ ] nil 상태에서 Explore 빈 상태 뷰 표시 · 학습하기 버튼 disabled
-- [ ] "학습할 단어가 없습니다" 알럿 → 단어 4개 미만 전용으로 분리
 
 ---
 
@@ -62,11 +46,10 @@
 
 | 구간 | 시간 |
 |---|---|
-| 완료 (A-1/A-2/A-3/B-1) | 10.5h |
-| **B-2 잔여 + B-3** | 4h |
+| 완료 (A-1/A-2/A-3/B-1/B-2) | 12.5h |
 | **C-1 + C-2 + C-3 + C-4** | 9.5h |
 | **D-1 + D-2** | 3.5h |
-| **남은 작업** | **17h** |
+| **남은 작업** | **13h** |
 
 ---
 
@@ -78,6 +61,9 @@
 ## 이연 (다음 스프린트)
 
 신규 기능: 북마크("나의 단어에 저장") — `originWordId` 토글 + UI 표시/숨김
+
+온보딩에서 추천 단어장 선택 → 활성 단어장 지정 (현재 `OnboardingCoordinator` 는 테마 선택만 한다)
+- 이 작업이 "활성 단어장 미선택 상태" 처리를 대체한다 — 정상 플로우에서 nil이 발생하지 않으므로 B-3을 폐기했다
 
 ---
 

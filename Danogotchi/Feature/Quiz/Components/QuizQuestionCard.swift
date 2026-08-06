@@ -15,7 +15,7 @@ final class QuisQuestionCard: UIView {
     
     private let circleView: UIView = {
         let view = UIView()
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         view.layer.cornerRadius = AppRadius.radius12
         view.layer.borderWidth = AppBorder.regular
         view.layer.borderColor = UIColor.black.cgColor
