@@ -9,7 +9,7 @@ final class CompleteQuizViewModel: BaseViewModel {
     
     // MARK: - ActionType 재정의
     enum ActionType {
-        case restart
+        case nextQuiz
         case retryIncorrect(words: [Vocab])
         case finish
         case dismiss
@@ -83,16 +83,16 @@ final class CompleteQuizViewModel: BaseViewModel {
     private func determineButtons() -> (String, String, ActionType, ActionType) {
         if result.incorrectWords.isEmpty {
             return (
-                "처음부터 다시 학습하기",
+                "다음 문제 학습하기",
                 "학습 끝내기",
-                .restart,
+                .nextQuiz,
                 .finish
             )
         } else {
             return (
-                "처음부터 다시 학습하기",
+                "다음 문제 학습하기",
                 "틀린 문제 학습하기",
-                .restart,
+                .nextQuiz,
                 .retryIncorrect(words: result.incorrectWords)
             )
         }

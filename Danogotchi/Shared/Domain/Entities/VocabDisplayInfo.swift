@@ -9,6 +9,19 @@ struct VocabDisplayInfo: Hashable {
 }
 
 
+extension VocabDisplayInfo {
+    /// 집계된 학습 이력으로 표시용 정보를 조립한다. 이력이 없으면 0으로 채운다.
+    init(word: Vocab, stats: LearningStats?, isSaved: Bool = false) {
+        self.init(
+            word: word,
+            learningCount: stats?.total ?? 0,
+            accuracy: stats?.accuracy ?? 0,
+            isSaved: isSaved
+        )
+    }
+}
+
+
 extension VocabDisplayInfo: CardDisplayable {
     var cardTitle: String { word.word }
     var cardSubtitle: String { word.meaning }

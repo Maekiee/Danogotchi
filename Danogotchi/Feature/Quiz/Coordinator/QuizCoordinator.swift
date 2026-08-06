@@ -63,13 +63,14 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
         result: QuizResult
     ) {
         switch action {
-        case .restart:
-            let newQuizData = QuizData(
-                words: originalQuizData.allWord,
-                allWord: originalQuizData.allWord
-            )
-            navigationController.dismiss(animated: true) { [weak self] in
-                self?.restartQuiz(with: newQuizData)
+        case .nextQuiz:
+            switch container.makeStartQuizUseCase().execute() {
+            case .success(let newQuizData):
+                navigationController.dismiss(animated: true) { [weak self] in
+                    self?.restartQuiz(with: newQuizData)
+                }
+            case .noWords, .notEnoughWords:
+                finish()
             }
             
         case .retryIncorrect(let words):

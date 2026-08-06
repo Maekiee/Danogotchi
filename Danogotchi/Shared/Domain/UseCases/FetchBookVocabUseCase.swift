@@ -45,21 +45,12 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
 
     // MyBookDetailViewModel의 정답률 집계 로직 이관
     private func joinWithHistory(_ vocabs: [Vocab], savedSourceIDs: Set<UUID>) -> [VocabDisplayInfo] {
-        let histories = learningHistoryRepository.fetchAllHistory()
-        let stats = Dictionary(grouping: histories, by: { $0.vocabId })
-            .mapValues { list -> (correct: Int, total: Int) in
-                (list.filter { $0.isCorrect }.count, list.count)
-            }
+        let stats = learningHistoryRepository.fetchAllHistory().statsByVocab()
         return vocabs.map { vocab in
-            let isSaved = savedSourceIDs.contains(vocab.id)
-            guard let s = stats[vocab.id], s.total > 0 else {
-                return VocabDisplayInfo(word: vocab, learningCount: 0, accuracy: 0, isSaved: isSaved)
-            }
-            return VocabDisplayInfo(
+            VocabDisplayInfo(
                 word: vocab,
-                learningCount: s.total,
-                accuracy: Double(s.correct) / Double(s.total),
-                isSaved: isSaved
+                stats: stats[vocab.id],
+                isSaved: savedSourceIDs.contains(vocab.id)
             )
         }
     }

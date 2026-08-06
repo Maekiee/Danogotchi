@@ -25,7 +25,8 @@ extension AppDIContainer {
         let learnHistoryRepository = makeVocabLearningHistoryRepository()
         return ExploreVocabViewModel(
             vocabBookRepository: vocabBookRepository,
-            learnHistoryRepository: learnHistoryRepository
+            learnHistoryRepository: learnHistoryRepository,
+            startQuizUseCase: makeStartQuizUseCase()
         )
     }
     
@@ -109,6 +110,13 @@ extension AppDIContainer {
     
     func makeCompleteQuizViewModel(result: QuizResult) -> CompleteQuizViewModel {
         return CompleteQuizViewModel(result: result)
+    }
+
+    func makeStartQuizUseCase() -> StartQuizUseCase {
+        return DefaultStartQuizUseCase(
+            vocabBookRepository: vocabBookRepository,
+            learningHistoryRepository: makeVocabLearningHistoryRepository()
+        )
     }
 }
 

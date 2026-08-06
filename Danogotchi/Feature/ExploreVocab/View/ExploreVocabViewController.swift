@@ -16,7 +16,6 @@ final class ExploreVocabViewController: BaseViewController {
     private let viewModel: ExploreVocabViewModel
     private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
-    private var allWordsInfo: [VocabDisplayInfo] = []
     weak var delegate: ExploreVocabViewControllerDelegate?
 
     private enum Section {
@@ -185,6 +184,7 @@ extension ExploreVocabViewController {
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
             },
+            startLearningTapped: startLearningButton.rx.tap.asObservable()
         )
 
         let output = viewModel.transform(input: input)
@@ -200,8 +200,17 @@ extension ExploreVocabViewController {
         output.wordItems
             .drive(with: self) { owner, wordList in
                 owner.collectionView.isHidden = wordList.isEmpty
-                owner.allWordsInfo = wordList
                 owner.applySnapshot(items: wordList)
+            }.disposed(by: disposeBag)
+
+        output.startQuiz
+            .emit(with: self) { owner, quizData in
+                owner.delegate?.exploreVocabDidTapStartQuiz(quizData: quizData)
+            }.disposed(by: disposeBag)
+
+        output.alertMessage
+            .emit(with: self) { owner, message in
+                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
             }.disposed(by: disposeBag)
 
         showLibraryVCButton.rx.tap
@@ -215,32 +224,6 @@ extension ExploreVocabViewController {
                 owner.delegate?.exploreVocabDidTapSetting()
             }.disposed(by: disposeBag)
 
-        startLearningButton.rx.tap
-            .bind(with: self) { owner, _ in
-                let allWords = owner.allWordsInfo.map { $0.word }
-
-                guard !allWords.isEmpty else {
-                    AlertPresenter.showNotificationAlert(
-                        on: owner,
-                        title: "알림",
-                        message: "학습할 단어가 없습니다."
-                    )
-                    return
-                }
-
-                guard allWords.count >= 4 else {
-                    AlertPresenter.showNotificationAlert(
-                        on: owner,
-                        title: "알림",
-                        message: "최소 4개 이상의 단어가 필요합니다."
-                    )
-                    return
-                }
-
-                let quizData = QuizData(words: allWords, allWord: allWords)
-
-                owner.delegate?.exploreVocabDidTapStartQuiz(quizData: quizData)
-            }.disposed(by: disposeBag)
     }
 }
 
