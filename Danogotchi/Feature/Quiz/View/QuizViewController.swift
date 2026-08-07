@@ -45,21 +45,6 @@ final class QuizViewController: BaseViewController {
         return label
     }()
     private let progressView = CustomProgressView()
-//    private let progressView: UIProgressView = {
-//        let progress = UIProgressView(progressViewStyle: .bar)
-//        progress.progressTintColor = AppColor.oxfordBlue
-//        progress.trackTintColor = AppColor.appWhite
-//        progress.progress = 0.0
-//        progress.layer.cornerRadius = 6
-//        progress.clipsToBounds = true
-//      
-////        progress.layer.sublayers?[1].cornerRadius = 6
-//        progress.subviews[1].clipsToBounds = true
-//      
-//        progress.layer.borderColor = UIColor.black.cgColor
-//        progress.layer.borderWidth = 1
-//        return progress
-//    }()
     private let totalQuestionLabel: UILabel = {
         let label = UILabel()
         label.textColor = AppColor.textPrimary
@@ -67,103 +52,14 @@ final class QuizViewController: BaseViewController {
         return label
     }()
     private let quizQuestionCard = QuisQuestionCard()
-    private let questionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "단어의 뜻을 선택하세요"
-        label.textColor = AppColor.textPrimary
-        label.font = AppFont.title2
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        return label
-    }()
-    private let choice1Button: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("선택지 1", for: .normal)
-        button.setTitleColor(AppColor.white, for: .normal)
-        button.backgroundColor = AppColor.black
-        button.layer.cornerRadius = AppRadius.radius20
-        button.titleLabel?.font = AppFont.title2
-        
-        button.layer.borderWidth = AppBorder.regular
-        button.layer.borderColor = UIColor.black.cgColor
-        
-        button.layer.shadowColor = AppColor.pointDarkGray.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 3)
-        button.layer.shadowOpacity = 1.0
-        button.layer.shadowRadius = 0
-        return button
-    }()
-    private let choice2Button: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("선택지 2", for: .normal)
-        button.setTitleColor(AppColor.white, for: .normal)
-        button.backgroundColor = AppColor.black
-        button.layer.cornerRadius = AppRadius.radius20
-        button.titleLabel?.font = AppFont.title2
-        
-        button.layer.borderWidth = AppBorder.regular
-        button.layer.borderColor = UIColor.black.cgColor
-        
-        button.layer.shadowColor = AppColor.pointDarkGray.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 3)
-        button.layer.shadowOpacity = 1.0
-        button.layer.shadowRadius = 0
-        return button
-    }()
-    private let choice3Button: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("선택지 3", for: .normal)
-        button.setTitleColor(AppColor.white, for: .normal)
-        button.backgroundColor = AppColor.black
-        button.layer.cornerRadius = AppRadius.radius20
-        button.titleLabel?.font = AppFont.title2
-        
-        button.layer.borderWidth = AppBorder.regular
-        button.layer.borderColor = UIColor.black.cgColor
-        
-        button.layer.shadowColor = AppColor.pointDarkGray.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 3)
-        button.layer.shadowOpacity = 1.0
-        button.layer.shadowRadius = 0
-        return button
-    }()
-    private let choice4Button: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("선택지 4", for: .normal)
-        button.setTitleColor(AppColor.white, for: .normal)
-        button.backgroundColor = AppColor.black
-        button.layer.cornerRadius = AppRadius.radius20
-        button.titleLabel?.font = AppFont.title2
-        
-        button.layer.borderWidth = AppBorder.regular
-        button.layer.borderColor = UIColor.black.cgColor
-        
-        button.layer.shadowColor = AppColor.pointDarkGray.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 3)
-        button.layer.shadowOpacity = 1.0
-        button.layer.shadowRadius = 0
-        return button
-    }()
-    private lazy var progressStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = AppSpacing.space8
-        stack.alignment = .center
-        stack.addArrangedSubview(progressView)
-        return stack
-    }()
+    private let choiceButtons = (0..<4).map { _ in ChoiceButton() }
     private lazy var choiceStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = AppSpacing.space12
         stack.distribution = .fillEqually
-        
-        [
-            choice1Button,
-            choice2Button,
-            choice3Button,
-            choice4Button
-        ].forEach { stack.addArrangedSubview($0) }
+
+        choiceButtons.forEach { stack.addArrangedSubview($0) }
         return stack
     }()
     
@@ -181,9 +77,7 @@ final class QuizViewController: BaseViewController {
             titleLabel,
             closeButton,
             progressView,
-            //            progressStackView,
             quizQuestionCard,
-            //            questionLabel,
             choiceStackView
         ].forEach { view.addSubview($0) }
     }
@@ -218,8 +112,10 @@ final class QuizViewController: BaseViewController {
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space24)
         }
         
-        choice1Button.snp.makeConstraints { make in
-            make.height.equalTo(48)
+        choiceButtons.forEach { button in
+            button.snp.makeConstraints { make in
+                make.height.equalTo(48)
+            }
         }
     }
     
@@ -231,10 +127,9 @@ final class QuizViewController: BaseViewController {
 extension QuizViewController {
     private func bind() {
         let choiceTaps = Observable.merge(
-            choice1Button.rx.tap.map { 0 },
-            choice2Button.rx.tap.map { 1 },
-            choice3Button.rx.tap.map { 2 },
-            choice4Button.rx.tap.map { 3 }
+            choiceButtons.enumerated().map { index, button in
+                button.rx.tap.map { index }
+            }
         )
         
         let input = QuizViewModel.Input(
@@ -257,42 +152,31 @@ extension QuizViewController {
             .drive(with: self) { owner, text in
                 owner.quizQuestionCard.text = text
             }.disposed(by: disposeBag)
-        //            .drive(questionLabel.rx.text)
-        //            .disposed(by: disposeBag)
-        
+
         output.choices
             .drive(with: self) { owner, choices in
-                owner.choice1Button.setTitle(choices[0], for: .normal)
-                owner.choice2Button.setTitle(choices[1], for: .normal)
-                owner.choice3Button.setTitle(choices[2], for: .normal)
-                owner.choice4Button.setTitle(choices[3], for: .normal)
-                
-                // 버튼 색상 초기화
-                [owner.choice1Button, owner.choice2Button,
-                 owner.choice3Button, owner.choice4Button].forEach {
-                    $0.backgroundColor = AppColor.appWhite
-                    $0.setTitleColor(AppColor.textPrimary, for: .normal)
+                // 버튼 상태 초기화
+                owner.choiceButtons.forEach {
+                    $0.apply(.idle)
                     $0.isEnabled = true
                 }
+
+                zip(owner.choiceButtons, choices).forEach { button, title in
+                    button.setTitle(title, for: .normal)
+                }
             }.disposed(by: disposeBag)
-        
+
         output.answerResult
             .emit(with: self) { owner, result in
-                let buttons = [owner.choice1Button, owner.choice2Button,
-                               owner.choice3Button, owner.choice4Button]
-                
-                buttons.forEach { $0.isEnabled = false }
-                
-                let selectedButton = buttons[result.selectedIndex]
-                
-                selectedButton.backgroundColor = result.isCorrect ? AppColor.appGreen : AppColor.appRed
-                selectedButton.setTitleColor(.white, for: .normal)
-                
+                owner.choiceButtons.forEach { $0.isEnabled = false }
+
+                owner.choiceButtons[result.selectedIndex]
+                    .apply(result.isCorrect ? .correct : .wrong)
+
                 if !result.isCorrect {
-                    buttons[result.correctIndex].backgroundColor = AppColor.appGreen
-                    buttons[result.correctIndex].setTitleColor(.white, for: .normal)
+                    owner.choiceButtons[result.correctIndex].apply(.correct)
                 }
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak owner] in
                     owner?.viewModel.moveToNextQuestion()
                 }
