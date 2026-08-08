@@ -27,6 +27,9 @@ final class CompleteQuizViewModel: BaseViewModel {
     /////
     struct Output {
         let scoreText: Driver<String>
+        let summaryText: Driver<String>
+        let correctCountText: Driver<String>
+        let incorrectCountText: Driver<String>
         let primaryButtonTitle: Driver<String>
         let secondaryButtonTitle: Driver<String>
         let primaryAction: Signal<ActionType>
@@ -42,11 +45,10 @@ final class CompleteQuizViewModel: BaseViewModel {
         let endLearningActionRelay = PublishRelay<ActionType>()
         
         let incorrectCount = result.total - result.correct
-        let scoreText = Driver.just("""
-               \(result.total)개를 학습했어요!
-               정답 \(result.correct)개
-               오답 \(incorrectCount)개
-               """)
+        let scoreText = Driver.just("\(result.correct) / \(result.total)")
+        let summaryText = Driver.just("\(result.total)개를 학습했어요")
+        let correctCountText = Driver.just("\(result.correct)개")
+        let incorrectCountText = Driver.just("\(incorrectCount)개")
         
         let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
         
@@ -71,6 +73,9 @@ final class CompleteQuizViewModel: BaseViewModel {
         
         return Output(
             scoreText: scoreText,
+            summaryText: summaryText,
+            correctCountText: correctCountText,
+            incorrectCountText: incorrectCountText,
             primaryButtonTitle: Driver.just(primaryTitle),
             secondaryButtonTitle: Driver.just(secondaryTitle),
             primaryAction: primaryActionRelay.asSignal(),
@@ -83,15 +88,15 @@ final class CompleteQuizViewModel: BaseViewModel {
     private func determineButtons() -> (String, String, ActionType, ActionType) {
         if result.incorrectWords.isEmpty {
             return (
-                "다음 문제 학습하기",
+                "계속 학습하기",
                 "학습 끝내기",
                 .nextQuiz,
                 .finish
             )
         } else {
             return (
-                "다음 문제 학습하기",
-                "틀린 문제 학습하기",
+                "계속 학습하기",
+                "틀린 문제 다시 풀기",
                 .nextQuiz,
                 .retryIncorrect(words: result.incorrectWords)
             )

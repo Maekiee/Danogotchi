@@ -36,31 +36,23 @@ final class CompleteQuizViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "학습 완료"
+        label.text = "학습 완료!"
         label.textColor = AppColor.textPrimary
-        label.font = AppFont.title1
+        label.font = AppFont.display
         label.textAlignment = .center
         return label
     }()
-    
-    private let scoreLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = AppColor.textPrimary
-        label.font = AppFont.font(.medium, size: 18)
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        return label
-    }()
-    
-    private let primaryButton = PrimaryFillButton(title: "")
-    private let secondaryButton = PrimaryFillButton(title: "")
-    private let endLearningButton = PrimaryFillButton(title: "학습 끝내기")
-    
+
+    private let resultCard = QuizResultCard()
+
+    private let primaryButton = CompleteActionButton(style: .primary, title: "")
+    private let secondaryButton = CompleteActionButton(style: .secondary, title: "")
+    private let endLearningButton = CompleteActionButton(style: .text, title: "학습 끝내기")
+
     private lazy var buttonStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = AppSpacing.space12
-        stack.distribution = .fillEqually
         [primaryButton, secondaryButton, endLearningButton].forEach { stack.addArrangedSubview($0) }
         return stack
     }()
@@ -78,39 +70,41 @@ final class CompleteQuizViewController: BaseViewController {
     override func configHierarchy() {
         [
             titleLabel,
-            scoreLabel,
+            resultCard,
             buttonStackView
         ].forEach { view.addSubview($0) }
     }
-    
+
     override func configLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(80)
-            make.centerX.equalToSuperview()
-        }
-        
-        scoreLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space32)
             make.centerX.equalToSuperview()
         }
 
-        buttonStackView.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+        resultCard.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space32)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
         }
-        
-        [primaryButton,
-         secondaryButton,
-         endLearningButton
-        ].forEach {
+
+        buttonStackView.snp.makeConstraints { make in
+            make.top.greaterThanOrEqualTo(resultCard.snp.bottom).offset(AppSpacing.space32)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space24)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
+        }
+
+        [primaryButton, secondaryButton].forEach {
             $0.snp.makeConstraints { make in
-                make.height.equalTo(48)
+                make.height.equalTo(52)
             }
         }
+
+        endLearningButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
     }
-    
+
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
     }
 }
 
@@ -125,9 +119,29 @@ extension CompleteQuizViewController {
         let output = viewModel.transform(input: input)
         
         output.scoreText
-            .drive(scoreLabel.rx.text)
+            .drive(with: self) { owner, text in
+                owner.resultCard.scoreText = text
+            }
             .disposed(by: disposeBag)
-        
+
+        output.summaryText
+            .drive(with: self) { owner, text in
+                owner.resultCard.summaryText = text
+            }
+            .disposed(by: disposeBag)
+
+        output.correctCountText
+            .drive(with: self) { owner, text in
+                owner.resultCard.correctText = text
+            }
+            .disposed(by: disposeBag)
+
+        output.incorrectCountText
+            .drive(with: self) { owner, text in
+                owner.resultCard.incorrectText = text
+            }
+            .disposed(by: disposeBag)
+
         output.primaryButtonTitle
             .drive(with: self) { owner, title in
                 owner.primaryButton.setTitle(title, for: .normal)
