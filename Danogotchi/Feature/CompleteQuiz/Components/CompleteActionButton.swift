@@ -1,6 +1,5 @@
 import UIKit
 
-/// 학습 완료 화면의 액션 버튼. 스타일로 위계를 구분한다.
 final class CompleteActionButton: UIButton {
 
     enum Style {
@@ -23,7 +22,7 @@ final class CompleteActionButton: UIButton {
         switch style {
         case .primary:
             titleLabel?.font = AppFont.bodyEmphasis
-            backgroundColor = AppColor.oxfordBlue
+            backgroundColor = AppColor.black
             setTitleColor(.white, for: .normal)
             applyOutline()
         case .secondary:
@@ -37,16 +36,10 @@ final class CompleteActionButton: UIButton {
         }
     }
 
-    /// 앱 공통 외곽선 스타일 (검은 테두리 + 오프셋 그림자)
     private func applyOutline() {
         layer.cornerRadius = AppRadius.radius20
 
         layer.borderWidth = AppBorder.regular
         layer.borderColor = UIColor.black.cgColor
-
-        layer.shadowColor = AppColor.pointDarkGray.cgColor
-        layer.shadowOffset = CGSize(width: 0, height: 3)
-        layer.shadowOpacity = 1.0
-        layer.shadowRadius = 0
     }
 }

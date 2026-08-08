@@ -36,6 +36,11 @@ final class QuisQuestionCard: UIView {
         get { return titleLabel.text }
         set { titleLabel.text = newValue }
     }
+
+    var cardBackgroundColor: UIColor? {
+        get { return containerView.backgroundColor }
+        set { containerView.backgroundColor = newValue }
+    }
     
     // MARK: - Initialization
     override init(frame: CGRect) {

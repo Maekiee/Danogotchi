@@ -14,7 +14,7 @@ final class CustomProgressView: UIView {
     }()
     private let progressFillView: UIView = {
         let view = UIView()
-        view.backgroundColor = AppColor.oxfordBlue
+        view.backgroundColor = AppColor.black
         return view
     }()
     

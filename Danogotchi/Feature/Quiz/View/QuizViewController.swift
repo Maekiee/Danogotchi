@@ -97,7 +97,7 @@ final class QuizViewController: BaseViewController {
         progressView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
-            make.height.equalTo(12)  // 두께 조정 (기본 2 → 8)
+            make.height.equalTo(12)  
         }
         
         quizQuestionCard.snp.makeConstraints { make in
@@ -107,7 +107,7 @@ final class QuizViewController: BaseViewController {
         }
         
         choiceStackView.snp.makeConstraints { make in
-            make.top.equalTo(quizQuestionCard.snp.bottom).offset(AppSpacing.space32)
+            make.top.equalTo(quizQuestionCard.snp.bottom).offset(48)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space24)
         }
@@ -151,6 +151,7 @@ extension QuizViewController {
         output.questionWord
             .drive(with: self) { owner, text in
                 owner.quizQuestionCard.text = text
+                owner.quizQuestionCard.cardBackgroundColor = AppColor.pastel(for: text)
             }.disposed(by: disposeBag)
 
         output.choices

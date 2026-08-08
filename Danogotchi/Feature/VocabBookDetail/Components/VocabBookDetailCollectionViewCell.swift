@@ -155,12 +155,7 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
 
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle
-        backgroundColor = UIColor(
-            hue: CGFloat(abs(item.cardTitle.hashValue % 300)) / 360.0,
-            saturation: 0.30,
-            brightness: 0.95,
-            alpha: 1.0
-        )
+        backgroundColor = AppColor.pastel(for: item.cardTitle)
         
         if let partOfSpeech = item.cardPartOfSpeech {
             vocabTypeTag.text = partOfSpeech

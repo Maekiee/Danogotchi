@@ -38,6 +38,17 @@ enum AppColor {
     static let appRed = UIColor(red: 0.8824, green: 0.298, blue: 0.3333, alpha: 1.0)
     static let pointBlack = UIColor(red: 0.1451, green: 0.1412, blue: 0.1333, alpha: 1.0)
 
+    // MARK: - Derived (시드 문자열로 파생되는 파스텔 카드 배경)
+    /// 같은 문자열이면 같은 색을 돌려준다. (앱 실행 단위 — `hashValue` 시드가 실행마다 달라짐)
+    static func pastel(for seed: String) -> UIColor {
+        UIColor(
+            hue: CGFloat(abs(seed.hashValue % 300)) / 360.0,
+            saturation: 0.30,
+            brightness: 0.95,
+            alpha: 1.0
+        )
+    }
+
     // MARK: - Helper
     private static func named(_ name: String) -> UIColor {
         guard let color = UIColor(named: name) else {
