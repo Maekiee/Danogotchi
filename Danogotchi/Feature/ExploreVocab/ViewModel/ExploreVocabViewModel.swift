@@ -10,6 +10,9 @@ final class ExploreVocabViewModel: BaseViewModel {
     private let startQuizUseCase: StartQuizUseCase
     private let toggleSaveVocabUseCase: ToggleSaveVocabUseCase
 
+    /// 표시 순서를 고정하는 셔플 결과. 같은 단어 구성이면 재조회해도 이 순서를 재사용한다.
+    private var shuffledOrder: [UUID] = []
+
     init(
         vocabBookRepository: VocabBookRepository,
         learnHistoryRepository: LearningHistoryRepository,
@@ -51,7 +54,7 @@ final class ExploreVocabViewModel: BaseViewModel {
             .bind(with: self) { owner, book in
                 let stats = owner.learnHistoryRepository.fetchAllHistory().statsByVocab()
                 let savedIDs = owner.savedSourceIDs(activeBook: book)
-                let displayItems = book.vocabList.reversed()
+                let displayItems = owner.shuffledWords(book.vocabList)
                     .map { word in
                         VocabDisplayInfo(
                             word: word,
@@ -102,6 +105,21 @@ final class ExploreVocabViewModel: BaseViewModel {
             startQuiz: startQuizRelay.asSignal(),
             alertMessage: alertMessageRelay.asSignal()
         )
+    }
+
+    /// 단어장 앞쪽 단어만 반복 노출되지 않도록 무작위로 섞는다.
+    /// 단어 구성이 그대로면 기존 순서를 유지한다 — 퀴즈·라이브러리에서 돌아올 때 카드가 재배치되지 않도록.
+    private func shuffledWords(_ words: [Vocab]) -> [Vocab] {
+        let wordsById = Dictionary(uniqueKeysWithValues: words.map { ($0.id, $0) })
+
+        if shuffledOrder.count == words.count {
+            let kept = shuffledOrder.compactMap { wordsById[$0] }
+            if kept.count == words.count { return kept }
+        }
+
+        let shuffled = words.shuffled()
+        shuffledOrder = shuffled.map(\.id)
+        return shuffled
     }
 
     /// 학습중인 추천 단어장의 단어 중 나의 단어장에 복사돼 있는 원본 id 집합
