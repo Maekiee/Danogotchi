@@ -22,10 +22,21 @@ final class ExploreVocabViewController: BaseViewController {
         case main
     }
 
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, VocabDisplayInfo>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
+    /// 무한 스크롤용 셀 식별자. 같은 단어를 여러 벌 복제해 넣으므로 복제 위치(page)까지 식별자에 포함한다.
+    private struct LoopItem: Hashable {
+        let page: Int
+        let info: VocabDisplayInfo
+    }
+
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, LoopItem>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, LoopItem>
 
     private var dataSource: DataSource!
+
+    /// 목록을 3벌 복제해 가운데 벌에서 시작한다 — 앞뒤 어느 쪽으로 넘겨도 카드가 끊기지 않도록.
+    private static let loopCopyCount = 3
+    private var baseItems: [VocabDisplayInfo] = []
+    private var pendingRecenterPage: Int?
 
     init(viewModel: ExploreVocabViewModel) {
         self.viewModel = viewModel
@@ -123,6 +134,13 @@ final class ExploreVocabViewController: BaseViewController {
         configView()
         configDataSource()
         bind()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let page = pendingRecenterPage, pageHeight > 0 else { return }
+        pendingRecenterPage = nil
+        moveTo(page: page)
     }
 
     override func configHierarchy() {
@@ -229,6 +247,14 @@ extension ExploreVocabViewController {
                 owner.delegate?.exploreVocabDidTapSetting()
             }.disposed(by: disposeBag)
 
+        // 페이지가 멈춘 뒤에 가운데 벌로 되돌린다 — 내용이 같아 화면상 변화가 없다
+        Observable.merge(
+            collectionView.rx.didEndDecelerating.asObservable(),
+            collectionView.rx.didEndDragging.filter { !$0 }.map { _ in () }
+        )
+        .bind(with: self) { owner, _ in
+            owner.recenterIfNeeded()
+        }.disposed(by: disposeBag)
     }
 }
 
@@ -236,9 +262,10 @@ extension ExploreVocabViewController {
 extension ExploreVocabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
-            MainWordCardCollectionViewCell, VocabDisplayInfo
-        > { [weak self] cell, indexPath, item in
+            MainWordCardCollectionViewCell, LoopItem
+        > { [weak self] cell, indexPath, loopItem in
             guard let self = self else { return }
+            let item = loopItem.info
             cell.disposeBag = DisposeBag()
 
             cell.configure(
@@ -280,11 +307,57 @@ extension ExploreVocabViewController {
     }
 
     private func applySnapshot(items: [VocabDisplayInfo]) {
+        // 저장 토글은 목록이 그대로다 — 이때는 스크롤 위치를 건드리지 않는다
+        let isSameList = baseItems.map(\.word.id) == items.map(\.word.id)
+        baseItems = items
+
+        // 카드가 1장이면 순환할 것이 없다 — 스크롤 자체를 막는다
+        let isLoopEnabled = items.count > 1
+        collectionView.isScrollEnabled = isLoopEnabled
+
+        let copies = isLoopEnabled ? Self.loopCopyCount : 1
+        let loopItems = (0..<(items.count * copies)).map { page in
+            LoopItem(page: page, info: items[page % items.count])
+        }
+
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
-        snapshot.appendItems(items)
+        snapshot.appendItems(loopItems)
         // 저장 상태가 바뀌면 diffable이 삭제+삽입으로 처리한다 — 페이징 카드가 튀지 않도록 애니메이션은 끈다
-        dataSource.apply(snapshot, animatingDifferences: false)
+        dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
+            guard let self, !isSameList else { return }
+            // 목록이 바뀌면 복제 버퍼도 새로 잡아야 한다 — 가운데 벌의 첫 카드로
+            moveTo(page: middlePageStart)
+        }
+    }
+
+    // MARK: - 무한 스크롤
+    /// contentInsetAdjustmentBehavior가 .never라 페이지 높이 = 컬렉션뷰 높이다.
+    private var pageHeight: CGFloat { collectionView.bounds.height }
+    private var middlePageStart: Int { baseItems.count * (Self.loopCopyCount / 2) }
+
+    private func moveTo(page: Int) {
+        guard pageHeight > 0 else {
+            // 레이아웃 전이면 bounds가 0이라 offset을 못 구한다 — viewDidLayoutSubviews로 미룬다
+            pendingRecenterPage = page
+            return
+        }
+        // contentSize가 새 스냅샷 기준으로 확정돼야 offset이 잘리지 않는다
+        collectionView.layoutIfNeeded()
+        collectionView.setContentOffset(
+            CGPoint(x: 0, y: CGFloat(page) * pageHeight),
+            animated: false
+        )
+    }
+
+    /// 가장자리 벌에 착지했으면 같은 카드를 보여주는 가운데 벌로 순간 이동한다.
+    private func recenterIfNeeded() {
+        let count = baseItems.count
+        guard count > 1, pageHeight > 0 else { return }
+
+        let page = Int((collectionView.contentOffset.y / pageHeight).rounded())
+        guard page < middlePageStart || page >= middlePageStart + count else { return }
+        moveTo(page: (page % count) + middlePageStart)
     }
 
     private static func layout() -> UICollectionViewLayout {
