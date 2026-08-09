@@ -26,7 +26,8 @@ extension AppDIContainer {
         return ExploreVocabViewModel(
             vocabBookRepository: vocabBookRepository,
             learnHistoryRepository: learnHistoryRepository,
-            startQuizUseCase: makeStartQuizUseCase()
+            startQuizUseCase: makeStartQuizUseCase(),
+            toggleSaveVocabUseCase: makeToggleSaveVocabUseCase()
         )
     }
     

@@ -4,18 +4,17 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-/// 재사용 가능한 셀
 final class MainWordCardCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     private let onSpeakerTapRelay = PublishRelay<Void>()
-    private let onModifyTapRelay = PublishRelay<Void>()
-    
+    private let onSaveTapRelay = PublishRelay<Void>()
+
     var onTouchTopIcon: Observable<Void> {
         return onSpeakerTapRelay.asObservable()
     }
-    
-    var onTouchImageIcon: Observable<Void> {
-        return onModifyTapRelay.asObservable()
+
+    var onSaveVocab: Observable<Void> {
+        return onSaveTapRelay.asObservable()
     }
     
     private var hostingController: UIHostingController<CardBlurView>?
@@ -49,35 +48,47 @@ final class MainWordCardCollectionViewCell: UICollectionViewCell {
             contentView.addSubview(hostingView)
             
             hostingView.snp.makeConstraints { make in
-                make.horizontalEdges.equalToSuperview().inset(28)
+                make.horizontalEdges.equalToSuperview().inset(16)
                 make.centerY.equalToSuperview()
-                make.height.equalTo(180)
+                make.height.equalTo(200)
             }
         }
     }
     
-    func configure(with item: CardDisplayable, parentVC: UIViewController) {
+    func configure(
+        with item: CardDisplayable,
+        parentVC: UIViewController,
+        isSaved: Bool,
+        showsSaveButton: Bool
+    ) {
         if let hostingController, hostingController.parent == nil {
             parentVC.addChild(hostingController)
             hostingController.didMove(toParent: parentVC)
         }
-        
+
         let newView = CardBlurView(
             title: item.cardTitle,
             subtitle: item.cardSubtitle,
             learningCount: item.cardChipText ?? 0,
             progress: item.cardAccuracy ?? 0.0,
+            isSaved: isSaved,
+            showsSaveButton: showsSaveButton,
             onSpeakerTap: { [weak self] in
                 guard let self = self else { return }
                 onSpeakerTapRelay.accept(())
             },
-            onModifyTap: { [weak self] in
+            onSaveTap: { [weak self] in
                 guard let self = self else { return }
-                onModifyTapRelay.accept(())
+                onSaveTapRelay.accept(())
             }
         )
-        
+
         hostingController?.rootView = newView
+    }
+
+    /// TTS 재생 상태만 갱신한다 — rootView가 struct라 나머지 표시 상태는 유지된다.
+    func setSpeaking(_ isSpeaking: Bool) {
+        hostingController?.rootView.isSpeaking = isSpeaking
     }
 }
 

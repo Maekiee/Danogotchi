@@ -113,6 +113,8 @@ final class ExploreVocabViewController: BaseViewController {
     }()
 
     private let deleteWordTrigger = PublishRelay<Vocab>()
+    private let saveVocabRelay = PublishRelay<VocabDisplayInfo>()
+    private var showsSaveButton = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -184,7 +186,8 @@ extension ExploreVocabViewController {
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
             },
-            startLearningTapped: startLearningButton.rx.tap.asObservable()
+            startLearningTapped: startLearningButton.rx.tap.asObservable(),
+            saveVocabTrigger: saveVocabRelay.asObservable()
         )
 
         let output = viewModel.transform(input: input)
@@ -197,8 +200,11 @@ extension ExploreVocabViewController {
             }
             .disposed(by: disposeBag)
 
-        output.wordItems
-            .drive(with: self) { owner, wordList in
+        // 셀 구성 시점에 저장 버튼 노출 여부가 최신이어야 하므로 목록과 같이 반영한다
+        Driver.combineLatest(output.wordItems, output.showsSaveButton)
+            .drive(with: self) { owner, pair in
+                let (wordList, showsSaveButton) = pair
+                owner.showsSaveButton = showsSaveButton
                 owner.collectionView.isHidden = wordList.isEmpty
                 owner.applySnapshot(items: wordList)
             }.disposed(by: disposeBag)
@@ -216,7 +222,6 @@ extension ExploreVocabViewController {
         showLibraryVCButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.exploreVocabDidTapLibrary()
-//                owner.delegate?.
             }.disposed(by: disposeBag)
         
         settingTabButton.rx.tap
@@ -234,12 +239,32 @@ extension ExploreVocabViewController {
             MainWordCardCollectionViewCell, VocabDisplayInfo
         > { [weak self] cell, indexPath, item in
             guard let self = self else { return }
-            
-            cell.configure(with: item, parentVC: self)
-            
+            cell.disposeBag = DisposeBag()
+
+            cell.configure(
+                with: item,
+                parentVC: self,
+                isSaved: item.isSaved,
+                showsSaveButton: self.showsSaveButton
+            )
+
             cell.onTouchTopIcon.bind(with: self) { owner, _ in
                 TTSManager.shared.speak(item.cardTitle)
             }.disposed(by: cell.disposeBag)
+
+            cell.onSaveVocab
+                .map { item }
+                .bind(to: self.saveVocabRelay)
+                .disposed(by: cell.disposeBag)
+
+            // 발음 중인 단어의 카드만 아이콘 색을 바꾼다
+            TTSManager.shared.currentSpeakingText
+                .observe(on: MainScheduler.instance)
+                .map { $0 == item.cardTitle }
+                .distinctUntilChanged()
+                .bind(with: cell) { cell, isSpeaking in
+                    cell.setSpeaking(isSpeaking)
+                }.disposed(by: cell.disposeBag)
         }
 
         dataSource = DataSource(collectionView: collectionView) {
@@ -258,7 +283,8 @@ extension ExploreVocabViewController {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        // 저장 상태가 바뀌면 diffable이 삭제+삽입으로 처리한다 — 페이징 카드가 튀지 않도록 애니메이션은 끈다
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 
     private static func layout() -> UICollectionViewLayout {
