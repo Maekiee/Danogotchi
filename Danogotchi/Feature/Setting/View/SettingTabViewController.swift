@@ -41,7 +41,7 @@ final class SettingTabViewController: BaseViewController {
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         view.alwaysBounceVertical = false
         view.bounces = true
         return view
@@ -79,24 +79,17 @@ final class SettingTabViewController: BaseViewController {
     }
     
     override func configHierarchy() {
-        view.addSubview(titleLabel)
         view.addSubview(collectionView)
     }
     
     override func configLayout() {
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
-            make.leading.equalToSuperview().offset(AppSpacing.space20)
-        }
-
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
-            make.leading.trailing.bottom.equalToSuperview()
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.horizontalEdges.bottom.equalToSuperview()
         }
     }
     
     override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
@@ -105,7 +98,7 @@ final class SettingTabViewController: BaseViewController {
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
-        configuration.backgroundColor = AppColor.backgroundBeige
+        configuration.backgroundColor = AppColor.background
         
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         
