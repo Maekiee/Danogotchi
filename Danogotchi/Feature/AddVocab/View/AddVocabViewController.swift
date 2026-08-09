@@ -24,29 +24,12 @@ final class AddVocabViewController: BaseViewController {
     }
 
     // MARK: - UI 프로퍼티
-    private let wordTextField = AddVocabViewController.makeTextField(placeholder: "단어")
-    private let meaningTextField = AddVocabViewController.makeTextField(placeholder: "뜻")
+    private let wordTextField = RoundedTextField(placeholder: "단어")
+    private let meaningTextField = RoundedTextField(placeholder: "뜻")
     private let partOfSpeechSegmentedControl = AddVocabViewController.makePartOfSpeechSegmentedControl()
-    private lazy var saveButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.title = viewModel.isEditing ? "수정" : "저장"
-        config.baseBackgroundColor = AppColor.black
-        config.baseForegroundColor = AppColor.white
-        config.background.cornerRadius = AppRadius.radius20
-        let button = UIButton(configuration: config)
-        button.configuration?.titleTextAttributesTransformer =
-            UIConfigurationTextAttributesTransformer { incoming in
-                var outgoing = incoming
-                outgoing.font = AppFont.title3
-                return outgoing
-            }
-        button.configurationUpdateHandler = { button in
-            let isEnabled = button.state != .disabled
-            button.configuration?.baseBackgroundColor = isEnabled ? AppColor.black : AppColor.gray30
-            button.configuration?.baseForegroundColor = isEnabled ? AppColor.white : AppColor.gray45
-        }
-        return button
-    }()
+    private lazy var saveButton = PrimaryFillButton(
+        title: viewModel.isEditing ? "수정" : "저장"
+    )
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,36 +90,6 @@ final class AddVocabViewController: BaseViewController {
 
 // MARK: - UI 팩토리
 extension AddVocabViewController {
-    private static func makeTextField(placeholder: String) -> UITextField {
-        let textField = UITextField()
-        textField.borderStyle = .none
-        textField.backgroundColor = AppColor.white
-        textField.layer.cornerRadius = AppRadius.radius20
-        textField.layer.borderWidth = AppBorder.thin
-        textField.layer.borderColor = AppColor.gray30.cgColor
-        textField.clipsToBounds = true
-        textField.font = AppFont.title2
-        
-        textField.textColor = AppColor.black
-        textField.attributedPlaceholder = NSAttributedString(
-            string: placeholder,
-            attributes: [
-                .font: AppFont.title2,
-                .foregroundColor: AppColor.gray45
-            ]
-        )
-        textField.autocapitalizationType = .none
-        textField.autocorrectionType = .no
-
-        let paddingFrame = CGRect(x: 0, y: 0, width: AppSpacing.space20, height: 0)
-        textField.leftView = UIView(frame: paddingFrame)
-        textField.leftViewMode = .always
-        textField.rightView = UIView(frame: paddingFrame)
-        textField.rightViewMode = .always
-
-        return textField
-    }
-
     private static func makePartOfSpeechSegmentedControl() -> UISegmentedControl {
         let control = UISegmentedControl(items: PartOfSpeech.allCases.map { $0.title })
         control.selectedSegmentIndex = 0 // 기본값: allCases의 첫 값

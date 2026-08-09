@@ -41,13 +41,7 @@ final class SearchThemeViewController: BaseViewController {
         label.textColor = AppColor.textPrimary
         return label
     }()
-    private let textField: UnderlineTextField = {
-        let tf = UnderlineTextField()
-        tf.placeholder = "이미지를 검색해주세요"
-        tf.font = AppFont.body
-        tf.isUserInteractionEnabled = true
-        return tf
-    }()
+    private let textField = RoundedTextField(placeholder: "이미지를 검색해주세요")
     private lazy var collectionView: UICollectionView = {
         waterfallLayout.delegate = self
         let view = UICollectionView(
@@ -55,7 +49,7 @@ final class SearchThemeViewController: BaseViewController {
             collectionViewLayout: waterfallLayout // 추가
         )
         view.showsVerticalScrollIndicator = false
-        view.backgroundColor = AppColor.backgroundBeige
+        view.backgroundColor = AppColor.background
         return view
     }()
     private lazy var  submitButton: PrimaryFillButton = {
@@ -122,15 +116,10 @@ final class SearchThemeViewController: BaseViewController {
         submitButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
-            make.height.equalTo(44)
+            make.height.equalTo(48)
         }
         
     }
-    
-    override func configView() {
-        view.backgroundColor = AppColor.backgroundBeige
-    }
-    
 }
 
 
@@ -143,9 +132,9 @@ extension SearchThemeViewController {
             viewWillAppear: rx.methodInvoked(#selector(viewWillAppear)).map {
                 _ in
             },
-            searchText: textField.tf.rx.text.orEmpty.asObservable(),
+            searchText: textField.rx.text.orEmpty.asObservable(),
             loadNextPage: loadNextPage.asObservable(),
-            textEndTrigger: textField.tf.rx.controlEvent(.editingDidEndOnExit).asObservable(),
+            textEndTrigger: textField.rx.controlEvent(.editingDidEndOnExit).asObservable(),
             selectedTheme: selectedThemeUrl.asObservable(),
         )
         let output = viewModel.transform(input: input)
@@ -222,7 +211,6 @@ extension SearchThemeViewController {
         
         // 설정 화면으로 돌아가기
         delegate?.didSelectTheme()
-//        navigationController?.popViewController(animated: true)
     }
 }
 
