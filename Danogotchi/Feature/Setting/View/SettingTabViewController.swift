@@ -41,7 +41,7 @@ final class SettingTabViewController: BaseViewController {
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.backgroundColor = AppColor.background
+        view.backgroundColor = AppColor.appWhite
         view.alwaysBounceVertical = false
         view.bounces = true
         return view
@@ -90,6 +90,9 @@ final class SettingTabViewController: BaseViewController {
     }
     
     override func configView() {
+        // 네비게이션 바 영역(safeArea 위)까지 리스트 배경과 같은 톤으로 맞춘다
+        view.backgroundColor = AppColor.appWhite
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
@@ -98,7 +101,7 @@ final class SettingTabViewController: BaseViewController {
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
-        configuration.backgroundColor = AppColor.background
+        configuration.backgroundColor = AppColor.appWhite
         
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         
@@ -121,7 +124,7 @@ extension SettingTabViewController {
             contentConfiguration.text = "\(setting.icon)   \(setting.title)"
             
             var backgroundConfig = UIBackgroundConfiguration.listGroupedCell()
-            backgroundConfig.backgroundColor = AppColor.appWhite
+            backgroundConfig.backgroundColor = AppColor.card
             
             if setting.action == .appVersion {
                 contentConfiguration.secondaryText = currentAppVersion
