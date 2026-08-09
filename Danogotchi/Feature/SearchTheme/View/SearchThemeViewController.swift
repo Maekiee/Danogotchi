@@ -200,7 +200,6 @@ extension SearchThemeViewController {
     
     private func handleOnboardingSubmit(selectedTheme: String) {
         UserInfoManager.shared.currentThemeUrl = selectedTheme
-        viewModel.activateMyBook()
         delegate?.didSelectTheme()
     }
     

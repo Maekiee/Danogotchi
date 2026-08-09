@@ -131,9 +131,15 @@ extension AppDIContainer {
         let repository = makeSearchThemeRepository()
         return SearchThemeViewModel(
             mode: mode,
-            repository: repository,
-            vocabBookRepository: vocabBookRepository
+            repository: repository
         )
+    }
+}
+
+// MARK: - Onboarding
+extension AppDIContainer {
+    func makeOnboardingInterestViewModel() -> OnboardingInterestViewModel {
+        return OnboardingInterestViewModel(setActiveBookUseCase: makeSetActiveBookUseCase())
     }
 }
 

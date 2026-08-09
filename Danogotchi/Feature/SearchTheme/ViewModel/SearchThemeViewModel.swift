@@ -5,28 +5,17 @@ import RxCocoa
 final class SearchThemeViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let repository: SearchThemeRepository
-    private let vocabBookRepository: VocabBookRepository
     private let mode: SearchThemeViewController.EntryMode
 //    private let mode: SearchThemeViewController.EntryMode
 
     init(
         mode: SearchThemeViewController.EntryMode,
-        repository: SearchThemeRepository,
-        vocabBookRepository: VocabBookRepository
+        repository: SearchThemeRepository
     ) {
         self.repository = repository
-        self.vocabBookRepository = vocabBookRepository
         self.mode = mode
     }
 
-    /// 온보딩 완료 시 나의 단어장을 활성 단어장으로 지정한다. 시드 실패 시 생성 후 지정.
-    func activateMyBook() {
-        let myBook = vocabBookRepository.readAllBooks(bookType: .myBook).first
-            ?? vocabBookRepository.createBook(title: BookTopic.myBook.title, bookType: .myBook, level: nil)
-
-        vocabBookRepository.setActiveBook(id: myBook.id)
-    }
-    
     struct Input {
         let viewWillAppear: Observable<Void>
         let searchText: Observable<String>
