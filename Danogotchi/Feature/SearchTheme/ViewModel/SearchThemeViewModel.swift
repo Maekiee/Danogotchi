@@ -3,6 +3,8 @@ import RxSwift
 import RxCocoa
 
 final class SearchThemeViewModel: BaseViewModel {
+    private static let networkErrorMessage = "잠시후 다시 시도해주세요"
+
     private let disposeBag = DisposeBag()
     private let repository: SearchThemeRepository
     private let mode: SearchThemeViewController.EntryMode
@@ -27,6 +29,7 @@ final class SearchThemeViewModel: BaseViewModel {
     struct Output {
         let themeImageList: Driver<[ThemeImageViewData]>
         let buttonEnable: Driver<Bool>
+        let alertMessage: Signal<String>
     }
     
     func transform(input: Input) -> Output {
@@ -37,8 +40,9 @@ final class SearchThemeViewModel: BaseViewModel {
         let isLoading = BehaviorRelay<Bool>(value: false)
         
         let submitButtonIsHidden = BehaviorRelay<Bool>(value: true)
-        
-        
+        let alertMessageRelay = PublishRelay<String>()
+
+
         // 초기값
         input.viewWillAppear
             .take(1)
@@ -58,6 +62,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     currentSearchWord.accept("library")
                 case .failure(let error):
                     print("네트워크 통신 에러: \(error)")
+                    alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }.disposed(by: disposeBag)
         
@@ -72,9 +77,14 @@ final class SearchThemeViewModel: BaseViewModel {
             ))
             .filter { (_, _, currentImages, total) in
                 return currentImages.count < total && total > 0
-            }.flatMapLatest { (searchWrod, page, _, Int) in
+            }
+            // 진행 중인 요청이 있으면 무시한다 (중복 요청 · 반복 알럿 방지)
+            .filter { _ in !isLoading.value }
+            .do(onNext: { _ in isLoading.accept(true) })
+            .flatMapLatest { (searchWrod, page, _, Int) in
                 self.repository.searchPhotos(query: searchWrod, page: page)
             }.bind(with: self) { owner, result in
+                isLoading.accept(false)
                 switch result {
                 case .success(let entity):
                     let newViewDataList = entity.results.map { ThemeImageViewData(from: $0) }
@@ -84,6 +94,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     nextPage.accept(nextPage.value + 1)
                 case .failure(let error):
                     print("무한 스크롤 로직 에러: \(error)")
+                    alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }.disposed(by: disposeBag)
         
@@ -110,6 +121,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     nextPage.accept(2)
                 case .failure(let error):
                     print("검색 에러 \(error)")
+                    alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }.disposed(by: disposeBag)
         
@@ -127,7 +139,8 @@ final class SearchThemeViewModel: BaseViewModel {
         
         return Output(
             themeImageList: imageItems.asDriver(onErrorJustReturn: []),
-            buttonEnable: submitButtonIsHidden.asDriver()
+            buttonEnable: submitButtonIsHidden.asDriver(),
+            alertMessage: alertMessageRelay.asSignal()
         )
     }
 }

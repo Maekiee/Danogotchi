@@ -183,7 +183,12 @@ extension SearchThemeViewController {
         output.buttonEnable
             .drive(submitButton.rx.isHidden)
             .disposed(by: disposeBag)
-        
+
+        output.alertMessage
+            .emit(with: self) { owner, message in
+                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+            }.disposed(by: disposeBag)
+
         submitButton.rx.tap
             .bind(with: self) { owner, _ in
                 guard let selectedTheme = owner.selectedThemeUrl.value else { return }
