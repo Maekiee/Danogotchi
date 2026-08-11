@@ -102,10 +102,16 @@ extension AppDIContainer {
 // MARK: - Quiz
 extension AppDIContainer {
     func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
-        let learningHistoryRepository = makeVocabLearningHistoryRepository()
         return QuizViewModel(
-            learningHistoryRepository: learningHistoryRepository,
+            earnExperienceUseCase: makeEarnExperienceUseCase(),
             quizData: quizData
+        )
+    }
+
+    func makeEarnExperienceUseCase() -> EarnExperienceUseCase {
+        return DefaultEarnExperienceUseCase(
+            learningHistoryRepository: makeVocabLearningHistoryRepository(),
+            experienceRepository: makeExperienceRepository()
         )
     }
     
@@ -162,5 +168,9 @@ extension AppDIContainer {
 
     func makeVocabLearningHistoryRepository() -> LearningHistoryRepository {
         return DefaultLearningHistoryRepository(context: coreDataStack.viewContext)
+    }
+
+    func makeExperienceRepository() -> ExperienceRepository {
+        return DefaultExperienceRepository()
     }
 }

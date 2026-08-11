@@ -4,7 +4,7 @@ import RxCocoa
 
 final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let learningHistoryRepository: LearningHistoryRepository
+    private let earnExperienceUseCase: EarnExperienceUseCase
 
     private let quizDataRelay: BehaviorRelay<QuizData>
     
@@ -20,10 +20,10 @@ final class QuizViewModel: BaseViewModel {
     }
     
     init(
-        learningHistoryRepository: LearningHistoryRepository,
+        earnExperienceUseCase: EarnExperienceUseCase,
         quizData: QuizData
     ) {
-        self.learningHistoryRepository = learningHistoryRepository
+        self.earnExperienceUseCase = earnExperienceUseCase
         self.quizDataRelay = BehaviorRelay(value: quizData)
         self.currentIndex = BehaviorRelay(value: 0)
     }
@@ -46,6 +46,7 @@ final class QuizViewModel: BaseViewModel {
         let answerResultRelay = PublishRelay<AnswerResult>()
         let quizCompletedRelay = PublishRelay<(originalData: QuizData, result: QuizResult)>()
         var correctCount = 0
+        var earnedExperience = 0
 
         // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
         let currentQuizData = Observable.combineLatest(
@@ -95,10 +96,10 @@ final class QuizViewModel: BaseViewModel {
                       let (word, _, correctIndex) = quizData else { return nil }
                 
                 let isCorrect = selectedIndex == correctIndex
-                
-                // LearningHistory 저장
-                learningHistoryRepository.addHistory(vocabId: word.id, isCorrect: isCorrect)
-                
+
+                // 이력 저장과 경험치 산정을 한 번에 (오답은 0)
+                earnedExperience += earnExperienceUseCase.record(vocabId: word.id, isCorrect: isCorrect)
+
                 if isCorrect {
                     correctCount += 1
                 } else {
@@ -120,10 +121,17 @@ final class QuizViewModel: BaseViewModel {
                 let nextIndex = index + 1
 
                 if nextIndex >= quizData.words.count {
+                    // 세션이 끝나는 시점에만 적립한다 (중도 이탈은 경험치 없음)
+                    let experience = owner.earnExperienceUseCase.commit(
+                        earned: earnedExperience,
+                        correct: correctCount,
+                        total: quizData.words.count
+                    )
                     let result = QuizResult(
                         correct: correctCount,
                         total: quizData.words.count,
-                        incorrectWords: owner.incorrectWords
+                        incorrectWords: owner.incorrectWords,
+                        experience: experience
                     )
                     quizCompletedRelay.accept((originalData: quizData, result: result))
                 } else {

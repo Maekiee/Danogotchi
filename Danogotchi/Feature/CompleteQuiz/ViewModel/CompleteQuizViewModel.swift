@@ -30,6 +30,8 @@ final class CompleteQuizViewModel: BaseViewModel {
         let summaryText: Driver<String>
         let correctCountText: Driver<String>
         let incorrectCountText: Driver<String>
+        let experienceText: Driver<String>
+        let totalPointText: Driver<String>
         let primaryButtonTitle: Driver<String>
         let secondaryButtonTitle: Driver<String>
         let primaryAction: Signal<ActionType>
@@ -45,10 +47,18 @@ final class CompleteQuizViewModel: BaseViewModel {
         let endLearningActionRelay = PublishRelay<ActionType>()
         
         let incorrectCount = result.total - result.correct
+        let experience = result.experience
         let scoreText = Driver.just("\(result.correct) / \(result.total)")
-        let summaryText = Driver.just("\(result.total)개를 학습했어요")
+        // 만점 보너스는 따로 줄을 만들지 않고 요약 문구로 알린다
+        let summaryText = Driver.just(
+            experience.perfectBonus > 0
+            ? "\(result.total)개 전부 정답! 보너스 +\(experience.perfectBonus)"
+            : "\(result.total)개를 학습했어요"
+        )
         let correctCountText = Driver.just("\(result.correct)개")
         let incorrectCountText = Driver.just("\(incorrectCount)개")
+        let experienceText = Driver.just("+\(experience.total) EXP")
+        let totalPointText = Driver.just("\(experience.totalPoint.formatted()) P")
         
         let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
         
@@ -76,6 +86,8 @@ final class CompleteQuizViewModel: BaseViewModel {
             summaryText: summaryText,
             correctCountText: correctCountText,
             incorrectCountText: incorrectCountText,
+            experienceText: experienceText,
+            totalPointText: totalPointText,
             primaryButtonTitle: Driver.just(primaryTitle),
             secondaryButtonTitle: Driver.just(secondaryTitle),
             primaryAction: primaryActionRelay.asSignal(),

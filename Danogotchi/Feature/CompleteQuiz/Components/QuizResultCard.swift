@@ -1,7 +1,7 @@
 import UIKit
 import SnapKit
 
-/// 학습 결과 요약 카드. 점수와 정답/오답 개수를 보여준다.
+/// 학습 결과 요약 카드. 점수·정답/오답 개수와 획득 경험치를 보여준다.
 final class QuizResultCard: UIView {
 
     // MARK: - UI 프로퍼티
@@ -32,9 +32,13 @@ final class QuizResultCard: UIView {
 
     private let horizontalDivider = QuizResultCard.makeDivider()
     private let verticalDivider = QuizResultCard.makeDivider()
+    private let experienceDivider = QuizResultCard.makeDivider()
+    private let experienceVerticalDivider = QuizResultCard.makeDivider()
 
     private let correctItem = CountItem(caption: "정답", dotColor: AppColor.appGreen)
     private let incorrectItem = CountItem(caption: "오답", dotColor: AppColor.appRed)
+    private let experienceItem = CountItem(caption: "획득 경험치", dotColor: AppColor.butter)
+    private let pointItem = CountItem(caption: "보유 포인트", dotColor: AppColor.lavender)
 
     // MARK: - Public Properties
     var scoreText: String? {
@@ -55,6 +59,16 @@ final class QuizResultCard: UIView {
     var incorrectText: String? {
         get { incorrectItem.countText }
         set { incorrectItem.countText = newValue }
+    }
+
+    var experienceText: String? {
+        get { experienceItem.countText }
+        set { experienceItem.countText = newValue }
+    }
+
+    var pointText: String? {
+        get { pointItem.countText }
+        set { pointItem.countText = newValue }
     }
 
     // MARK: - Initialization
@@ -78,7 +92,11 @@ final class QuizResultCard: UIView {
             horizontalDivider,
             verticalDivider,
             correctItem,
-            incorrectItem
+            incorrectItem,
+            experienceDivider,
+            experienceVerticalDivider,
+            experienceItem,
+            pointItem
         ].forEach { containerView.addSubview($0) }
     }
 
@@ -97,29 +115,50 @@ final class QuizResultCard: UIView {
             make.centerX.equalToSuperview()
         }
 
-        horizontalDivider.snp.makeConstraints { make in
-            make.top.equalTo(summaryLabel.snp.bottom).offset(AppSpacing.space24)
+        layoutRow(divider: horizontalDivider, verticalDivider: verticalDivider,
+                  left: correctItem, right: incorrectItem,
+                  below: summaryLabel, topSpacing: AppSpacing.space24)
+
+        layoutRow(divider: experienceDivider, verticalDivider: experienceVerticalDivider,
+                  left: experienceItem, right: pointItem,
+                  below: correctItem, topSpacing: AppSpacing.space20)
+
+        // 카드 높이는 마지막 행의 컨텐츠 높이로 결정된다
+        experienceItem.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().offset(-AppSpacing.space32)
+        }
+    }
+
+    /// 구분선 아래에 좌/우 2열 항목과 가운데 세로 구분선을 한 행으로 배치한다
+    private func layoutRow(
+        divider: UIView,
+        verticalDivider: UIView,
+        left: UIView,
+        right: UIView,
+        below: UIView,
+        topSpacing: CGFloat
+    ) {
+        divider.snp.makeConstraints { make in
+            make.top.equalTo(below.snp.bottom).offset(topSpacing)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
             make.height.equalTo(AppBorder.thin)
         }
 
-        // 카드 높이는 아래 두 항목의 컨텐츠 높이로 결정된다
-        correctItem.snp.makeConstraints { make in
-            make.top.equalTo(horizontalDivider.snp.bottom).offset(AppSpacing.space20)
-            make.bottom.equalToSuperview().offset(-AppSpacing.space32)
+        left.snp.makeConstraints { make in
+            make.top.equalTo(divider.snp.bottom).offset(AppSpacing.space20)
             make.leading.equalToSuperview().offset(AppSpacing.space24)
             make.trailing.equalTo(verticalDivider.snp.leading).offset(-AppSpacing.space16)
         }
 
-        incorrectItem.snp.makeConstraints { make in
-            make.top.bottom.equalTo(correctItem)
+        right.snp.makeConstraints { make in
+            make.top.bottom.equalTo(left)
             make.leading.equalTo(verticalDivider.snp.trailing).offset(AppSpacing.space16)
             make.trailing.equalToSuperview().offset(-AppSpacing.space24)
         }
 
         verticalDivider.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalTo(correctItem)
+            make.centerY.equalTo(left)
             make.width.equalTo(AppBorder.thin)
             make.height.equalTo(40)
         }

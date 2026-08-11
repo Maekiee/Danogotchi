@@ -29,7 +29,8 @@ final class CompleteQuizViewController: BaseViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    @MainActor
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
@@ -44,7 +45,6 @@ final class CompleteQuizViewController: BaseViewController {
     }()
 
     private let resultCard = QuizResultCard()
-
     private let primaryButton = CompleteActionButton(style: .primary, title: "")
     private let secondaryButton = CompleteActionButton(style: .secondary, title: "")
     private let endLearningButton = CompleteActionButton(style: .text, title: "학습 끝내기")
@@ -139,6 +139,18 @@ extension CompleteQuizViewController {
         output.incorrectCountText
             .drive(with: self) { owner, text in
                 owner.resultCard.incorrectText = text
+            }
+            .disposed(by: disposeBag)
+
+        output.experienceText
+            .drive(with: self) { owner, text in
+                owner.resultCard.experienceText = text
+            }
+            .disposed(by: disposeBag)
+
+        output.totalPointText
+            .drive(with: self) { owner, text in
+                owner.resultCard.pointText = text
             }
             .disposed(by: disposeBag)
 
