@@ -64,6 +64,12 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         navigationController.present(nav, animated: true)
         
     }
+    
+    // 캐릭터탭
+    func didTapCharacter() {
+        let nav = UINavigationController()
+        navigationController.present(nav, animated: true)
+    }
 }
 
 extension MainCoordinator: LibraryCoordinatorDelegate {

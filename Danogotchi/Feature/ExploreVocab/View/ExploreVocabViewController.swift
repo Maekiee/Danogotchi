@@ -9,6 +9,7 @@ protocol ExploreVocabViewControllerDelegate: AnyObject {
     func exploreVocabDidTapLibrary()
     func exploreVocabDidTapSetting()
     func exploreVocabDidTapStartQuiz(quizData: QuizData)
+    func didTapCharacter()
 }
 
 final class ExploreVocabViewController: BaseViewController {
@@ -22,7 +23,6 @@ final class ExploreVocabViewController: BaseViewController {
         case main
     }
 
-    /// 무한 스크롤용 셀 식별자. 같은 단어를 여러 벌 복제해 넣으므로 복제 위치(page)까지 식별자에 포함한다.
     private struct LoopItem: Hashable {
         let page: Int
         let info: VocabDisplayInfo
@@ -32,8 +32,7 @@ final class ExploreVocabViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, LoopItem>
 
     private var dataSource: DataSource!
-
-    /// 목록을 3벌 복제해 가운데 벌에서 시작한다 — 앞뒤 어느 쪽으로 넘겨도 카드가 끊기지 않도록.
+    
     private static let loopCopyCount = 3
     private var baseItems: [VocabDisplayInfo] = []
     private var pendingRecenterPage: Int?
@@ -57,6 +56,21 @@ final class ExploreVocabViewController: BaseViewController {
         var config = UIButton.Configuration.filled()
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
         config.image = UIImage(systemName: "gearshape", withConfiguration: symbolConfig)
+        config.baseForegroundColor = AppColor.white
+        config.background.backgroundColor = AppColor.black.withAlphaComponent(
+            0.25
+        )
+        config.background.cornerRadius = AppSpacing.space24
+        config.background.visualEffect = UIBlurEffect(
+            style: .systemMaterialDark
+        )
+        let button = UIButton(configuration: config)
+        return button
+    }()
+    private let openCharacterButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
+        config.image = UIImage(systemName: "pawprint", withConfiguration: symbolConfig)
         config.baseForegroundColor = AppColor.white
         config.background.backgroundColor = AppColor.black.withAlphaComponent(
             0.25
@@ -150,6 +164,7 @@ final class ExploreVocabViewController: BaseViewController {
             showLibraryVCButton,
             settingTabButton,
             startLearningButton,
+            openCharacterButton,
             
         ].forEach { view.addSubview($0) }
     }
@@ -176,8 +191,14 @@ final class ExploreVocabViewController: BaseViewController {
             make.height.equalTo(AppSpacing.space24 * 2)
         }
         
-        settingTabButton.snp.makeConstraints { make in
+        openCharacterButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.size.equalTo(AppSpacing.space24 * 2)
+        }
+        
+        settingTabButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
             make.size.equalTo(AppSpacing.space24 * 2)
         }
@@ -245,6 +266,12 @@ extension ExploreVocabViewController {
         settingTabButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.exploreVocabDidTapSetting()
+            }.disposed(by: disposeBag)
+        
+        openCharacterButton.rx.tap
+            .bind(with: self) { owner, _ in
+                print("캐릭터 탭 오픈")
+                owner.delegate?.didTapCharacter()
             }.disposed(by: disposeBag)
 
         // 페이지가 멈춘 뒤에 가운데 벌로 되돌린다 — 내용이 같아 화면상 변화가 없다
