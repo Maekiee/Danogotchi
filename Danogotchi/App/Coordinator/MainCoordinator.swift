@@ -67,8 +67,17 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     
     // 캐릭터탭
     func didTapCharacter() {
-        let nav = UINavigationController()
+        let vc = CharacterViewController()
+        vc.delegate = self
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .fullScreen
         navigationController.present(nav, animated: true)
+    }
+}
+
+extension MainCoordinator: CharacterViewControllerDelegate {
+    func characterDidTapClose() {
+        navigationController.dismiss(animated: true)
     }
 }
 
