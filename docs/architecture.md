@@ -11,7 +11,7 @@
 
 > **배치 규칙**: 도메인 조각·UI가 **2개 이상 Feature에서 쓰이면 `Shared/`**, 정확히 1개 Feature 전용이면 **그 Feature 폴더 안**(예: `Feature/Quiz/Components/CustomProgressView`)에 둔다.
 >
-> **UseCase 레이어**(`Shared/Domain/UseCases/`)는 도입 진행 중(현재 7개). 처음부터 일괄 도입하지 않고, **비즈니스 규칙이 복잡해져 ViewModel에서 분리가 필요한 순간에 만든다**.
+> **UseCase 레이어**(`Shared/Domain/UseCases/`)는 도입 진행 중. 처음부터 일괄 도입하지 않고, **비즈니스 규칙이 복잡해져 ViewModel에서 분리가 필요한 순간에 만든다**.
 
 ## MVVM-C / Coordinator
 - 모든 화면 전환은 `Coordinator` 프로토콜을 통해 수행된다 (직접 `pushViewController` 금지).
@@ -61,6 +61,11 @@
 - 위치: `Feature/Quiz`
 - 활성 단어장으로부터 생성되는 학습 세션.
 
+### 경험치 (Experience)
+- 정책: `Shared/Domain/UseCases/EarnExperienceUseCase.swift`의 `ExperiencePolicy` — 정답 1개당 `base + 학습횟수 가산 + 정답률 가산`, 전 문제 정답 시 `perfectBonus`.
+- **산정은 이력 반영 *전*의 `LearningStats` 기준.** 반영 후 값으로 계산하면 방금 맞힌 정답이 정답률을 올려 스스로 보상을 깎는다.
+- 누적 포인트는 `ExperienceRepository`(UserDefaults `experienceTotalPoint`) — CoreData 아님. 캐릭터 엔티티 도입 시 이관 예정.
+
 ### 테마 (Theme)
 - 조회: `SearchThemeRepository` → Unsplash REST (`Core/Network/ApiRouter.searchPhoto`).
 - 선택 결과 URL은 `UserInfoManager.currentThemeUrl`에 저장된다. 메인 화면 배경으로 쓰인다.
@@ -73,6 +78,7 @@ UseCase → Repository → CoreData 동기 저장 → `activeBookId` 등 Relay �
 ## 전역 상태 / 싱글턴
 
 - `UserInfoManager` — UserDefaults: `username` / `userId`(미사용) / `themeUrl` 만. 활성 단어장·퀴즈 상태는 여기 없다(CoreData로 이관됨).
+- UserDefaults를 직접 쓰는 곳이 하나 더 있다 — `DefaultExperienceRepository`(`experienceTotalPoint`). UserInfoManager를 경유하지 않는다.
 - `TTSManager` — AVSpeechSynthesizer 래퍼 (단어 발음)
 
 > 싱글턴 직접 참조는 점진적으로 줄여나가는 중. 신규 코드는 가능하면 **AppDIContainer를 통한 주입** 또는 Repository 의존성으로 우회한다.

@@ -20,10 +20,19 @@
 - 구독은 `bind(with: self) { owner, value in ... }` 패턴 (강한 참조 회피).
 - `DisposeBag`은 ViewModel/VC 단위 1개씩 보유.
 
+## DesignSystem 컨벤션
+
+- 색/폰트/여백/반경 하드코딩 금지. `Shared/DesignSystem/Tokens/`의 `AppColor` / `AppFont` / `AppSpacing` / `AppRadius` / `AppBorder`만 쓴다.
+- `AppColor`는 3층 — Palette(원시) / Semantic(`background`·`textPrimary`·`card`·`primary`) / Legacy.
+  **화면·컴포넌트는 Semantic만 참조**한다. Legacy는 점진 교체 대상이라 신규 사용 금지.
+- 폰트는 Pretendard. 역할 토큰(`AppFont.body` 등)을 쓰고 `.systemFont(ofSize:)`는 새로 도입하지 않는다.
+- 2개 이상 화면에서 쓰는 UI 컴포넌트는 `Shared/DesignSystem/Components/`(`PrimaryButton`·`RoundedTextField` 등)에 둔다.
+
 ## MVVM 컨벤션
 
 - ViewModel은 `BaseViewModel` 채택 + `Input` / `Output` struct 정의 + `transform(input:) -> Output` 단일 진입점.
 - ViewController는 ViewModel 인스턴스를 **생성자 주입**으로만 받는다(스토리보드/세그웨이 X).
+- ViewController는 `BaseViewController`를 상속하고 `UIConfigurationLayout`의 `configHierarchy()` / `configLayout()` / `configView()`를 override한 뒤 `viewDidLoad`에서 이 순서로 호출한다 (addSubview → SnapKit 제약 → 속성 설정).
 - 화면 전환은 ViewController에서 직접 하지 않고 delegate를 통해 Coordinator에 위임.
 
 ## Coordinator 컨벤션
