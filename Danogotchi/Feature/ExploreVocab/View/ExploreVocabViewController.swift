@@ -1,4 +1,5 @@
 import Kingfisher
+import OSLog
 import RxCocoa
 import RxSwift
 import SnapKit
@@ -270,7 +271,7 @@ extension ExploreVocabViewController {
         
         openCharacterButton.rx.tap
             .bind(with: self) { owner, _ in
-                print("캐릭터 탭 오픈")
+                AppLogger.ui.debug("캐릭터 탭 오픈")
                 owner.delegate?.didTapCharacter()
             }.disposed(by: disposeBag)
 

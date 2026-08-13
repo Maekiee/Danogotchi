@@ -13,6 +13,23 @@
 - MARK 주석 적극 사용: `// MARK: - <영역>` 으로 코드 섹션 분리.
 - 한국어 주석 허용 (예: `// "나의 단어장"이 없는 경우 빈 배열 처리`). 의도/도메인 맥락 설명에 집중.
 
+## 로깅 컨벤션
+
+- **`print` / `NSLog` / `debugPrint` 금지.** 로그는 전부 `Core/Utils/AppLogger`(OSLog `Logger` 래퍼)를 경유한다. 쓰는 파일에 `import OSLog`를 추가한다.
+- subsystem은 번들 ID라서 Dev(`com.maekie.Danogotchi.dev`)/Release 로그가 Console.app에서 자동 분리된다.
+- 카테고리는 5종. 새로 만들지 말고 아래에서 고른다:
+  | 카테고리 | 용도 |
+  |---|---|
+  | `AppLogger.lifecycle` | 화면 생성/해제 트레이스 (`BaseViewController`) |
+  | `AppLogger.database` | CoreData 저장·시드 |
+  | `AppLogger.network` | Unsplash 등 원격 통신 |
+  | `AppLogger.push` | FCM 토큰·푸시 |
+  | `AppLogger.ui` | 탭·메일 컴포저 등 UI 이벤트 |
+- 레벨: 개발용 트레이스는 `.debug`, 실패는 `.error`. `.debug`은 릴리스에서 기본 수집되지 않으므로 **`#if DEBUG` 가드를 따로 두지 않는다**.
+- privacy: OSLog는 문자열·객체 보간을 기본 `<private>`로 가린다. 진단에 필요한 **에러 상세만 `privacy: .public`** 을 붙이고, 사용자 데이터(단어·검색어 등)는 기본값을 유지한다.
+- 에러는 `\(error)`를 직접 보간할 수 없다(OSLog 보간 오버로드 없음). `\(String(describing: error), privacy: .public)`을 쓴다 — `localizedDescription`은 CoreData `NSError`의 validation 상세를 잃는다.
+- **토큰·자격증명은 값 자체를 로그에 남기지 않는다.** 성공/실패 여부만 기록한다.
+
 ## Rx 컨벤션
 
 - Output 외부 노출: `Driver<T>` (메인 스레드 + 에러 X 보장).

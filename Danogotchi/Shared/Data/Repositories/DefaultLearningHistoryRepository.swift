@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import OSLog
 
 final class DefaultLearningHistoryRepository {
     private let context: NSManagedObjectContext
@@ -20,7 +21,7 @@ final class DefaultLearningHistoryRepository {
         do {
             try context.save()
         } catch {
-            print("CoreData 저장 실패: \(error)")
+            AppLogger.database.error("CoreData 저장 실패: \(String(describing: error), privacy: .public)")
         }
     }
 }

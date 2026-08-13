@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import OSLog
 
 /// 최초 실행 시 토픽별 단어장 + 추천 단어를 CoreData에 시드
 enum DatabaseSeeder {
@@ -41,7 +42,7 @@ enum DatabaseSeeder {
         do {
             try context.save()
         } catch {
-            print("DatabaseSeeder 저장 실패: \(error)")
+            AppLogger.database.error("DatabaseSeeder 저장 실패: \(String(describing: error), privacy: .public)")
         }
         // ponytail: 첫 실행 ~1.5k행 메인스레드 동기 시드, 데이터가 10배 커지면 background context로
     }

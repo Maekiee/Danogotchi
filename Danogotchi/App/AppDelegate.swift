@@ -1,4 +1,5 @@
 import UIKit
+import OSLog
 import FirebaseCore
 import FirebaseMessaging
 import IQKeyboardManagerSwift
@@ -28,11 +29,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         Messaging.messaging().delegate = self
         
+        // 토큰 원문은 남기지 않는다 — 로그로 유출되면 임의 기기에 푸시를 보낼 수 있다
         Messaging.messaging().token { token, error in
             if let error = error {
-                print("Error fetching FCM registration token: \(error)")
-            } else if let token = token {
-                print("FCM registration token: \(token)")
+                AppLogger.push.error("FCM 토큰 조회 실패: \(String(describing: error), privacy: .public)")
+            } else if token != nil {
+                AppLogger.push.debug("FCM 토큰 조회 성공")
             }
         }
         
@@ -62,7 +64,7 @@ extension AppDelegate: MessagingDelegate {
     
     // 디바이스 토큰 정보가 변견ㅇ이 되면 알려줌
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
+        AppLogger.push.debug("FCM 등록 토큰 갱신 (수신: \(fcmToken != nil, privacy: .public))")
         
         let dataDict: [String: String] = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(

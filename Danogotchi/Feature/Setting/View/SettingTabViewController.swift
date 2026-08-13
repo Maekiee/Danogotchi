@@ -1,4 +1,5 @@
 import UIKit
+import OSLog
 import SnapKit
 import RxSwift
 import RxCocoa
@@ -258,11 +259,11 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
             case .sent:
                 self.showMailSucceedAlert()
             case .saved:
-                print("Mail saved")
+                AppLogger.ui.debug("메일 임시저장")
             case .cancelled:
-                print("Mail cancelled")
+                AppLogger.ui.debug("메일 작성 취소")
             case .failed:
-                print("Mail failed: \(error?.localizedDescription ?? "Unknown error")")
+                AppLogger.ui.error("메일 전송 실패: \(error?.localizedDescription ?? "알 수 없는 오류", privacy: .public)")
             @unknown default:
                 fatalError()
             }

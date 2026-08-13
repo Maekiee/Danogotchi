@@ -1,4 +1,5 @@
 import CoreData
+import OSLog
 
 final class CoreDataStack {
     static let shared = CoreDataStack()
@@ -23,7 +24,7 @@ final class CoreDataStack {
         do {
             try viewContext.save()
         } catch {
-            print("코어데이터 저장 실패: \(error)")
+            AppLogger.database.error("코어데이터 저장 실패: \(String(describing: error), privacy: .public)")
         }
         
     }

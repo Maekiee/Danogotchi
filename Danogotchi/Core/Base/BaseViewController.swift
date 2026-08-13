@@ -1,4 +1,5 @@
 import UIKit
+import OSLog
 import Toast
 import RxSwift
 import RxCocoa
@@ -11,11 +12,11 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
         super.viewDidLoad()
 //        view.backgroundColor = AppColor.backgroundBeige
         view.backgroundColor = AppColor.background
-        print("✅ Init: \(String(describing: type(of: self))) ✅")
+        AppLogger.lifecycle.debug("✅ Init: \(String(describing: type(of: self)), privacy: .public) ✅")
     }
     
     deinit {
-        print("☑️ Deinit 해제: \(String(describing: type(of: self))) ☑️")
+        AppLogger.lifecycle.debug("☑️ Deinit 해제: \(String(describing: type(of: self)), privacy: .public) ☑️")
     }
     
     func configHierarchy() { }

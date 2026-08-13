@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import OSLog
 import RxSwift
 import RxCocoa
 
@@ -34,7 +35,7 @@ final class DefaultVocabBookRepository {
         do {
             try context.save()
         } catch {
-            print("CoreData 저장 실패: \(error)")
+            AppLogger.database.error("CoreData 저장 실패: \(String(describing: error), privacy: .public)")
         }
     }
 }

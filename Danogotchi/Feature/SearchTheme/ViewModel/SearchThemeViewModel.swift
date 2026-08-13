@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import RxSwift
 import RxCocoa
 
@@ -61,7 +62,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     nextPage.accept(2)
                     currentSearchWord.accept("library")
                 case .failure(let error):
-                    print("네트워크 통신 에러: \(error)")
+                    AppLogger.network.error("테마 초기 로드 실패: \(String(describing: error), privacy: .public)")
                     alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }.disposed(by: disposeBag)
@@ -93,7 +94,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     imageItems.accept(currentList)
                     nextPage.accept(nextPage.value + 1)
                 case .failure(let error):
-                    print("무한 스크롤 로직 에러: \(error)")
+                    AppLogger.network.error("테마 페이지네이션 실패: \(String(describing: error), privacy: .public)")
                     alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }.disposed(by: disposeBag)
@@ -120,7 +121,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     totalImageCount.accept(entity.total)
                     nextPage.accept(2)
                 case .failure(let error):
-                    print("검색 에러 \(error)")
+                    AppLogger.network.error("테마 검색 실패: \(String(describing: error), privacy: .public)")
                     alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }.disposed(by: disposeBag)
