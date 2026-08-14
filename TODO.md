@@ -2,7 +2,7 @@
 
 **스프린트 목표**: 테마 선택 뒤 펫을 만들고, 캐릭터 화면에서 시간에 따라 변하는 상태를 돌보며 학습 경험치로 수동 레벨업한다.
 
-**진행**: 계획 완료 · 구현 전
+**진행**: A-1 도메인 모델 완료 · A-2부터 진행 예정
 
 ## 현재 상태
 
@@ -32,12 +32,16 @@
 
 ### A-1. 펫 모델
 
-- [ ] `Shared/Domain/Entities/Pet.swift` 정의: `id / type / name / level / totalExperience / satiety / hydration / fun / cleanliness / hp / stateUpdatedAt / createAt`
-- [ ] `PetType`은 선택 가능한 첫 번째 펫 1종만 정의하고 에셋 이름을 연결한다. 개발 중인 8칸의 미래 타입은 미리 만들지 않는다.
-- [ ] `PetCareStat`을 `satiety / hydration / fun / cleanliness`으로 정의해 네 돌보기 버튼이 같은 처리 경로를 사용하게 한다.
-- [ ] `PetMood`를 `happy / satisfied / hungry / thirsty / bored / unpleasant / refreshed / sad / depressed`로 정의한다.
+- [x] `Shared/Domain/Entities/Pet.swift` 정의: `id / type / name / level / totalExperience / satiety / hydration / fun / cleanliness / hp / stateUpdatedAt / createAt`
+  - 정산 때마다 변형되는 유일한 엔티티라 변하는 필드는 `var`로 둔다. `id / type / name / createAt`만 `let`.
+- [x] `PetType`은 선택 가능한 첫 번째 펫 1종만 정의하고 에셋 이름을 연결한다. 개발 중인 8칸의 미래 타입은 미리 만들지 않는다.
+  - 임시로 `case sprout`(새싹이) / `imageName = "pet_sprout"`. 실제 에셋이 없으므로 호출부에서 `UIImage(named:) ?? UIImage(systemName: "pawprint")`로 대체한다.
+- [x] `PetCareStat`을 `satiety / hydration / fun / cleanliness`으로 정의해 네 돌보기 버튼이 같은 처리 경로를 사용하게 한다.
+- [x] `PetMood`를 `happy / satisfied / hungry / thirsty / bored / unpleasant / refreshed / sad / depressed`로 정의한다.
 - [ ] 레벨, 누적 경험치, HP는 저장하고 기분·게이지 진행률·사망 여부·하트 표시 상태는 파생값으로 둔다.
+  - `Pet.isDead`만 반영 완료. 나머지 파생값은 정책 의존이라 A-3·A-4·A-5에서 나온다.
 - [ ] 화면 표시 모델 `PetDisplayInfo`는 `Shared/Domain/Entities/`에 둔다. Shared의 UseCase가 반환하므로 `Feature/Character`에 두면 의존 방향이 역전된다 (`VocabDisplayInfo` 패턴).
+  - 필드가 A-3~A-5 파생값에 전부 의존해 지금 만들면 빈 껍데기가 된다. **생성은 B-3 `FetchPetStateUseCase` 시점으로 이연**하고 배치 규칙만 확정해 둔다.
 
 ### A-2. 시간 경과와 돌보기 정책
 
