@@ -12,11 +12,25 @@ enum PetCareStat: String, CaseIterable {
         case .satiety:
             return "포만감"
         case .hydration:
-            return "수분"
+            return "갈증"
         case .fun:
             return "즐거움"
         case .cleanliness:
             return "청결"
+        }
+    }
+
+    /// 정산·돌보기가 네 수치를 같은 코드로 다루기 위한 매핑
+    var keyPath: WritableKeyPath<Pet, Double> {
+        switch self {
+        case .satiety:
+            return \.satiety
+        case .hydration:
+            return \.hydration
+        case .fun:
+            return \.fun
+        case .cleanliness:
+            return \.cleanliness
         }
     }
 }
