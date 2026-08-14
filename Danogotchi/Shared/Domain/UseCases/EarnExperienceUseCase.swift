@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 
 /// 경험치 산정 규칙 — 학습횟수가 적고 정답률이 낮은 단어를 맞힐수록 많이 준다.
@@ -40,14 +41,14 @@ protocol EarnExperienceUseCase {
 
 final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
     private let learningHistoryRepository: LearningHistoryRepository
-    private let experienceRepository: ExperienceRepository
+    private let petRepository: PetRepository
 
     init(
         learningHistoryRepository: LearningHistoryRepository,
-        experienceRepository: ExperienceRepository
+        petRepository: PetRepository
     ) {
         self.learningHistoryRepository = learningHistoryRepository
-        self.experienceRepository = experienceRepository
+        self.petRepository = petRepository
     }
 
     func record(vocabId: UUID, isCorrect: Bool) -> Int {
@@ -58,9 +59,14 @@ final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
         return isCorrect ? ExperiencePolicy.experience(for: stats) : 0
     }
 
+    /// 적립은 `totalExperience`만 올린다 — `stateUpdatedAt`·HP를 건드리면 미정산 경과시간이 유실된다.
     func commit(earned: Int, correct: Int, total: Int) -> ExperienceGain {
         let bonus = ExperiencePolicy.perfectBonus(correct: correct, total: total)
-        let totalPoint = experienceRepository.addPoint(earned + bonus)
+        guard let totalPoint = petRepository.addExperience(earned + bonus) else {
+            // 온보딩이 펫 생성을 강제하므로 정상 경로에서는 발생하지 않는다
+            AppLogger.database.error("펫이 없어 경험치를 적립하지 못했다")
+            return ExperienceGain(earned: earned, perfectBonus: bonus, totalPoint: 0)
+        }
         return ExperienceGain(earned: earned, perfectBonus: bonus, totalPoint: totalPoint)
     }
 }

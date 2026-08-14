@@ -2,14 +2,14 @@
 
 **스프린트 목표**: 테마 선택 뒤 펫을 만들고, 캐릭터 화면에서 시간에 따라 변하는 상태를 돌보며 학습 경험치로 수동 레벨업한다.
 
-**진행**: A 도메인 규칙 완료(모델·정산·기분·레벨·HP/부활, 단위 테스트 41개 통과) · 다음은 B CoreData/저장소
+**진행**: A 도메인 규칙 · B CoreData/저장소 완료(엔티티·`PetRepository`·UseCase 5종·경험치 이관, 단위 테스트 61개 통과) · 다음은 C 온보딩
 
 ## 현재 상태
 
 - 캐릭터 화면은 테스트 레이블과 닫기 버튼만 있고 ViewModel이 없다. `MainCoordinator.didTapCharacter()`가 진입마다 새 인스턴스를 만들어 full-screen present 한다.
 - 온보딩은 현재 `관심사 → 테마 → 완료`이며, 완료 여부는 `currentThemeUrl`만으로 판단한다.
-- 퀴즈 경험치는 `ExperienceRepository`를 통해 UserDefaults의 `experienceTotalPoint`에 이미 적립되고 있다.
-- CoreData 펫 엔티티, 알·펫 이미지 에셋, 테스트 타깃은 아직 없다.
+- ~~퀴즈 경험치는 `ExperienceRepository`를 통해 UserDefaults의 `experienceTotalPoint`에 이미 적립되고 있다.~~ → B-4에서 `PetEntity.totalExperience`로 이관, `ExperienceRepository` 삭제.
+- 알·펫 이미지 에셋은 아직 없다.
 - **출시는 됐지만 실사용자가 없다.** 보존할 사용자 데이터가 없으므로 CoreData 모델 버저닝과 기존 경험치 이관은 전부 하지 않고, 검증은 앱 삭제 후 재설치로 처리한다.
 
 ## 구현 기본안
@@ -116,41 +116,52 @@
 
 ### B-1. CoreData 엔티티
 
-- [ ] 기존 `Model.xcdatamodel`에 `PetEntity`를 직접 추가한다. 보존할 사용자 데이터가 없으므로 모델 버전을 새로 만들지 않는다 — 기존 스토어와 해시가 어긋나면 앱을 삭제 후 재설치한다.
-- [ ] `PetEntity` 필드: `id(UUID) / type(String) / name(String) / level(Int64) / totalExperience(Int64) / satiety(Double) / hydration(Double) / fun(Double) / cleanliness(Double) / hp(Double, 기본값 40) / stateUpdatedAt(Date) / createAt(Date)`.
-- [ ] `maxHP`·`isDead`·하트 표시 상태는 저장하지 않는다. `health`도 이번에는 만들지 않고 HealthKit 도입 시 속성으로 추가한다.
-- [ ] `PetEntity+CoreDataClass.swift`, `PetEntity+CoreDataProperties.swift`, `PetMapper.swift`를 기존 수동 관리 패턴에 맞춰 추가한다.
+- [x] 기존 `Model.xcdatamodel`에 `PetEntity`를 직접 추가한다. 보존할 사용자 데이터가 없으므로 모델 버전을 새로 만들지 않는다 — 기존 스토어와 해시가 어긋나면 앱을 삭제 후 재설치한다.
+  - `NSPersistentStoreDescription`의 자동 경량 마이그레이션이 기본 `true`라 엔티티 추가는 대개 그냥 열린다. 실패하면 `CoreDataStack`이 `fatalError`로 죽으므로 앱 삭제 후 재실행.
+- [x] `PetEntity` 필드: `id(UUID) / type(String) / name(String) / level(Int64) / totalExperience(Int64) / satiety(Double) / hydration(Double) / fun(Double) / cleanliness(Double) / hp(Double, 기본값 40) / stateUpdatedAt(Date) / createAt(Date)`.
+- [x] `maxHP`·`isDead`·하트 표시 상태는 저장하지 않는다. `health`도 이번에는 만들지 않고 HealthKit 도입 시 속성으로 추가한다.
+- [x] `PetEntity+CoreDataClass.swift`, `PetEntity+CoreDataProperties.swift`, `PetMapper.swift`를 기존 수동 관리 패턴에 맞춰 추가한다.
+  - `PetMapper`에는 기존 매퍼에 없는 `apply(_ pet: Pet)`(도메인 → 엔티티)도 넣었다. `createPet`·`updatePet` 두 곳이 12개 필드 대입을 공유한다.
 
 ### B-2. `PetRepository`
 
-- [ ] `Shared/Domain/Interfaces/Repositories/PetRepository.swift`와 `DefaultPetRepository`를 추가한다.
-- [ ] Repository는 CRUD만 맡는다: 펫 생성, 조회, 전체 저장, 경험치 가산. **정산·조건 판단·페널티 계산은 넣지 않는다** — 정책 판단은 B-3의 UseCase 책임이다.
-- [ ] 펫 생성 전에 기존 엔티티가 있는지 확인해 앱당 1마리 불변식을 지킨다.
-- [ ] 저장은 CoreData 동기 저장 한 번으로 처리한다. 돌봄 수치와 HP 저장을 별도 경로로 나누지 않는다.
-- [ ] 현재 단일 화면에는 변경 신호 소비자가 없으므로 `characterChanged` Relay는 추가하지 않는다.
+- [x] `Shared/Domain/Interfaces/Repositories/PetRepository.swift`와 `DefaultPetRepository`를 추가한다.
+- [x] Repository는 CRUD만 맡는다: 펫 생성, 조회, 전체 저장, 경험치 가산. **정산·조건 판단·페널티 계산은 넣지 않는다** — 정책 판단은 B-3의 UseCase 책임이다.
+  - `createPet`은 완성된 `Pet`을 받는다. 초기 수치 `100`·HP `40`은 `PetStatePolicy` 상수라서 `CreatePetUseCase`가 조립해 넘긴다 — Repository는 밸런스값을 모른다.
+  - `addExperience`를 따로 둔 이유: `readPet` → 수정 → `updatePet` 왕복으로도 되지만, "적립은 `stateUpdatedAt`·HP를 건드리지 않는다"를 주석이 아니라 구조로 못박는다.
+- [x] 펫 생성 전에 기존 엔티티가 있는지 확인해 앱당 1마리 불변식을 지킨다.
+  - 조회는 `createAt` 오름차순 + `fetchLimit 1` — 중복이 생겨도 항상 같은(가장 오래된) 한 마리를 본다.
+- [x] 저장은 CoreData 동기 저장 한 번으로 처리한다. 돌봄 수치와 HP 저장을 별도 경로로 나누지 않는다.
+- [x] 현재 단일 화면에는 변경 신호 소비자가 없으므로 `characterChanged` Relay는 추가하지 않는다.
 
 ### B-3. UseCase
 
-- [ ] `Shared/Domain/UseCases/`에 `protocol X` + `final class DefaultX: X` 쌍으로 추가하고 `AppDIContainer`에 `make*()`를 넣는다 (기존 10개와 동일 형태).
+- [x] `Shared/Domain/UseCases/`에 `protocol X` + `final class DefaultX: X` 쌍으로 추가하고 `AppDIContainer`에 `make*()`를 넣는다 (기존 10개와 동일 형태).
   - `FetchPetStateUseCase` — 조회 → `PetStatePolicy` 정산 → 저장 → `PetDisplayInfo` 반환
   - `CarePetUseCase` — `PetCareStat` 하나를 받아 정산 후 `+25`. 이미 `100`이면 정산분만 저장하고 안내 결과 반환
   - `LevelUpPetUseCase` — 정산 후 `PetLevelPolicy` 조건 재검사, 통과 시에만 `level += 1`
   - `RevivePetUseCase` — 정산 후 사망 확인, HP·돌봄 수치 복구와 페널티를 한 저장으로 처리
   - `CreatePetUseCase` — 온보딩에서 이름·타입으로 생성, 중복 생성 차단
-- [ ] 사망 · `100` 도달 · 조건 미충족 같은 액션 결과는 UseCase가 결과 타입으로 돌려주고 ViewModel은 표시만 한다.
-- [ ] 동기 로직은 `.just()`로 감싸 Rx 스트림으로 반환한다.
+- [x] 사망 · `100` 도달 · 조건 미충족 같은 액션 결과는 UseCase가 결과 타입으로 돌려주고 ViewModel은 표시만 한다.
+  - 세 액션의 payload가 전부 `PetDisplayInfo`로 같아서 거의 동일한 enum 3개 대신 `PetActionResult`(`info` + `rejection?`) 하나로 만들었다. `rejection == nil`이 성공이고, 화면은 rejection과 무관하게 항상 `info`를 다시 렌더링한다.
+  - `PetDisplayInfo`는 `VocabDisplayInfo`처럼 도메인 엔티티(`pet`)를 품고 파생값(`mood`·게이지·`canLevelUp`)만 더한다. 하트 표시 상태는 → **D-2**.
+  - 액션 3종은 옵셔널을 반환한다 — `info`가 non-optional이라 "펫 없음"을 `rejection`으로 표현할 수 없다. 정상 경로에는 없는 상태라 VM이 `guard let`으로 흘려보낸다.
+- [x] ~~동기 로직은 `.just()`로 감싸 Rx 스트림으로 반환한다.~~ → `StartQuizUseCase`처럼 **평범한 값을 반환**한다. 전부 동기 CoreData 작업이라 Rx 랩핑이 VM에서 `flatMapLatest` 잡음만 만들고, 테스트 타깃에 RxSwift를 링크해야 한다.
 
 ### B-4. 기존 경험치 연결
 
-- [ ] `EarnExperienceUseCase`가 `ExperienceRepository` 대신 `PetRepository`를 받아 `PetEntity.totalExperience`를 올리게 한다. 프로토콜 하나에 구현이 하나뿐이므로 `ExperienceRepository`와 `DefaultExperienceRepository`(UserDefaults)는 제거한다.
-- [ ] 경험치 적립은 HP를 정산하거나 `stateUpdatedAt`을 갱신하지 않아 미정산 경과시간을 유실하지 않게 한다.
-- [ ] 적립 시 펫이 없으면 `assertionFailure` 후 `0`을 반환한다. 온보딩이 펫 생성을 강제하므로 정상 경로에서는 발생하지 않지만, 반환값이 정의되지 않으면 경험치가 조용히 증발한다.
-- [ ] `AppDIContainer`에 `DefaultPetRepository` 단일 인스턴스를 두고 온보딩·캐릭터·퀴즈 UseCase에 주입한다.
-- [ ] 기존 `experienceTotalPoint` 키는 이관하지 않는다. 보존할 사용자가 없고 재설치하면 UserDefaults도 함께 사라진다.
-- [ ] 펫 이름은 `UserInfoManager.username`을 재사용하지 않고 `PetEntity.name`에 저장한다.
-- [ ] 퀴즈 완료 화면(`CompleteQuizViewModel.totalPointText`)의 누적 포인트 단위를 `P`가 아닌 `EXP`로 표시한다.
+- [x] `EarnExperienceUseCase`가 `ExperienceRepository` 대신 `PetRepository`를 받아 `PetEntity.totalExperience`를 올리게 한다. 프로토콜 하나에 구현이 하나뿐이므로 `ExperienceRepository`와 `DefaultExperienceRepository`(UserDefaults)는 제거한다.
+  - `record()`는 손대지 않았다 — 학습 이력만 쓰고 펫을 건드리지 않아 사망 중에도 학습·적립이 막히지 않는다(A-5 요구사항).
+- [x] 경험치 적립은 HP를 정산하거나 `stateUpdatedAt`을 갱신하지 않아 미정산 경과시간을 유실하지 않게 한다.
+- [x] 적립 시 펫이 없으면 ~~`assertionFailure`~~ **`AppLogger` 기록** 후 `0`을 반환한다. 온보딩이 펫 생성을 강제하므로 정상 경로에서는 발생하지 않지만, 반환값이 정의되지 않으면 경험치가 조용히 증발한다.
+  - `assertionFailure`는 펫 생성(C-2)이 붙기 전까지 퀴즈 완료마다 Debug 빌드를 트랩시키고, E-1의 "`0`을 반환하는 것도 확인한다" 테스트를 불가능하게 만든다.
+- [x] `AppDIContainer`에 `DefaultPetRepository` 단일 인스턴스를 두고 온보딩·캐릭터·퀴즈 UseCase에 주입한다.
+- [x] 기존 `experienceTotalPoint` 키는 이관하지 않는다. 보존할 사용자가 없고 재설치하면 UserDefaults도 함께 사라진다.
+- [x] 펫 이름은 `UserInfoManager.username`을 재사용하지 않고 `PetEntity.name`에 저장한다.
+- [x] 퀴즈 완료 화면(`CompleteQuizViewModel.totalPointText`)의 누적 포인트 단위를 `P`가 아닌 `EXP`로 표시한다.
 
 > **검증 기준**: 퀴즈 완료 시 `PetEntity.totalExperience`가 증가하고 캐릭터 화면 게이지·레벨업 버튼에 그대로 반영되어야 한다.
+> 단위 테스트로는 확인 완료. **수동 검증은 펫 생성(C-2)·화면(D-1) 이후** — 지금은 펫이 없어 `AppLogger`에 기록만 남는다.
 
 ---
 
@@ -211,6 +222,7 @@
 
 - [ ] 밥주기 → 포만감, 물주기 → 수분, 놀아주기 → 즐거움, 청소하기 → 청결을 회복한다.
 - [ ] 돌보기 결과를 즉시 다시 렌더링하고 이미 100이면 토스트로 안내한다.
+  - 감소가 계속 일어나므로 `PetActionRejection.alreadyFull`은 경과 시간이 `0` 이하일 때만 뜬다. `99.99`에서 눌러도 성공 처리라 토스트가 사실상 안 나온다 — 안내가 필요하면 "`100`에 근접" 기준을 여기서 정한다.
 - [ ] 경험치 게이지가 100% 미만이면 레벨업 버튼을 비활성화한다.
 - [ ] 레벨업 성공 후 레벨·게이지·버튼 상태를 다시 렌더링하고 초과 경험치를 보존한다.
 - [ ] 사망 상태에서는 돌보기·레벨업 버튼을 비활성화하고 부활 버튼만 활성화한다. 학습 화면 진입과 퀴즈 경험치 적립은 막지 않는다.
@@ -224,9 +236,10 @@
 
 ### E-1. 최소 테스트 기반
 
-> **현재 41개 통과** — `PetStatePolicyTests`(34) · `PetLevelPolicyTests`(7).
+> **현재 61개 통과** — `PetStatePolicyTests`(34) · `PetPersistenceTests`(20) · `PetLevelPolicyTests`(7).
 > 실행: `xcodebuild -scheme Danogotchi-dev -destination 'platform=iOS Simulator,name=iPhone 17' test`
-> 공용 픽스처는 `DanogotchiTests/PetTestSupport.swift`(`makePet` / `hoursLater` / `petAfterCare`).
+> 공용 픽스처는 `DanogotchiTests/PetTestSupport.swift`(`makePet` / `hoursLater` / `hoursAgo` / `petAfterCare` / `makeInMemoryContext`).
+> 정책 테스트는 고정 시각(`testBase`), 저장소·UseCase 테스트는 UseCase가 내부에서 `Date()`를 쓰므로 `hoursAgo`로 경과를 심는다.
 
 - [x] 현재 없는 `DanogotchiTests` 단위 테스트 타깃을 추가한다.
 - [x] `PetStatePolicy`: 0시간·1시간·장시간 경과, 감소 후 돌보기, 돌봄 수치 0/100과 HP 0/40 제한을 테스트한다.
@@ -241,8 +254,9 @@
 - [ ] HP 표시 파생값을 `40 / 39 / 38 / 37 / 36 / 0.5 / 0`에서 검증해 하트 10개, `2/3 · 1/2 · 1/3`, 최소 1칸, 전멸 상태를 확인한다. → **D-2**
 - [x] 부활 시 `50% → 40%`, `5% → 0%`, 레벨 진행률 0%에서 한 단계 하락, 레벨 0 하한, 초과 경험치 차감, 살아 있는 펫의 부활·중복 요청 거부를 테스트한다.
 - [x] 부활 직후 네 돌봄 수치가 `50` 이상이고 곧바로 HP가 감소하지 않는지 테스트한다.
-- [ ] 경험치 적립이 `stateUpdatedAt`을 갱신하지 않아 적립 전후로 미정산 경과시간이 보존되는지 테스트한다. 펫이 없을 때 `0`을 반환하는 것도 확인한다. → B-4
-- [ ] 인메모리 CoreData로 펫 1마리 생성, 중복 생성 차단, 돌보기·HP 정산 저장, 경험치 적립, 조건부 레벨업·부활의 원자적 저장을 테스트한다. → B-2·B-3
+- [x] 경험치 적립이 `stateUpdatedAt`을 갱신하지 않아 적립 전후로 미정산 경과시간이 보존되는지 테스트한다. 펫이 없을 때 `0`을 반환하는 것도 확인한다.
+- [x] 인메모리 CoreData로 펫 1마리 생성, 중복 생성 차단, 돌보기·HP 정산 저장, 경험치 적립, 조건부 레벨업·부활의 원자적 저장을 테스트한다.
+  - `alreadyFull`은 경과 시간이 `0` 이하일 때만 성립한다(감소가 계속 일어나므로) — 테스트도 `stateUpdatedAt`을 미래로 심는 기기 시각 되돌림 상황으로 잡았다. 실사용 UX는 **D-3에서 판단**한다.
 - [ ] 이름의 앞뒤 공백 제거·빈 값·10자 경계를 테스트한다. → C-2
 
 ### E-2. 통합·수동 검증

@@ -11,6 +11,11 @@ final class AppDIContainer {
         context: coreDataStack.viewContext
     )
 
+    /// 앱당 1마리 불변식을 한 곳에서 지키도록 온보딩·캐릭터·퀴즈가 같은 인스턴스를 쓴다.
+    lazy var petRepository: PetRepository = DefaultPetRepository(
+        context: coreDataStack.viewContext
+    )
+
     init() {
         userInfoManager = UserInfoManager.shared
         ttsManager = TTSManager.shared
@@ -111,7 +116,7 @@ extension AppDIContainer {
     func makeEarnExperienceUseCase() -> EarnExperienceUseCase {
         return DefaultEarnExperienceUseCase(
             learningHistoryRepository: makeVocabLearningHistoryRepository(),
-            experienceRepository: makeExperienceRepository()
+            petRepository: petRepository
         )
     }
     
@@ -169,8 +174,27 @@ extension AppDIContainer {
     func makeVocabLearningHistoryRepository() -> LearningHistoryRepository {
         return DefaultLearningHistoryRepository(context: coreDataStack.viewContext)
     }
+}
 
-    func makeExperienceRepository() -> ExperienceRepository {
-        return DefaultExperienceRepository()
+// MARK: - Character
+extension AppDIContainer {
+    func makeFetchPetStateUseCase() -> FetchPetStateUseCase {
+        return DefaultFetchPetStateUseCase(petRepository: petRepository)
+    }
+
+    func makeCarePetUseCase() -> CarePetUseCase {
+        return DefaultCarePetUseCase(petRepository: petRepository)
+    }
+
+    func makeLevelUpPetUseCase() -> LevelUpPetUseCase {
+        return DefaultLevelUpPetUseCase(petRepository: petRepository)
+    }
+
+    func makeRevivePetUseCase() -> RevivePetUseCase {
+        return DefaultRevivePetUseCase(petRepository: petRepository)
+    }
+
+    func makeCreatePetUseCase() -> CreatePetUseCase {
+        return DefaultCreatePetUseCase(petRepository: petRepository)
     }
 }

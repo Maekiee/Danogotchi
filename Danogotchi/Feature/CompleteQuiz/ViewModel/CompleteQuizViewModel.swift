@@ -58,7 +58,7 @@ final class CompleteQuizViewModel: BaseViewModel {
         let correctCountText = Driver.just("\(result.correct)개")
         let incorrectCountText = Driver.just("\(incorrectCount)개")
         let experienceText = Driver.just("+\(experience.total) EXP")
-        let totalPointText = Driver.just("\(experience.totalPoint.formatted()) P")
+        let totalPointText = Driver.just("\(experience.totalPoint.formatted()) EXP")
         
         let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
         

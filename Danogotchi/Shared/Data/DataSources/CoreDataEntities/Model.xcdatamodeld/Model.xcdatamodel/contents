@@ -6,6 +6,20 @@
         <attribute name="isCorrect" attributeType="Boolean" usesScalarValueType="YES"/>
         <relationship name="vocab" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="VocabEntity" inverseName="histories" inverseEntity="VocabEntity"/>
     </entity>
+    <entity name="PetEntity" representedClassName="PetEntity" syncable="YES">
+        <attribute name="cleanliness" attributeType="Double" defaultValueString="100" usesScalarValueType="YES"/>
+        <attribute name="createAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="fun" attributeType="Double" defaultValueString="100" usesScalarValueType="YES"/>
+        <attribute name="hp" attributeType="Double" defaultValueString="40" usesScalarValueType="YES"/>
+        <attribute name="hydration" attributeType="Double" defaultValueString="100" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="level" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="satiety" attributeType="Double" defaultValueString="100" usesScalarValueType="YES"/>
+        <attribute name="stateUpdatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="totalExperience" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="type" attributeType="String"/>
+    </entity>
     <entity name="VocabBookEntity" representedClassName="VocabBookEntity" syncable="YES">
         <attribute name="bookType" attributeType="String"/>
         <attribute name="createAt" attributeType="Date" usesScalarValueType="NO"/>
