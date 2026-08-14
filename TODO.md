@@ -2,14 +2,14 @@
 
 **스프린트 목표**: 테마 선택 뒤 펫을 만들고, 캐릭터 화면에서 시간에 따라 변하는 상태를 돌보며 학습 경험치로 수동 레벨업한다.
 
-**진행**: A 도메인 규칙 · B CoreData/저장소 완료(엔티티·`PetRepository`·UseCase 5종·경험치 이관, 단위 테스트 61개 통과) · 다음은 C 온보딩
+**진행**: A 도메인 규칙 · B CoreData/저장소 · C-1 알 선택 화면 완료(단위 테스트 61개 유지) · 다음은 C-2 이름 지정
 
 ## 현재 상태
 
 - 캐릭터 화면은 테스트 레이블과 닫기 버튼만 있고 ViewModel이 없다. `MainCoordinator.didTapCharacter()`가 진입마다 새 인스턴스를 만들어 full-screen present 한다.
-- 온보딩은 현재 `관심사 → 테마 → 완료`이며, 완료 여부는 `currentThemeUrl`만으로 판단한다.
+- ~~온보딩은 현재 `관심사 → 테마 → 완료`이며,~~ → C-1에서 `관심사 → 테마 → 알 선택 → 완료`가 됐다. 완료 여부는 여전히 `currentThemeUrl`만으로 판단한다 (→ C-3).
 - ~~퀴즈 경험치는 `ExperienceRepository`를 통해 UserDefaults의 `experienceTotalPoint`에 이미 적립되고 있다.~~ → B-4에서 `PetEntity.totalExperience`로 이관, `ExperienceRepository` 삭제.
-- 알·펫 이미지 에셋은 아직 없다.
+- 알·펫 이미지 에셋은 아직 없다. C-1 알 선택 셀은 `oval.portrait.fill`(선택 가능) / `questionmark`(개발중) SF Symbol로 대체 중이고, 교체 지점은 `PetType.eggImageName`·`imageName` 두 문자열뿐이다.
 - **출시는 됐지만 실사용자가 없다.** 보존할 사용자 데이터가 없으므로 CoreData 모델 버저닝과 기존 경험치 이관은 전부 하지 않고, 검증은 앱 삭제 후 재설치로 처리한다.
 
 ## 구현 기본안
@@ -169,11 +169,21 @@
 
 ### C-1. 알 선택 화면
 
-- [ ] `OnboardingEggSelectionViewController`와 Input/Output 방식 ViewModel, 3×3 전용 셀을 추가한다.
-- [ ] 알 슬롯은 항상 9개를 표시한다. 첫 번째만 선택 가능하고 나머지 8개는 딤 처리와 `개발중` 문구를 표시하며 탭을 무시한다.
-- [ ] 첫 번째 알을 선택해야 다음 버튼이 활성화되고 단일 선택 상태가 화면에 드러나게 한다.
-- [ ] 개발 중 슬롯에는 미래 `PetType`을 만들지 않고 화면용 `comingSoon` 상태만 사용한다.
-- [ ] 첫 번째 알·펫 에셋이 준비되지 않았으면 SF Symbol 임시 이미지를 사용하되 교체 지점을 `PetType`의 에셋 이름 한곳으로 제한한다.
+- [x] `OnboardingEggSelectionViewController`와 Input/Output 방식 ViewModel, 3×3 전용 셀을 추가한다.
+  - 관심사 화면(`OnboardingInterestViewController` + `OnboardingInterestItem`)과 같은 4파일 구성. 레이아웃은 `repeatingSubitem:count: 3` — 여백을 뺀 나머지를 3등분하므로 `fractionalWidth(1/3)` 3칸이 넘치는 문제가 없다.
+  - ViewModel에 의존성이 없지만 `makeOnboardingEggSelectionViewModel()`은 컨벤션대로 추가했다.
+- [x] 알 슬롯은 항상 9개를 표시한다. 첫 번째만 선택 가능하고 나머지 8개는 딤 처리와 `개발중` 문구를 표시하며 탭을 무시한다.
+  - 무시는 셀·`shouldSelectItemAt`이 아니라 ViewModel의 `compactMap { $0.petType }`에서 처리한다.
+  - `isSelected`에 `type != nil` 가드가 필요하다 — `type == selected`만 쓰면 초기 상태(둘 다 `nil`)에서 개발중 8칸이 전부 선택돼 보인다.
+- [x] 첫 번째 알을 선택해야 다음 버튼이 활성화되고 단일 선택 상태가 화면에 드러나게 한다.
+- [x] 개발 중 슬롯에는 미래 `PetType`을 만들지 않고 화면용 `comingSoon` 상태만 사용한다.
+  - `OnboardingEggItem.petType == nil`이 개발중이다. 슬롯 인덱스가 `PetType.allCases.count` 미만이면 선택 가능하므로 알이 늘어나도 화면 코드는 그대로다.
+- [x] 첫 번째 알·펫 에셋이 준비되지 않았으면 SF Symbol 임시 이미지를 사용하되 교체 지점을 `PetType`의 에셋 이름 한곳으로 제한한다.
+  - `PetType.eggImageName` 추가. 셀에서 `UIImage(named:) ?? UIImage(systemName: "oval.portrait.fill")`.
+- [x] 접근성: 셀을 `isAccessibilityElement`로 두고 개발중 슬롯에 `.notEnabled`, 선택된 슬롯에 `.selected` traits와 한국어 `accessibilityLabel`을 준다. 알파·색만으로 상태를 전달하지 않는다.
+- [x] `OnboardingCoordinator.didSelectTheme()`이 알 선택 화면을 push한다. 화면을 열어볼 수 없으면 검증이 C-3까지 밀리므로 이번에 함께 연결했다 — 알 선택 완료는 **임시로** `onboardingDidComplete()`를 호출한다(C-2가 그 사이에 이름 화면을 끼운다).
+
+> 단위 테스트는 넣지 않았다. 슬롯 생성이 "앞의 `PetType` 개수만 선택 가능" 한 줄이고 ViewModel 테스트는 테스트 타깃에 RxSwift 링크가 필요하다. E-1에도 C-1 항목이 없다 — 검증은 E-2 육안.
 
 ### C-2. 이름 지정 화면
 
@@ -185,6 +195,7 @@
 ### C-3. Coordinator와 재진입
 
 - [ ] `OnboardingCoordinator` 흐름을 `관심사 → 테마 → 알 선택 → 이름 지정 → 완료`로 연결한다.
+  - `테마 → 알 선택` push는 C-1에서 완료. 남은 건 `알 선택 → 이름 지정`(C-2)과 아래 재진입 분기다.
 - [ ] `AppFlowCoordinator`의 완료 조건을 `currentThemeUrl != nil && pet != nil`로 변경한다.
 - [ ] `currentThemeUrl`은 있지만 펫이 없는 상태(테마 선택 직후 강제 종료, 개발 중인 기기)에서는 관심사·테마를 반복하지 않고 알 선택부터 시작하게 한다.
 - [ ] `currentThemeUrl`이 없으면 기존 관심사 화면부터 시작한다. 테마 선택 뒤 이미 펫이 있으면 중복 생성 없이 바로 완료하고, 없으면 알 선택으로 이동한다.

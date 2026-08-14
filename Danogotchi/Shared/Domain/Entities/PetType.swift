@@ -18,4 +18,12 @@ enum PetType: String, CaseIterable {
             return "pet_sprout"
         }
     }
+
+    /// 알 에셋 이름. 이미지가 없어 셀에서 SF Symbol로 대체된다.
+    var eggImageName: String {
+        switch self {
+        case .sprout:
+            return "egg_sprout"
+        }
+    }
 }

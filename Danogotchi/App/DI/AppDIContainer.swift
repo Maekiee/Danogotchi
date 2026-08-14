@@ -152,6 +152,10 @@ extension AppDIContainer {
     func makeOnboardingInterestViewModel() -> OnboardingInterestViewModel {
         return OnboardingInterestViewModel(setActiveBookUseCase: makeSetActiveBookUseCase())
     }
+
+    func makeOnboardingEggSelectionViewModel() -> OnboardingEggSelectionViewModel {
+        return OnboardingEggSelectionViewModel()
+    }
 }
 
 

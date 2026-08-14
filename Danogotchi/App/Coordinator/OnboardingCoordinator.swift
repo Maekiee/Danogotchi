@@ -33,6 +33,13 @@ final class OnboardingCoordinator: Coordinator {
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
+
+    private func showEggSelection() {
+        let vm = container.makeOnboardingEggSelectionViewModel()
+        let vc = OnboardingEggSelectionViewController(viewModel: vm)
+        vc.delegate = self
+        navigationController.pushViewController(vc, animated: true)
+    }
 }
 
 extension OnboardingCoordinator: OnboardingInterestViewControllerDelegate {
@@ -43,6 +50,13 @@ extension OnboardingCoordinator: OnboardingInterestViewControllerDelegate {
 
 extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
     func didSelectTheme() {
+        showEggSelection()
+    }
+}
+
+extension OnboardingCoordinator: OnboardingEggSelectionViewControllerDelegate {
+    // C-2에서 이름 지정 화면 push로 교체된다. 지금 완료해도 펫 없이 메인으로 가는 기존 동작과 같다.
+    func onboardingEggSelectionDidFinish(type: PetType) {
         delegate?.onboardingDidComplete()
     }
 }
