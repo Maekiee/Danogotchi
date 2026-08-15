@@ -20,25 +20,33 @@ final class DefaultPetRepository {
         return try? context.fetch(request).first
     }
 
-    private func saveContext() {
-        guard context.hasChanges else { return }
+    /// 생성 실패를 화면까지 알려야 해서 성공 여부를 돌려준다. 나머지 호출부는 결과를 쓰지 않는다.
+    @discardableResult
+    private func saveContext() -> Bool {
+        guard context.hasChanges else { return true }
         do {
             try context.save()
+            return true
         } catch {
             AppLogger.database.error("CoreData 저장 실패: \(String(describing: error), privacy: .public)")
+            return false
         }
     }
 }
 
 extension DefaultPetRepository: PetRepository {
     /// 초기 수치는 정책 상수라 호출부가 조립한 Pet을 그대로 저장한다.
-    func createPet(_ pet: Pet) -> Pet {
+    func createPet(_ pet: Pet) -> Pet? {
         if let existing = fetchPetEntity() { return existing.toDomain() }
 
         let petEntity = PetEntity(context: context)
         petEntity.apply(pet)
 
-        saveContext()
+        // 저장에 실패한 엔티티를 남기면 다음 fetch가 "이미 있음"으로 오판해 재시도가 막힌다.
+        guard saveContext() else {
+            context.delete(petEntity)
+            return nil
+        }
 
         return petEntity.toDomain()
     }

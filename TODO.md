@@ -2,14 +2,14 @@
 
 **스프린트 목표**: 테마 선택 뒤 펫을 만들고, 캐릭터 화면에서 시간에 따라 변하는 상태를 돌보며 학습 경험치로 수동 레벨업한다.
 
-**진행**: A 도메인 규칙 · B CoreData/저장소 · C-1 알 선택 화면 완료(단위 테스트 61개 유지) · 다음은 C-2 이름 지정
+**진행**: A 도메인 규칙 · B CoreData/저장소 · C 온보딩 완료(단위 테스트 69개) · 다음은 D-1 캐릭터 ViewModel
 
 ## 현재 상태
 
 - 캐릭터 화면은 테스트 레이블과 닫기 버튼만 있고 ViewModel이 없다. `MainCoordinator.didTapCharacter()`가 진입마다 새 인스턴스를 만들어 full-screen present 한다.
-- ~~온보딩은 현재 `관심사 → 테마 → 완료`이며,~~ → C-1에서 `관심사 → 테마 → 알 선택 → 완료`가 됐다. 완료 여부는 여전히 `currentThemeUrl`만으로 판단한다 (→ C-3).
+- ~~온보딩은 현재 `관심사 → 테마 → 완료`이며,~~ → C에서 `관심사 → 테마 → 알 선택 → 이름 지정 → 완료`가 됐고, 완료 여부는 `currentThemeUrl != nil && 펫 존재`로 판단한다.
 - ~~퀴즈 경험치는 `ExperienceRepository`를 통해 UserDefaults의 `experienceTotalPoint`에 이미 적립되고 있다.~~ → B-4에서 `PetEntity.totalExperience`로 이관, `ExperienceRepository` 삭제.
-- 알·펫 이미지 에셋은 아직 없다. C-1 알 선택 셀은 `oval.portrait.fill`(선택 가능) / `questionmark`(개발중) SF Symbol로 대체 중이고, 교체 지점은 `PetType.eggImageName`·`imageName` 두 문자열뿐이다.
+- 알·펫 이미지 에셋은 아직 없다. C-1 알 선택 셀은 **이미지를 그리지 않고** 테두리와 가운데 텍스트만 표시하므로 `PetType.eggImageName`은 현재 참조하는 곳이 없다. `imageName`은 D-2 캐릭터 화면에서 쓴다.
 - **출시는 됐지만 실사용자가 없다.** 보존할 사용자 데이터가 없으므로 CoreData 모델 버저닝과 기존 경험치 이관은 전부 하지 않고, 검증은 앱 삭제 후 재설치로 처리한다.
 
 ## 구현 기본안
@@ -128,6 +128,7 @@
 - [x] `Shared/Domain/Interfaces/Repositories/PetRepository.swift`와 `DefaultPetRepository`를 추가한다.
 - [x] Repository는 CRUD만 맡는다: 펫 생성, 조회, 전체 저장, 경험치 가산. **정산·조건 판단·페널티 계산은 넣지 않는다** — 정책 판단은 B-3의 UseCase 책임이다.
   - `createPet`은 완성된 `Pet`을 받는다. 초기 수치 `100`·HP `40`은 `PetStatePolicy` 상수라서 `CreatePetUseCase`가 조립해 넘긴다 — Repository는 밸런스값을 모른다.
+  - **C-2에서 `createPet`을 `-> Pet?`로 바꿨다.** 생성 실패만 화면에 안내해야 해서 `saveContext()`가 성공 여부를 돌려준다. `updatePet`·`addExperience`는 결과를 쓰지 않는다(`@discardableResult`).
   - `addExperience`를 따로 둔 이유: `readPet` → 수정 → `updatePet` 왕복으로도 되지만, "적립은 `stateUpdatedAt`·HP를 건드리지 않는다"를 주석이 아니라 구조로 못박는다.
 - [x] 펫 생성 전에 기존 엔티티가 있는지 확인해 앱당 1마리 불변식을 지킨다.
   - 조회는 `createAt` 오름차순 + `fetchLimit 1` — 중복이 생겨도 항상 같은(가장 오래된) 한 마리를 본다.
@@ -169,17 +170,24 @@
 
 ### C-1. 알 선택 화면
 
-- [x] `OnboardingEggSelectionViewController`와 Input/Output 방식 ViewModel, 3×3 전용 셀을 추가한다.
-  - 관심사 화면(`OnboardingInterestViewController` + `OnboardingInterestItem`)과 같은 4파일 구성. 레이아웃은 `repeatingSubitem:count: 3` — 여백을 뺀 나머지를 3등분하므로 `fractionalWidth(1/3)` 3칸이 넘치는 문제가 없다.
-  - ViewModel에 의존성이 없지만 `makeOnboardingEggSelectionViewModel()`은 컨벤션대로 추가했다.
+- [x] `EggSelectionViewController`와 Input/Output 방식 ViewModel, 3×3 전용 셀을 추가한다.
+  - 관심사 화면(`OnboardingInterestViewController` + `OnboardingInterestItem`)과 같은 4파일 구성.
+  - **온보딩 전용이 아니라 `Feature/EggSelection/`으로 분리했다.** 앞으로 온보딩 밖에서도 알을 고르게 되고, 이 화면은 `PetType`과 Base 타입에만 의존해 Onboarding의 다른 두 화면과 결합이 0이다. 흐름은 여전히 `OnboardingCoordinator`가 소유하므로 전용 Coordinator는 만들지 않았다(Coordinator를 갖는 Feature는 모달 다화면 플로우의 루트뿐).
+  - 칸은 **정사각형**이다. 한 변을 `floor((컨테이너 너비 - 간격×2) / 3)`으로 직접 계산해 아이템의 폭·높이에 `.absolute`로 못박고, 그룹은 `subitems: [item, item, item]`로 세운다. 컨테이너 너비가 필요해 클로저 기반 `UICollectionViewCompositionalLayout`을 쓴다.
+    - `repeatingSubitem:count: 3`은 **그룹을 3등분해주지 않는다.** 아이템에 선언된 크기 그대로 3번 반복하므로, 아이템을 `fractionalWidth(1)`로 두면 그룹 폭이 컨테이너의 3배가 돼 2·3번째 칸이 화면 밖으로 밀린다(`fractionalWidth(1/3)`도 간격을 빼지 못해 그만큼 넘친다). 처음에 이걸 "3등분해준다"로 잘못 읽어 한 줄에 한 칸만 보였다.
+    - `floor`는 부동소수점 오차로 `한 변×3 + 간격×2`가 컨테이너를 아주 조금 넘겨 세 번째 칸이 잘리는 것을 막는다. 버려지는 최대 2pt는 오른쪽 여백으로 흡수된다.
+    - 좌우 여백은 `collectionView` 제약(`space20`, 제목·버튼과 동일) **한 곳에서만** 준다. 섹션 인셋까지 주면 이중으로 밀린다.
+  - 그리드는 영역보다 짧아 위에 붙고 아래가 남는다. 컴포지셔널 레이아웃이 위에서부터 채우므로 별도 정렬 코드는 없다.
+  - ViewModel에 의존성이 없지만 `makeEggSelectionViewModel()`은 컨벤션대로 `// MARK: - EggSelection` 섹션에 추가했다.
 - [x] 알 슬롯은 항상 9개를 표시한다. 첫 번째만 선택 가능하고 나머지 8개는 딤 처리와 `개발중` 문구를 표시하며 탭을 무시한다.
   - 무시는 셀·`shouldSelectItemAt`이 아니라 ViewModel의 `compactMap { $0.petType }`에서 처리한다.
   - `isSelected`에 `type != nil` 가드가 필요하다 — `type == selected`만 쓰면 초기 상태(둘 다 `nil`)에서 개발중 8칸이 전부 선택돼 보인다.
 - [x] 첫 번째 알을 선택해야 다음 버튼이 활성화되고 단일 선택 상태가 화면에 드러나게 한다.
 - [x] 개발 중 슬롯에는 미래 `PetType`을 만들지 않고 화면용 `comingSoon` 상태만 사용한다.
-  - `OnboardingEggItem.petType == nil`이 개발중이다. 슬롯 인덱스가 `PetType.allCases.count` 미만이면 선택 가능하므로 알이 늘어나도 화면 코드는 그대로다.
-- [x] 첫 번째 알·펫 에셋이 준비되지 않았으면 SF Symbol 임시 이미지를 사용하되 교체 지점을 `PetType`의 에셋 이름 한곳으로 제한한다.
-  - `PetType.eggImageName` 추가. 셀에서 `UIImage(named:) ?? UIImage(systemName: "oval.portrait.fill")`.
+  - `EggItem.petType == nil`이 개발중이다. 슬롯 인덱스가 `PetType.allCases.count` 미만이면 선택 가능하므로 알이 늘어나도 화면 코드는 그대로다.
+- [x] 첫 번째 알·펫 에셋이 준비되지 않았으면 임시 표현을 쓰되 교체 지점을 `PetType`의 에셋 이름 한곳으로 제한한다.
+  - ~~셀에서 `UIImage(named:) ?? UIImage(systemName: "oval.portrait.fill")`~~ → **셀은 이미지를 그리지 않는다.** 알 에셋 없이 SF Symbol을 채우면 칸마다 실루엣이 달라 격자가 지저분해진다. 지금은 `cornerRadius16` 테두리로 칸이 차지하는 공간만 드러내고 가운데에 이름(`새싹이`) 또는 `개발중` 한 줄만 둔다. 배경은 `clear`, 테두리 두께는 선택 여부와 무관하게 고정이고 선택은 테두리 **색**으로만 표시한다(두께를 바꾸면 칸 크기가 흔들린다).
+  - `PetType.eggImageName`은 남아 있지만 **현재 참조하는 곳이 없다.** 에셋이 붙는 시점에 셀에 다시 연결한다.
 - [x] 접근성: 셀을 `isAccessibilityElement`로 두고 개발중 슬롯에 `.notEnabled`, 선택된 슬롯에 `.selected` traits와 한국어 `accessibilityLabel`을 준다. 알파·색만으로 상태를 전달하지 않는다.
 - [x] `OnboardingCoordinator.didSelectTheme()`이 알 선택 화면을 push한다. 화면을 열어볼 수 없으면 검증이 C-3까지 밀리므로 이번에 함께 연결했다 — 알 선택 완료는 **임시로** `onboardingDidComplete()`를 호출한다(C-2가 그 사이에 이름 화면을 끼운다).
 
@@ -187,20 +195,32 @@
 
 ### C-2. 이름 지정 화면
 
-- [ ] `OnboardingPetNameViewController`와 Input/Output 방식 ViewModel을 추가하고 `CreatePetUseCase`를 주입한다.
-- [ ] 앞뒤 공백과 줄바꿈을 제거한 이름만 저장하고, 빈 문자열 및 기본 상한 10자를 차단한다.
-- [ ] 유효한 이름일 때만 완료 버튼을 활성화하고 중복 탭으로 펫이 두 번 생성되지 않게 한다.
-- [ ] 저장 성공 후에만 온보딩 완료 이벤트를 전달하고, 실패하면 현재 화면에서 안내한다.
+- [x] `OnboardingPetNameViewController`와 Input/Output 방식 ViewModel을 추가하고 `CreatePetUseCase`를 주입한다.
+  - `PetType`은 알 선택 화면에서 `makeOnboardingPetNameViewModel(petType:)`으로 넘어온다. ViewModel이 보관하므로 Input에는 없다.
+- [x] 앞뒤 공백과 줄바꿈을 제거한 이름만 저장하고, 빈 문자열 및 기본 상한 10자를 차단한다.
+  - 검증은 `PetNamePolicy.validate`(순수 타입)에 두고 ViewModel은 호출만 한다. ViewModel 안에 두면 테스트 타깃에 RxSwift 링크가 없어 E-1의 이름 테스트가 불가능하다.
+  - 결과는 `PetNameValidation`(`empty` / `tooLong(Int)` / `valid(String)`) 세 상태다. **"아직 안 썼다"와 "너무 길다"를 구분해야** 입력 전부터 빨간 문구가 뜨지 않는다.
+  - 길이는 `Character` 기준이라 한글 조합 문자·이모지가 1자다.
+- [x] 유효한 이름일 때만 완료 버튼을 활성화하고 중복 탭으로 펫이 두 번 생성되지 않게 한다.
+  - 상한 초과 시 입력을 막지 않고 **텍스트필드 아래 빨간 문구**와 버튼 비활성으로만 알린다. 텍스트필드에 잘린 값을 되돌려 쓰면 한글 조합 중 커서가 튄다.
+  - 안내 문구("1~10자로 지어주세요")와 글자수 카운터는 두지 않는다 — 규칙을 미리 늘어놓는 대신 실제로 넘겼을 때만 알린다.
+  - 빨간색은 `AppColor.error`(Semantic). Legacy `appRed`를 승격해 퀴즈 오답 색과 톤을 맞췄다 — `coral`은 light에서 연한 피치라 글자 대비가 부족하고 이미 감정 토픽 색이다.
+  - 중복 탭 플래그는 두지 않았다. 동기 호출이라 같은 런루프에서 화면이 넘어가고, 두 번 들어와도 `createPet`이 기존 펫을 돌려준다.
+- [x] 저장 성공 후에만 온보딩 완료 이벤트를 전달하고, 실패하면 현재 화면에서 안내한다.
+  - 이를 위해 `PetRepository.createPet`과 `CreatePetUseCase.execute`를 **옵셔널 반환으로 바꿨다**(B-2 항목의 시그니처 변경). `saveContext()`가 성공 여부를 돌려주고, 실패하면 미저장 엔티티를 `context.delete`로 걷어낸다 — 남기면 다음 조회가 "이미 있음"으로 오판해 재시도가 막힌다.
+  - 실패 시 `AlertPresenter.showNotificationAlert`로 "잠시 후 다시 시도해주세요"를 띄우고 화면에 머문다.
 
 ### C-3. Coordinator와 재진입
 
-- [ ] `OnboardingCoordinator` 흐름을 `관심사 → 테마 → 알 선택 → 이름 지정 → 완료`로 연결한다.
-  - `테마 → 알 선택` push는 C-1에서 완료. 남은 건 `알 선택 → 이름 지정`(C-2)과 아래 재진입 분기다.
-- [ ] `AppFlowCoordinator`의 완료 조건을 `currentThemeUrl != nil && pet != nil`로 변경한다.
-- [ ] `currentThemeUrl`은 있지만 펫이 없는 상태(테마 선택 직후 강제 종료, 개발 중인 기기)에서는 관심사·테마를 반복하지 않고 알 선택부터 시작하게 한다.
-- [ ] `currentThemeUrl`이 없으면 기존 관심사 화면부터 시작한다. 테마 선택 뒤 이미 펫이 있으면 중복 생성 없이 바로 완료하고, 없으면 알 선택으로 이동한다.
-- [ ] 알 선택 상태는 한 종류뿐이므로 별도 온보딩 진행 상태를 저장하지 않는다.
+- [x] `OnboardingCoordinator` 흐름을 `관심사 → 테마 → 알 선택 → 이름 지정 → 완료`로 연결한다.
+- [x] `AppFlowCoordinator`의 완료 조건을 `currentThemeUrl != nil && pet != nil`로 변경한다.
+  - 펫 조회는 `IsPetCreatedUseCase`를 새로 만들어 경유한다. `FetchPetStateUseCase`는 조회할 때마다 정산하고 저장하므로 존재 확인에 쓸 수 없다.
+- [x] `currentThemeUrl`은 있지만 펫이 없는 상태(테마 선택 직후 강제 종료, 개발 중인 기기)에서는 관심사·테마를 반복하지 않고 알 선택부터 시작하게 한다.
+  - 이때 알 선택이 첫 화면이라 push할 대상이 없다 — `showEggSelection(asRoot:)`가 `setViewControllers`로 세운다.
+- [x] `currentThemeUrl`이 없으면 기존 관심사 화면부터 시작한다. 테마 선택 뒤 이미 펫이 있으면 중복 생성 없이 바로 완료하고, 없으면 알 선택으로 이동한다.
+- [x] 알 선택 상태는 한 종류뿐이므로 별도 온보딩 진행 상태를 저장하지 않는다.
 - [ ] 알 선택 → 이름 지정은 push이므로 스와이프 back으로 돌아올 수 있다. 되돌아온 뒤 재선택해도 펫이 중복 생성되지 않는지 확인한다.
+  - 코드상 되돌아가는 시점에는 아직 펫이 없어 재선택이 안전하다. 육안 확인은 → **E-2**. `nav.isNavigationBarHidden = true`라 back 버튼 없이 스와이프만 된다(기존 온보딩과 동일).
 
 > **검증 기준**: 신규 설치 전체 흐름, 테마 선택 직후 강제 종료, 이름 입력 중 강제 종료, 기존 `currentThemeUrl 있음 / pet 없음` 상태에서 모두 올바른 화면으로 복귀해야 한다.
 
@@ -247,7 +267,7 @@
 
 ### E-1. 최소 테스트 기반
 
-> **현재 61개 통과** — `PetStatePolicyTests`(34) · `PetPersistenceTests`(20) · `PetLevelPolicyTests`(7).
+> **현재 69개 통과** — `PetStatePolicyTests`(34) · `PetPersistenceTests`(21) · `PetLevelPolicyTests`(7) · `PetNamePolicyTests`(7).
 > 실행: `xcodebuild -scheme Danogotchi-dev -destination 'platform=iOS Simulator,name=iPhone 17' test`
 > 공용 픽스처는 `DanogotchiTests/PetTestSupport.swift`(`makePet` / `hoursLater` / `hoursAgo` / `petAfterCare` / `makeInMemoryContext`).
 > 정책 테스트는 고정 시각(`testBase`), 저장소·UseCase 테스트는 UseCase가 내부에서 `Date()`를 쓰므로 `hoursAgo`로 경과를 심는다.
@@ -268,17 +288,19 @@
 - [x] 경험치 적립이 `stateUpdatedAt`을 갱신하지 않아 적립 전후로 미정산 경과시간이 보존되는지 테스트한다. 펫이 없을 때 `0`을 반환하는 것도 확인한다.
 - [x] 인메모리 CoreData로 펫 1마리 생성, 중복 생성 차단, 돌보기·HP 정산 저장, 경험치 적립, 조건부 레벨업·부활의 원자적 저장을 테스트한다.
   - `alreadyFull`은 경과 시간이 `0` 이하일 때만 성립한다(감소가 계속 일어나므로) — 테스트도 `stateUpdatedAt`을 미래로 심는 기기 시각 되돌림 상황으로 잡았다. 실사용 UX는 **D-3에서 판단**한다.
-- [ ] 이름의 앞뒤 공백 제거·빈 값·10자 경계를 테스트한다. → C-2
+- [x] 이름의 앞뒤 공백 제거·빈 값·10자 경계를 테스트한다.
+  - `PetNamePolicyTests`(7). `empty` / `tooLong` / `valid` 세 상태와 중간 공백 보존, 이모지·조합 문자 1자 계산을 함께 본다.
 
 ### E-2. 통합·수동 검증
 
 - [ ] fresh install에서 관심사 → 테마 → 알 → 이름 → 메인 흐름을 확인한다.
-- [ ] 알 9개, 첫 번째 단일 선택, 개발 중 8개 비활성·접근성 문구를 확인한다.
+- [ ] 알 9개, 첫 번째 단일 선택, 개발 중 8개 비활성·접근성 문구를 확인한다. 칸이 정사각형이고 3×3 격자가 상단에 붙는지 좁은 기기·넓은 기기 양쪽에서 본다.
+- [ ] 이름 화면에서 10자까지는 안내가 없다가 11자부터 빨간 문구가 뜨고 완료 버튼이 잠기는지, 다시 줄이면 풀리는지, 공백만 입력하면 문구 없이 버튼만 잠기는지 확인한다.
 - [ ] 앱 백그라운드·강제 종료 후 돌봄 수치와 HP가 같은 경과시간으로 한 번만 정산되고 온보딩 재진입에 영향이 없는지 확인한다.
 - [ ] 퀴즈 완료 경험치가 캐릭터 게이지와 레벨업 버튼에 반영되는지 확인한다.
 - [ ] 24시간·48시간·72시간·80시간 방치 후 HP가 40으로 유지되고, 80시간 초과부터 하트가 단계적으로 감소해 157시간 46분 40초(`157 7/9h`)에 사망하는지 확인한다.
 - [ ] 사망 중에도 퀴즈 학습과 경험치 적립이 가능하고 부활 시점의 경험치에 페널티가 적용되는지 확인한다.
-- [ ] `xcodebuild -scheme Danogotchi-dev build`와 `xcodebuild -scheme Danogotchi build`를 모두 통과시킨다.
+- [x] `xcodebuild -scheme Danogotchi-dev build`와 `xcodebuild -scheme Danogotchi build`를 모두 통과시킨다.
 
 ---
 

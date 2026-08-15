@@ -25,6 +25,9 @@ enum AppColor {
     static let textSecondary = gray75
     static let card = white
     static let primary = coral    // ← 디자인 확정 후 조정
+    /// 폼 검증 실패 문구. Legacy appRed를 승격해 퀴즈 오답 색과 톤을 맞춘다 —
+    /// coral은 light에서 연한 피치라 글자 대비가 부족하고 이미 감정 토픽 색이다.
+    static let error = appRed
 
     // MARK: - Legacy (대응 컬러셋 없음 — 점진 교체 전까지 값·이름 유지)
     static let cardColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1.0)

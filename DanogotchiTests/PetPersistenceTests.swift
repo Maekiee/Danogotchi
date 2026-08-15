@@ -62,17 +62,17 @@ final class PetPersistenceTests: XCTestCase {
         )
     }
 
-    func test_이미_펫이_있으면_새로_만들지_않고_기존_펫을_돌려준다() {
-        let first = repository.createPet(makePet(name: "첫째"))
-        let second = repository.createPet(makePet(name: "둘째"))
+    func test_이미_펫이_있으면_새로_만들지_않고_기존_펫을_돌려준다() throws {
+        let first = try XCTUnwrap(repository.createPet(makePet(name: "첫째")))
+        let second = try XCTUnwrap(repository.createPet(makePet(name: "둘째")))
 
         XCTAssertEqual(second.id, first.id)
         XCTAssertEqual(second.name, "첫째")
         XCTAssertEqual(petCount(), 1)
     }
 
-    func test_전체_저장이_정산_결과를_그대로_덮어쓴다() {
-        let pet = repository.createPet(makePet(satiety: 60, stateUpdatedAt: hoursAgo(10)))
+    func test_전체_저장이_정산_결과를_그대로_덮어쓴다() throws {
+        let pet = try XCTUnwrap(repository.createPet(makePet(satiety: 60, stateUpdatedAt: hoursAgo(10))))
         let settled = PetStatePolicy.settle(pet, now: Date())
 
         repository.updatePet(settled)
@@ -245,10 +245,10 @@ final class PetPersistenceTests: XCTestCase {
 
     // MARK: - CreatePetUseCase
 
-    func test_생성은_모든_수치를_최대로_시작한다() {
+    func test_생성은_모든_수치를_최대로_시작한다() throws {
         let useCase = DefaultCreatePetUseCase(petRepository: repository)
 
-        let pet = useCase.execute(type: .sprout, name: "새싹")
+        let pet = try XCTUnwrap(useCase.execute(type: .sprout, name: "새싹"))
 
         XCTAssertEqual(pet.name, "새싹")
         XCTAssertEqual(pet.level, 0)
@@ -259,15 +259,27 @@ final class PetPersistenceTests: XCTestCase {
         }
     }
 
-    func test_생성을_두_번_호출해도_펫은_한_마리다() {
+    func test_생성을_두_번_호출해도_펫은_한_마리다() throws {
         let useCase = DefaultCreatePetUseCase(petRepository: repository)
 
-        let first = useCase.execute(type: .sprout, name: "새싹")
-        let second = useCase.execute(type: .sprout, name: "다른이름")
+        let first = try XCTUnwrap(useCase.execute(type: .sprout, name: "새싹"))
+        let second = try XCTUnwrap(useCase.execute(type: .sprout, name: "다른이름"))
 
         XCTAssertEqual(second.id, first.id)
         XCTAssertEqual(second.name, "새싹")
         XCTAssertEqual(petCount(), 1)
+    }
+
+    // MARK: - IsPetCreatedUseCase
+
+    func test_펫_존재_여부는_생성_전후로_바뀐다() {
+        let useCase = DefaultIsPetCreatedUseCase(petRepository: repository)
+
+        XCTAssertFalse(useCase.execute())
+
+        _ = repository.createPet(makePet())
+
+        XCTAssertTrue(useCase.execute())
     }
 
     // MARK: - EarnExperienceUseCase

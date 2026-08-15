@@ -153,8 +153,23 @@ extension AppDIContainer {
         return OnboardingInterestViewModel(setActiveBookUseCase: makeSetActiveBookUseCase())
     }
 
-    func makeOnboardingEggSelectionViewModel() -> OnboardingEggSelectionViewModel {
-        return OnboardingEggSelectionViewModel()
+    func makeOnboardingPetNameViewModel(petType: PetType) -> OnboardingPetNameViewModel {
+        return OnboardingPetNameViewModel(
+            createPetUseCase: makeCreatePetUseCase(),
+            petType: petType
+        )
+    }
+
+    /// 온보딩 재진입 분기(AppFlowCoordinator·OnboardingCoordinator)에서만 쓴다.
+    func makeIsPetCreatedUseCase() -> IsPetCreatedUseCase {
+        return DefaultIsPetCreatedUseCase(petRepository: petRepository)
+    }
+}
+
+// MARK: - EggSelection
+extension AppDIContainer {
+    func makeEggSelectionViewModel() -> EggSelectionViewModel {
+        return EggSelectionViewModel()
     }
 }
 

@@ -4,24 +4,24 @@ import SnapKit
 import UIKit
 
 
-protocol OnboardingEggSelectionViewControllerDelegate: AnyObject {
-    func onboardingEggSelectionDidFinish(type: PetType)
+protocol EggSelectionViewControllerDelegate: AnyObject {
+    func eggSelectionDidFinish(type: PetType)
 }
 
-final class OnboardingEggSelectionViewController: BaseViewController {
+final class EggSelectionViewController: BaseViewController {
 
-    weak var delegate: OnboardingEggSelectionViewControllerDelegate?
+    weak var delegate: EggSelectionViewControllerDelegate?
 
     private let disposeBag = DisposeBag()
-    private let viewModel: OnboardingEggSelectionViewModel
-    private let itemSelected = PublishRelay<OnboardingEggItem>()
+    private let viewModel: EggSelectionViewModel
+    private let itemSelected = PublishRelay<EggItem>()
 
     private enum Section {
         case main
     }
 
-    private typealias DataSource = UICollectionViewDiffableDataSource<Section, OnboardingEggItem>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, OnboardingEggItem>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, EggItem>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, EggItem>
 
     private var dataSource: DataSource!
 
@@ -44,7 +44,7 @@ final class OnboardingEggSelectionViewController: BaseViewController {
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
-            collectionViewLayout: OnboardingEggSelectionViewController.layout()
+            collectionViewLayout: EggSelectionViewController.layout()
         )
         view.alwaysBounceVertical = false
         view.showsVerticalScrollIndicator = false
@@ -53,7 +53,7 @@ final class OnboardingEggSelectionViewController: BaseViewController {
     }()
     private let nextButton = PrimaryFillButton(title: "다음")
 
-    init(viewModel: OnboardingEggSelectionViewModel) {
+    init(viewModel: EggSelectionViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -94,7 +94,7 @@ final class OnboardingEggSelectionViewController: BaseViewController {
 
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(descriptionLabel.snp.bottom).offset(AppSpacing.space24)
-            make.horizontalEdges.equalToSuperview()
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.bottom.equalTo(nextButton.snp.top).offset(-AppSpacing.space16)
         }
 
@@ -110,9 +110,9 @@ final class OnboardingEggSelectionViewController: BaseViewController {
     }
 }
 
-extension OnboardingEggSelectionViewController {
+extension EggSelectionViewController {
     private func bind() {
-        let input = OnboardingEggSelectionViewModel.Input(
+        let input = EggSelectionViewModel.Input(
             itemSelected: itemSelected.asObservable(),
             nextTapped: nextButton.rx.tap.asObservable()
         )
@@ -130,7 +130,7 @@ extension OnboardingEggSelectionViewController {
 
         output.didSelectEgg
             .emit(with: self) { owner, type in
-                owner.delegate?.onboardingEggSelectionDidFinish(type: type)
+                owner.delegate?.eggSelectionDidFinish(type: type)
             }.disposed(by: disposeBag)
 
         // 개발중 슬롯 무시는 ViewModel이 처리한다
@@ -144,10 +144,10 @@ extension OnboardingEggSelectionViewController {
 }
 
 // MARK: - CollectionView
-extension OnboardingEggSelectionViewController {
+extension EggSelectionViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
-            OnboardingEggCollectionViewCell, OnboardingEggItem
+            EggCollectionViewCell, EggItem
         > { cell, _, item in
             cell.binding(with: item)
         }
@@ -164,7 +164,7 @@ extension OnboardingEggSelectionViewController {
         }
     }
 
-    private func applySnapshot(items: [OnboardingEggItem]) {
+    private func applySnapshot(items: [EggItem]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
@@ -173,33 +173,36 @@ extension OnboardingEggSelectionViewController {
     }
 
     private static func layout() -> UICollectionViewLayout {
-        let item = NSCollectionLayoutItem(
-            layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1),
-                heightDimension: .fractionalHeight(1)
+        return UICollectionViewCompositionalLayout { _, environment in
+            let spacing = AppSpacing.space12
+
+            // 한 변은 간격을 뺀 나머지의 1/3. 내림해서 3칸 + 간격 2개가 컨테이너를 넘지 않게 한다 —
+            // 넘치면 세 번째 칸이 잘린다. 남는 1~2pt는 오른쪽 여백으로 흡수된다.
+            let width = environment.container.effectiveContentSize.width
+            let side = floor((width - spacing * 2) / 3)
+
+            // 폭·높이를 같은 값으로 못박아 정사각형을 만든다. count:에 3등분을 맡기고
+            // fractionalWidth(1)로 두면 칸 하나가 그룹 전체 폭을 차지해 옆으로 밀려난다.
+            let item = NSCollectionLayoutItem(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .absolute(side),
+                    heightDimension: .absolute(side)
+                )
             )
-        )
 
-        // count: 3이 여백을 뺀 나머지를 3등분하고, 높이는 컨테이너 너비 기준으로 잡아 정사각형에 가깝게 만든다
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1),
-                heightDimension: .fractionalWidth(1.0 / 3)
-            ),
-            repeatingSubitem: item,
-            count: 3
-        )
-        group.interItemSpacing = .fixed(AppSpacing.space12)
+            let group = NSCollectionLayoutGroup.horizontal(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .absolute(side)
+                ),
+                subitems: [item, item, item]
+            )
+            group.interItemSpacing = .fixed(spacing)
 
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = AppSpacing.space12
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: 0,
-            leading: AppSpacing.space20,
-            bottom: 0,
-            trailing: AppSpacing.space20
-        )
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = spacing
 
-        return UICollectionViewCompositionalLayout(section: section)
+            return section
+        }
     }
 }
