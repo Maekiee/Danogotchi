@@ -59,14 +59,13 @@ final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
         return isCorrect ? ExperiencePolicy.experience(for: stats) : 0
     }
 
-    /// 적립은 `totalExperience`만 올린다 — `stateUpdatedAt`·HP를 건드리면 미정산 경과시간이 유실된다.
+    /// 적립은 경험치만 올린다 — `stateUpdatedAt`·HP를 건드리면 미정산 경과시간이 유실된다.
     func commit(earned: Int, correct: Int, total: Int) -> ExperienceGain {
         let bonus = ExperiencePolicy.perfectBonus(correct: correct, total: total)
-        guard let totalPoint = petRepository.addExperience(earned + bonus) else {
+        if petRepository.addExperience(earned + bonus) == nil {
             // 온보딩이 펫 생성을 강제하므로 정상 경로에서는 발생하지 않는다
             AppLogger.database.error("펫이 없어 경험치를 적립하지 못했다")
-            return ExperienceGain(earned: earned, perfectBonus: bonus, totalPoint: 0)
         }
-        return ExperienceGain(earned: earned, perfectBonus: bonus, totalPoint: totalPoint)
+        return ExperienceGain(earned: earned, perfectBonus: bonus)
     }
 }

@@ -6,7 +6,8 @@ struct Pet {
     let type: PetType
     let name: String
     var level: Int
-    var totalExperience: Int
+    /// 현재 레벨에서 모은 경험치. 레벨업 시 0으로 초기화되고 초과분은 이월되지 않는다.
+    var experience: Int
     /// 돌봄 수치 — 전부 `0...100`의 긍정 방향. `0`이 나쁨, `100`이 좋음이다.
     var satiety: Double
     var hydration: Double

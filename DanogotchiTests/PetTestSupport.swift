@@ -33,7 +33,7 @@ func makeInMemoryContext() -> NSManagedObjectContext {
 func makePet(
     name: String = "테스트",
     level: Int = 0,
-    totalExperience: Int = 0,
+    experience: Int = 0,
     satiety: Double = 100,
     hydration: Double = 100,
     fun: Double = 100,
@@ -46,7 +46,7 @@ func makePet(
         type: .sprout,
         name: name,
         level: level,
-        totalExperience: totalExperience,
+        experience: experience,
         satiety: satiety,
         hydration: hydration,
         fun: fun,

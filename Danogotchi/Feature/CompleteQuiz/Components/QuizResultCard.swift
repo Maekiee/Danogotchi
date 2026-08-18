@@ -33,12 +33,10 @@ final class QuizResultCard: UIView {
     private let horizontalDivider = QuizResultCard.makeDivider()
     private let verticalDivider = QuizResultCard.makeDivider()
     private let experienceDivider = QuizResultCard.makeDivider()
-    private let experienceVerticalDivider = QuizResultCard.makeDivider()
 
     private let correctItem = CountItem(caption: "정답", dotColor: AppColor.appGreen)
     private let incorrectItem = CountItem(caption: "오답", dotColor: AppColor.appRed)
     private let experienceItem = CountItem(caption: "획득 경험치", dotColor: AppColor.butter)
-    private let pointItem = CountItem(caption: "보유 포인트", dotColor: AppColor.lavender)
 
     // MARK: - Public Properties
     var scoreText: String? {
@@ -66,11 +64,6 @@ final class QuizResultCard: UIView {
         set { experienceItem.countText = newValue }
     }
 
-    var pointText: String? {
-        get { pointItem.countText }
-        set { pointItem.countText = newValue }
-    }
-
     // MARK: - Initialization
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -94,9 +87,7 @@ final class QuizResultCard: UIView {
             correctItem,
             incorrectItem,
             experienceDivider,
-            experienceVerticalDivider,
-            experienceItem,
-            pointItem
+            experienceItem
         ].forEach { containerView.addSubview($0) }
     }
 
@@ -119,12 +110,17 @@ final class QuizResultCard: UIView {
                   left: correctItem, right: incorrectItem,
                   below: summaryLabel, topSpacing: AppSpacing.space24)
 
-        layoutRow(divider: experienceDivider, verticalDivider: experienceVerticalDivider,
-                  left: experienceItem, right: pointItem,
-                  below: correctItem, topSpacing: AppSpacing.space20)
+        // 마지막 행은 항목이 하나뿐이라 2열 배치(`layoutRow`)를 쓰지 않는다
+        experienceDivider.snp.makeConstraints { make in
+            make.top.equalTo(correctItem.snp.bottom).offset(AppSpacing.space20)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
+            make.height.equalTo(AppBorder.thin)
+        }
 
         // 카드 높이는 마지막 행의 컨텐츠 높이로 결정된다
         experienceItem.snp.makeConstraints { make in
+            make.top.equalTo(experienceDivider.snp.bottom).offset(AppSpacing.space20)
+            make.centerX.equalToSuperview()
             make.bottom.equalToSuperview().offset(-AppSpacing.space32)
         }
     }

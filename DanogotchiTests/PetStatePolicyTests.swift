@@ -215,20 +215,21 @@ final class PetStatePolicyTests: XCTestCase {
     }
 
     func test_돌보기는_100을_넘지_않는다() {
-        guard case .success(let pet) = PetStatePolicy.care(makePet(satiety: 90), stat: .satiety, now: hoursLater(1)) else {
+        guard case .success(let pet) = PetStatePolicy.care(makePet(satiety: 79), stat: .satiety, now: hoursLater(1)) else {
             return XCTFail("성공해야 한다")
         }
         XCTAssertEqual(pet.satiety, PetStatePolicy.maxStat, accuracy: 0.001)
     }
 
-    func test_이미_100이면_안내하되_정산_결과는_저장한다() {
-        // 시각을 되돌린 상황 — 수치는 100 그대로지만 타임스탬프는 재동기화된다
+    func test_이미_80_이상이면_안내하되_정산_결과는_저장한다() {
+        // 시각을 되돌린 상황 — 수치는 그대로지만 타임스탬프는 재동기화된다
         let past = testBase.addingTimeInterval(-3600)
-        guard case .alreadyFull(let pet) = PetStatePolicy.care(makePet(), stat: .satiety, now: past) else {
+        let pet = makePet(satiety: PetStatePolicy.careThreshold)
+        guard case .alreadyFull(let cared) = PetStatePolicy.care(pet, stat: .satiety, now: past) else {
             return XCTFail("alreadyFull이어야 한다")
         }
-        XCTAssertEqual(pet.satiety, PetStatePolicy.maxStat, accuracy: 0.001)
-        XCTAssertEqual(pet.stateUpdatedAt, past)
+        XCTAssertEqual(cared.satiety, PetStatePolicy.careThreshold, accuracy: 0.001)
+        XCTAssertEqual(cared.stateUpdatedAt, past)
     }
 
     func test_사망한_펫은_돌볼_수_없지만_정산_결과는_저장한다() {
@@ -265,51 +266,51 @@ final class PetStatePolicyTests: XCTestCase {
     }
 
     func test_부활_페널티는_현재레벨_요구량의_10퍼센트() {
-        // 레벨 1 시작 100, 요구 200 → 누적 200은 진행 50%
-        let dead = makePet(level: 1, totalExperience: 200, hp: 0)
+        // 레벨 1 요구량 2,105의 10% = 210
+        let dead = makePet(level: 1, experience: 1_000, hp: 0)
         guard case .success(let pet) = PetStatePolicy.revive(dead, now: testBase) else {
             return XCTFail("성공해야 한다")
         }
-        XCTAssertEqual(pet.totalExperience, 180)
-        XCTAssertEqual(PetLevelPolicy.progress(pet), 0.4, accuracy: 0.001)
+        XCTAssertEqual(pet.experience, 790)
     }
 
-    func test_부활_페널티는_현재레벨_시작_아래로_내려가지_않는다() {
-        // 진행 5% → 차감 후 0%
-        let dead = makePet(level: 1, totalExperience: 110, hp: 0)
+    func test_부활_페널티는_0_아래로_내려가지_않는다() {
+        // 차감량(210)보다 적게 모았어도 레벨은 유지된다
+        let dead = makePet(level: 1, experience: 100, hp: 0)
         guard case .success(let pet) = PetStatePolicy.revive(dead, now: testBase) else {
             return XCTFail("성공해야 한다")
         }
         XCTAssertEqual(pet.level, 1)
-        XCTAssertEqual(pet.totalExperience, 100)
+        XCTAssertEqual(pet.experience, 0)
         XCTAssertEqual(PetLevelPolicy.progress(pet), 0, accuracy: 0.001)
     }
 
     func test_진행률_0퍼센트에서_부활하면_레벨이_한_단계_내려간다() {
-        let dead = makePet(level: 2, totalExperience: 300, hp: 0)
+        let dead = makePet(level: 2, experience: 0, hp: 0)
         guard case .success(let pet) = PetStatePolicy.revive(dead, now: testBase) else {
             return XCTFail("성공해야 한다")
         }
         XCTAssertEqual(pet.level, 1)
-        XCTAssertEqual(pet.totalExperience, 100)
+        // 내려간 레벨의 경험치도 복원하지 않는다
+        XCTAssertEqual(pet.experience, 0)
         XCTAssertEqual(PetLevelPolicy.progress(pet), 0, accuracy: 0.001)
     }
 
     func test_레벨0에서는_더_내려가지_않는다() {
-        let dead = makePet(level: 0, totalExperience: 0, hp: 0)
+        let dead = makePet(level: 0, experience: 0, hp: 0)
         guard case .success(let pet) = PetStatePolicy.revive(dead, now: testBase) else {
             return XCTFail("성공해야 한다")
         }
         XCTAssertEqual(pet.level, 0)
-        XCTAssertEqual(pet.totalExperience, 0)
+        XCTAssertEqual(pet.experience, 0)
     }
 
-    func test_초과_경험치가_있어도_현재레벨_요구량의_10퍼센트만_깎는다() {
-        let dead = makePet(level: 0, totalExperience: 250, hp: 0)
+    func test_승급을_미뤄_초과분이_쌓여도_요구량의_10퍼센트만_깎는다() {
+        let dead = makePet(level: 0, experience: 2_500, hp: 0)
         guard case .success(let pet) = PetStatePolicy.revive(dead, now: testBase) else {
             return XCTFail("성공해야 한다")
         }
-        XCTAssertEqual(pet.totalExperience, 240)
+        XCTAssertEqual(pet.experience, 2_400)
         // 초과분이 남아 차감 후에도 게이지가 100%다
         XCTAssertTrue(PetLevelPolicy.canLevelUp(pet))
     }
@@ -323,13 +324,13 @@ final class PetStatePolicyTests: XCTestCase {
     }
 
     func test_부활을_두_번_요청해도_경험치가_한_번만_깎인다() {
-        let dead = makePet(level: 1, totalExperience: 200, hp: 0)
+        let dead = makePet(level: 1, experience: 1_000, hp: 0)
         guard case .success(let first) = PetStatePolicy.revive(dead, now: testBase) else {
             return XCTFail("성공해야 한다")
         }
         guard case .alive(let second) = PetStatePolicy.revive(first, now: testBase) else {
             return XCTFail("두 번째는 alive여야 한다")
         }
-        XCTAssertEqual(second.totalExperience, 180)
+        XCTAssertEqual(second.experience, 790)
     }
 }

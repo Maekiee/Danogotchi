@@ -14,7 +14,7 @@ final class DefaultLevelUpPetUseCase: LevelUpPetUseCase {
     }
 
     /// 버튼 활성 상태를 신뢰하지 않고 저장 직전에 다시 검사한다.
-    /// 레벨만 올리고 누적 경험치는 그대로 둬 초과분이 다음 레벨 게이지로 이월된다.
+    /// 승급하면 경험치는 0으로 되돌린다 — 초과분은 버려지고 다음 레벨로 이월되지 않는다.
     func execute() -> PetActionResult? {
         guard let pet = petRepository.readPet() else { return nil }
 
@@ -22,6 +22,7 @@ final class DefaultLevelUpPetUseCase: LevelUpPetUseCase {
         let canLevelUp = PetLevelPolicy.canLevelUp(settled)
         if canLevelUp {
             settled.level += 1
+            settled.experience = 0
         }
 
         petRepository.updatePet(settled)

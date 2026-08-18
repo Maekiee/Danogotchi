@@ -67,7 +67,8 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     
     // 캐릭터탭
     func didTapCharacter() {
-        let vc = CharacterViewController()
+        let vm = container.makeCharacterViewModel()
+        let vc = CharacterViewController(viewModel: vm)
         vc.delegate = self
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen

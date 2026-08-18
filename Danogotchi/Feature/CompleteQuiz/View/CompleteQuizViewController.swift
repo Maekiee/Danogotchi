@@ -148,12 +148,6 @@ extension CompleteQuizViewController {
             }
             .disposed(by: disposeBag)
 
-        output.totalPointText
-            .drive(with: self) { owner, text in
-                owner.resultCard.pointText = text
-            }
-            .disposed(by: disposeBag)
-
         output.primaryButtonTitle
             .drive(with: self) { owner, title in
                 owner.primaryButton.setTitle(title, for: .normal)

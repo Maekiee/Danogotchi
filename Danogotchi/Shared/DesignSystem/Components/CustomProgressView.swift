@@ -12,18 +12,16 @@ final class CustomProgressView: UIView {
         view.layer.borderWidth = AppBorder.thin
         return view
     }()
-    private let progressFillView: UIView = {
-        let view = UIView()
-        view.backgroundColor = AppColor.black
-        return view
-    }()
+    private let progressFillView = UIView()
     
     
     private var progressWidthConstraint: Constraint?
     private var currentProgress: Float = 0.0
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    /// 채움 색은 호출부가 정한다 — 돌봄 수치 4개를 색으로 구분하기 위해서다.
+    init(fillColor: UIColor = AppColor.black) {
+        super.init(frame: .zero)
+        progressFillView.backgroundColor = fillColor
         setupLayout()
     }
     
@@ -75,6 +73,15 @@ final class CustomProgressView: UIView {
             }
         } else {
             self.trackView.layoutIfNeeded()
+        }
+    }
+}
+
+extension Reactive where Base: CustomProgressView {
+    var progress: Binder<Float> {
+        return Binder(self.base) { view, progress in
+            // 애니메이션과 함께 progress 설정
+            view.setProgress(progress, animated: true)
         }
     }
 }

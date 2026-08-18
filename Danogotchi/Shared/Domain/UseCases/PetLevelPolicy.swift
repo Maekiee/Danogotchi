@@ -1,34 +1,33 @@
 import Foundation
 
 
-/// 레벨 요구량은 레벨마다 100씩 늘어난다 — 0→1은 100, 1→2는 200, 2→3은 300 EXP.
+/// 레벨 요구량은 표로 고정돼 있고 Lv.7이 마지막이다.
 /// 레벨업은 자동으로 처리하지 않으므로 여기서는 조건 판정까지만 한다.
 enum PetLevelPolicy {
 
-    static let experiencePerLevel = 100
+    /// 마지막 레벨. 여기 도달하면 더 올릴 수 없다.
+    static let maxLevel = 7
 
-    /// 현재 레벨에서 다음 레벨로 가는 데 필요한 경험치
+    /// index = 현재 레벨. `[0]`이 0→1, 마지막이 6→7이다.
+    private static let requirements = [1_000, 2_105, 3_347, 5_063, 7_423, 10_639, 36_189]
+
+    static func isMaxLevel(_ level: Int) -> Bool {
+        level >= maxLevel
+    }
+
+    /// 다음 레벨까지 필요한 경험치. 최고 레벨은 다음이 없어 마지막 요구량을 그대로 돌려준다
+    /// — 부활 페널티 기준으로만 쓰인다.
     static func requiredExperience(level: Int) -> Int {
-        experiencePerLevel * (level + 1)
+        requirements[min(max(0, level), requirements.count - 1)]
     }
 
-    /// 현재 레벨이 시작되는 누적 경험치 (등차수열 합)
-    static func levelStartExperience(level: Int) -> Int {
-        experiencePerLevel * level * (level + 1) / 2
-    }
-
-    /// 현재 레벨 안에서 모은 경험치. 레벨업 시 누적값을 깎지 않으므로 초과분이 그대로 남을 수 있다.
-    static func currentExperience(_ pet: Pet) -> Int {
-        max(0, pet.totalExperience - levelStartExperience(level: pet.level))
-    }
-
-    /// 게이지 진행률. 초과분은 `1`로 자른다 — 표시 텍스트는 초과분을 그대로 보여준다 (`250 / 100`).
+    /// 게이지 진행률. 최고 레벨은 더 채울 곳이 없으므로 항상 가득 찬 것으로 본다.
     static func progress(_ pet: Pet) -> Double {
-        let required = requiredExperience(level: pet.level)
-        return min(1, Double(currentExperience(pet)) / Double(required))
+        guard !isMaxLevel(pet.level) else { return 1 }
+        return min(1, Double(pet.experience) / Double(requiredExperience(level: pet.level)))
     }
 
     static func canLevelUp(_ pet: Pet) -> Bool {
-        currentExperience(pet) >= requiredExperience(level: pet.level)
+        !isMaxLevel(pet.level) && pet.experience >= requiredExperience(level: pet.level)
     }
 }

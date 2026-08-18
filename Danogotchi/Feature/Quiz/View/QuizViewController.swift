@@ -198,12 +198,3 @@ extension QuizViewController {
             }.disposed(by: disposeBag)
     }
 }
-
-extension Reactive where Base: CustomProgressView {
-    var progress: Binder<Float> {
-        return Binder(self.base) { view, progress in
-            // 애니메이션과 함께 progress 설정
-            view.setProgress(progress, animated: true)
-        }
-    }
-}

@@ -197,6 +197,15 @@ extension AppDIContainer {
 
 // MARK: - Character
 extension AppDIContainer {
+    func makeCharacterViewModel() -> CharacterViewModel {
+        return CharacterViewModel(
+            fetchPetStateUseCase: makeFetchPetStateUseCase(),
+            carePetUseCase: makeCarePetUseCase(),
+            levelUpPetUseCase: makeLevelUpPetUseCase(),
+            revivePetUseCase: makeRevivePetUseCase()
+        )
+    }
+
     func makeFetchPetStateUseCase() -> FetchPetStateUseCase {
         return DefaultFetchPetStateUseCase(petRepository: petRepository)
     }

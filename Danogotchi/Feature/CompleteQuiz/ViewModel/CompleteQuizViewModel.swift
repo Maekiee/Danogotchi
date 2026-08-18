@@ -31,7 +31,6 @@ final class CompleteQuizViewModel: BaseViewModel {
         let correctCountText: Driver<String>
         let incorrectCountText: Driver<String>
         let experienceText: Driver<String>
-        let totalPointText: Driver<String>
         let primaryButtonTitle: Driver<String>
         let secondaryButtonTitle: Driver<String>
         let primaryAction: Signal<ActionType>
@@ -58,7 +57,6 @@ final class CompleteQuizViewModel: BaseViewModel {
         let correctCountText = Driver.just("\(result.correct)개")
         let incorrectCountText = Driver.just("\(incorrectCount)개")
         let experienceText = Driver.just("+\(experience.total) EXP")
-        let totalPointText = Driver.just("\(experience.totalPoint.formatted()) EXP")
         
         let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
         
@@ -87,7 +85,6 @@ final class CompleteQuizViewModel: BaseViewModel {
             correctCountText: correctCountText,
             incorrectCountText: incorrectCountText,
             experienceText: experienceText,
-            totalPointText: totalPointText,
             primaryButtonTitle: Driver.just(primaryTitle),
             secondaryButtonTitle: Driver.just(secondaryTitle),
             primaryAction: primaryActionRelay.asSignal(),

@@ -6,10 +6,12 @@ import Foundation
 struct PetDisplayInfo {
     let pet: Pet
     let mood: PetMood
-    let currentExperience: Int
-    let requiredExperience: Int
     let progress: Double
     let canLevelUp: Bool
+    /// 최고 레벨이면 레벨업 버튼 자체를 숨긴다
+    let isMaxLevel: Bool
+    /// 항상 10칸. HP를 그대로 두고 표시 단계만 파생한 값이다.
+    let hearts: [PetHeartFill]
 }
 
 
@@ -19,10 +21,10 @@ extension PetDisplayInfo {
         self.init(
             pet: pet,
             mood: PetStatePolicy.mood(pet),
-            currentExperience: PetLevelPolicy.currentExperience(pet),
-            requiredExperience: PetLevelPolicy.requiredExperience(level: pet.level),
             progress: PetLevelPolicy.progress(pet),
-            canLevelUp: PetLevelPolicy.canLevelUp(pet)
+            canLevelUp: PetLevelPolicy.canLevelUp(pet),
+            isMaxLevel: PetLevelPolicy.isMaxLevel(pet.level),
+            hearts: PetHeartPolicy.hearts(hp: pet.hp)
         )
     }
 }

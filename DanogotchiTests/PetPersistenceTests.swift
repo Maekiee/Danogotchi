@@ -34,7 +34,7 @@ final class PetPersistenceTests: XCTestCase {
     func test_생성한_펫을_모든_필드_그대로_다시_읽는다() {
         let pet = makePet(
             level: 3,
-            totalExperience: 640,
+            experience: 640,
             satiety: 71.5,
             hydration: 62.25,
             fun: 48,
@@ -49,7 +49,7 @@ final class PetPersistenceTests: XCTestCase {
         XCTAssertEqual(saved.type, pet.type)
         XCTAssertEqual(saved.name, pet.name)
         XCTAssertEqual(saved.level, 3)
-        XCTAssertEqual(saved.totalExperience, 640)
+        XCTAssertEqual(saved.experience, 640)
         XCTAssertEqual(saved.satiety, 71.5)
         XCTAssertEqual(saved.hydration, 62.25)
         XCTAssertEqual(saved.fun, 48)
@@ -90,13 +90,13 @@ final class PetPersistenceTests: XCTestCase {
     func test_경험치_가산은_다른_필드를_건드리지_않는다() {
         let stateUpdatedAt = hoursAgo(24)
         _ = repository.createPet(
-            makePet(totalExperience: 40, satiety: 30, hp: 12, stateUpdatedAt: stateUpdatedAt)
+            makePet(experience: 40, satiety: 30, hp: 12, stateUpdatedAt: stateUpdatedAt)
         )
 
         XCTAssertEqual(repository.addExperience(60), 100)
 
         guard let saved = repository.readPet() else { return XCTFail("펫 저장 실패") }
-        XCTAssertEqual(saved.totalExperience, 100)
+        XCTAssertEqual(saved.experience, 100)
         XCTAssertEqual(saved.satiety, 30)
         XCTAssertEqual(saved.hp, 12)
         XCTAssertEqual(
@@ -183,7 +183,7 @@ final class PetPersistenceTests: XCTestCase {
     // MARK: - LevelUpPetUseCase
 
     func test_경험치가_부족하면_직접_호출해도_레벨이_오르지_않는다() {
-        _ = repository.createPet(makePet(totalExperience: 99, stateUpdatedAt: hoursAgo(1)))
+        _ = repository.createPet(makePet(experience: 999, stateUpdatedAt: hoursAgo(1)))
         let useCase = DefaultLevelUpPetUseCase(petRepository: repository)
 
         let result = useCase.execute()
@@ -192,18 +192,18 @@ final class PetPersistenceTests: XCTestCase {
         XCTAssertEqual(repository.readPet()?.level, 0)
     }
 
-    func test_레벨업은_초과_경험치를_보존한다() {
-        _ = repository.createPet(makePet(totalExperience: 250, stateUpdatedAt: hoursAgo(1)))
+    func test_레벨업은_초과_경험치를_버린다() {
+        _ = repository.createPet(makePet(experience: 2_500, stateUpdatedAt: hoursAgo(1)))
         let useCase = DefaultLevelUpPetUseCase(petRepository: repository)
 
         let result = useCase.execute()
 
         XCTAssertNil(result?.rejection)
         XCTAssertEqual(repository.readPet()?.level, 1)
-        XCTAssertEqual(repository.readPet()?.totalExperience, 250)
-        // 레벨 1 진행분 150 / 요구량 200
-        XCTAssertEqual(result?.info.currentExperience, 150)
-        XCTAssertEqual(result?.info.requiredExperience, 200)
+        // 요구량 1,000을 넘긴 1,500은 이월되지 않는다
+        XCTAssertEqual(repository.readPet()?.experience, 0)
+        XCTAssertEqual(result?.info.progress ?? -1, 0, accuracy: 0.001)
+        XCTAssertEqual(result?.info.canLevelUp, false)
     }
 
     // MARK: - RevivePetUseCase
@@ -212,7 +212,7 @@ final class PetPersistenceTests: XCTestCase {
         _ = repository.createPet(
             makePet(
                 level: 1,
-                totalExperience: 250,
+                experience: 1_000,
                 satiety: 0, hydration: 0, fun: 0, cleanliness: 0,
                 hp: 0,
                 stateUpdatedAt: hoursAgo(24)
@@ -228,8 +228,8 @@ final class PetPersistenceTests: XCTestCase {
         for stat in PetCareStat.allCases {
             XCTAssertGreaterThanOrEqual(saved[keyPath: stat.keyPath], PetStatePolicy.reviveFloor)
         }
-        // 레벨 1 요구량 200의 10%
-        XCTAssertEqual(saved.totalExperience, 230)
+        // 레벨 1 요구량 2,105의 10%
+        XCTAssertEqual(saved.experience, 790)
         XCTAssertEqual(saved.level, 1)
     }
 
@@ -252,10 +252,10 @@ final class PetPersistenceTests: XCTestCase {
 
         XCTAssertEqual(pet.name, "새싹")
         XCTAssertEqual(pet.level, 0)
-        XCTAssertEqual(pet.totalExperience, 0)
+        XCTAssertEqual(pet.experience, 0)
         XCTAssertEqual(pet.hp, PetStatePolicy.maxHP)
         for stat in PetCareStat.allCases {
-            XCTAssertEqual(pet[keyPath: stat.keyPath], PetStatePolicy.maxStat)
+            XCTAssertEqual(pet[keyPath: stat.keyPath], PetStatePolicy.initialStat)
         }
     }
 
@@ -291,15 +291,15 @@ final class PetPersistenceTests: XCTestCase {
         )
     }
 
-    func test_경험치_적립은_totalExperience만_올리고_정산_시각을_보존한다() {
+    func test_경험치_적립은_경험치만_올리고_정산_시각을_보존한다() {
         let stateUpdatedAt = hoursAgo(24)
         _ = repository.createPet(makePet(hp: 20, stateUpdatedAt: stateUpdatedAt))
 
         let gain = makeEarnExperienceUseCase().commit(earned: 30, correct: 2, total: 4)
 
-        XCTAssertEqual(gain.totalPoint, 30)
+        XCTAssertEqual(gain.total, 30)
         guard let saved = repository.readPet() else { return XCTFail("펫 저장 실패") }
-        XCTAssertEqual(saved.totalExperience, 30)
+        XCTAssertEqual(saved.experience, 30)
         XCTAssertEqual(saved.hp, 20)
         XCTAssertEqual(
             saved.stateUpdatedAt.timeIntervalSince1970,
@@ -308,11 +308,11 @@ final class PetPersistenceTests: XCTestCase {
         )
     }
 
-    func test_펫이_없으면_적립은_0을_돌려준다() {
+    func test_펫이_없어도_획득량_산정은_그대로다() {
         let gain = makeEarnExperienceUseCase().commit(earned: 30, correct: 4, total: 4)
 
-        XCTAssertEqual(gain.totalPoint, 0)
-        // 산정 자체는 정상이므로 획득량과 보너스는 그대로 돌려준다
+        XCTAssertNil(repository.readPet())
+        // 저장에 실패해도 산정 자체는 정상이므로 획득량과 보너스는 그대로 돌려준다
         XCTAssertEqual(gain.earned, 30)
         XCTAssertEqual(gain.perfectBonus, 4)
     }

@@ -3,7 +3,7 @@ import Foundation
 
 enum PetCareResult {
     case success(Pet)
-    /// 대상 수치가 이미 100 — 정산 결과는 저장해야 하므로 Pet을 함께 돌려준다
+    /// 대상 수치가 이미 `careThreshold` 이상 — 정산 결과는 저장해야 하므로 Pet을 함께 돌려준다
     case alreadyFull(Pet)
     /// 정산 결과 사망 — 요청한 돌보기는 적용하지 않지만 정산 결과는 저장한다
     case dead(Pet)
@@ -25,6 +25,11 @@ enum PetStatePolicy {
     static let maxStat: Double = 100
     static let maxHP: Double = 40
     static let careRecovery: Double = 25
+    /// 이 값 이상이면 돌볼 수 없다. 100을 계속 유지하는 플레이를 막는다.
+    static let careThreshold: Double = 80
+    /// 생성 직후 돌봄 수치. `careThreshold` 미만이라 바로 돌볼 수 있고,
+    /// `healthyThreshold` 초과라 기분이 "만족함"이고 HP 회복 조건도 만족한다.
+    static let initialStat: Double = 70
 
     /// 이 값 이하로 내려간 수치 하나당 HP가 깎인다
     static let dangerThreshold: Double = 20
@@ -173,7 +178,7 @@ extension PetStatePolicy {
         var settled = settle(pet, now: now)
 
         if settled.isDead { return .dead(settled) }
-        if settled[keyPath: stat.keyPath] >= maxStat { return .alreadyFull(settled) }
+        if settled[keyPath: stat.keyPath] >= careThreshold { return .alreadyFull(settled) }
 
         settled[keyPath: stat.keyPath] = min(maxStat, settled[keyPath: stat.keyPath] + careRecovery)
         return .success(settled)
@@ -201,19 +206,16 @@ extension PetStatePolicy {
     }
 
     /// 현재 레벨에서 모은 경험치가 있으면 요구량의 10%를 깎고, 없으면 레벨을 한 단계 내린다.
-    /// 레벨업을 미뤄 초과 경험치가 쌓여 있어도 현재 레벨 요구량 기준으로만 차감한다.
     private static func applyRevivePenalty(_ pet: inout Pet) {
-        guard PetLevelPolicy.currentExperience(pet) > 0 else {
+        guard pet.experience > 0 else {
             guard pet.level > 0 else { return }
             pet.level -= 1
-            pet.totalExperience = PetLevelPolicy.levelStartExperience(level: pet.level)
+            // 내려간 레벨의 경험치는 복원하지 않는다 — 레벨 간 이월이 없는 것과 같은 이유다
+            pet.experience = 0
             return
         }
         let required = PetLevelPolicy.requiredExperience(level: pet.level)
         let penalty = Int(Double(required) * revivePenaltyRate)
-        pet.totalExperience = max(
-            PetLevelPolicy.levelStartExperience(level: pet.level),
-            pet.totalExperience - penalty
-        )
+        pet.experience = max(0, pet.experience - penalty)
     }
 }

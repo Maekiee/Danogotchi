@@ -16,7 +16,7 @@ extension PetEntity {
             type: type,
             name: name,
             level: Int(level),
-            totalExperience: Int(totalExperience),
+            experience: Int(totalExperience), // CoreData 속성명은 `totalExperience`로 남아 있지만 담긴 값은 현재 레벨 경험치다
             satiety: satiety,
             hydration: hydration,
             fun: fun,
@@ -27,13 +27,12 @@ extension PetEntity {
         )
     }
 
-    /// 도메인 값으로 필드를 덮어쓴다. 생성과 전체 저장이 같은 코드를 쓰도록 매퍼에 둔다.
     func apply(_ pet: Pet) {
         id = pet.id
         type = pet.type.rawValue
         name = pet.name
         level = Int64(pet.level)
-        totalExperience = Int64(pet.totalExperience)
+        totalExperience = Int64(pet.experience)
         satiety = pet.satiety
         hydration = pet.hydration
         fun = pet.fun
