@@ -1,0 +1,299 @@
+<div align="center">
+
+# 단어고치 (Danogotchi)
+
+**단어를 외울수록 캐릭터가 자라는 iOS 영어 단어 학습 앱**
+
+![iOS](https://img.shields.io/badge/iOS-16.0+-000000?logo=apple&logoColor=white)
+![Swift](https://img.shields.io/badge/Swift-5.0-F05138?logo=swift&logoColor=white)
+![UIKit](https://img.shields.io/badge/UIKit-Programmatic-2396F3)
+![RxSwift](https://img.shields.io/badge/RxSwift-6.x-B7178C)
+![CoreData](https://img.shields.io/badge/CoreData-Local%20DB-4B8BBE)
+![App Store](https://img.shields.io/badge/App%20Store-출시-0D96F6)
+
+</div>
+
+---
+
+## 이런 앱입니다
+
+단어장과 다마고치를 합친 앱입니다.
+
+퀴즈를 풀어 단어를 맞히면 캐릭터의 경험치가 쌓이고, 게이지가 다 차면 레벨이 오릅니다. 반대로 앱을 켜지 않는 동안에는 캐릭터의 **포만감·수분·즐거움·청결**이 시간에 따라 조금씩 떨어지고, 오래 방치하면 체력이 줄다가 결국 세상을 떠납니다.
+
+**"오늘 단어를 봐야 할 이유"를 캐릭터가 만들어 줍니다.**
+
+---
+
+## 스크린샷
+
+> 이미지 준비 중입니다. 아래 파일을 `docs/images/`에 넣으면 이 표에 그대로 표시됩니다.
+
+| 메인 · 단어 카드 | 퀴즈 | 캐릭터 | 단어장 |
+|:---:|:---:|:---:|:---:|
+| `main.png` | `quiz.png` | `character.png` | `library.png` |
+| 준비 중 | 준비 중 | 준비 중 | 준비 중 |
+
+---
+
+## 핵심 기능
+
+| 기능 | 설명 |
+|---|---|
+| **단어 학습** | 여행·비즈니스·감정·일상 4개 주제의 추천 단어 **1,457개**를 첫 실행 시 기기 안에 저장합니다. 마음에 드는 단어는 "나의 단어장"에 담고, 직접 추가·수정·삭제할 수 있습니다. |
+| **4지선다 퀴즈** | 학습중인 단어장에서 최대 20문제를 출제합니다. 단어를 무작위로 고르지 않고 **아직 덜 학습한 단어를 우선 선정**합니다. |
+| **캐릭터 육성** | 퀴즈 정답으로 경험치를 모아 직접 레벨업합니다(최고 Lv.7). 돌봄 4수치와 체력(HP), 사망·부활이 있습니다. |
+| **시간 경과 반영** | 앱을 꺼둔 동안 흘러간 시간을 **다시 열 때 한 번에 계산**합니다. 백그라운드 작업이나 상시 타이머를 쓰지 않습니다. |
+| **배경 테마** | Unsplash에서 사진을 검색해 메인 화면 배경으로 지정합니다. |
+
+이 외에 단어 발음 듣기(TTS), 단어별 정답률 표시, 학습중 단어장 전환을 지원합니다.
+
+---
+
+## 화면 흐름
+
+```mermaid
+flowchart TD
+    A[앱 실행] --> B{배경 테마와 캐릭터가<br/>모두 있는가}
+    B -- 아니오 --> C[관심사 선택]
+    C --> D[배경 테마 선택]
+    D --> E[알 선택]
+    E --> F[이름 짓기]
+    F --> G
+    B -- 예 --> G[메인 · 단어 카드]
+    G --> H[학습하기 · 4지선다 퀴즈]
+    H --> I[학습 완료 · 정답 수와 획득 경험치]
+    I --> G
+    G --> J[캐릭터 · 돌보기와 레벨업]
+    G --> K[단어장 목록과 상세]
+    G --> L[설정 · 배경 테마 변경]
+```
+
+온보딩 도중 앱이 종료돼도 **이미 끝낸 단계는 다시 묻지 않습니다.** 테마만 저장된 상태로 재실행하면 알 선택부터 이어서 진행합니다.
+
+---
+
+## 아키텍처
+
+Clean Architecture + MVVM-C 구조입니다. 화면(Feature)은 서로를 참조하지 않고, 구현체를 조립하는 위치는 `AppDIContainer` 한 곳뿐입니다.
+
+```mermaid
+graph TD
+    subgraph APP["App · 조립과 화면 전환"]
+        DI[AppDIContainer]
+        CO[Coordinator]
+    end
+
+    subgraph FEATURE["Feature · 화면 12종"]
+        VC[ViewController]
+        VM[ViewModel<br/>Input · Output]
+    end
+
+    subgraph SHARED["Shared · 도메인과 데이터"]
+        UC[UseCase · Policy]
+        EN[Entity]
+        IF[Repository 프로토콜]
+        RP[Repository 구현]
+        MP[Mapper]
+        DS[DesignSystem 토큰]
+    end
+
+    subgraph CORE["Core · 공통 기반"]
+        CD[(CoreData)]
+        NW[Network · Alamofire]
+        LG[AppLogger · OSLog]
+    end
+
+    CO --> VC
+    DI -. 주입 .-> VM
+    VC --> VM
+    VC --> DS
+    VM --> UC
+    UC --> EN
+    UC --> IF
+    RP -. 구현 .-> IF
+    RP --> MP
+    MP --> CD
+    RP --> NW
+```
+
+- **의존 방향은 `Feature → Shared → Core` 한 방향입니다.** 반대 방향 참조와 Feature 간 참조가 없습니다.
+- **도메인은 저장 방식을 모릅니다.** UseCase는 `Repository` 프로토콜에만 의존하고, CoreData·네트워크를 아는 구현체는 `AppDIContainer`에서 주입합니다. 저장소를 바꿔도 도메인 코드는 그대로입니다.
+- **화면 전환은 ViewController가 직접 하지 않습니다.** delegate로 Coordinator에 위임하고, 자식 Coordinator의 생명주기는 `addChild` / `removeChild`로 관리합니다.
+
+### 디렉토리
+
+```
+Danogotchi/
+├── App/           앱 진입점 · AppDIContainer · Coordinator 계층
+├── Core/          BaseViewController · CoreDataStack · 네트워크 · AppLogger
+├── Shared/
+│   ├── Domain/    Entity · Repository 프로토콜 · UseCase 16개 · Policy 4개
+│   ├── Data/      Repository 구현 5종 · Mapper · CoreData 모델 · 추천 단어 시드
+│   └── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트
+└── Feature/       화면 단위 폴더 12개 (View / ViewModel / Components / Coordinator)
+```
+
+---
+
+## 데이터 흐름
+
+### 퀴즈 정답 → 경험치 적립
+
+경험치는 **학습 이력을 저장하기 전의 정답률**로 계산합니다. 순서를 바꾸면 방금 맞힌 정답이 스스로 정답률을 올려 보상을 깎습니다.
+
+```mermaid
+sequenceDiagram
+    participant V as QuizViewController
+    participant VM as QuizViewModel
+    participant UC as EarnExperienceUseCase
+    participant H as LearningHistoryRepository
+    participant P as PetRepository
+
+    V->>VM: 보기 선택
+    VM->>UC: record 호출
+    UC->>H: 이 단어의 이전 정답률 조회
+    Note over UC: 이력 반영 전 값으로 경험치 산정
+    UC->>H: 학습 이력 저장
+    UC-->>VM: 이번 문제 획득 경험치
+    VM->>UC: commit · 만점 보너스 합산
+    UC->>P: 캐릭터 경험치 적립
+    VM-->>V: 학습 완료 화면으로 이동
+```
+
+### 캐릭터 상태 정산
+
+타이머를 돌리지 않습니다. **화면을 열거나 앱으로 돌아온 순간**, 마지막 정산 시각과의 차이를 계산해 한 번에 반영하고 저장합니다.
+
+```mermaid
+flowchart LR
+    A[화면 진입 · 앱 복귀 · 돌보기] --> B[경과 시간 계산<br/>현재 시각 − 마지막 정산 시각]
+    B --> C[돌봄 4수치 감소]
+    C --> D{수치 구간 판정}
+    D -- 모두 65 초과 --> E[체력 회복<br/>시간당 +0.5]
+    D -- 20 이하가 있음 --> F[체력 감소<br/>수치 1개당 시간당 −0.25]
+    D -- 그 외 --> G[체력 유지]
+    E --> H{체력이 0 이하인가}
+    F --> H
+    G --> H
+    H -- 예 --> I[사망 · 부활 필요]
+    H -- 아니오 --> J[기분 계산]
+    I --> K[CoreData 저장<br/>정산 시각 갱신]
+    J --> K
+    K --> L[화면 갱신]
+```
+
+---
+
+## 주요 기술
+
+| 기술 | 사용 내용 |
+|---|---|
+| **UIKit + SnapKit** | 스토리보드 없이 코드로만 화면을 구성합니다. 12개 화면 전부 `configHierarchy()` → `configLayout()` → `configView()` 순서를 지킵니다. |
+| **RxSwift / RxCocoa** | ViewModel은 `Input` / `Output` 구조체와 `transform(input:)` 단일 진입점을 갖습니다. 외부에는 `Driver` · `Signal`로 노출해 메인 스레드 실행을 보장합니다. |
+| **Coordinator** | `AppFlowCoordinator` → `MainCoordinator` / `OnboardingCoordinator` → 화면별 Coordinator 계층입니다. 온보딩 완료 여부에 따른 첫 화면 분기도 여기서 결정합니다. |
+| **CoreData** | 엔티티 4종(`VocabEntity` · `VocabBookEntity` · `LearningHistoryEntity` · `PetEntity`)을 사용합니다. `Mapper`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다. |
+| **Alamofire + Kingfisher** | Unsplash 사진 검색(`ApiRouter`)과 이미지 다운로드·캐싱을 담당합니다. |
+| **DiffableDataSource** | 단어 카드·단어장·테마 목록에 사용합니다. 테마 검색 화면은 높이가 제각각인 사진을 위해 워터폴 레이아웃(`WaterFallLayout`)을 직접 구현했습니다. |
+| **SwiftUI 부분 도입** | 단어 카드의 블러 레이어만 SwiftUI로 만들고 `UIHostingController`로 UIKit 셀에 넣었습니다. |
+| **디자인 시스템** | 색·폰트·여백·모서리 반경을 토큰(`AppColor` · `AppFont` · `AppSpacing` · `AppRadius` · `AppBorder`)으로 고정했습니다. 화면 코드에 색상값과 폰트 크기를 직접 쓰지 않습니다. |
+| **OSLog** | `print`를 쓰지 않습니다. `AppLogger` 5개 카테고리로 분류하며, subsystem이 번들 ID라 개발용과 운영용 로그가 Console에서 자동으로 분리됩니다. FCM 토큰 같은 값은 성공 여부만 남깁니다. |
+| **XCTest** | 도메인 정책 단위 테스트 **76개**를 운영합니다. |
+| **Firebase** | 앱 초기화와 FCM 푸시 토큰 등록에 사용합니다. |
+| **빌드 설정** | `xcconfig`로 개발용·운영용 스킴을 분리했습니다. 번들 ID, 앱 이름, `GoogleService-Info.plist`가 스킴에 따라 자동으로 바뀌고 API 키는 저장소에 포함하지 않습니다. |
+
+---
+
+## 설계에서 신경 쓴 점
+
+### 1. 계산 규칙을 순수 함수로 분리해 테스트 가능하게 만들었습니다
+
+시간에 따른 수치 감소, 기분 판정, 체력 증감, 레벨 경계, 부활 페널티를 `PetStatePolicy` · `PetLevelPolicy` · `PetHeartPolicy` · `PetNamePolicy` 네 파일에 **입력과 출력만 있는 계산**으로 모았습니다.
+
+덕분에 테스트 타깃이 RxSwift나 CoreData 없이 규칙 자체를 검증합니다. 밸런스 수치도 한 파일에 모여 있어 조정할 때 열어야 할 파일이 하나입니다.
+
+### 2. 타이머 없이 시간 경과를 처리했습니다
+
+백그라운드 작업이나 반복 타이머 대신, **마지막 정산 시각 하나**를 저장해 두고 화면을 열 때 차이를 계산합니다.
+
+배터리를 쓰지 않고, 앱이 강제 종료돼도 값이 어긋나지 않습니다. 기기 시각을 미래로 옮겼다 되돌리는 경우에는 상태가 그 미래 시점까지 얼어붙는 문제가 있는데, 정산 시각을 현재로 되맞추는 처리로 막았습니다.
+
+### 3. 경과 구간을 시간순으로 나눠 계산합니다
+
+조회 시점의 최종 수치 하나로 전체 경과 시간을 소급 적용하지 않습니다. 수치가 임계값(65 · 20)을 통과한 시각을 각각 구해 체력의 회복·정지·감소를 순서대로 적용합니다.
+
+한 번에 뭉뚱그리면 "3일 전부터 굶고 있었다"와 "방금 굶기 시작했다"의 결과가 같아집니다.
+
+### 4. 보상이 스스로를 깎지 않도록 계산 순서를 고정했습니다
+
+경험치는 학습 이력을 저장하기 **전** 정답률로 산정합니다. 반대로 하면 방금 맞힌 정답이 정답률을 끌어올려 보상이 줄어듭니다.
+
+만점 보너스는 문제 수의 제곱에 비례시켰습니다. 문제가 적을수록 만점이 쉬우므로(4문제와 20문제의 난이도 차이), 단어가 적은 단어장을 반복하는 쪽이 더 이득이 되는 역전을 막기 위해서입니다.
+
+### 5. 화면에 보이는 숫자의 규칙을 상황별로 다르게 정했습니다
+
+경험치 퍼센트는 **버림**, 돌봄 수치는 **반올림**으로 표시합니다.
+
+경험치를 반올림하면 99.6%가 `100%`로 보여 "다 찼는데 레벨업 버튼이 안 눌린다"가 됩니다. 반대로 돌봄 수치를 버림으로 표시하면 99.9가 `99`로 보여 "돌봤는데 수치가 안 올랐다"가 됩니다. 게이지·하트처럼 색과 길이로만 전달되는 정보에는 VoiceOver 값을 따로 제공합니다.
+
+---
+
+## 육성 규칙
+
+**레벨별 필요 경험치** — 레벨업하면 경험치는 0이 되고 초과분은 다음 레벨로 넘어가지 않습니다.
+
+| 레벨 | 0 → 1 | 1 → 2 | 2 → 3 | 3 → 4 | 4 → 5 | 5 → 6 | 6 → 7 |
+|---|---|---|---|---|---|---|---|
+| 필요 경험치 | 1,000 | 2,105 | 3,347 | 5,063 | 7,423 | 10,639 | 36,189 |
+
+**돌봄 수치** — 모두 0~100이며 100이 가장 좋은 상태입니다.
+
+| 항목 | 시간당 감소 | 돌보기 | 조건 |
+|---|---|---|---|
+| 수분 | −1.0 | +25 | 해당 수치가 **80 미만**일 때만 돌볼 수 있음 |
+| 포만감 | −0.8 | +25 | 〃 |
+| 즐거움 | −0.6 | +25 | 〃 |
+| 청결 | −0.4 | +25 | 〃 |
+
+체력은 최대 40이며, 네 수치가 모두 65를 넘으면 회복하고 20 이하인 수치가 있으면 감소합니다. 아무것도 하지 않아도 **80시간까지는 체력이 줄지 않습니다.** 체력이 0이 되면 부활해야 하고, 부활 시 현재 레벨 경험치의 10%가 차감됩니다.
+
+---
+
+## 테스트
+
+도메인 정책 단위 테스트 **76개**를 운영합니다.
+
+| 파일 | 검증 내용 |
+|---|---|
+| `PetStatePolicyTests` (34) | 시간에 따른 수치 감소, 돌보기 경계, 기분 판정 우선순위, 체력 구간별 정산, 사망·부활 페널티 |
+| `PetPersistenceTests` (21) | UseCase와 CoreData 저장 왕복, 레벨업·부활·경험치 적립의 실제 저장 결과 |
+| `PetLevelPolicyTests` (7) | 레벨별 요구 경험치, 게이지 진행률, 최고 레벨 처리, 경험치 이월 없음 |
+| `PetHeartPolicyTests` (7) | 체력의 하트 10칸 표시 변환 |
+| `PetNamePolicyTests` (7) | 캐릭터 이름 입력 규칙 |
+
+```bash
+xcodebuild -scheme Danogotchi-dev -destination 'platform=iOS Simulator,name=iPhone 17' test
+```
+
+---
+
+## 빌드
+
+**요구 사항** — Xcode 16 이상, iOS 16.0 이상. 의존성은 Swift Package Manager로 자동 설치됩니다.
+
+```bash
+xcodebuild -scheme Danogotchi-dev build   # 개발용 · 단어고치[DEV]
+xcodebuild -scheme Danogotchi build       # 운영용 · com.maekie.Danogotchi
+```
+
+> **주의** — API 키와 Firebase 설정은 저장소에 포함돼 있지 않습니다. `Danogotchi/App/Secret/`에 `Secret.swift`, `Secrets.xcconfig`, 개발·운영용 `GoogleService-Info.plist`를 배치해야 빌드됩니다. 자세한 내용은 [`docs/environment.md`](docs/environment.md)를 참고하세요.
+
+---
+
+## 문서
+
+| 문서 | 내용 |
+|---|---|
+| [`docs/architecture.md`](docs/architecture.md) | 레이어 구조, 도메인 용어 정의, 데이터 흐름 |
+| [`docs/conventions.md`](docs/conventions.md) | 네이밍, Rx, MVVM, Coordinator, 디자인 시스템, 로깅 규칙 |
+| [`docs/environment.md`](docs/environment.md) | 빌드 스킴, 의존성, 로컬 DB, UI 구현 메모 |
