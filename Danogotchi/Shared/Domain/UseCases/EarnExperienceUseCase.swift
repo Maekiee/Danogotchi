@@ -65,6 +65,7 @@ final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
         if petRepository.addExperience(earned + bonus) == nil {
             // 온보딩이 펫 생성을 강제하므로 정상 경로에서는 발생하지 않는다
             AppLogger.database.error("펫이 없어 경험치를 적립하지 못했다")
+            CrashReporter.log("펫이 없어 경험치를 적립하지 못했다")
         }
         return ExperienceGain(earned: earned, perfectBonus: bonus)
     }

@@ -29,6 +29,7 @@ final class DefaultPetRepository {
             return true
         } catch {
             AppLogger.database.error("CoreData 저장 실패: \(String(describing: error), privacy: .public)")
+            CrashReporter.record(error)
             return false
         }
     }

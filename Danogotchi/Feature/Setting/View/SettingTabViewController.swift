@@ -264,6 +264,7 @@ extension SettingTabViewController: MFMailComposeViewControllerDelegate {
                 AppLogger.ui.debug("메일 작성 취소")
             case .failed:
                 AppLogger.ui.error("메일 전송 실패: \(error?.localizedDescription ?? "알 수 없는 오류", privacy: .public)")
+                if let error { CrashReporter.record(error) }
             @unknown default:
                 fatalError()
             }

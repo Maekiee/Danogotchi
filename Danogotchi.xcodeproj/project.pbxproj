@@ -288,7 +288,7 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/Danogotchi/App/Secret/Firebase/$(CONFIGURATION)/GoogleService-Info.plist",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}\n\n\n👍️\n\n✅️\n\n👀️\n\n\n\n${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}\n\n\n👍️\n\n✅️\n\n👀️\n\n\n\n${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
 			);
 			outputFileListPaths = (
 			);
