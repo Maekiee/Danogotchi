@@ -43,6 +43,7 @@ enum DatabaseSeeder {
             try context.save()
         } catch {
             AppLogger.database.error("DatabaseSeeder 저장 실패: \(String(describing: error), privacy: .public)")
+            CrashReporter.record(error)
         }
         // ponytail: 첫 실행 ~1.5k행 메인스레드 동기 시드, 데이터가 10배 커지면 background context로
     }

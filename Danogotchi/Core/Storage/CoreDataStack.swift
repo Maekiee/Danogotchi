@@ -25,6 +25,7 @@ final class CoreDataStack {
             try viewContext.save()
         } catch {
             AppLogger.database.error("코어데이터 저장 실패: \(String(describing: error), privacy: .public)")
+            CrashReporter.record(error)
         }
         
     }

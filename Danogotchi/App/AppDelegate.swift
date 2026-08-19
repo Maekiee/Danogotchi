@@ -33,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Messaging.messaging().token { token, error in
             if let error = error {
                 AppLogger.push.error("FCM 토큰 조회 실패: \(String(describing: error), privacy: .public)")
+                CrashReporter.record(error)
             } else if token != nil {
                 AppLogger.push.debug("FCM 토큰 조회 성공")
             }
