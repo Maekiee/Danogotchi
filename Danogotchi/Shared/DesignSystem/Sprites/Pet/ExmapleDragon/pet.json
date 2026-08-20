@@ -1,0 +1,48 @@
+{
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "clips": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frameCount": 6,
+      "fps": 10,
+      "loop": true
+    },
+    {
+      "name": "blink",
+      "row": 1,
+      "frameCount": 3,
+      "fps": 10,
+      "loop": false
+    },
+    {
+      "name": "happy",
+      "row": 2,
+      "frameCount": 6,
+      "fps": 10,
+      "loop": false
+    },
+    {
+      "name": "sad",
+      "row": 3,
+      "frameCount": 4,
+      "fps": 10,
+      "loop": true
+    },
+    {
+      "name": "sleep",
+      "row": 4,
+      "frameCount": 4,
+      "fps": 10,
+      "loop": true
+    },
+    {
+      "name": "sick",
+      "row": 5,
+      "frameCount": 4,
+      "fps": 10,
+      "loop": true
+    }
+  ]
+}

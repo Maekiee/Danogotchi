@@ -10,12 +10,12 @@ enum PetType: String, CaseIterable {
         }
     }
 
-    /// 에셋 이름. 아직 이미지가 없어 호출부에서 SF Symbol로 대체된다 —
-    /// 에셋을 추가할 때 바꿀 곳은 이 문자열 하나뿐이다.
+    /// 에셋 이름. 테스트용 ExmapleDragon 스프라이트 시트의 첫 프레임을 임시로 쓴다 —
+    /// 실제 캐릭터 에셋이 들어오면 바꿀 곳은 이 문자열 하나뿐이다.
     var imageName: String {
         switch self {
         case .sprout:
-            return "pet_sprout"
+            return "spritesheet0"
         }
     }
 
