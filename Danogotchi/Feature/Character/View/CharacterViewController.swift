@@ -29,12 +29,7 @@ final class CharacterViewController: BaseViewController {
         stack.alignment = .fill
         return stack
     }()
-    private let petImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFit
-        view.tintColor = AppColor.textSecondary
-        return view
-    }()
+    private let petSpriteView = PetSpriteView()
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = AppFont.title1
@@ -104,7 +99,7 @@ final class CharacterViewController: BaseViewController {
         scrollView.addSubview(contentStackView)
 
         [
-            petImageView,
+            petSpriteView,
             nameLabel,
             moodLabel,
             heartBarView,
@@ -128,7 +123,7 @@ final class CharacterViewController: BaseViewController {
             make.width.equalToSuperview().offset(-AppSpacing.space20 * 2)
         }
 
-        petImageView.snp.makeConstraints { make in
+        petSpriteView.snp.makeConstraints { make in
             make.height.equalTo(160)
         }
 
@@ -140,10 +135,6 @@ final class CharacterViewController: BaseViewController {
     }
 
     override func configView() {
-        // 펫 에셋이 아직 없다 — 들어오면 `PetType.imageName` 하나만 바뀐다
-        petImageView.image = UIImage(named: PetType.sprout.imageName)
-            ?? UIImage(systemName: "pawprint")
-
         heartBarView.isAccessibilityElement = true
         heartBarView.accessibilityLabel = "체력"
 
@@ -261,6 +252,12 @@ extension CharacterViewController {
     /// 한 번의 정산 결과를 화면 전체에 반영한다
     private func render(_ info: PetDisplayInfo) {
         let pet = info.pet
+
+        // 레벨이 시트를, 기분이 클립을 고른다. 둘 다 그대로면 애니메이션이 끊기지 않고 이어진다.
+        petSpriteView.render(
+            sheetName: pet.type.sheetName(level: pet.level),
+            clip: PetSpriteClip(mood: info.mood, isDead: pet.isDead)
+        )
 
         nameLabel.text = pet.name
         // 기분은 사망 상태에서도 계산되므로 갈아치우는 건 화면 몫이다

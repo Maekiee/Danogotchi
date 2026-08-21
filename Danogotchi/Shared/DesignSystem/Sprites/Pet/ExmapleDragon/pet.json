@@ -5,41 +5,27 @@
     {
       "name": "idle",
       "row": 0,
-      "frameCount": 6,
+      "frameCount": 8,
       "fps": 10,
       "loop": true
-    },
-    {
-      "name": "blink",
-      "row": 1,
-      "frameCount": 3,
-      "fps": 10,
-      "loop": false
-    },
-    {
-      "name": "happy",
-      "row": 2,
-      "frameCount": 6,
-      "fps": 10,
-      "loop": false
     },
     {
       "name": "sad",
-      "row": 3,
-      "frameCount": 4,
-      "fps": 10,
-      "loop": true
-    },
-    {
-      "name": "sleep",
-      "row": 4,
+      "row": 1,
       "frameCount": 4,
       "fps": 10,
       "loop": true
     },
     {
       "name": "sick",
-      "row": 5,
+      "row": 2,
+      "frameCount": 4,
+      "fps": 10,
+      "loop": true
+    },
+    {
+      "name": "sleep",
+      "row": 3,
       "frameCount": 4,
       "fps": 10,
       "loop": true
