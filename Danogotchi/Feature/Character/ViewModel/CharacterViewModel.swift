@@ -9,17 +9,20 @@ final class CharacterViewModel: BaseViewModel {
     private let fetchPetStateUseCase: FetchPetStateUseCase
     private let carePetUseCase: CarePetUseCase
     private let levelUpPetUseCase: LevelUpPetUseCase
+    private let adjustPetLevelUseCase: AdjustPetLevelUseCase
     private let revivePetUseCase: RevivePetUseCase
 
     init(
         fetchPetStateUseCase: FetchPetStateUseCase,
         carePetUseCase: CarePetUseCase,
         levelUpPetUseCase: LevelUpPetUseCase,
+        adjustPetLevelUseCase: AdjustPetLevelUseCase,
         revivePetUseCase: RevivePetUseCase
     ) {
         self.fetchPetStateUseCase = fetchPetStateUseCase
         self.carePetUseCase = carePetUseCase
         self.levelUpPetUseCase = levelUpPetUseCase
+        self.adjustPetLevelUseCase = adjustPetLevelUseCase
         self.revivePetUseCase = revivePetUseCase
     }
 
@@ -28,6 +31,8 @@ final class CharacterViewModel: BaseViewModel {
         let didBecomeActive: Observable<Void>
         let careTapped: Observable<PetCareStat>
         let levelUpTapped: Observable<Void>
+        /// dev 빌드 테스트 버튼 — 요구 경험치를 무시하고 레벨만 옮긴다. 릴리스에서는 아무 값도 오지 않는다.
+        let levelDeltaTapped: Observable<Int>
         /// 부활은 경험치를 깎으므로 확인 알럿을 통과한 뒤에 들어온다
         let reviveTapped: Observable<Void>
     }
@@ -57,6 +62,11 @@ final class CharacterViewModel: BaseViewModel {
         input.levelUpTapped
             .bind(with: self) { owner, _ in
                 owner.apply(owner.levelUpPetUseCase.execute(), to: state, toast: toastMessage)
+            }.disposed(by: disposeBag)
+
+        input.levelDeltaTapped
+            .bind(with: self) { owner, delta in
+                owner.apply(owner.adjustPetLevelUseCase.execute(delta: delta), to: state, toast: toastMessage)
             }.disposed(by: disposeBag)
 
         input.reviveTapped

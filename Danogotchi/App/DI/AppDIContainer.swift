@@ -202,6 +202,7 @@ extension AppDIContainer {
             fetchPetStateUseCase: makeFetchPetStateUseCase(),
             carePetUseCase: makeCarePetUseCase(),
             levelUpPetUseCase: makeLevelUpPetUseCase(),
+            adjustPetLevelUseCase: makeAdjustPetLevelUseCase(),
             revivePetUseCase: makeRevivePetUseCase()
         )
     }
@@ -216,6 +217,11 @@ extension AppDIContainer {
 
     func makeLevelUpPetUseCase() -> LevelUpPetUseCase {
         return DefaultLevelUpPetUseCase(petRepository: petRepository)
+    }
+
+    /// dev 빌드 테스트 버튼용 — 요구 경험치를 건너뛴다
+    func makeAdjustPetLevelUseCase() -> AdjustPetLevelUseCase {
+        return DefaultAdjustPetLevelUseCase(petRepository: petRepository)
     }
 
     func makeRevivePetUseCase() -> RevivePetUseCase {

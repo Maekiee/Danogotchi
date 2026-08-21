@@ -112,30 +112,55 @@ final class PetSpriteView: UIView {
         let isSameState = current?.sheetName == sheetName && current?.clip == clip
         guard !isSameState || layer.animation(forKey: Self.animationKey) == nil else { return }
 
+        guard let frames = frames(sheetName: sheetName, clip: clip),
+              let firstFrame = frames.rects.first else { return }
+
+        current = (sheetName, clip)
+        show(sheet: frames.sheet, rect: firstFrame)
+
+        guard frames.rects.count > 1, frames.info.fps > 0 else { return }
+        layer.add(makeAnimation(rects: frames.rects, clip: frames.info), forKey: Self.animationKey)
+    }
+
+    /// 애니메이션 없이 한 칸만 세워둔다 — 알 선택 화면은 정지 이미지를 쓴다.
+    /// `current`는 건드리지 않는다 — 애니메이션 재시작 방지 전용이고 정지 뷰는 `render`를 부르지 않는다.
+    func renderStill(sheetName: String, clip: PetSpriteClip, frameIndex: Int) {
+        guard let frames = frames(sheetName: sheetName, clip: clip),
+              frames.rects.indices.contains(frameIndex) else { return }
+
+        show(sheet: frames.sheet, rect: frames.rects[frameIndex])
+    }
+
+    /// 시트와 클립을 유닛 사각형 목록으로 바꾼다. 실패 로그는 여기 한 곳에 모은다.
+    private func frames(
+        sheetName: String,
+        clip: PetSpriteClip
+    ) -> (sheet: CGImage, rects: [CGRect], info: PetSpriteSheet.Clip)? {
         guard let manifest = PetSpriteSheet.manifest,
-              let clipInfo = manifest.clip(clip),
+              let info = manifest.clip(clip),
               let sheet = UIImage(named: sheetName)?.cgImage else {
             // 아무것도 그리지 않는다. 유닛 사각형 없이 contents만 넣으면 시트 전체가 격자로 보인다.
             AppLogger.ui.error(
                 "스프라이트 로드 실패 — sheet: \(sheetName, privacy: .public), clip: \(clip.rawValue, privacy: .public)"
             )
-            return
+            return nil
         }
 
-        let sheetPixelSize = CGSize(width: sheet.width, height: sheet.height)
-        let rects = manifest.unitRects(of: clipInfo, sheetPixelSize: sheetPixelSize)
-        guard let firstFrame = rects.first else {
+        let rects = manifest.unitRects(
+            of: info,
+            sheetPixelSize: CGSize(width: sheet.width, height: sheet.height)
+        )
+        guard !rects.isEmpty else {
             AppLogger.ui.error("클립이 시트 격자를 벗어남 — clip: \(clip.rawValue, privacy: .public)")
-            return
+            return nil
         }
+        return (sheet, rects, info)
+    }
 
-        current = (sheetName, clip)
+    private func show(sheet: CGImage, rect: CGRect) {
         layer.contents = sheet
-        layer.contentsRect = firstFrame
+        layer.contentsRect = rect
         layer.removeAnimation(forKey: Self.animationKey)
-
-        guard rects.count > 1, clipInfo.fps > 0 else { return }
-        layer.add(makeAnimation(rects: rects, clip: clipInfo), forKey: Self.animationKey)
     }
 
     private func makeAnimation(rects: [CGRect], clip: PetSpriteSheet.Clip) -> CAKeyframeAnimation {

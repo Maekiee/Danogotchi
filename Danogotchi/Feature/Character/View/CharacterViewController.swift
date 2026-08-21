@@ -74,6 +74,10 @@ final class CharacterViewController: BaseViewController {
     }
     private let levelUpButton = PrimaryFillButton(title: "레벨업")
     private let reviveButton = PrimaryFillButton(title: "부활")
+    /// dev 빌드 전용 테스트 버튼. 릴리스에서는 스택에 올리지 않으므로 탭이 발생하지 않는다.
+    /// ponytail: 릴리스 바이너리에 버튼 두 개가 남는다 — 조건부 컴파일을 5군데로 번지게 하는 것보다 싸다.
+    private let debugLevelDownButton = PrimaryFillButton(title: "Lv -1")
+    private let debugLevelUpButton = PrimaryFillButton(title: "Lv +1")
 
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
@@ -110,6 +114,10 @@ final class CharacterViewController: BaseViewController {
             levelUpButton,
             reviveButton,
         ].forEach { contentStackView.addArrangedSubview($0) }
+
+        #if DEBUG
+        contentStackView.addArrangedSubview(makeDebugLevelRow())
+        #endif
     }
 
     override func configLayout() {
@@ -177,6 +185,21 @@ extension CharacterViewController {
         return stack
     }
 
+    /// 레벨별 시트를 눈으로 확인하려면 경험치를 실제로 모아야 한다 — dev 빌드에서만 건너뛴다
+    private func makeDebugLevelRow() -> UIView {
+        let row = UIStackView(arrangedSubviews: [debugLevelDownButton, debugLevelUpButton])
+        row.axis = .horizontal
+        row.spacing = AppSpacing.space12
+        row.distribution = .fillEqually
+
+        [debugLevelDownButton, debugLevelUpButton].forEach { button in
+            button.snp.makeConstraints { make in
+                make.height.equalTo(48)
+            }
+        }
+        return row
+    }
+
     private func makeCareButtonGrid() -> UIView {
         let buttons = careButtons.map { $0.button }
         let rows = stride(from: 0, to: buttons.count, by: 2).map { index -> UIStackView in
@@ -216,6 +239,11 @@ extension CharacterViewController {
                 .map { _ in },
             careTapped: careTapped,
             levelUpTapped: levelUpButton.rx.tap.asObservable(),
+            // dev 빌드에서만 스택에 올라간다 — 릴리스에서는 탭이 발생하지 않는다
+            levelDeltaTapped: Observable.merge(
+                debugLevelDownButton.rx.tap.map { -1 },
+                debugLevelUpButton.rx.tap.map { 1 }
+            ),
             reviveTapped: reviveConfirmed.asObservable()
         )
 

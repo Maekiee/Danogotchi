@@ -206,6 +206,24 @@ final class PetPersistenceTests: XCTestCase {
         XCTAssertEqual(result?.info.canLevelUp, false)
     }
 
+    // MARK: - AdjustPetLevelUseCase
+
+    func test_테스트용_레벨_조절은_경험치를_두고_정책_범위_안에서만_움직인다() {
+        _ = repository.createPet(makePet(experience: 500, stateUpdatedAt: hoursAgo(1)))
+        let useCase = DefaultAdjustPetLevelUseCase(petRepository: repository)
+
+        _ = useCase.execute(delta: -1)
+        XCTAssertEqual(repository.readPet()?.level, 0)
+
+        _ = useCase.execute(delta: 1)
+        XCTAssertEqual(repository.readPet()?.level, 1)
+        // 요구 경험치를 건너뛰기만 하고 경험치 자체는 그대로 둔다
+        XCTAssertEqual(repository.readPet()?.experience, 500)
+
+        _ = useCase.execute(delta: PetLevelPolicy.maxLevel + 5)
+        XCTAssertEqual(repository.readPet()?.level, PetLevelPolicy.maxLevel)
+    }
+
     // MARK: - RevivePetUseCase
 
     func test_부활은_HP와_수치와_페널티를_한_번에_저장한다() {

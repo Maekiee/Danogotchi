@@ -95,6 +95,25 @@ final class PetSpriteTests: XCTestCase {
         XCTAssertEqual(animation.repeatCount, .infinity)
     }
 
+    func test_정지_렌더는_지정한_칸만_세우고_애니메이션을_붙이지_않는다() throws {
+        let manifest = try loadManifest()
+        let idle = try XCTUnwrap(manifest.clip(.idle))
+        let name = PetType.sprout.sheetName(level: 0)
+        let sheet = try XCTUnwrap(UIImage(named: name)?.cgImage)
+        let rects = manifest.unitRects(
+            of: idle,
+            sheetPixelSize: CGSize(width: sheet.width, height: sheet.height)
+        )
+        // 알 선택 화면이 2번째 칸을 쓴다
+        XCTAssertGreaterThan(rects.count, 1)
+
+        let view = PetSpriteView()
+        view.renderStill(sheetName: name, clip: .idle, frameIndex: 1)
+
+        XCTAssertEqual(view.layer.contentsRect, rects[1])
+        XCTAssertNil(view.layer.animation(forKey: PetSpriteView.animationKey))
+    }
+
     func test_같은_상태로_다시_렌더하면_애니메이션을_재시작하지_않는다() {
         let view = PetSpriteView()
         let sheetName = PetType.sprout.sheetName(level: 0)
