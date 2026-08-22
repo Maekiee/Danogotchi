@@ -39,7 +39,8 @@ final class HeartBarView: UIView {
 
     private func configLayout() {
         stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.leading.top.bottom.equalToSuperview()
+            make.trailing.lessThanOrEqualToSuperview()
         }
     }
 

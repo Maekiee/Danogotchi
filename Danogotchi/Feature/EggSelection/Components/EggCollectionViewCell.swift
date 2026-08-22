@@ -3,8 +3,12 @@ import SnapKit
 
 final class EggCollectionViewCell: UICollectionViewCell {
 
+    /// 알 아트는 128px 프레임의 세로 69% 지점에 중심이 있다 — 캐릭터가 프레임 하단을 밟는 시트라
+    /// 프레임째 얹으면 셀 중앙보다 내려가 보인다. 그 편차(≈ 0.19 × 스프라이트 한 변)만큼 끌어올린다.
+    private static let artCenterCorrection: CGFloat = 18
+
     private let spriteView = PetSpriteView()
-    /// "개발중" 슬롯 8칸이 쓴다 — 알이 있는 칸은 이미지만 보여준다
+    /// "준비중" 슬롯 8칸이 쓴다 — 알이 있는 칸은 이미지만 보여준다
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = AppFont.label
@@ -31,7 +35,9 @@ final class EggCollectionViewCell: UICollectionViewCell {
 
     private func configLayout() {
         spriteView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(AppSpacing.space8)
+            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space8)
+            make.height.equalTo(spriteView.snp.width)
+            make.centerY.equalToSuperview().offset(-Self.artCenterCorrection)
         }
 
         titleLabel.snp.makeConstraints { make in
@@ -58,13 +64,13 @@ final class EggCollectionViewCell: UICollectionViewCell {
             accessibilityLabel = "\(type.title) 알"
             accessibilityTraits = item.isSelected ? [.staticText, .selected] : .staticText
         } else {
-            titleLabel.text = "개발중"
+            titleLabel.text = "준비중"
             titleLabel.textColor = AppColor.gray60
-            accessibilityLabel = "개발중인 알"
+            accessibilityLabel = "준비중인 알"
             accessibilityTraits = [.staticText, .notEnabled]
         }
 
-        // 딤 처리 — 개발중 슬롯은 탭해도 반응하지 않는다
+        // 딤 처리 — 준비중 슬롯은 탭해도 반응하지 않는다
         contentView.alpha = item.isComingSoon ? 0.4 : 1.0
         contentView.layer.borderColor = item.isSelected
             ? AppColor.textPrimary.cgColor

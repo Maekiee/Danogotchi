@@ -78,6 +78,8 @@ final class CharacterViewController: BaseViewController {
     /// ponytail: 릴리스 바이너리에 버튼 두 개가 남는다 — 조건부 컴파일을 5군데로 번지게 하는 것보다 싸다.
     private let debugLevelDownButton = PrimaryFillButton(title: "Lv -1")
     private let debugLevelUpButton = PrimaryFillButton(title: "Lv +1")
+    /// 디버그 레벨 버튼을 첫 화면 아래로 밀어내는 여백 — 스크롤해야 나온다
+    private let debugLevelSpacer = UIView()
 
     init(viewModel: CharacterViewModel) {
         self.viewModel = viewModel
@@ -116,6 +118,7 @@ final class CharacterViewController: BaseViewController {
         ].forEach { contentStackView.addArrangedSubview($0) }
 
         #if DEBUG
+        contentStackView.addArrangedSubview(debugLevelSpacer)
         contentStackView.addArrangedSubview(makeDebugLevelRow())
         #endif
     }
@@ -124,6 +127,10 @@ final class CharacterViewController: BaseViewController {
         scrollView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
+        
+        petSpriteView.snp.makeConstraints { make in
+            make.height.equalTo(160)
+        }
 
         contentStackView.snp.makeConstraints { make in
             make.verticalEdges.equalToSuperview().inset(AppSpacing.space20)
@@ -131,15 +138,18 @@ final class CharacterViewController: BaseViewController {
             make.width.equalToSuperview().offset(-AppSpacing.space20 * 2)
         }
 
-        petSpriteView.snp.makeConstraints { make in
-            make.height.equalTo(160)
-        }
-
         [levelUpButton, reviveButton].forEach { button in
             button.snp.makeConstraints { make in
                 make.height.equalTo(48)
             }
         }
+
+        #if DEBUG
+        // 화면 높이에 비례 — 기기가 커져 아래 여백이 늘어도 첫 화면에는 안 걸린다
+        debugLevelSpacer.snp.makeConstraints { make in
+            make.height.equalTo(scrollView.frameLayoutGuide.snp.height).multipliedBy(0.3)
+        }
+        #endif
     }
 
     override func configView() {

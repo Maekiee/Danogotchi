@@ -33,14 +33,6 @@ final class EggSelectionViewController: BaseViewController {
         label.textColor = AppColor.textPrimary
         return label
     }()
-    private let descriptionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "지금은 첫 번째 알만 만날 수 있어요."
-        label.font = AppFont.footnote
-        label.textColor = AppColor.textSecondary
-        label.numberOfLines = 0
-        return label
-    }()
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
@@ -75,7 +67,6 @@ final class EggSelectionViewController: BaseViewController {
     override func configHierarchy() {
         [
             titleLabel,
-            descriptionLabel,
             collectionView,
             nextButton,
         ].forEach { view.addSubview($0) }
@@ -87,13 +78,8 @@ final class EggSelectionViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
         }
 
-        descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space8)
-            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
-        }
-
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(descriptionLabel.snp.bottom).offset(AppSpacing.space24)
+            make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space24)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.bottom.equalTo(nextButton.snp.top).offset(-AppSpacing.space16)
         }
@@ -133,7 +119,7 @@ extension EggSelectionViewController {
                 owner.delegate?.eggSelectionDidFinish(type: type)
             }.disposed(by: disposeBag)
 
-        // 개발중 슬롯 무시는 ViewModel이 처리한다
+        // 준비중 슬롯 무시는 ViewModel이 처리한다
         collectionView.rx.itemSelected
             .compactMap { [weak self] indexPath in
                 self?.dataSource.itemIdentifier(for: indexPath)

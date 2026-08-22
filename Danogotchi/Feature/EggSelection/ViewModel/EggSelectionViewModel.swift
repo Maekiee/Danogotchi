@@ -32,7 +32,7 @@ final class EggSelectionViewModel: BaseViewModel {
             .map { selected in
                 (0..<Self.slotCount).map { index in
                     let type = index < types.count ? types[index] : nil
-                    // type != nil 가드가 없으면 초기 상태(둘 다 nil)에서 개발중 8칸이 전부 선택돼 보인다
+                    // type != nil 가드가 없으면 초기 상태(둘 다 nil)에서 준비중 8칸이 전부 선택돼 보인다
                     return EggItem(
                         index: index,
                         petType: type,
