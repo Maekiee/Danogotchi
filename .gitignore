@@ -1,5 +1,6 @@
 Secret.swift
 Secret/
+.claude/settings.local.json
 
 ### macOS ###
 # General
