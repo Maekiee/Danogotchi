@@ -33,11 +33,17 @@
 |:---:|:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="260" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="260" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="260" alt="학습 결과 화면"> |
 
-### 단어장과 캐릭터
+### 단어장
 
-| 추천 단어장 | 단어 추가 | 캐릭터 관리 |
+| 추천 단어장 | 단어 추가 | 단어장 상세 |
 |:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="260" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="260" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/1571ce05-7d56-4e84-a14f-3572c58e69b3" width="260" alt="캐릭터 관리 화면"> |
+| <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="260" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="260" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/48a52402-3975-4a06-b7cb-db45dd116685" width="260" alt="단어장 상세 화면"> |
+
+### 캐릭터
+
+| 캐릭터 화면 |
+|:---:|
+| <img src="https://github.com/user-attachments/assets/1571ce05-7d56-4e84-a14f-3572c58e69b3" width="360" alt="캐릭터 관리 화면"> |
 
 ---
 
