@@ -1,42 +1,21 @@
-<div align="center">
+<div align="left">
 
 # 단어고치 (Danogotchi)
 
-**영단어 학습의 꾸준함을 돕기 위해, 덜 학습한 단어를 우선 출제하고<br/>
-정답 보상을 캐릭터 성장으로 연결한 iOS 앱입니다.**
+단어고치는 영어학습을 하고 사용자의 성장을 캐릭터의 성장으로 표현해<br/>
+학습의 재미와 성장을 직관적으로 보여주는 앱 입니다
 
 [![App Store](https://img.shields.io/badge/App%20Store-다운로드-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/kr/app/%EB%8B%A8%EC%96%B4%EA%B3%A0%EC%B9%98/id6753820016)
-[![GitHub](https://img.shields.io/badge/GitHub-코드%20보기-181717?logo=github&logoColor=white)](https://github.com/Maekiee/Danogotchi)
 
 </div>
+
+---
 
 - **핵심 개발**: 2025.09–2025.10
 - **유지보수**: 2025.10–현재
 - **개발 인원**: 1인 개발
 - **담당 범위**: 기획, 디자인, iOS 개발, 테스트, 출시 및 유지보수
 - **최소 지원 버전**: iOS 16.0
-
-**구현 방식** · Core Data 기반 로컬 저장 · 덜 학습한 단어 우선 출제 · 경과 시간 기반 캐릭터 상태 계산 · MVVM-C·Coordinator 화면 구조 · XCTest 도메인 규칙 검증
-
-<div align="center">
-
-![iOS](https://img.shields.io/badge/iOS-16.0+-000000?logo=apple&logoColor=white)
-![Swift](https://img.shields.io/badge/Swift-5.0-F05138?logo=swift&logoColor=white)
-![UIKit](https://img.shields.io/badge/UIKit-Programmatic-2396F3)
-![RxSwift](https://img.shields.io/badge/RxSwift-6.x-B7178C)
-![CoreData](https://img.shields.io/badge/CoreData-Local%20DB-4B8BBE)
-
-</div>
-
----
-
-## 이런 앱입니다
-
-단어장과 다마고치를 합친 앱입니다.
-
-퀴즈를 풀어 단어를 맞히면 캐릭터의 경험치가 쌓이고, 게이지가 다 차면 레벨이 오릅니다. 반대로 앱을 켜지 않는 동안에는 캐릭터의 **포만감·수분·즐거움·청결**이 시간에 따라 조금씩 떨어지고, 오래 방치하면 체력이 줄다가 결국 세상을 떠납니다.
-
-**"오늘 단어를 봐야 할 이유"를 캐릭터가 만들어 줍니다.**
 
 ---
 
@@ -253,27 +232,6 @@ flowchart LR
 
 ---
 
-## 육성 규칙
-
-**레벨별 필요 경험치** — 레벨업하면 경험치는 0이 되고 초과분은 다음 레벨로 넘어가지 않습니다.
-
-| 레벨 | 0 → 1 | 1 → 2 | 2 → 3 | 3 → 4 | 4 → 5 | 5 → 6 | 6 → 7 |
-|---|---|---|---|---|---|---|---|
-| 필요 경험치 | 1,000 | 2,105 | 3,347 | 5,063 | 7,423 | 10,639 | 36,189 |
-
-**돌봄 수치** — 모두 0~100이며 100이 가장 좋은 상태입니다.
-
-| 항목 | 시간당 감소 | 돌보기 | 조건 |
-|---|---|---|---|
-| 수분 | −1.0 | +25 | 해당 수치가 **80 미만**일 때만 돌볼 수 있음 |
-| 포만감 | −0.8 | +25 | 〃 |
-| 즐거움 | −0.6 | +25 | 〃 |
-| 청결 | −0.4 | +25 | 〃 |
-
-체력은 최대 40이며, 네 수치가 모두 65를 넘으면 회복하고 20 이하인 수치가 있으면 감소합니다. 아무것도 하지 않아도 **80시간까지는 체력이 줄지 않습니다.** 체력이 0이 되면 부활해야 하고, 부활 시 현재 레벨 경험치의 10%가 차감됩니다.
-
----
-
 ## 테스트
 
 도메인 정책 단위 테스트 **76개**를 운영합니다.
@@ -285,30 +243,3 @@ flowchart LR
 | `PetLevelPolicyTests` (7) | 레벨별 요구 경험치, 게이지 진행률, 최고 레벨 처리, 경험치 이월 없음 |
 | `PetHeartPolicyTests` (7) | 체력의 하트 10칸 표시 변환 |
 | `PetNamePolicyTests` (7) | 캐릭터 이름 입력 규칙 |
-
-```bash
-xcodebuild -scheme Danogotchi-dev -destination 'platform=iOS Simulator,name=iPhone 17' test
-```
-
----
-
-## 빌드
-
-**요구 사항** — Xcode 16 이상, iOS 16.0 이상. 의존성은 Swift Package Manager로 자동 설치됩니다.
-
-```bash
-xcodebuild -scheme Danogotchi-dev build   # 개발용 · 단어고치[DEV]
-xcodebuild -scheme Danogotchi build       # 운영용 · com.maekie.Danogotchi
-```
-
-> **주의** — API 키와 Firebase 설정은 저장소에 포함돼 있지 않습니다. `Danogotchi/App/Secret/`에 `Secret.swift`, `Secrets.xcconfig`, 개발·운영용 `GoogleService-Info.plist`를 배치해야 빌드됩니다. 자세한 내용은 [`docs/environment.md`](docs/environment.md)를 참고하세요.
-
----
-
-## 문서
-
-| 문서 | 내용 |
-|---|---|
-| [`docs/architecture.md`](docs/architecture.md) | 레이어 구조, 도메인 용어 정의, 데이터 흐름 |
-| [`docs/conventions.md`](docs/conventions.md) | 네이밍, Rx, MVVM, Coordinator, 디자인 시스템, 로깅 규칙 |
-| [`docs/environment.md`](docs/environment.md) | 빌드 스킴, 의존성, 로컬 DB, UI 구현 메모 |
