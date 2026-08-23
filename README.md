@@ -2,14 +2,29 @@
 
 # 단어고치 (Danogotchi)
 
-**단어를 외울수록 캐릭터가 자라는 iOS 영어 단어 학습 앱**
+**영단어 학습의 꾸준함을 돕기 위해, 덜 학습한 단어를 우선 출제하고<br/>
+정답 보상을 캐릭터 성장으로 연결한 iOS 앱입니다.**
+
+[![App Store](https://img.shields.io/badge/App%20Store-다운로드-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/kr/app/%EB%8B%A8%EC%96%B4%EA%B3%A0%EC%B9%98/id6753820016)
+[![GitHub](https://img.shields.io/badge/GitHub-코드%20보기-181717?logo=github&logoColor=white)](https://github.com/Maekiee/Danogotchi)
+
+</div>
+
+- **핵심 개발**: 2025.09–2025.10
+- **유지보수**: 2025.10–현재
+- **개발 인원**: 1인 개발
+- **담당 범위**: 기획, 디자인, iOS 개발, 테스트, 출시 및 유지보수
+- **최소 지원 버전**: iOS 16.0
+
+**구현 방식** · Core Data 기반 로컬 저장 · 덜 학습한 단어 우선 출제 · 경과 시간 기반 캐릭터 상태 계산 · MVVM-C·Coordinator 화면 구조 · XCTest 도메인 규칙 검증
+
+<div align="center">
 
 ![iOS](https://img.shields.io/badge/iOS-16.0+-000000?logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-5.0-F05138?logo=swift&logoColor=white)
 ![UIKit](https://img.shields.io/badge/UIKit-Programmatic-2396F3)
 ![RxSwift](https://img.shields.io/badge/RxSwift-6.x-B7178C)
 ![CoreData](https://img.shields.io/badge/CoreData-Local%20DB-4B8BBE)
-![App Store](https://img.shields.io/badge/App%20Store-출시-0D96F6)
 
 </div>
 
