@@ -21,12 +21,23 @@
 
 ## 스크린샷
 
-> 이미지 준비 중입니다. 아래 파일을 `docs/images/`에 넣으면 이 표에 그대로 표시됩니다.
+### 온보딩
 
-| 메인 · 단어 카드 | 퀴즈 | 캐릭터 | 단어장 |
-|:---:|:---:|:---:|:---:|
-| `main.png` | `quiz.png` | `character.png` | `library.png` |
-| 준비 중 | 준비 중 | 준비 중 | 준비 중 |
+| 관심사 선택 | 배경 테마 선택 | 알 선택 |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/cd975405-940f-4be7-83d5-fd3ebacd9b9c" width="260" alt="관심사 선택 온보딩 화면"> | <img src="https://github.com/user-attachments/assets/33212c73-f934-4c6f-b846-2b8775a741db" width="260" alt="배경 테마 선택 화면"> | <img src="https://github.com/user-attachments/assets/91b1efe8-c8e9-4ef1-91c9-99bafc364b34" width="260" alt="알 선택 화면"> |
+
+### 학습
+
+| 단어 탐색 | 4지선다 퀴즈 | 학습 결과 |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="260" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="260" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="260" alt="학습 결과 화면"> |
+
+### 단어장과 캐릭터
+
+| 추천 단어장 | 단어 추가 | 캐릭터 관리 |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="260" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="260" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/1571ce05-7d56-4e84-a14f-3572c58e69b3" width="260" alt="캐릭터 관리 화면"> |
 
 ---
 
