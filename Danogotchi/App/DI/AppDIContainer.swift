@@ -27,10 +27,8 @@ final class AppDIContainer {
 extension AppDIContainer {
 
     func makeExploreVocabViewModel() -> ExploreVocabViewModel {
-        let learnHistoryRepository = makeVocabLearningHistoryRepository()
         return ExploreVocabViewModel(
-            vocabBookRepository: vocabBookRepository,
-            learnHistoryRepository: learnHistoryRepository,
+            fetchVocabsUseCase: makeFetchVocabsUseCase(),
             startQuizUseCase: makeStartQuizUseCase(),
             toggleSaveVocabUseCase: makeToggleSaveVocabUseCase()
         )
@@ -137,12 +135,15 @@ extension AppDIContainer {
     func makeSearchThemeRepository() -> SearchThemeRepository {
         return DefaultSearchThemeRepository()
     }
+
+    func makeSearchThemeUseCase() -> SearchThemeUseCase {
+        return DefaultSearchThemeUseCase(repository: makeSearchThemeRepository())
+    }
     
     func makeSearchThemeViewModel(mode: SearchThemeViewController.EntryMode) -> SearchThemeViewModel {
-        let repository = makeSearchThemeRepository()
         return SearchThemeViewModel(
             mode: mode,
-            repository: repository
+            searchThemeUseCase: makeSearchThemeUseCase()
         )
     }
 }

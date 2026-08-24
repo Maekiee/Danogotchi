@@ -5,8 +5,7 @@ import RxCocoa
 
 final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
-    private let vocabBookRepository: VocabBookRepository
-    private let learnHistoryRepository: LearningHistoryRepository
+    private let fetchVocabsUseCase: FetchVocabsUseCase
     private let startQuizUseCase: StartQuizUseCase
     private let toggleSaveVocabUseCase: ToggleSaveVocabUseCase
 
@@ -14,13 +13,11 @@ final class ExploreVocabViewModel: BaseViewModel {
     private var shuffledOrder: [UUID] = []
 
     init(
-        vocabBookRepository: VocabBookRepository,
-        learnHistoryRepository: LearningHistoryRepository,
+        fetchVocabsUseCase: FetchVocabsUseCase,
         startQuizUseCase: StartQuizUseCase,
         toggleSaveVocabUseCase: ToggleSaveVocabUseCase
     ) {
-        self.vocabBookRepository = vocabBookRepository
-        self.learnHistoryRepository = learnHistoryRepository
+        self.fetchVocabsUseCase = fetchVocabsUseCase
         self.startQuizUseCase = startQuizUseCase
         self.toggleSaveVocabUseCase = toggleSaveVocabUseCase
     }
@@ -44,27 +41,18 @@ final class ExploreVocabViewModel: BaseViewModel {
         let startQuizRelay = PublishRelay<QuizData>()
         let alertMessageRelay = PublishRelay<String>()
 
-        let bookChangedTrigger = vocabBookRepository.activeBookId.map { _ in () }
-
         let viewRefreshTrigger = input.viewWillAppear.startWith(())
 
         // 트리거마다 CoreData에서 다시 읽는다 — 단어 추가/삭제가 즉시 반영되도록
-        Observable.merge(bookChangedTrigger, viewRefreshTrigger)
-            .compactMap { [weak self] _ in self?.vocabBookRepository.readActiveBook() }
-            .bind(with: self) { owner, book in
-                let stats = owner.learnHistoryRepository.fetchAllHistory().statsByVocab()
-                let savedIDs = owner.savedSourceIDs(activeBook: book)
-                let displayItems = owner.shuffledWords(book.vocabList)
-                    .map { word in
-                        VocabDisplayInfo(
-                            word: word,
-                            stats: stats[word.id],
-                            isSaved: savedIDs.contains(word.id)
-                        )
-                    }
-                allWordItems.accept(displayItems)
+        Observable.merge(fetchVocabsUseCase.activeBookChanged, viewRefreshTrigger)
+            .flatMapLatest { [weak self] _ -> Observable<(bookType: BookTopic, items: [VocabDisplayInfo])> in
+                guard let self else { return .empty() }
+                return fetchVocabsUseCase.executeActive()
+            }
+            .bind(with: self) { owner, content in
+                allWordItems.accept(owner.shuffledItems(content.items))
                 // 나의 단어장을 학습중이면 저장할 곳이 없다
-                showsSaveButton.accept(book.bookType != .myBook)
+                showsSaveButton.accept(content.bookType != .myBook)
             }.disposed(by: disposeBag)
 
         input.saveVocabTrigger
@@ -109,23 +97,16 @@ final class ExploreVocabViewModel: BaseViewModel {
 
     /// 단어장 앞쪽 단어만 반복 노출되지 않도록 무작위로 섞는다.
     /// 단어 구성이 그대로면 기존 순서를 유지한다 — 퀴즈·라이브러리에서 돌아올 때 카드가 재배치되지 않도록.
-    private func shuffledWords(_ words: [Vocab]) -> [Vocab] {
-        let wordsById = Dictionary(uniqueKeysWithValues: words.map { ($0.id, $0) })
+    private func shuffledItems(_ items: [VocabDisplayInfo]) -> [VocabDisplayInfo] {
+        let itemsById = Dictionary(uniqueKeysWithValues: items.map { ($0.word.id, $0) })
 
-        if shuffledOrder.count == words.count {
-            let kept = shuffledOrder.compactMap { wordsById[$0] }
-            if kept.count == words.count { return kept }
+        if shuffledOrder.count == items.count {
+            let kept = shuffledOrder.compactMap { itemsById[$0] }
+            if kept.count == items.count { return kept }
         }
 
-        let shuffled = words.shuffled()
-        shuffledOrder = shuffled.map(\.id)
+        let shuffled = items.shuffled()
+        shuffledOrder = shuffled.map(\.word.id)
         return shuffled
-    }
-
-    /// 학습중인 추천 단어장의 단어 중 나의 단어장에 복사돼 있는 원본 id 집합
-    private func savedSourceIDs(activeBook: VocabBook) -> Set<UUID> {
-        guard activeBook.bookType != .myBook,
-              let myBook = vocabBookRepository.readAllBooks(bookType: .myBook).first else { return [] }
-        return Set(vocabBookRepository.fetchVocabs(inBookId: myBook.id).compactMap { $0.sourceWordId })
     }
 }

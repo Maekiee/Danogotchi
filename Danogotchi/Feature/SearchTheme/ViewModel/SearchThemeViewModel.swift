@@ -7,15 +7,15 @@ final class SearchThemeViewModel: BaseViewModel {
     private static let networkErrorMessage = "잠시후 다시 시도해주세요"
 
     private let disposeBag = DisposeBag()
-    private let repository: SearchThemeRepository
+    private let searchThemeUseCase: SearchThemeUseCase
     private let mode: SearchThemeViewController.EntryMode
 //    private let mode: SearchThemeViewController.EntryMode
 
     init(
         mode: SearchThemeViewController.EntryMode,
-        repository: SearchThemeRepository
+        searchThemeUseCase: SearchThemeUseCase
     ) {
-        self.repository = repository
+        self.searchThemeUseCase = searchThemeUseCase
         self.mode = mode
     }
 
@@ -49,7 +49,7 @@ final class SearchThemeViewModel: BaseViewModel {
             .take(1)
             .withLatestFrom(nextPage.asObservable())
             .flatMapLatest{ page in
-                self.repository.searchPhotos(query: "library", page: page)
+                self.searchThemeUseCase.execute(query: "library", page: page)
             }
             .bind(with: self) { owner, result in
                 switch result {
@@ -84,7 +84,7 @@ final class SearchThemeViewModel: BaseViewModel {
             .filter { _ in !isLoading.value }
             .do(onNext: { _ in isLoading.accept(true) })
             .flatMapLatest { (searchWrod, page, _, Int) in
-                self.repository.searchPhotos(query: searchWrod, page: page)
+                self.searchThemeUseCase.execute(query: searchWrod, page: page)
             }.bind(with: self) { owner, result in
                 isLoading.accept(false)
                 switch result {
@@ -110,7 +110,7 @@ final class SearchThemeViewModel: BaseViewModel {
                 currentSearchWord.accept(text)
             }
             .flatMap { text in
-                self.repository.searchPhotos(query: text, page: 1)
+                self.searchThemeUseCase.execute(query: text, page: 1)
             }
             .bind(with: self) { owner, result in
                 imageItems.accept([])

@@ -2,7 +2,10 @@ import Foundation
 import RxSwift
 
 protocol FetchVocabsUseCase {
+    /// 활성 단어장 변경 신호. 값 캐시가 아니므로 신호를 받으면 executeActive()로 다시 읽는다.
+    var activeBookChanged: Observable<Void> { get }
     func execute(topic: BookTopic) -> Observable<[VocabDisplayInfo]>
+    func executeActive() -> Observable<(bookType: BookTopic, items: [VocabDisplayInfo])>
 }
 
 final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
@@ -16,6 +19,10 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
         self.vocabBookRepository = vocabBookRepository
         self.learningHistoryRepository = learningHistoryRepository
     }
+
+    var activeBookChanged: Observable<Void> {
+        return vocabBookRepository.activeBookId.map { _ in () }
+    }
     
     func execute(topic: BookTopic) -> Observable<[VocabDisplayInfo]> {
         fetchVocabs(topic: topic)
@@ -23,6 +30,15 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
                 guard let self else { return [] }
                 return self.joinWithHistory(vocabs, savedSourceIDs: self.savedSourceIDs(topic: topic))
             }
+    }
+
+    func executeActive() -> Observable<(bookType: BookTopic, items: [VocabDisplayInfo])> {
+        guard let book = vocabBookRepository.readActiveBook() else { return .empty() }
+        let items = joinWithHistory(
+            book.vocabList,
+            savedSourceIDs: savedSourceIDs(topic: book.bookType)
+        )
+        return .just((bookType: book.bookType, items: items))
     }
 
     private func fetchVocabs(topic: BookTopic) -> Observable<[Vocab]> {

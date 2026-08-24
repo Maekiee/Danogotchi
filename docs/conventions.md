@@ -60,13 +60,14 @@
 
 ## Repository 컨벤션
 
-- 프로토콜은 `Shared/Domain/Interfaces/Repositories/`, `Default*` 구현체는 `Shared/Data/Repositories/`. ViewModel은 항상 프로토콜에 의존.
+- 프로토콜은 `Shared/Domain/Interfaces/Repositories/`, `Default*` 구현체는 `Shared/Data/Repositories/`에 둔다.
+- ViewModel은 Repository를 직접 받지 않고 UseCase 프로토콜을 경유한다. 외부 의존성이 없는 UI 상태 로직과 상태 없는 Domain Policy에는 형식적인 UseCase를 만들지 않는다.
 - CRUD 메서드 네이밍: `readAll()` / `fetch*` / `create*` / `update*` / `delete(id:)`.
+- CoreData Entity → Domain은 `toDomain()`, Domain 전체 반영은 필요한 경우 `apply(_:)`, 네트워크 DTO → Domain은 현재 `toEntity()`를 쓴다. 사용하지 않는 역방향 Mapper는 만들지 않는다.
 - 새 Repository/UseCase를 만들면 반드시 `AppDIContainer`에 `make*()` 추가.
 
 ## DI 컨벤션
 
 - `AppDIContainer` 본체 init에는 Manager 싱글턴 보유까지만, 도메인별 팩토리는 `extension`으로 분리 (`// MARK: - Explore/Library/Quiz/Setting`).
 - ViewModel/Repository/UseCase 생성은 반드시 `AppDIContainer.make*` 경유.
-
 
