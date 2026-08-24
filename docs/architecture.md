@@ -1,7 +1,8 @@
 # 아키텍처
 
-기존 MVVM + Repository 구조를 **Clean Architecture + MVVM-C (Input/Output) + RxSwift** 로 전면 교체하는 중이다.
-멀티모듈·TCA 전환(장기 목표)을 대비해 **App / Core / Shared / Feature** 구조로 디렉토리 개편 완료(2026-07). UseCase 도입 등 코드 레벨 이관은 점진적으로 진행한다.
+Clean Architecture + MVVM-C Input/Output Pattern
+멀티모듈·TCA 전환(장기 목표)을 대비해 **App / Core / Shared / Feature** 구조로 디렉토리 개편 완료(2026-07). 
+ViewModel의 Repository 접근은 UseCase를 경유하며, 싱글턴 직접 참조 제거와 멀티모듈 전환은 점진적으로 진행한다.
 
 ## 레이어 구조 (디렉토리)
 
@@ -11,7 +12,7 @@
 
 > **배치 규칙**: 도메인 조각·UI가 **2개 이상 Feature에서 쓰이면 `Shared/`**, 정확히 1개 Feature 전용이면 **그 Feature 폴더 안**(예: `Feature/Quiz/Components/CustomProgressView`)에 둔다.
 >
-> **UseCase 레이어**(`Shared/Domain/UseCases/`)는 도입 진행 중. 처음부터 일괄 도입하지 않고, **비즈니스 규칙이 복잡해져 ViewModel에서 분리가 필요한 순간에 만든다**.
+> **UseCase 레이어**(`Shared/Domain/UseCases/`)는 ViewModel과 Repository 사이의 경계다. ViewModel은 Repository를 직접 받지 않고 UseCase 프로토콜을 경유한다. 외부 의존성이 없는 UI 상태 로직과 상태 없는 Domain Policy에는 형식적인 UseCase를 만들지 않는다.
 
 ## MVVM-C / Coordinator
 - 모든 화면 전환은 `Coordinator` 프로토콜을 통해 수행된다 (직접 `pushViewController` 금지).
@@ -51,6 +52,7 @@
 ### 활성 단어장 (학습중 단어장)
 - 저장: `VocabBookEntity.isActive` — 앱 전체에서 **항상 1개**. `setActiveBook(id:)`가 같은 트랜잭션에서 기존 것을 해제한다.
 - 읽기: `VocabBookRepository.readActiveBook()` / 변경 신호: `activeBookId: Observable<UUID?>`
+- 화면 조회: `FetchVocabsUseCase.executeActive()`가 활성 단어장·학습 이력·저장 여부를 합쳐 ViewModel에 전달한다.
 - **신호는 값 캐시가 아니다** — 신호를 받으면 `readActiveBook()`으로 다시 읽는다.
 
 ### 학습 이력
@@ -64,10 +66,10 @@
 ### 경험치 (Experience)
 - 정책: `Shared/Domain/UseCases/EarnExperienceUseCase.swift`의 `ExperiencePolicy` — 정답 1개당 `base + 학습횟수 가산 + 정답률 가산`, 전 문제 정답 시 `perfectBonus`.
 - **산정은 이력 반영 *전*의 `LearningStats` 기준.** 반영 후 값으로 계산하면 방금 맞힌 정답이 정답률을 올려 스스로 보상을 깎는다.
-- 누적 포인트는 `ExperienceRepository`(UserDefaults `experienceTotalPoint`) — CoreData 아님. 캐릭터 엔티티 도입 시 이관 예정.
+- 획득 경험치는 `EarnExperienceUseCase → PetRepository.addExperience(_:) → PetEntity.totalExperience`로 저장한다. CoreData 속성명은 과거 이름을 유지하지만 값은 현재 레벨에서 모은 경험치다.
 
 ### 테마 (Theme)
-- 조회: `SearchThemeRepository` → Unsplash REST (`Core/Network/ApiRouter.searchPhoto`).
+- 조회: `SearchThemeViewModel → SearchThemeUseCase → SearchThemeRepository` → Unsplash REST (`Core/Network/ApiRouter.searchPhoto`).
 - 선택 결과 URL은 `UserInfoManager.currentThemeUrl`에 저장된다. 메인 화면 배경으로 쓰인다.
 
 ## 핵심 데이터 흐름 (Write 패스)
@@ -75,11 +77,15 @@
 UseCase → Repository → CoreData 동기 저장 → `activeBookId` 등 Relay 신호 방출 → 구독 측이 재조회.
 즉 **저장이 먼저, UI 갱신은 신호 기반 재조회**다.
 
+## 데이터 매핑
+
+- CoreData Entity → Domain Model은 Data 계층 Mapper extension의 `toDomain()`을 쓴다.
+- Domain Model 전체를 CoreData Entity에 반영할 때는 필요한 모델만 `apply(_:)`를 둔다. 부분 생성·수정은 Repository가 필드를 직접 반영한다.
+- 네트워크 DTO → Domain Model은 현재 DTO extension의 `toEntity()`를 쓴다. 읽기 전용 API에 사용하지 않는 `toDTO()`를 대칭으로 만들지 않는다.
+
 ## 전역 상태 / 싱글턴
 
 - `UserInfoManager` — UserDefaults: `username` / `userId`(미사용) / `themeUrl` 만. 활성 단어장·퀴즈 상태는 여기 없다(CoreData로 이관됨).
-- UserDefaults를 직접 쓰는 곳이 하나 더 있다 — `DefaultExperienceRepository`(`experienceTotalPoint`). UserInfoManager를 경유하지 않는다.
 - `TTSManager` — AVSpeechSynthesizer 래퍼 (단어 발음)
 
-> 싱글턴 직접 참조는 점진적으로 줄여나가는 중. 신규 코드는 가능하면 **AppDIContainer를 통한 주입** 또는 Repository 의존성으로 우회한다.
-
+> 싱글턴 직접 참조는 점진적으로 줄여나가는 중. 신규 의존성은 **AppDIContainer를 통해 주입**하고, ViewModel의 Repository 접근은 UseCase 프로토콜을 경유한다.

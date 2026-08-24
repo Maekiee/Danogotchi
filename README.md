@@ -142,8 +142,9 @@ graph TD
     UC --> IF
     RP -. 구현 .-> IF
     RP --> MP
-    MP --> CD
+    RP --> CD
     RP --> NW
+    MP --> EN
 ```
 
 ### 디렉토리
@@ -153,7 +154,7 @@ Danogotchi/
 ├── App/           앱 진입점 · AppDIContainer · Coordinator 계층
 ├── Core/          BaseViewController · CoreDataStack · 네트워크 · AppLogger
 ├── Shared/
-│   ├── Domain/    Entity · Repository 프로토콜 · UseCase 16개 · Policy 4개
+│   ├── Domain/    Entity · Repository 프로토콜 · UseCase · Policy
 │   ├── Data/      Repository 구현 5종 · Mapper · CoreData 모델 · 추천 단어 시드
 │   └── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트
 └── Feature/       화면 단위 폴더 12개 (View / ViewModel / Components / Coordinator)
@@ -175,6 +176,7 @@ Danogotchi/
 
 ### UseCase 레이어
 - 비즈니스 규칙을 `AddVocabUseCase`, `StartQuizUseCase`, `CarePetUseCase`, `EarnExperienceUseCase` 등으로 분리하고, 정책은 `PetStatePolicy` · `PetLevelPolicy` · `ExperiencePolicy`에 상수까지 모아 테스트 가능하게 유지
+- Repository 접근이 필요한 ViewModel은 UseCase 프로토콜을 경유하며, UI 상태 로직과 상태 없는 Domain Policy에는 형식적인 UseCase를 만들지 않음
 
 ### Repository 패턴 + DIP
 - `Shared/Domain/Interfaces`의 프로토콜과 `Shared/Data/Repositories`의 구현을 분리해 Domain이 CoreData·네트워크를 모르게 구성
@@ -192,7 +194,7 @@ Danogotchi/
 - View → ViewModel → UseCase → Repository → CoreData 동기 저장 → 변경 신호(Relay) 방출 → 구독 측 재조회. 저장이 먼저이고 UI 갱신은 신호 기반 재조회로 처리
 
 ### 테스트: 
-- 정책·영속화 계층 중심 단위 테스트 90개 (`PetStatePolicyTests`, `PetPersistenceTests` 등)
+- 정책·UseCase·영속화 계층 중심 단위 테스트 93개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
 
 ---
 
@@ -255,7 +257,8 @@ flowchart LR
 
 ### CoreData
 * 엔티티 4종(`VocabEntity` · `VocabBookEntity` · `LearningHistoryEntity` · `PetEntity`)을 사용합니다.
-* `Mapper`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다.
+* `Mapper`의 `toDomain()`과 필요한 모델의 `apply(_:)`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다.
+* 네트워크 DTO는 `toEntity()`로 Domain Model에 변환하며, 읽기 전용 흐름에 사용하지 않는 `toDTO()`는 만들지 않습니다.
 
 ### Alamofire + Kingfisher
 * Unsplash 사진 검색(`ApiRouter`)을 담당합니다.
@@ -278,7 +281,7 @@ flowchart LR
 * subsystem이 번들 ID라 개발용과 운영용 로그가 Console에서 자동으로 분리됩니다.
 
 ### XCTest
-* 도메인 정책 단위 테스트 **76개**를 운영합니다.
+* 도메인 정책·UseCase·영속화 단위 테스트 **93개**를 운영합니다.
 
 ### 빌드 설정
 * `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
@@ -288,12 +291,15 @@ flowchart LR
 
 ## 테스트
 
-도메인 정책 단위 테스트 **76개**를 운영합니다.
+도메인 정책·UseCase·영속화 단위 테스트 **93개**를 운영합니다.
 
 | 파일 | 검증 내용 |
 |---|---|
 | `PetStatePolicyTests` (34) | 시간에 따른 수치 감소, 돌보기 경계, 기분 판정 우선순위, 체력 구간별 정산, 사망·부활 페널티 |
-| `PetPersistenceTests` (21) | UseCase와 CoreData 저장 왕복, 레벨업·부활·경험치 적립의 실제 저장 결과 |
+| `PetPersistenceTests` (22) | UseCase와 CoreData 저장 왕복, 레벨업·부활·경험치 적립의 실제 저장 결과 |
 | `PetLevelPolicyTests` (7) | 레벨별 요구 경험치, 게이지 진행률, 최고 레벨 처리, 경험치 이월 없음 |
 | `PetHeartPolicyTests` (7) | 체력의 하트 10칸 표시 변환 |
 | `PetNamePolicyTests` (7) | 캐릭터 이름 입력 규칙 |
+| `PetSpriteTests` (11) | 스프라이트 매니페스트·프레임 격자·애니메이션 전환 |
+| `PetTypeTests` (2) | 레벨별 이미지 로드와 범위 제한 |
+| `VocabUseCaseTests` (3) | 활성 단어장의 이력·저장 상태 조립과 변경 신호 |
