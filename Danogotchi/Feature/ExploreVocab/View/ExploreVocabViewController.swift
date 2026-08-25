@@ -69,8 +69,13 @@ final class ExploreVocabViewController: BaseViewController {
     }()
     private let openCharacterButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
-        config.image = UIImage(systemName: "pawprint", withConfiguration: symbolConfig)
+        if let icon = UIImage(named: "character-icon") {
+            let height = AppSpacing.space32
+            let size = CGSize(width: height * icon.size.width / icon.size.height, height: height)
+            config.image = UIGraphicsImageRenderer(size: size).image { _ in
+                icon.draw(in: CGRect(origin: .zero, size: size))
+            }.withRenderingMode(.alwaysTemplate)
+        }
         config.baseForegroundColor = AppColor.white
         config.background.backgroundColor = AppColor.black.withAlphaComponent(
             0.25
