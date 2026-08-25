@@ -6,28 +6,30 @@
       "name": "idle",
       "row": 0,
       "frameCount": 8,
-      "fps": 10,
-      "loop": true
+      "fps": 6,
+      "loop": true,
+      "restFrames": 4,
+      "cycleSeconds": 5
     },
     {
       "name": "sad",
       "row": 1,
       "frameCount": 8,
-      "fps": 10,
+      "fps": 6,
       "loop": true
     },
     {
       "name": "sick",
       "row": 2,
       "frameCount": 4,
-      "fps": 10,
+      "fps": 6,
       "loop": true
     },
     {
       "name": "sleep",
       "row": 3,
       "frameCount": 4,
-      "fps": 10,
+      "fps": 6,
       "loop": true
     }
   ]

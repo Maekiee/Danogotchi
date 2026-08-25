@@ -77,9 +77,16 @@ final class PetSpriteTests: XCTestCase {
     func test_애니메이션은_프레임을_칸_단위로_끊어_무한_반복한다() throws {
         let manifest = try loadManifest()
         let idle = try XCTUnwrap(manifest.clip(.idle))
+        let name = PetType.sprout.sheetName(level: 0)
+        let sheet = try XCTUnwrap(UIImage(named: name)?.cgImage)
+        // 재생 길이는 시트 칸 수가 아니라 playbackOrder가 늘려놓은 순서를 따른다
+        let playback = idle.playbackOrder(of: manifest.unitRects(
+            of: idle,
+            sheetPixelSize: CGSize(width: sheet.width, height: sheet.height)
+        ))
 
         let view = PetSpriteView()
-        view.render(sheetName: PetType.sprout.sheetName(level: 0), clip: .idle)
+        view.render(sheetName: name, clip: .idle)
 
         let animation = try XCTUnwrap(
             view.layer.animation(forKey: PetSpriteView.animationKey) as? CAKeyframeAnimation
@@ -88,11 +95,53 @@ final class PetSpriteTests: XCTestCase {
         XCTAssertEqual(animation.keyPath, "contentsRect")
         // 보간되면 칸이 스르륵 밀린다 — 이 한 줄이 프레임을 튀게 만든다
         XCTAssertEqual(animation.calculationMode, .discrete)
-        XCTAssertEqual(animation.values?.count, idle.frameCount)
+        XCTAssertEqual(animation.values?.count, playback.count)
         // discrete는 값 n개에 keyTimes n+1개를 요구한다
-        XCTAssertEqual(animation.keyTimes?.count, idle.frameCount + 1)
-        XCTAssertEqual(animation.duration, Double(idle.frameCount) / idle.fps, accuracy: .ulpOfOne)
+        XCTAssertEqual(animation.keyTimes?.count, playback.count + 1)
+        XCTAssertEqual(animation.duration, Double(playback.count) / idle.fps, accuracy: .ulpOfOne)
         XCTAssertEqual(animation.repeatCount, .infinity)
+    }
+
+    func test_쉬는_자세를_여러_번_돌린_뒤_꼬리를_한_번_붙인다() throws {
+        let manifest = try loadManifest()
+        let idle = try XCTUnwrap(manifest.clip(.idle))
+        let rest = try XCTUnwrap(idle.restFrames, "idle에 쉬는 구간이 없다")
+        let cycle = try XCTUnwrap(idle.cycleSeconds, "idle에 목표 주기가 없다")
+
+        let sheet = try XCTUnwrap(UIImage(named: PetType.sprout.sheetName(level: 0))?.cgImage)
+        let frames = manifest.unitRects(
+            of: idle,
+            sheetPixelSize: CGSize(width: sheet.width, height: sheet.height)
+        )
+        let playback = idle.playbackOrder(of: frames)
+
+        // 꼬리는 정확히 한 번, 맨 뒤에만 붙는다 — 깜박임이 두 번 돌면 여기서 깨진다
+        let tail = Array(frames.suffix(from: rest))
+        XCTAssertEqual(Array(playback.suffix(tail.count)), tail)
+
+        let head = playback.dropLast(tail.count)
+        XCTAssertEqual(head.count % rest, 0)
+        for (index, rect) in head.enumerated() {
+            XCTAssertEqual(rect, frames[index % rest], "쉬는 루프 \(index)번째 칸이 어긋났다")
+        }
+
+        // 주기는 쉬는 루프 한 바퀴(rest/fps) 단위로만 떨어지므로 목표에 정확히 맞을 수 없다.
+        // 그 한 바퀴보다 더 벗어났다면 반올림이 잘못된 것이다.
+        let duration = Double(playback.count) / idle.fps
+        XCTAssertEqual(duration, cycle, accuracy: Double(rest) / idle.fps)
+    }
+
+    func test_쉬는_구간이_없는_클립은_전_프레임을_그대로_돌린다() throws {
+        let manifest = try loadManifest()
+        let sleep = try XCTUnwrap(manifest.clip(.sleep))
+        let sheet = try XCTUnwrap(UIImage(named: PetType.sprout.sheetName(level: 0))?.cgImage)
+        let frames = manifest.unitRects(
+            of: sleep,
+            sheetPixelSize: CGSize(width: sheet.width, height: sheet.height)
+        )
+
+        XCTAssertNil(sleep.restFrames)
+        XCTAssertEqual(sleep.playbackOrder(of: frames), frames)
     }
 
     func test_정지_렌더는_지정한_칸만_세우고_애니메이션을_붙이지_않는다() throws {
