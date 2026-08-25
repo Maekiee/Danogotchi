@@ -8,7 +8,13 @@ ViewModel의 Repository 접근은 UseCase를 경유하며, 싱글턴 직접 참�
 
 핵심 두 가지:
 1. **`Shared/Domain/Interfaces`(프로토콜)와 `Shared/Data/Repositories`(구현)의 분리** — 의존성 역전(DIP)으로 Domain이 외부 의존성을 모른다.
-2. **의존 방향은 `Feature → Shared → Core` 한 방향**, 조립(구현체 주입)은 `App`에서만 한다. Feature는 다른 Feature를 참조하지 않는다.
+2. **의존 방향은 `Feature → Shared → Core` 한 방향**, 조립(구현체 주입)은 `App`에서만 한다.
+   Feature 간 참조는 **그 플로우의 Coordinator 안에서만** 허용한다 — 여러 Feature 화면을 하나의 흐름으로 엮는 지점이 Coordinator이기 때문이다.
+   **View / ViewModel / UseCase는 다른 Feature를 참조하지 않는다.**
+
+> **현재 Feature 간 엣지** (전부 Coordinator 경유):
+> `Library → AddVocab · VocabBookDetail` / `Quiz → CompleteQuiz` / `Setting → SearchTheme`
+> 새 엣지가 생기면 이 목록에 추가한다. 목록에 없거나 Coordinator 밖에서 생긴 참조는 위반이다.
 
 > **배치 규칙**: 도메인 조각·UI가 **2개 이상 Feature에서 쓰이면 `Shared/`**, 정확히 1개 Feature 전용이면 **그 Feature 폴더 안**(예: `Feature/Quiz/Components/CustomProgressView`)에 둔다.
 >

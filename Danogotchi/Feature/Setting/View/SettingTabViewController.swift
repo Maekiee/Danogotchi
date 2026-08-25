@@ -1,14 +1,11 @@
 import UIKit
-import OSLog
 import SnapKit
 import RxSwift
 import RxCocoa
-import SafariServices
-import MessageUI
 
 protocol SettingTabViewControllerDelegate: AnyObject {
     func didTapSearchTheme()
-    func didTapInquiry()
+    func didTapInquiry(mailBody: String)
     func didTapAppStore()
     func didTapPrivacyPolicy()
     func didTapClose()
@@ -221,53 +218,7 @@ extension SettingTabViewController {
         
         output.mailBody
             .emit(with: self) { owner, body in
-                if MFMailComposeViewController.canSendMail() {
-                    let mailComposer = MFMailComposeViewController()
-                    mailComposer.mailComposeDelegate = owner
-                    mailComposer.setToRecipients(["pdwssf@gmail.com"])
-                    mailComposer.setSubject("앱 문의하기")
-                    mailComposer.setMessageBody(body, isHTML: false)
-                    owner.present(mailComposer, animated: true, completion: nil)
-                } else {
-                    owner.showMailErrorAlert()
-                }
+                owner.delegate?.didTapInquiry(mailBody: body)
             }.disposed(by: disposeBag)
-    }
-}
-
-//
-extension SettingTabViewController: MFMailComposeViewControllerDelegate {
-    // 공통 컴포넌트로 분리
-    func showMailErrorAlert() {
-        let alert = UIAlertController(title: "메일 전송 실패", message: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    // 공통 컴포넌트로 분리
-    func showMailSucceedAlert() {
-        let alert = UIAlertController(title: "메일 전송 성공", message: "메일이 성공적으로 전송 되었습니다.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    // 메일 관련
-    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-        controller.dismiss(animated: true) { [weak self] in
-            guard let self = self else { return }
-            switch result {
-            case .sent:
-                self.showMailSucceedAlert()
-            case .saved:
-                AppLogger.ui.debug("메일 임시저장")
-            case .cancelled:
-                AppLogger.ui.debug("메일 작성 취소")
-            case .failed:
-                AppLogger.ui.error("메일 전송 실패: \(error?.localizedDescription ?? "알 수 없는 오류", privacy: .public)")
-                if let error { CrashReporter.record(error) }
-            @unknown default:
-                fatalError()
-            }
-        }
     }
 }

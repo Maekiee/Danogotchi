@@ -16,7 +16,6 @@ protocol ExploreVocabViewControllerDelegate: AnyObject {
 final class ExploreVocabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: ExploreVocabViewModel
-    private let userInfo = UserInfoManager.shared
     private var bookTitle = ""
     weak var delegate: ExploreVocabViewControllerDelegate?
 
@@ -205,11 +204,6 @@ final class ExploreVocabViewController: BaseViewController {
         }
     }
 
-    override func configView() {
-        if let themeUrl = userInfo.currentThemeUrl {
-            themeBackgroundImage.kf.setImage(with: URL(string: themeUrl))
-        }
-    }
 }
 
 extension ExploreVocabViewController {
@@ -232,10 +226,8 @@ extension ExploreVocabViewController {
 
         let output = viewModel.transform(input: input)
         
-        UserInfoManager.shared.themeUrlObservable
-            .compactMap { $0 }
-            .observe(on: MainScheduler.instance)
-            .bind(with: self) { owner, themeUrl in
+        output.themeUrl
+            .drive(with: self) { owner, themeUrl in
                 owner.updateBackgroundImage(with: themeUrl)
             }
             .disposed(by: disposeBag)

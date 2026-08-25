@@ -2,7 +2,7 @@ import Foundation
 
 final class AppDIContainer {
     // MARK: - Managers
-    let userInfoManager: UserInfoManager
+    let userInfoManager: UserInfoProtocol
     let ttsManager: TTSManager
     let coreDataStack: CoreDataStack
 
@@ -30,7 +30,8 @@ extension AppDIContainer {
         return ExploreVocabViewModel(
             fetchVocabsUseCase: makeFetchVocabsUseCase(),
             startQuizUseCase: makeStartQuizUseCase(),
-            toggleSaveVocabUseCase: makeToggleSaveVocabUseCase()
+            toggleSaveVocabUseCase: makeToggleSaveVocabUseCase(),
+            observeThemeUseCase: makeObserveThemeUseCase()
         )
     }
     
@@ -140,11 +141,19 @@ extension AppDIContainer {
         return DefaultSearchThemeUseCase(repository: makeSearchThemeRepository())
     }
     
-    func makeSearchThemeViewModel(mode: SearchThemeViewController.EntryMode) -> SearchThemeViewModel {
+    func makeSearchThemeViewModel() -> SearchThemeViewModel {
         return SearchThemeViewModel(
-            mode: mode,
-            searchThemeUseCase: makeSearchThemeUseCase()
+            searchThemeUseCase: makeSearchThemeUseCase(),
+            saveThemeUseCase: makeSaveThemeUseCase()
         )
+    }
+
+    func makeSaveThemeUseCase() -> SaveThemeUseCase {
+        return DefaultSaveThemeUseCase(userInfo: userInfoManager)
+    }
+
+    func makeObserveThemeUseCase() -> ObserveThemeUseCase {
+        return DefaultObserveThemeUseCase(userInfo: userInfoManager)
     }
 }
 

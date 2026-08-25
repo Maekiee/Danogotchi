@@ -8,15 +8,14 @@ final class SearchThemeViewModel: BaseViewModel {
 
     private let disposeBag = DisposeBag()
     private let searchThemeUseCase: SearchThemeUseCase
-    private let mode: SearchThemeViewController.EntryMode
-//    private let mode: SearchThemeViewController.EntryMode
+    private let saveThemeUseCase: SaveThemeUseCase
 
     init(
-        mode: SearchThemeViewController.EntryMode,
-        searchThemeUseCase: SearchThemeUseCase
+        searchThemeUseCase: SearchThemeUseCase,
+        saveThemeUseCase: SaveThemeUseCase
     ) {
         self.searchThemeUseCase = searchThemeUseCase
-        self.mode = mode
+        self.saveThemeUseCase = saveThemeUseCase
     }
 
     struct Input {
@@ -25,12 +24,14 @@ final class SearchThemeViewModel: BaseViewModel {
         let loadNextPage: Observable<Void>
         let textEndTrigger: Observable<()>
         let selectedTheme: Observable<String?>
+        let submitTapped: Observable<Void>
     }
     
     struct Output {
         let themeImageList: Driver<[ThemeImageViewData]>
         let buttonEnable: Driver<Bool>
         let alertMessage: Signal<String>
+        let themeSaved: Signal<Void>
     }
     
     func transform(input: Input) -> Output {
@@ -42,6 +43,7 @@ final class SearchThemeViewModel: BaseViewModel {
         
         let submitButtonIsHidden = BehaviorRelay<Bool>(value: true)
         let alertMessageRelay = PublishRelay<String>()
+        let themeSavedRelay = PublishRelay<Void>()
 
 
         // 초기값
@@ -137,14 +139,20 @@ final class SearchThemeViewModel: BaseViewModel {
                     submitButtonIsHidden.accept(true)
                 }
             }.disposed(by: disposeBag)
-        
-        
-        
-        
+
+        input.submitTapped
+            .withLatestFrom(input.selectedTheme)
+            .compactMap { $0 }
+            .bind(with: self) { owner, themeUrl in
+                owner.saveThemeUseCase.execute(url: themeUrl)
+                themeSavedRelay.accept(())
+            }.disposed(by: disposeBag)
+
         return Output(
             themeImageList: imageItems.asDriver(onErrorJustReturn: []),
             buttonEnable: submitButtonIsHidden.asDriver(),
-            alertMessage: alertMessageRelay.asSignal()
+            alertMessage: alertMessageRelay.asSignal(),
+            themeSaved: themeSavedRelay.asSignal()
         )
     }
 }

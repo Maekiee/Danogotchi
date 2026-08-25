@@ -8,6 +8,7 @@ final class ExploreVocabViewModel: BaseViewModel {
     private let fetchVocabsUseCase: FetchVocabsUseCase
     private let startQuizUseCase: StartQuizUseCase
     private let toggleSaveVocabUseCase: ToggleSaveVocabUseCase
+    private let observeThemeUseCase: ObserveThemeUseCase
 
     /// 표시 순서를 고정하는 셔플 결과. 같은 단어 구성이면 재조회해도 이 순서를 재사용한다.
     private var shuffledOrder: [UUID] = []
@@ -15,11 +16,13 @@ final class ExploreVocabViewModel: BaseViewModel {
     init(
         fetchVocabsUseCase: FetchVocabsUseCase,
         startQuizUseCase: StartQuizUseCase,
-        toggleSaveVocabUseCase: ToggleSaveVocabUseCase
+        toggleSaveVocabUseCase: ToggleSaveVocabUseCase,
+        observeThemeUseCase: ObserveThemeUseCase
     ) {
         self.fetchVocabsUseCase = fetchVocabsUseCase
         self.startQuizUseCase = startQuizUseCase
         self.toggleSaveVocabUseCase = toggleSaveVocabUseCase
+        self.observeThemeUseCase = observeThemeUseCase
     }
 
     struct Input {
@@ -33,6 +36,7 @@ final class ExploreVocabViewModel: BaseViewModel {
         let showsSaveButton: Driver<Bool>
         let startQuiz: Signal<QuizData>
         let alertMessage: Signal<String>
+        let themeUrl: Driver<String>
     }
 
     func transform(input: Input) -> Output {
@@ -91,7 +95,10 @@ final class ExploreVocabViewModel: BaseViewModel {
             wordItems: allWordItems.asDriver(),
             showsSaveButton: showsSaveButton.asDriver(),
             startQuiz: startQuizRelay.asSignal(),
-            alertMessage: alertMessageRelay.asSignal()
+            alertMessage: alertMessageRelay.asSignal(),
+            themeUrl: observeThemeUseCase.execute()
+                .compactMap { $0 }
+                .asDriver(onErrorDriveWith: .empty())
         )
     }
 

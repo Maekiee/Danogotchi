@@ -12,12 +12,7 @@ final class SearchThemeViewController: BaseViewController {
     
     weak var delegate: SearchThemeViewControllerDelegate?
     
-    enum EntryMode {
-        case onboarding
-        case settings
-    }
-    
-    private let entryMode: EntryMode
+    private let entryMode: SearchThemeEntryMode
     private let disposeBag = DisposeBag()
     private let viewModel: SearchThemeViewModel
     private let selectedThemeUrl = BehaviorRelay<String?>(value: nil)
@@ -58,7 +53,7 @@ final class SearchThemeViewController: BaseViewController {
     }()
     
     init(
-        mode: EntryMode,
+        mode: SearchThemeEntryMode,
         viewModel: SearchThemeViewModel
     ) {
         self.entryMode = mode
@@ -136,6 +131,7 @@ extension SearchThemeViewController {
             loadNextPage: loadNextPage.asObservable(),
             textEndTrigger: textField.rx.controlEvent(.editingDidEndOnExit).asObservable(),
             selectedTheme: selectedThemeUrl.asObservable(),
+            submitTapped: submitButton.rx.tap.asObservable()
         )
         let output = viewModel.transform(input: input)
         
@@ -189,32 +185,11 @@ extension SearchThemeViewController {
                 AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
             }.disposed(by: disposeBag)
 
-        submitButton.rx.tap
-            .bind(with: self) { owner, _ in
-                guard let selectedTheme = owner.selectedThemeUrl.value else { return }
-                
-                switch owner.entryMode {
-                case .onboarding:
-                    owner.handleOnboardingSubmit(selectedTheme: selectedTheme)
-                case .settings:
-                    owner.handleSettingsSubmit(selectedTheme: selectedTheme)
-                }
-                
+        // 저장까지 끝난 뒤 다음 화면으로 넘긴다 (온보딩/설정 분기는 Coordinator가 담당)
+        output.themeSaved
+            .emit(with: self) { owner, _ in
+                owner.delegate?.didSelectTheme()
             }.disposed(by: disposeBag)
-    }
-    
-    private func handleOnboardingSubmit(selectedTheme: String) {
-        UserInfoManager.shared.currentThemeUrl = selectedTheme
-        delegate?.didSelectTheme()
-    }
-    
-    /// 설정 화면에서 수정하기 버튼 탭 (새로운 로직)
-    private func handleSettingsSubmit(selectedTheme: String) {
-        // 테마만 변경
-        UserInfoManager.shared.currentThemeUrl = selectedTheme
-        
-        // 설정 화면으로 돌아가기
-        delegate?.didSelectTheme()
     }
 }
 

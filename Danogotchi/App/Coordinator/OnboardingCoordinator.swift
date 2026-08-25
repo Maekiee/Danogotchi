@@ -18,7 +18,7 @@ final class OnboardingCoordinator: Coordinator {
 
     func start() {
         // 테마까지 끝냈는데 펫이 없는 상태(테마 직후 강제 종료)면 관심사·테마를 반복하지 않는다
-        if UserInfoManager.shared.currentThemeUrl != nil {
+        if container.userInfoManager.currentThemeUrl != nil {
             showEggSelection(asRoot: true)
         } else {
             showInterestSelection()
@@ -33,7 +33,7 @@ final class OnboardingCoordinator: Coordinator {
     }
 
     private func showSearchTheme() {
-        let vm = container.makeSearchThemeViewModel(mode: .onboarding)
+        let vm = container.makeSearchThemeViewModel()
         let vc = SearchThemeViewController(mode: .onboarding, viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)

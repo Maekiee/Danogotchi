@@ -20,7 +20,7 @@ extension AppFlowCoordinator {
         DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
 
         // 테마와 펫이 모두 있어야 온보딩 완료다. 펫만 없으면 OnboardingCoordinator가 알 선택부터 시작한다.
-        let isOnboardingComplete = UserInfoManager.shared.currentThemeUrl != nil
+        let isOnboardingComplete = container.userInfoManager.currentThemeUrl != nil
             && container.makeIsPetCreatedUseCase().execute()
 
         if isOnboardingComplete {

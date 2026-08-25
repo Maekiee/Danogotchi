@@ -12,7 +12,7 @@
     {
       "name": "sad",
       "row": 1,
-      "frameCount": 4,
+      "frameCount": 8,
       "fps": 10,
       "loop": true
     },
