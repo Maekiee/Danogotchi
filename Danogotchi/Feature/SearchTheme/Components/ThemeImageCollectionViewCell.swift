@@ -23,7 +23,7 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         let view = UIImageView()
         view.image = UIImage(systemName: "checkmark.circle.fill")
         view.tintColor = AppColor.appWhite
-        view.backgroundColor = AppColor.oxfordBlue
+        view.backgroundColor = AppColor.black
         view.layer.cornerRadius = AppRadius.radius12
         view.clipsToBounds = true
         view.isHidden = true

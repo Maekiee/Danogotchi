@@ -10,7 +10,6 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        view.backgroundColor = AppColor.backgroundBeige
         view.backgroundColor = AppColor.background
         AppLogger.lifecycle.debug("✅ Init: \(String(describing: type(of: self)), privacy: .public) ✅")
     }
