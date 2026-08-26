@@ -5,6 +5,7 @@ import RxCocoa
 final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let earnExperienceUseCase: EarnExperienceUseCase
+    private let studyReminderUseCase: StudyReminderUseCase
 
     private let quizDataRelay: BehaviorRelay<QuizData>
     
@@ -21,9 +22,11 @@ final class QuizViewModel: BaseViewModel {
     
     init(
         earnExperienceUseCase: EarnExperienceUseCase,
+        studyReminderUseCase: StudyReminderUseCase,
         quizData: QuizData
     ) {
         self.earnExperienceUseCase = earnExperienceUseCase
+        self.studyReminderUseCase = studyReminderUseCase
         self.quizDataRelay = BehaviorRelay(value: quizData)
         self.currentIndex = BehaviorRelay(value: 0)
     }
@@ -127,6 +130,9 @@ final class QuizViewModel: BaseViewModel {
                         correct: correctCount,
                         total: quizData.words.count
                     )
+                    // 학습 이력이 늘었으니 미학습 알림 기준일을 다시 잡는다
+                    owner.studyReminderUseCase.refresh()
+
                     let result = QuizResult(
                         correct: correctCount,
                         total: quizData.words.count,

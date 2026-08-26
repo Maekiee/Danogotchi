@@ -8,6 +8,7 @@ final class UserInfoManager: UserInfoProtocol {
         static let username = "username"
         static let userId = "userId"
         static let themeUrl = "themeUrl"
+        static let studyReminder = "studyReminderEnabled"
     }
 
     private let themeUrlRelay = BehaviorRelay<String?>(value: nil)
@@ -32,6 +33,17 @@ final class UserInfoManager: UserInfoProtocol {
         }
     }
     
+    // 키가 없는 첫 실행은 켜진 것으로 본다 — UserDefaults.bool 기본값(false)을 쓰면 기능이 꺼진 채 시작한다
+    var isStudyReminderEnabled: Bool {
+        get {
+            return UserDefaults.standard.object(forKey: Keys.studyReminder) as? Bool ?? true
+        }
+
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.studyReminder)
+        }
+    }
+
     var username: String? {
         get {
             guard let username = UserDefaults.standard.string(forKey: Keys.username) else { return nil }

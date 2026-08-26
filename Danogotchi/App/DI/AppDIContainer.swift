@@ -108,6 +108,7 @@ extension AppDIContainer {
     func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
         return QuizViewModel(
             earnExperienceUseCase: makeEarnExperienceUseCase(),
+            studyReminderUseCase: makeStudyReminderUseCase(),
             quizData: quizData
         )
     }
@@ -188,11 +189,30 @@ extension AppDIContainer {
     func makeAppEnvProvider() -> AppEnvProvider {
         return DefaultAppEnvProvider()
     }
+    
     func makeSettingTabViewModel() -> SettingTabViewModel {
         let envProvider = makeAppEnvProvider()
-        return SettingTabViewModel(appEnv: envProvider)
+        return SettingTabViewModel(
+            appEnv: envProvider,
+            studyReminderUseCase: makeStudyReminderUseCase()
+        )
     }
-    
+
+}
+
+// MARK: - Notification
+extension AppDIContainer {
+    func makeLocalNotificationScheduler() -> LocalNotificationScheduling {
+        return LocalNotificationScheduler()
+    }
+
+    func makeStudyReminderUseCase() -> StudyReminderUseCase {
+        return DefaultStudyReminderUseCase(
+            userInfo: userInfoManager,
+            learningHistoryRepository: makeVocabLearningHistoryRepository(),
+            scheduler: makeLocalNotificationScheduler()
+        )
+    }
 }
 
 extension AppDIContainer {

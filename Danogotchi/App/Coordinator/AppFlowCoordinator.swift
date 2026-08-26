@@ -19,6 +19,9 @@ extension AppFlowCoordinator {
     func start() {
         DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
 
+        // 미학습 알림은 마지막 학습 시각 기준이라 실행마다 다시 계산해 덮어쓴다
+        container.makeStudyReminderUseCase().refresh()
+
         // 테마와 펫이 모두 있어야 온보딩 완료다. 펫만 없으면 OnboardingCoordinator가 알 선택부터 시작한다.
         let isOnboardingComplete = container.userInfoManager.currentThemeUrl != nil
             && container.makeIsPetCreatedUseCase().execute()

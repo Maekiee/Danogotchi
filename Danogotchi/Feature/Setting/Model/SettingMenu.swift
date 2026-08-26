@@ -18,6 +18,8 @@ struct SettingMenu: Hashable {
             switch self {
             case .general:
                 return [
+                    SettingMenu(icon: "🔔", title: "학습 알림",
+                                category: self, action: .studyReminder),
                     SettingMenu(icon: "🎨", title: "배경 테마 변경하기",
                                 category: self, action: .searchTheme)
                 ]
@@ -40,6 +42,7 @@ struct SettingMenu: Hashable {
     }
     
     enum Action {
+        case studyReminder
         case searchTheme
         case inquiry
         case appStore

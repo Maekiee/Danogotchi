@@ -29,6 +29,9 @@ final class SettingTabViewController: BaseViewController {
     
     private var currentAppVersion: String = ""
     
+    /// 셀이 아니라 VC가 인스턴스 하나를 보유한다 — 셀 재사용 때 같은 스위치가 재부착되므로 바인딩을 한 번만 걸면 된다
+    private let reminderSwitch = UISwitch()
+
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "설정"
@@ -124,12 +127,21 @@ extension SettingTabViewController {
             var backgroundConfig = UIBackgroundConfiguration.listGroupedCell()
             backgroundConfig.backgroundColor = AppColor.card
             
-            if setting.action == .appVersion {
+            contentConfiguration.secondaryText = nil
+
+            switch setting.action {
+            case .appVersion:
                 contentConfiguration.secondaryText = currentAppVersion
                 contentConfiguration.secondaryTextProperties.color = AppColor.textSecondary
                 cell.accessories = []
-            } else {
-                contentConfiguration.secondaryText = nil
+            case .studyReminder:
+                cell.accessories = [
+                    .customView(configuration: .init(
+                        customView: reminderSwitch,
+                        placement: .trailing()
+                    ))
+                ]
+            default:
                 cell.accessories = [.disclosureIndicator()]
             }
             
@@ -170,7 +182,8 @@ extension SettingTabViewController {
         let input = SettingTabViewModel.Input(
             itemSelected: collectionView.rx.itemSelected.compactMap { [weak self] indexPath in
                 self?.dataSource.itemIdentifier(for: indexPath)
-            }
+            },
+            reminderToggled: reminderSwitch.rx.isOn.changed.asObservable()
         )
         let output = viewModel.transform(input: input)
 
@@ -185,6 +198,11 @@ extension SettingTabViewController {
                 owner.currentAppVersion = version
             }.disposed(by: disposeBag)
         
+        output.isReminderOn
+            .drive(with: self) { owner, isOn in
+                owner.reminderSwitch.isOn = isOn
+            }.disposed(by: disposeBag)
+
         output.sections
             .drive(with: self) { owner, sections in
                 sections.forEach { section in
@@ -201,6 +219,11 @@ extension SettingTabViewController {
         output.action
             .emit(with: self) { owner, action in
                 switch action {
+                case .studyReminder:
+                    // 스위치가 상태를 바꾸므로 행 탭은 선택 해제만 한다
+                    owner.collectionView.indexPathsForSelectedItems?.forEach {
+                        owner.collectionView.deselectItem(at: $0, animated: true)
+                    }
                 case .searchTheme:
                     owner.delegate?.didTapSearchTheme()
                 case .inquiry:
