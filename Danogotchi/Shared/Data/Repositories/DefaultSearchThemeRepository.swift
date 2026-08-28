@@ -1,22 +1,31 @@
 import Foundation
 import RxSwift
 
-final class DefaultSearchThemeRepository: SearchThemeRepository {
-    func searchPhotos(query: String, page: Int) -> RxSwift.Single<Result<SearchPhotoEntity, Error>> {
-        let api = ApiRouter.searchPhoto(word: query, page: page)
-        
-        return ApiService.searchPhoto(api: api, type: SearchPhotoDTO.self)
-            .map { response in
-                switch response {
-                case .success(let dto):
-                    let entity = dto.toEntity()
-                    return .success(entity)
-                case .failure(let error):
-                    return .failure(error)
-                }
-            }
-        
+final class DefaultSearchThemeRepository {
+    private let apiClient: ApiClient
+    
+    init(apiClient: ApiClient) {
+        self.apiClient = apiClient
     }
     
-    
+}
+
+extension DefaultSearchThemeRepository: SearchThemeRepository {
+    func searchPhotos(query: String, page: Int) -> Single<Result<SearchPhotoEntity, Error>> {
+        return Single.create { [apiClient] observer in
+            let task = Task {
+                do {
+                    let dto = try await apiClient.request(
+                        UnsplashApiRouter.searchPhoto(query: query, page: page),
+                        responseType: SearchPhotoDTO.self
+                    )
+                    
+                    observer(.success(.success(dto.toEntity())))
+                } catch {
+                    observer(.success(.failure(error)))
+                }
+            }
+            return Disposables.create { task.cancel() }
+        }
+    }
 }

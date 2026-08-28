@@ -135,7 +135,7 @@ extension AppDIContainer {
 // MARK: - Setting Tab
 extension AppDIContainer {
     func makeSearchThemeRepository() -> SearchThemeRepository {
-        return DefaultSearchThemeRepository()
+        return DefaultSearchThemeRepository(apiClient: DefaultApiClient())
     }
 
     func makeSearchThemeUseCase() -> SearchThemeUseCase {
