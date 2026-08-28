@@ -1,31 +1,26 @@
 import Foundation
 
 final class AppDIContainer {
-    // MARK: - Managers
     let userInfoManager: UserInfoProtocol
     let ttsManager: TTSManager
     let coreDataStack: CoreDataStack
-
-    /// 활성 단어장 변경 신호를 보유하므로 앱 전체에서 인스턴스가 하나여야 한다.
-    lazy var vocabBookRepository: VocabBookRepository = DefaultVocabBookRepository(
-        context: coreDataStack.viewContext
-    )
-
-    /// 앱당 1마리 불변식을 한 곳에서 지키도록 온보딩·캐릭터·퀴즈가 같은 인스턴스를 쓴다.
-    lazy var petRepository: PetRepository = DefaultPetRepository(
-        context: coreDataStack.viewContext
-    )
+    let apiClient:ApiClient
+    let vocabBookRepository: VocabBookRepository
+    let petRepository: PetRepository
 
     init() {
         userInfoManager = UserInfoManager.shared
         ttsManager = TTSManager.shared
         coreDataStack = CoreDataStack.shared
+        apiClient = DefaultApiClient()
+        vocabBookRepository = DefaultVocabBookRepository(context: coreDataStack.viewContext)
+        petRepository = DefaultPetRepository(context: coreDataStack.viewContext)
     }
 }
 
 // MARK: - Explore / CreateWord
 extension AppDIContainer {
-
+    
     func makeExploreVocabViewModel() -> ExploreVocabViewModel {
         return ExploreVocabViewModel(
             fetchVocabsUseCase: makeFetchVocabsUseCase(),
@@ -135,7 +130,7 @@ extension AppDIContainer {
 // MARK: - Setting Tab
 extension AppDIContainer {
     func makeSearchThemeRepository() -> SearchThemeRepository {
-        return DefaultSearchThemeRepository(apiClient: DefaultApiClient())
+        return DefaultSearchThemeRepository(apiClient: apiClient)
     }
 
     func makeSearchThemeUseCase() -> SearchThemeUseCase {

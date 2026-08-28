@@ -29,7 +29,7 @@ final class DefaultApiClient: ApiClient {
         }
         
         switch http.statusCode {
-        case 2..<300:
+        case 200..<300:
             break
         case 400:
             throw NetworkError.badRequest(message: messages(from: data))
