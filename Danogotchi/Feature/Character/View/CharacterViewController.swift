@@ -68,17 +68,13 @@ final class CharacterViewController: BaseViewController {
         label.textAlignment = .center
         return label
     }()
-    /// 네 개를 한 줄에 놓으면 좁은 기기에서 "놀아주기"가 잘린다 — 2×2로 세운다
     private lazy var careButtons = PetCareStat.allCases.map { stat in
         (stat: stat, button: PrimaryFillButton(title: stat.actionTitle))
     }
     private let levelUpButton = PrimaryFillButton(title: "레벨업")
     private let reviveButton = PrimaryFillButton(title: "부활")
-    /// dev 빌드 전용 테스트 버튼. 릴리스에서는 스택에 올리지 않으므로 탭이 발생하지 않는다.
-    /// ponytail: 릴리스 바이너리에 버튼 두 개가 남는다 — 조건부 컴파일을 5군데로 번지게 하는 것보다 싸다.
     private let debugLevelDownButton = PrimaryFillButton(title: "Lv -1")
     private let debugLevelUpButton = PrimaryFillButton(title: "Lv +1")
-    /// 디버그 레벨 버튼을 첫 화면 아래로 밀어내는 여백 — 스크롤해야 나온다
     private let debugLevelSpacer = UIView()
 
     init(viewModel: CharacterViewModel) {
@@ -166,8 +162,6 @@ final class CharacterViewController: BaseViewController {
 extension CharacterViewController {
     private func makeExperienceSection() -> UIView {
         let container = UIView()
-
-        // 현재/필요 EXP 절대 수치는 노출하지 않는다 — 진행률만 퍼센트로 알린다
         let headerStack = UIStackView(arrangedSubviews: [levelLabel, experiencePercentLabel])
         headerStack.axis = .horizontal
 
@@ -195,7 +189,6 @@ extension CharacterViewController {
         return stack
     }
 
-    /// 레벨별 시트를 눈으로 확인하려면 경험치를 실제로 모아야 한다 — dev 빌드에서만 건너뛴다
     private func makeDebugLevelRow() -> UIView {
         let row = UIStackView(arrangedSubviews: [debugLevelDownButton, debugLevelUpButton])
         row.axis = .horizontal
@@ -249,7 +242,6 @@ extension CharacterViewController {
                 .map { _ in },
             careTapped: careTapped,
             levelUpTapped: levelUpButton.rx.tap.asObservable(),
-            // dev 빌드에서만 스택에 올라간다 — 릴리스에서는 탭이 발생하지 않는다
             levelDeltaTapped: Observable.merge(
                 debugLevelDownButton.rx.tap.map { -1 },
                 debugLevelUpButton.rx.tap.map { 1 }
@@ -291,14 +283,13 @@ extension CharacterViewController {
     private func render(_ info: PetDisplayInfo) {
         let pet = info.pet
 
-        // 레벨이 시트를, 기분이 클립을 고른다. 둘 다 그대로면 애니메이션이 끊기지 않고 이어진다.
+        
         petSpriteView.render(
             sheetName: pet.type.sheetName(level: pet.level),
             clip: PetSpriteClip(mood: info.mood, isDead: pet.isDead)
         )
 
         nameLabel.text = pet.name
-        // 기분은 사망 상태에서도 계산되므로 갈아치우는 건 화면 몫이다
         moodLabel.text = pet.isDead ? "세상을 떠났어요" : info.mood.title
 
         heartBarView.setHearts(info.hearts)
@@ -306,12 +297,8 @@ extension CharacterViewController {
             "\(Int(PetStatePolicy.maxHP)) 중 \(Int(pet.hp))"
 
         levelLabel.text = "Lv. \(pet.level)"
-        // 버림이다 — 반올림하면 99.6%가 `100%`로 떠서 레벨업 버튼은 비활성인데 다 찬 것처럼 읽힌다.
-        // `progress == 1`(승급 가능)에서만 정확히 `100%`가 된다.
-        // (`CareStatRowView`는 정반대로 반올림한다. 거기선 99.96을 99로 쓰면 돌보기가 안 먹은 것처럼 보인다.)
         experiencePercentLabel.text = "\(Int(info.progress * 100))%"
         experienceGaugeView.setProgress(Float(info.progress), animated: true)
-        // 게이지만 남으므로 VoiceOver에는 퍼센트로 읽어준다
         experienceGaugeView.superview?.accessibilityValue = info.isMaxLevel
             ? "레벨 \(pet.level), 최고 레벨"
             : "레벨 \(pet.level), \(Int(info.progress * 100))퍼센트"
@@ -321,8 +308,7 @@ extension CharacterViewController {
         }
 
         renderDanger(pet)
-
-        // 수치가 넉넉하면 돌보기를 막는다 — 기준은 정책이 갖는다
+        
         careButtons.forEach { pair in
             pair.button.isEnabled = !pet.isDead
                 && pet[keyPath: pair.stat.keyPath] < PetStatePolicy.careThreshold
@@ -332,7 +318,6 @@ extension CharacterViewController {
         reviveButton.isHidden = !pet.isDead
     }
 
-    /// 기분만으로는 사망이 임박한 걸 알 수 없다 — 어떤 수치가 HP를 깎고 있는지 문구로 알린다
     private func renderDanger(_ pet: Pet) {
         let dangerStats = PetCareStat.allCases
             .filter { pet[keyPath: $0.keyPath] <= PetStatePolicy.dangerThreshold }

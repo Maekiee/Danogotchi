@@ -78,7 +78,8 @@ final class OnboardingPetNameViewController: BaseViewController {
         }
 
         doneButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
+            make.bottom.lessThanOrEqualTo(view.keyboardLayoutGuide.snp.top).offset(-AppSpacing.space20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20).priority(.high)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.height.equalTo(48)
         }
@@ -108,6 +109,7 @@ extension OnboardingPetNameViewController {
 
         output.didCreatePet
             .emit(with: self) { owner, _ in
+                owner.view.endEditing(true)
                 owner.delegate?.onboardingPetNameDidFinish()
             }.disposed(by: disposeBag)
 

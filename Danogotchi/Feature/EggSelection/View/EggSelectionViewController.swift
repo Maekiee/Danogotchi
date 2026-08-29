@@ -154,7 +154,6 @@ extension EggSelectionViewController {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
-        // 선택이 바뀌면 diffable이 삭제+삽입으로 처리한다 — 알이 튀지 않도록 애니메이션은 끈다
         dataSource.apply(snapshot, animatingDifferences: false)
     }
 
@@ -162,13 +161,9 @@ extension EggSelectionViewController {
         return UICollectionViewCompositionalLayout { _, environment in
             let spacing = AppSpacing.space12
 
-            // 한 변은 간격을 뺀 나머지의 1/3. 내림해서 3칸 + 간격 2개가 컨테이너를 넘지 않게 한다 —
-            // 넘치면 세 번째 칸이 잘린다. 남는 1~2pt는 오른쪽 여백으로 흡수된다.
             let width = environment.container.effectiveContentSize.width
             let side = floor((width - spacing * 2) / 3)
 
-            // 폭·높이를 같은 값으로 못박아 정사각형을 만든다. count:에 3등분을 맡기고
-            // fractionalWidth(1)로 두면 칸 하나가 그룹 전체 폭을 차지해 옆으로 밀려난다.
             let item = NSCollectionLayoutItem(
                 layoutSize: NSCollectionLayoutSize(
                     widthDimension: .absolute(side),
