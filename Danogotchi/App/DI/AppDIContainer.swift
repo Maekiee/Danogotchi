@@ -153,6 +153,27 @@ extension AppDIContainer {
     }
 }
 
+// MARK: - Weather
+extension AppDIContainer {
+    func makeWeatherRepository() -> WeatherRepository {
+        return DefaultWeatherRepository(apiClient: apiClient)
+    }
+
+    /// DeviceLocationProvider가 @MainActor라 생성도 메인에서만 가능하다
+    @MainActor
+    func makeLocationProvider() -> LocationProviding {
+        return DeviceLocationProvider()
+    }
+
+    @MainActor
+    func makeFetchCurrentWeatherUseCase() -> FetchCurrentWeatherUseCase {
+        return DefaultFetchCurrentWeatherUseCase(
+            locationProvider: makeLocationProvider(),
+            weatherRepository: makeWeatherRepository()
+        )
+    }
+}
+
 // MARK: - Onboarding
 extension AppDIContainer {
     func makeOnboardingInterestViewModel() -> OnboardingInterestViewModel {

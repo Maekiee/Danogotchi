@@ -9,6 +9,7 @@ enum HTTPMethod: String, Sendable {
 }
 
 protocol Endpoint: Sendable {
+    var baseURL: String { get }
     var path: String { get }
     var method: HTTPMethod { get }
     var headers: [String: String] { get }
@@ -17,7 +18,7 @@ protocol Endpoint: Sendable {
 }
 
 extension Endpoint {
-    var headers: [String:String] { APIHeader.dict([.apiKey, .applicationJSON]) }
+    var headers: [String:String] { APIHeader.dict([.applicationJSON]) }
     var body: Data? { nil }
     var queryItems: [URLQueryItem]? { nil }
 }

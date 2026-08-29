@@ -12,6 +12,12 @@
 	</array>
 	<key>UnsplashBaseURL</key>
 	<string>$(UNSPLASH_BASE_URL)</string>
+	<key>WeatherBaseURL</key>
+	<string>$(WEATHER_BASE_URL)</string>
+	<key>WeatherAPIKey</key>
+	<string>$(WEATHER_API_KEY)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>현재 위치의 날씨를 보여주기 위해 위치 정보를 사용합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

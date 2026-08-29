@@ -55,7 +55,7 @@ final class DefaultApiClient: ApiClient {
     }
     
     private func makeRequest(_ endpoint: Endpoint) throws -> URLRequest {
-        var components = URLComponents(string: APIConfig.baseURL + endpoint.path)
+        var components = URLComponents(string: endpoint.baseURL + endpoint.path)
         components?.queryItems = endpoint.queryItems
         
         guard let url = components?.url else { throw NetworkError.invalidURL }

@@ -1,12 +1,12 @@
 import Foundation
 
 enum APIHeader {
-    case apiKey
+    case unsplashKey
     case applicationJSON
     
     var field: (name: String, value: String) {
         switch self {
-        case .apiKey: return ("Authorization", "Client-ID \(APIConfig.apiKey)")
+        case .unsplashKey: return ("Authorization", "Client-ID \(APIConfig.Unsplash.apiKey)")
         case .applicationJSON: return ("Content-Type", "application/json")
         }
     }

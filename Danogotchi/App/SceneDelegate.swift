@@ -1,4 +1,5 @@
 import UIKit
+import OSLog
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -11,6 +12,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: scene)
         appCoordinator = AppFlowCoordinator(window: window!, container: container)
         appCoordinator?.start()
+
+        // TODO: 날씨 API 연동 검증용 임시 호출 — 확인 후 제거
+        #if DEBUG
+        Task {
+            do {
+                let weather = try await container.makeFetchCurrentWeatherUseCase().getWeather()
+                AppLogger.network.debug("현재 날씨 조회 성공 — 도시=\(weather.cityName, privacy: .public), 기온=\(weather.temperature, privacy: .public)℃, 체감=\(weather.feelsLike, privacy: .public)℃, 습도=\(weather.humidity, privacy: .public)%, 상태=\(weather.description, privacy: .public)(\(weather.condition, privacy: .public))")
+            } catch {
+                AppLogger.network.error("현재 날씨 조회 실패: \(String(describing: error), privacy: .public)")
+            }
+        }
+        #endif
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

@@ -3,6 +3,8 @@ import Foundation
 enum UnsplashApiRouter: Endpoint {
     case searchPhoto(query: String, page: Int)
     
+    var baseURL: String { APIConfig.Unsplash.baseURL }
+    
     var path: String {
         switch self {
         case .searchPhoto: return "/search/photos"
@@ -10,6 +12,8 @@ enum UnsplashApiRouter: Endpoint {
     }
     
     var method: HTTPMethod { .get }
+    
+    var headers: [String: String] { APIHeader.dict([.unsplashKey, .applicationJSON]) }
     
     var queryItems: [URLQueryItem]? {
         switch self {
