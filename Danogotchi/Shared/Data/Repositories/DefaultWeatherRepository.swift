@@ -14,6 +14,7 @@ extension DefaultWeatherRepository: WeatherRepository {
             WeatherApiRouter.currentWeather(lat: lat, lon: lon),
             responseType: CurrentWeatherDTO.self
         )
+        print(dto)
         return dto.toEntity()
     }
 }

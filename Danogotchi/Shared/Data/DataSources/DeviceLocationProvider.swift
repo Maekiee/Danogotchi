@@ -2,13 +2,12 @@ import CoreLocation
 
 @MainActor
 final class DeviceLocationProvider: NSObject, LocationProviding {
-    private let manager = CLLocationManager()
+    private var manager: CLLocationManager?
     private var continuation: CheckedContinuation<Coordinate, Error>?
     
-    override init() {
+    /// 생성 시점에는 메인 격리 상태를 건드리지 않는다 — 조립부(AppDIContainer)를 nonisolated로 두기 위해서다
+    nonisolated override init() {
         super.init()
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyKilometer
     }
     
     func currentCoordinate() async throws -> Coordinate {
@@ -16,11 +15,21 @@ final class DeviceLocationProvider: NSObject, LocationProviding {
         
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
-            requestLocationIfAuthorized()
+            requestLocationIfAuthorized(makeManagerIfNeeded())
         }
     }
     
-    private func requestLocationIfAuthorized() {
+    private func makeManagerIfNeeded() -> CLLocationManager {
+        if let manager { return manager }
+        
+        let created = CLLocationManager()
+        created.delegate = self
+        created.desiredAccuracy = kCLLocationAccuracyKilometer
+        manager = created
+        return created
+    }
+    
+    private func requestLocationIfAuthorized(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
@@ -43,7 +52,7 @@ final class DeviceLocationProvider: NSObject, LocationProviding {
 extension DeviceLocationProvider: @preconcurrency CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         guard continuation != nil else { return }
-        requestLocationIfAuthorized()
+        requestLocationIfAuthorized(manager)
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

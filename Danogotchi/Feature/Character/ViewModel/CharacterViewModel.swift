@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import RxSwift
 import RxCocoa
 
@@ -11,19 +12,22 @@ final class CharacterViewModel: BaseViewModel {
     private let levelUpPetUseCase: LevelUpPetUseCase
     private let adjustPetLevelUseCase: AdjustPetLevelUseCase
     private let revivePetUseCase: RevivePetUseCase
+    private let fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
 
     init(
         fetchPetStateUseCase: FetchPetStateUseCase,
         carePetUseCase: CarePetUseCase,
         levelUpPetUseCase: LevelUpPetUseCase,
         adjustPetLevelUseCase: AdjustPetLevelUseCase,
-        revivePetUseCase: RevivePetUseCase
+        revivePetUseCase: RevivePetUseCase,
+        fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
     ) {
         self.fetchPetStateUseCase = fetchPetStateUseCase
         self.carePetUseCase = carePetUseCase
         self.levelUpPetUseCase = levelUpPetUseCase
         self.adjustPetLevelUseCase = adjustPetLevelUseCase
         self.revivePetUseCase = revivePetUseCase
+        self.fetchCurrentWeatherUseCase = fetchCurrentWeatherUseCase
     }
 
     struct Input {
@@ -49,9 +53,30 @@ final class CharacterViewModel: BaseViewModel {
         let toastMessage = PublishRelay<String>()
 
         // 조회가 곧 정산이다. 타이머 없이 진입과 포그라운드 복귀 두 시점에만 부른다.
-        Observable.merge(input.viewWillAppear, input.didBecomeActive)
+        let refreshTrigger = Observable.merge(input.viewWillAppear, input.didBecomeActive)
+
+        refreshTrigger
             .bind(with: self) { owner, _ in
                 state.accept(owner.fetchPetStateUseCase.execute())
+            }.disposed(by: disposeBag)
+
+        // 날씨는 부가 정보라 실패해도 화면에 알리지 않는다.
+        // 진행 중인 요청이 있으면 무시한다 — 위치 조회가 겹치면 requestInProgress로 실패한다.
+        let isWeatherLoading = BehaviorRelay<Bool>(value: false)
+
+        refreshTrigger
+            .filter { !isWeatherLoading.value }
+            .bind(with: self) { owner, _ in
+                isWeatherLoading.accept(true)
+                Task { @MainActor in
+                    defer { isWeatherLoading.accept(false) }
+                    do {
+                        let weather = try await owner.fetchCurrentWeatherUseCase.getWeather()
+                        AppLogger.network.debug("현재 날씨 — 도시=\(weather.cityName, privacy: .public), 기온=\(weather.temperature, privacy: .public)℃, 체감=\(weather.feelsLike, privacy: .public)℃, 습도=\(weather.humidity, privacy: .public)%, 상태=\(weather.description, privacy: .public)")
+                    } catch {
+                        AppLogger.network.error("현재 날씨 조회 실패: \(String(describing: error), privacy: .public)")
+                    }
+                }
             }.disposed(by: disposeBag)
 
         input.careTapped
