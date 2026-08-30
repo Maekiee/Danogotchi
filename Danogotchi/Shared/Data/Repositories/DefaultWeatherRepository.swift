@@ -14,7 +14,7 @@ extension DefaultWeatherRepository: WeatherRepository {
             WeatherApiRouter.currentWeather(lat: lat, lon: lon),
             responseType: CurrentWeatherDTO.self
         )
-        print(dto)
+        print("날씨 데이터 원본: \(dto)")
         return dto.toEntity()
     }
 }

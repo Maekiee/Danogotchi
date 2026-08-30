@@ -7,6 +7,7 @@ struct CurrentWeatherDTO: Decodable {
 }
 
 struct WeatherConditionDTO: Decodable {
+    let id: Int
     let main: String
     let description: String
     let icon: String
@@ -26,7 +27,7 @@ extension CurrentWeatherDTO {
             temperature: main.temp,
             feelsLike: main.feels_like,
             humidity: main.humidity,
-            condition: condition?.main ?? "",
+            weatherType: condition.map { WeatherType(id: $0.id) } ?? .clear,
             description: condition?.description ?? "",
             iconCode: condition?.icon ?? ""
         )

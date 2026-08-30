@@ -5,7 +5,7 @@ struct CurrentWeather {
     let temperature: Double
     let feelsLike: Double
     let humidity: Int
-    let condition: String
+    let weatherType: WeatherType
     let description: String
     let iconCode: String
 }
