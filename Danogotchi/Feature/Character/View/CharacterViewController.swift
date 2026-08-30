@@ -124,14 +124,18 @@ final class CharacterViewController: BaseViewController {
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
+        // 남는 세로 공간을 전부 흡수한다. 콘텐츠가 화면보다 길면 이 최소값으로 돌아온다.
         petSpriteView.snp.makeConstraints { make in
-            make.height.equalTo(160)
+            make.height.greaterThanOrEqualTo(160)
         }
 
         contentStackView.snp.makeConstraints { make in
             make.verticalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.width.equalToSuperview().offset(-AppSpacing.space20 * 2)
+            // 콘텐츠가 짧아도 최소 한 화면은 채운다 — 그래야 남는 공간이 생긴다
+            make.height.greaterThanOrEqualTo(scrollView.frameLayoutGuide.snp.height)
+                .offset(-AppSpacing.space20 * 2)
         }
 
         [levelUpButton, reviveButton].forEach { button in
@@ -152,9 +156,18 @@ final class CharacterViewController: BaseViewController {
         heartBarView.isAccessibilityElement = true
         heartBarView.accessibilityLabel = "체력"
 
+        // 스택의 남는 공간을 가져갈 뷰를 명시한다 — 기본값(250)끼리 겹치면 어디가 늘어날지 불확실하다
+        petSpriteView.setContentHuggingPriority(.init(1), for: .vertical)
+
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
+
+        #if DEBUG
+        // 임시 — 캐릭터 영역이 실제로 차지하는 박스 확인용. 날씨 배경 배치를 정하면 지운다.
+        petSpriteView.layer.borderWidth = 0.5
+        petSpriteView.layer.borderColor = UIColor.red.cgColor
+        #endif
     }
 }
 

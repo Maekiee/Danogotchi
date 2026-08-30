@@ -85,10 +85,7 @@ final class PetSpriteView: UIView {
 
     init() {
         super.init(frame: .zero)
-
-        // 시트에 @2x/@3x가 없어 128px 프레임을 그대로 늘린다 — 보간하면 픽셀 아트가 뭉갠다
         layer.magnificationFilter = .nearest
-        // 프레임은 정사각이지만 뷰는 스택 폭을 채워 정사각이 아니다
         layer.contentsGravity = .resizeAspect
     }
 
@@ -97,7 +94,6 @@ final class PetSpriteView: UIView {
     }
 
     func render(sheetName: String, clip: PetSpriteClip) {
-        // 백그라운드에 다녀오면 CoreAnimation이 애니메이션을 떼어간다 — 상태가 같아도 다시 붙인다
         let isSameState = current?.sheetName == sheetName && current?.clip == clip
         guard !isSameState || layer.animation(forKey: Self.animationKey) == nil else { return }
 
@@ -123,14 +119,11 @@ final class PetSpriteView: UIView {
     }
 
     /// 시트와 클립을 유닛 사각형 목록으로 바꾼다. 실패 로그는 여기 한 곳에 모은다.
-    private func frames(
-        sheetName: String,
-        clip: PetSpriteClip
+    private func frames(sheetName: String, clip: PetSpriteClip
     ) -> (sheet: CGImage, rects: [CGRect], info: PetSpriteSheet.Clip)? {
         guard let manifest = PetSpriteSheet.manifest,
               let info = manifest.clip(clip),
               let sheet = UIImage(named: sheetName)?.cgImage else {
-            // 아무것도 그리지 않는다. 유닛 사각형 없이 contents만 넣으면 시트 전체가 격자로 보인다.
             AppLogger.ui.error(
                 "스프라이트 로드 실패 — sheet: \(sheetName, privacy: .public), clip: \(clip.rawValue, privacy: .public)"
             )
@@ -156,12 +149,8 @@ final class PetSpriteView: UIView {
 
     private func makeAnimation(rects: [CGRect], clip: PetSpriteSheet.Clip) -> CAKeyframeAnimation {
         let animation = CAKeyframeAnimation(keyPath: "contentsRect")
-        // CGRect는 객체가 아니라 NSValue로 감싸야 KVC가 받는다
         animation.values = rects.map { NSValue(cgRect: $0) }
-        // `.discrete`는 값 n개에 keyTimes n+1개를 요구한다(첫 값 0.0, 마지막 1.0) —
-        // 안 주면 마지막 프레임이 자기 몫의 시간을 못 받는다
         animation.keyTimes = (0...rects.count).map { NSNumber(value: Double($0) / Double(rects.count)) }
-        // 이 한 줄이 빠지면 칸이 보간돼 프레임이 스르륵 밀린다
         animation.calculationMode = .discrete
         animation.duration = Double(rects.count) / clip.fps
         animation.repeatCount = clip.loop ? .infinity : 1

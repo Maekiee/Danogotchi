@@ -12,7 +12,7 @@ enum PetCareStat: String, CaseIterable {
         case .satiety:
             return "포만감"
         case .hydration:
-            return "수분"
+            return "갈증"
         case .fun:
             return "즐거움"
         case .cleanliness:
