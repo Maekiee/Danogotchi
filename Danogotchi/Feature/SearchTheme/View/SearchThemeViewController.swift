@@ -142,6 +142,15 @@ extension SearchThemeViewController {
                 owner.applySnapshot(items: imageList)
             }.disposed(by: disposeBag)
         
+        output.isEmptyResult
+            .drive(with: self) { owner, isEmpty in
+                if isEmpty {
+                    owner.collectionView.setView(title: "검색 결과가 없습니다")
+                } else {
+                    owner.collectionView.restore()
+                }
+            }.disposed(by: disposeBag)
+        
         // 스크롤 하단 체크
         collectionView.rx.contentOffset
             .map { [weak self] offset in

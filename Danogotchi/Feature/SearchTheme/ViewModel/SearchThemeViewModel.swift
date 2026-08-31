@@ -29,6 +29,7 @@ final class SearchThemeViewModel: BaseViewModel {
     
     struct Output {
         let themeImageList: Driver<[ThemeImageViewData]>
+        let isEmptyResult: Driver<Bool>
         let buttonEnable: Driver<Bool>
         let alertMessage: Signal<String>
         let themeSaved: Signal<Void>
@@ -40,6 +41,7 @@ final class SearchThemeViewModel: BaseViewModel {
         let totalImageCount = BehaviorRelay<Int>(value: 0)
         let currentSearchWord = BehaviorRelay<String>(value: "")
         let isLoading = BehaviorRelay<Bool>(value: false)
+        let isEmptyResult = BehaviorRelay<Bool>(value: false)
         
         let submitButtonIsHidden = BehaviorRelay<Bool>(value: true)
         let alertMessageRelay = PublishRelay<String>()
@@ -60,6 +62,7 @@ final class SearchThemeViewModel: BaseViewModel {
                         ThemeImageViewData(from: photoEntity)
                     }
                     imageItems.accept(viewDataList)
+                    isEmptyResult.accept(viewDataList.isEmpty)
                     totalImageCount.accept(entity.total)
                     nextPage.accept(2)
                     currentSearchWord.accept("library")
@@ -122,9 +125,12 @@ final class SearchThemeViewModel: BaseViewModel {
                         ThemeImageViewData(from: $0)
                     }
                     imageItems.accept(viewDataList)
+                    isEmptyResult.accept(viewDataList.isEmpty)
                     totalImageCount.accept(entity.total)
                     nextPage.accept(2)
                 case .failure(let error):
+                    // 통신 실패는 "결과 없음"이 아니다 — 직전 검색이 0건이었어도 문구를 내린다
+                    isEmptyResult.accept(false)
                     AppLogger.network.error("테마 검색 실패: \(String(describing: error), privacy: .public)")
                     CrashReporter.record(error)
                     alertMessageRelay.accept(Self.networkErrorMessage)
@@ -150,6 +156,7 @@ final class SearchThemeViewModel: BaseViewModel {
 
         return Output(
             themeImageList: imageItems.asDriver(onErrorJustReturn: []),
+            isEmptyResult: isEmptyResult.asDriver(),
             buttonEnable: submitButtonIsHidden.asDriver(),
             alertMessage: alertMessageRelay.asSignal(),
             themeSaved: themeSavedRelay.asSignal()
