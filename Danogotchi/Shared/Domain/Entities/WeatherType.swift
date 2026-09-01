@@ -1,6 +1,6 @@
 import Foundation
 
-enum WeatherType {
+enum WeatherType: String, CaseIterable {
     case thunderstorm
     case drizzle
     case rain

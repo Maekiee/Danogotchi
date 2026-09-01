@@ -30,6 +30,7 @@ final class CharacterViewController: BaseViewController {
         return stack
     }()
     private let petSpriteView = PetSpriteView()
+    private let weatherSpriteView = WeatherSpriteView()
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = AppFont.title1
@@ -98,6 +99,7 @@ final class CharacterViewController: BaseViewController {
 
     override func configHierarchy() {
         view.addSubview(scrollView)
+        view.addSubview(weatherSpriteView)
         scrollView.addSubview(contentStackView)
 
         [
@@ -124,6 +126,13 @@ final class CharacterViewController: BaseViewController {
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
+        // 스크롤과 무관하게 화면 우측 상단에 머문다
+        weatherSpriteView.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).inset(AppSpacing.space20)
+            make.size.equalTo(64)
+        }
+
         // 남는 세로 공간을 전부 흡수한다. 콘텐츠가 화면보다 길면 이 최소값으로 돌아온다.
         petSpriteView.snp.makeConstraints { make in
             make.height.greaterThanOrEqualTo(160)
@@ -155,6 +164,9 @@ final class CharacterViewController: BaseViewController {
     override func configView() {
         heartBarView.isAccessibilityElement = true
         heartBarView.accessibilityLabel = "체력"
+
+        // 날씨를 받기 전에는 빈 칸을 보이지 않는다
+        weatherSpriteView.isHidden = true
 
         // 스택의 남는 공간을 가져갈 뷰를 명시한다 — 기본값(250)끼리 겹치면 어디가 늘어날지 불확실하다
         petSpriteView.setContentHuggingPriority(.init(1), for: .vertical)
@@ -272,6 +284,12 @@ extension CharacterViewController {
         output.toastMessage
             .emit(with: self) { owner, message in
                 owner.showToast(message)
+            }.disposed(by: disposeBag)
+
+        output.weatherType
+            .drive(with: self) { owner, type in
+                owner.weatherSpriteView.isHidden = false
+                owner.weatherSpriteView.render(type)
             }.disposed(by: disposeBag)
 
         // 되돌릴 수 없는 경험치 차감이라 확인을 받는다

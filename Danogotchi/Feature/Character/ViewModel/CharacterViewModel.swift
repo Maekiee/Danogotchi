@@ -42,6 +42,7 @@ final class CharacterViewModel: BaseViewModel {
     struct Output {
         let info: Driver<PetDisplayInfo>
         let toastMessage: Signal<String>
+        let weatherType: Driver<WeatherType>
     }
 
     func transform(input: Input) -> Output {
@@ -49,6 +50,7 @@ final class CharacterViewModel: BaseViewModel {
         let toastMessage = PublishRelay<String>()
         let refreshTrigger = Observable.merge(input.viewWillAppear, input.didBecomeActive)
         let isWeatherLoading = BehaviorRelay<Bool>(value: false)
+        let weatherType = BehaviorRelay<WeatherType?>(value: nil)
         
         refreshTrigger
             .bind(with: self) { owner, _ in
@@ -63,6 +65,7 @@ final class CharacterViewModel: BaseViewModel {
                     defer { isWeatherLoading.accept(false) }
                     do {
                         let weather = try await owner.fetchCurrentWeatherUseCase.getWeather()
+                        weatherType.accept(weather.weatherType)
                         AppLogger.network.debug("현재 날씨 — 도시=\(weather.cityName, privacy: .public), 종류=\(String(describing: weather.weatherType), privacy: .public), 기온=\(weather.temperature, privacy: .public)℃, 체감=\(weather.feelsLike, privacy: .public)℃, 습도=\(weather.humidity, privacy: .public)%, 상태=\(weather.description, privacy: .public)")
                     } catch {
                         AppLogger.network.error("현재 날씨 조회 실패: \(String(describing: error), privacy: .public)")
@@ -92,7 +95,8 @@ final class CharacterViewModel: BaseViewModel {
 
         return Output(
             info: state.compactMap { $0 }.asDriver(onErrorDriveWith: .empty()),
-            toastMessage: toastMessage.asSignal()
+            toastMessage: toastMessage.asSignal(),
+            weatherType: weatherType.compactMap { $0 }.asDriver(onErrorDriveWith: .empty())
         )
     }
 
