@@ -29,19 +29,19 @@ struct WeatherSpriteSheet: Decodable {
     func unitRects(of clip: Clip, sheetPixelSize: CGSize) -> [CGRect] {
         guard frameWidth > 0, frameHeight > 0 else { return [] }
 
-        // 시트가 프레임 크기로 딱 나눠떨어지지 않는다(1660 / 207 = 8.019).
-        // 반올림해 격자를 정수로 고정해야 칸이 조금씩 밀리지 않는다.
-        let columns = (sheetPixelSize.width / CGFloat(frameWidth)).rounded()
-        let rows = (sheetPixelSize.height / CGFloat(frameHeight)).rounded()
+        let columns = sheetPixelSize.width / CGFloat(frameWidth)
+        let rows = sheetPixelSize.height / CGFloat(frameHeight)
         guard columns >= 1, rows >= 1,
               clip.row >= 0, CGFloat(clip.row) < rows,
               clip.frameCount > 0, CGFloat(clip.frameCount) <= columns else { return [] }
 
         return (0..<clip.frameCount).map { column in
-            CGRect(x: CGFloat(column) / columns,
-                   y: CGFloat(clip.row) / rows,
-                   width: 1 / columns,
-                   height: 1 / rows)
+            CGRect(
+                x: CGFloat(column) * CGFloat(frameWidth) / sheetPixelSize.width,
+                y: CGFloat(clip.row) * CGFloat(frameHeight) / sheetPixelSize.height,
+                width: CGFloat(frameWidth) / sheetPixelSize.width,
+                height: CGFloat(frameHeight) / sheetPixelSize.height
+            )
         }
     }
 }

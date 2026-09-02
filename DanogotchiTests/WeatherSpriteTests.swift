@@ -31,9 +31,15 @@ final class WeatherSpriteTests: XCTestCase {
         }
     }
 
-    func test_유닛_사각형은_한_행을_가로로_훑는다() throws {
+    func test_유닛_사각형은_선언된_프레임_크기를_사용한다() throws {
         let manifest = try loadManifest()
-        let clip = try XCTUnwrap(manifest.clip(.clear))
+        let clip = WeatherSpriteSheet.Clip(
+            name: "test",
+            row: 1,
+            frameCount: 2,
+            fps: 1,
+            loop: false
+        )
         let sheet = try loadSheet()
         let rects = manifest.unitRects(
             of: clip,
@@ -44,13 +50,54 @@ final class WeatherSpriteTests: XCTestCase {
         // 같은 클립은 같은 행에 머문다
         XCTAssertEqual(Set(rects.map { $0.minY }).count, 1)
 
-        // 시트가 프레임 크기로 딱 안 나눠떨어져도 칸은 균등해야 한다 — 안 그러면 프레임이 조금씩 밀린다
-        let width = 1 / CGFloat(clip.frameCount)
+        let width = CGFloat(manifest.frameWidth) / CGFloat(sheet.width)
+        let height = CGFloat(manifest.frameHeight) / CGFloat(sheet.height)
         for (index, rect) in rects.enumerated() {
             XCTAssertEqual(rect.width, width, accuracy: .ulpOfOne)
             XCTAssertEqual(rect.minX, CGFloat(index) * width, accuracy: .ulpOfOne)
+            XCTAssertEqual(rect.height, height, accuracy: .ulpOfOne)
+            XCTAssertEqual(rect.minY, height, accuracy: .ulpOfOne)
         }
-        XCTAssertEqual(try XCTUnwrap(rects.last).maxX, 1, accuracy: .ulpOfOne)
+        XCTAssertEqual(
+            try XCTUnwrap(rects.last).maxX,
+            CGFloat(clip.frameCount) * width,
+            accuracy: .ulpOfOne
+        )
+    }
+
+    func test_모든_날씨_프레임은_격자_안에_여백을_두고_본체가_정렬된다() throws {
+        let manifest = try loadManifest()
+        let sheet = try loadSheet()
+        let pixels = try RGBAImage(sheet)
+
+        XCTAssertEqual(sheet.width, manifest.frameWidth * 8)
+        XCTAssertEqual(sheet.height, manifest.frameHeight * 7)
+
+        for row in 0..<7 {
+            let frames = (0..<8).map { column in
+                CGRect(
+                    x: CGFloat(column * manifest.frameWidth),
+                    y: CGFloat(row * manifest.frameHeight),
+                    width: CGFloat(manifest.frameWidth),
+                    height: CGFloat(manifest.frameHeight)
+                )
+            }
+            let reference = try XCTUnwrap(pixels.bodyFeature(in: frames[0], row: row))
+
+            for (column, frame) in frames.enumerated() {
+                let bounds = try XCTUnwrap(pixels.alphaBounds(in: frame))
+                XCTAssertGreaterThanOrEqual(bounds.minX - frame.minX, 2, "row \(row), column \(column): 왼쪽 여백")
+                XCTAssertGreaterThanOrEqual(bounds.minY - frame.minY, 2, "row \(row), column \(column): 위쪽 여백")
+                XCTAssertGreaterThanOrEqual(frame.maxX - bounds.maxX, 2, "row \(row), column \(column): 오른쪽 여백")
+                XCTAssertGreaterThanOrEqual(frame.maxY - bounds.maxY, 2, "row \(row), column \(column): 아래쪽 여백")
+
+                let candidate = try XCTUnwrap(pixels.bodyFeature(in: frame, row: row))
+                let alignment = bestAlignmentOffset(reference: reference, candidate: candidate)
+                XCTAssertGreaterThan(alignment.score, 0.8, "row \(row), column \(column): 본체 상관도")
+                XCTAssertLessThanOrEqual(abs(alignment.dx), 1, "row \(row), column \(column): 가로 지터")
+                XCTAssertLessThanOrEqual(abs(alignment.dy), 1, "row \(row), column \(column): 세로 지터")
+            }
+        }
     }
 
     func test_매니페스트가_시트_격자를_벗어나면_아무_프레임도_주지_않는다() throws {
@@ -118,4 +165,133 @@ final class WeatherSpriteTests: XCTestCase {
         )
         XCTAssertEqual(Set(manifest.clips.map { $0.row }).count, manifest.clips.count)
     }
+}
+
+private struct RGBAImage {
+    private enum PixelError: Error {
+        case contextCreationFailed
+    }
+
+    let width: Int
+    let height: Int
+    private let pixels: [UInt8]
+
+    init(_ image: CGImage) throws {
+        let width = image.width
+        let height = image.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let rendered = pixels.withUnsafeMutableBytes { buffer in
+            guard let address = buffer.baseAddress,
+                  let context = CGContext(
+                    data: address,
+                    width: width,
+                    height: height,
+                    bitsPerComponent: 8,
+                    bytesPerRow: width * 4,
+                    space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue
+                        | CGImageAlphaInfo.premultipliedLast.rawValue
+                  ) else { return false }
+
+            context.draw(
+                image,
+                in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height))
+            )
+            return true
+        }
+        guard rendered else { throw PixelError.contextCreationFailed }
+
+        self.width = width
+        self.height = height
+        self.pixels = pixels
+    }
+
+    func alphaBounds(in rect: CGRect, alphaGreaterThan threshold: UInt8 = 0) -> CGRect? {
+        var minimumX = Int(rect.maxX)
+        var minimumY = Int(rect.maxY)
+        var maximumX = Int(rect.minX) - 1
+        var maximumY = Int(rect.minY) - 1
+
+        for y in Int(rect.minY)..<Int(rect.maxY) {
+            for x in Int(rect.minX)..<Int(rect.maxX) where alpha(x: x, y: y) > threshold {
+                minimumX = min(minimumX, x)
+                minimumY = min(minimumY, y)
+                maximumX = max(maximumX, x)
+                maximumY = max(maximumY, y)
+            }
+        }
+        guard maximumX >= minimumX, maximumY >= minimumY else { return nil }
+        return CGRect(
+            x: minimumX,
+            y: minimumY,
+            width: maximumX - minimumX + 1,
+            height: maximumY - minimumY + 1
+        )
+    }
+
+    func bodyFeature(in rect: CGRect, row: Int) -> [Double]? {
+        guard let bounds = alphaBounds(in: rect, alphaGreaterThan: 16) else { return nil }
+        let frameWidth = Int(rect.width)
+        let frameHeight = Int(rect.height)
+        let bodyBottom = row <= 3
+            ? Int(bounds.minY + (bounds.height * 0.65).rounded())
+            : Int(rect.maxY)
+        var result = [Double](repeating: 0, count: frameWidth * frameHeight)
+
+        for localY in 0..<frameHeight {
+            let y = Int(rect.minY) + localY
+            guard y < bodyBottom else { continue }
+            for localX in 0..<frameWidth {
+                let x = Int(rect.minX) + localX
+                guard alpha(x: x, y: y) > 16 else { continue }
+                let offset = pixelOffset(x: x, y: y)
+                result[localY * frameWidth + localX] =
+                    Double(pixels[offset]) * 0.2126
+                    + Double(pixels[offset + 1]) * 0.7152
+                    + Double(pixels[offset + 2]) * 0.0722
+            }
+        }
+        return result
+    }
+
+    private func pixelOffset(x: Int, y: Int) -> Int {
+        (y * width + x) * 4
+    }
+
+    private func alpha(x: Int, y: Int) -> UInt8 {
+        pixels[pixelOffset(x: x, y: y) + 3]
+    }
+}
+
+private func bestAlignmentOffset(
+    reference: [Double],
+    candidate: [Double],
+    frameSize: Int = 216
+) -> (dx: Int, dy: Int, score: Double) {
+    let referenceNorm = sqrt(reference.reduce(0) { $0 + $1 * $1 })
+    let candidateNorm = sqrt(candidate.reduce(0) { $0 + $1 * $1 })
+    var best = (dx: 0, dy: 0, score: -Double.infinity)
+
+    for dy in -2...2 {
+        for dx in -2...2 {
+            var product = 0.0
+            for y in 0..<frameSize {
+                let candidateY = y - dy
+                guard candidateY >= 0, candidateY < frameSize else { continue }
+                for x in 0..<frameSize {
+                    let candidateX = x - dx
+                    guard candidateX >= 0, candidateX < frameSize else { continue }
+                    product += reference[y * frameSize + x]
+                        * candidate[candidateY * frameSize + candidateX]
+                }
+            }
+            let score = product / (referenceNorm * candidateNorm)
+            let currentDistance = abs(dx) + abs(dy)
+            let bestDistance = abs(best.dx) + abs(best.dy)
+            if score > best.score || (score == best.score && currentDistance < bestDistance) {
+                best = (dx, dy, score)
+            }
+        }
+    }
+    return best
 }

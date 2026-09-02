@@ -8,7 +8,6 @@ protocol CharacterViewControllerDelegate: AnyObject {
 }
 
 final class CharacterViewController: BaseViewController {
-
     private let disposeBag = DisposeBag()
     private let viewModel: CharacterViewModel
     weak var delegate: CharacterViewControllerDelegate?
@@ -128,7 +127,7 @@ final class CharacterViewController: BaseViewController {
         
         // 스크롤과 무관하게 화면 우측 상단에 머문다
         weatherSpriteView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space20)
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(AppSpacing.space20)
             make.size.equalTo(64)
         }
@@ -142,7 +141,6 @@ final class CharacterViewController: BaseViewController {
             make.verticalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.width.equalToSuperview().offset(-AppSpacing.space20 * 2)
-            // 콘텐츠가 짧아도 최소 한 화면은 채운다 — 그래야 남는 공간이 생긴다
             make.height.greaterThanOrEqualTo(scrollView.frameLayoutGuide.snp.height)
                 .offset(-AppSpacing.space20 * 2)
         }
@@ -175,11 +173,11 @@ final class CharacterViewController: BaseViewController {
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
 
-        #if DEBUG
-        // 임시 — 캐릭터 영역이 실제로 차지하는 박스 확인용. 날씨 배경 배치를 정하면 지운다.
-        petSpriteView.layer.borderWidth = 0.5
-        petSpriteView.layer.borderColor = UIColor.red.cgColor
-        #endif
+//        #if DEBUG
+//        // 임시 — 캐릭터 영역이 실제로 차지하는 박스 확인용. 날씨 배경 배치를 정하면 지운다.
+//        petSpriteView.layer.borderWidth = 0.5
+//        petSpriteView.layer.borderColor = UIColor.red.cgColor
+//        #endif
     }
 }
 
