@@ -260,9 +260,10 @@ flowchart LR
 * `Mapper`의 `toDomain()`과 필요한 모델의 `apply(_:)`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다.
 * 네트워크 DTO는 `toEntity()`로 Domain Model에 변환하며, 읽기 전용 흐름에 사용하지 않는 `toDTO()`는 만들지 않습니다.
 
-### Alamofire + Kingfisher
-* Unsplash 사진 검색(`ApiRouter`)을 담당합니다.
-* 이미지 다운로드와 캐싱을 처리합니다.
+### 배경 테마 이미지
+* 선택한 사진은 URL만 저장하지 않고 `Library/Application Support/ThemeImage/`에 실제 파일로 내려받아 보관합니다. URL이 내려가거나 오프라인이어도 배경이 유지됩니다.
+* Unsplash 이미지 CDN에 `fit=crop`으로 화면 픽셀 크기를 요청해 업스케일 없이 받고, HEIC로 저장합니다(실패 시 WebP로 대체).
+* 표시할 때는 `ImageDecoder`가 ImageIO로 백그라운드에서 디코딩까지 끝내 첫 렌더링이 끊기지 않게 합니다.
 
 ### DiffableDataSource
 * 단어 카드·단어장·테마 목록에 사용합니다.

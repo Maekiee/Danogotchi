@@ -2,11 +2,11 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import Kingfisher
 
 final class ThemeImageCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
-    
+    private var thumbnailTask: Task<Void, Never>?
+
     private let thumbnail: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
@@ -40,6 +40,8 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
+        thumbnailTask?.cancel()
+        thumbnailTask = nil
         thumbnail.image = nil
         setSelected(false)
     }
@@ -48,9 +50,22 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configBind(with item: ThemeImageViewData, isSelected: Bool) {
-        thumbnail.kf.setImage(with: URL(string: item.thumbnailUrl))
+    func configBind(with item: ThemeImageViewData, isSelected: Bool, loader: RemoteImageLoader) {
         setSelected(isSelected)
+
+        guard let url = URL(string: item.thumbnailUrl) else { return }
+
+        // 이미 받아둔 이미지는 즉시 넣는다 — 재사용 때 한 프레임 비는 것을 막는다
+        if let cached = loader.cachedImage(for: url) {
+            thumbnail.image = cached
+            return
+        }
+
+        thumbnailTask = Task { @MainActor [weak self] in
+            let image = await loader.load(url: url)
+            guard !Task.isCancelled, let self, let image else { return }
+            self.thumbnail.image = image
+        }
     }
     
     private func configHierarchy() {

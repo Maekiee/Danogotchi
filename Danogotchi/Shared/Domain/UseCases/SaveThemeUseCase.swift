@@ -1,18 +1,19 @@
 import Foundation
+import RxSwift
 
 protocol SaveThemeUseCase {
-    /// 선택한 배경 테마 이미지 URL을 저장한다.
-    func execute(url: String)
+    /// 선택한 배경 테마 이미지를 로컬에 내려받아 저장한다.
+    func execute(rawUrl: String) -> Single<Result<Void, Error>>
 }
 
 final class DefaultSaveThemeUseCase: SaveThemeUseCase {
-    private let userInfo: UserInfoProtocol
+    private let themeImageRepository: ThemeImageRepository
 
-    init(userInfo: UserInfoProtocol) {
-        self.userInfo = userInfo
+    init(themeImageRepository: ThemeImageRepository) {
+        self.themeImageRepository = themeImageRepository
     }
 
-    func execute(url: String) {
-        userInfo.currentThemeUrl = url
+    func execute(rawUrl: String) -> Single<Result<Void, Error>> {
+        return themeImageRepository.replace(rawUrl: rawUrl)
     }
 }

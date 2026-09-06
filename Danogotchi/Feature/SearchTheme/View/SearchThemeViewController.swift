@@ -27,7 +27,9 @@ final class SearchThemeViewController: BaseViewController {
     private var dataSource: DataSource!
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()
-    
+    /// 화면이 소유해 캐시가 화면과 함께 사라지게 한다
+    private let imageLoader = RemoteImageLoader()
+
 
     private let titleText: UILabel = {
         let label = UILabel()
@@ -50,6 +52,12 @@ final class SearchThemeViewController: BaseViewController {
     private lazy var  submitButton: PrimaryFillButton = {
         let button = entryMode == .onboarding ? "시작하기" : "수정하기"
         return PrimaryFillButton(title: button)
+    }()
+    private let savingIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .large)
+        view.color = AppColor.textPrimary
+        view.hidesWhenStopped = true
+        return view
     }()
     
     init(
@@ -87,6 +95,7 @@ final class SearchThemeViewController: BaseViewController {
             textField,
             collectionView,
             submitButton,
+            savingIndicator,
         ].forEach { view.addSubview($0) }
     }
     
@@ -113,7 +122,10 @@ final class SearchThemeViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.height.equalTo(48)
         }
-        
+
+        savingIndicator.snp.makeConstraints { make in
+            make.center.equalTo(collectionView)
+        }
     }
 }
 
@@ -171,6 +183,8 @@ extension SearchThemeViewController {
                     return
                 }
                 
+                print("디버깅 2: \(selectedItem)")
+                
                 let newUrl = (owner.selectedThemeUrl.value == selectedItem.themeImageUrl) ? nil : selectedItem.themeImageUrl
                 owner.selectedThemeUrl.accept(newUrl)
             }.disposed(by: disposeBag)
@@ -188,6 +202,19 @@ extension SearchThemeViewController {
         output.buttonEnable
             .drive(submitButton.rx.isHidden)
             .disposed(by: disposeBag)
+
+        // 이미지를 내려받아 저장하는 동안은 선택을 바꾸지 못하게 막는다
+        output.isSaving
+            .drive(with: self) { owner, isSaving in
+                if isSaving {
+                    owner.savingIndicator.startAnimating()
+                } else {
+                    owner.savingIndicator.stopAnimating()
+                }
+                owner.submitButton.isEnabled = !isSaving
+                owner.collectionView.isUserInteractionEnabled = !isSaving
+                owner.textField.isEnabled = !isSaving
+            }.disposed(by: disposeBag)
 
         output.alertMessage
             .emit(with: self) { owner, message in
@@ -219,7 +246,11 @@ extension SearchThemeViewController {
         let cellRegistration = UICollectionView.CellRegistration<ThemeImageCollectionViewCell, ThemeImageViewData> {
             [weak self] cell, indexPath, item in
             guard let self = self else { return }
-            cell.configBind(with: item, isSelected: item.themeImageUrl == selectedThemeUrl.value)
+            cell.configBind(
+                with: item,
+                isSelected: item.themeImageUrl == selectedThemeUrl.value,
+                loader: imageLoader
+            )
         }
         
         dataSource = DataSource(collectionView: collectionView) {

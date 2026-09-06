@@ -20,6 +20,7 @@ extension DefaultSearchThemeRepository: SearchThemeRepository {
                         responseType: SearchPhotoDTO.self
                     )
                     
+                    print("디버그 1: \(dto)")
                     observer(.success(.success(dto.toEntity())))
                 } catch {
                     observer(.success(.failure(error)))

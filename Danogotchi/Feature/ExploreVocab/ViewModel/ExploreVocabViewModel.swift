@@ -36,7 +36,7 @@ final class ExploreVocabViewModel: BaseViewModel {
         let showsSaveButton: Driver<Bool>
         let startQuiz: Signal<QuizData>
         let alertMessage: Signal<String>
-        let themeUrl: Driver<String>
+        let themeImageFileURL: Driver<URL?>
     }
 
     func transform(input: Input) -> Output {
@@ -96,8 +96,8 @@ final class ExploreVocabViewModel: BaseViewModel {
             showsSaveButton: showsSaveButton.asDriver(),
             startQuiz: startQuizRelay.asSignal(),
             alertMessage: alertMessageRelay.asSignal(),
-            themeUrl: observeThemeUseCase.execute()
-                .compactMap { $0 }
+            // nil도 그대로 흘린다 — 저장된 이미지가 사라진 상태가 화면에 반영돼야 한다
+            themeImageFileURL: observeThemeUseCase.execute()
                 .asDriver(onErrorDriveWith: .empty())
         )
     }

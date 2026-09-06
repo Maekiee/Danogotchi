@@ -33,6 +33,7 @@ final class SearchThemeViewModel: BaseViewModel {
         let buttonEnable: Driver<Bool>
         let alertMessage: Signal<String>
         let themeSaved: Signal<Void>
+        let isSaving: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
@@ -46,6 +47,7 @@ final class SearchThemeViewModel: BaseViewModel {
         let submitButtonIsHidden = BehaviorRelay<Bool>(value: true)
         let alertMessageRelay = PublishRelay<String>()
         let themeSavedRelay = PublishRelay<Void>()
+        let isSaving = BehaviorRelay<Bool>(value: false)
 
 
         // 초기값
@@ -146,12 +148,25 @@ final class SearchThemeViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
 
+        // 이미지를 로컬에 내려받아 저장할 때까지 기다린다 — 저장에 실패하면 화면을 닫지 않는다
         input.submitTapped
             .withLatestFrom(input.selectedTheme)
             .compactMap { $0 }
-            .bind(with: self) { owner, themeUrl in
-                owner.saveThemeUseCase.execute(url: themeUrl)
-                themeSavedRelay.accept(())
+            .filter { _ in !isSaving.value }
+            .do(onNext: { _ in isSaving.accept(true) })
+            .flatMapLatest { [saveThemeUseCase] rawUrl in
+                saveThemeUseCase.execute(rawUrl: rawUrl)
+            }
+            .bind(with: self) { owner, result in
+                isSaving.accept(false)
+                switch result {
+                case .success:
+                    themeSavedRelay.accept(())
+                case .failure(let error):
+                    AppLogger.network.error("테마 이미지 저장 실패: \(String(describing: error), privacy: .public)")
+                    CrashReporter.record(error)
+                    alertMessageRelay.accept(Self.networkErrorMessage)
+                }
             }.disposed(by: disposeBag)
 
         return Output(
@@ -159,7 +174,8 @@ final class SearchThemeViewModel: BaseViewModel {
             isEmptyResult: isEmptyResult.asDriver(),
             buttonEnable: submitButtonIsHidden.asDriver(),
             alertMessage: alertMessageRelay.asSignal(),
-            themeSaved: themeSavedRelay.asSignal()
+            themeSaved: themeSavedRelay.asSignal(),
+            isSaving: isSaving.asDriver()
         )
     }
 }

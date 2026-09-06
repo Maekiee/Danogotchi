@@ -2,6 +2,10 @@ import Foundation
 
 protocol ApiClient: Sendable {
     func request<T: Decodable>(_ endpoint: Endpoint, responseType: T.Type) async throws -> T
+
+    /// 이미지 같은 원시 바이트를 절대 URL에서 그대로 받는다.
+    /// request(_:responseType:)는 JSON 디코딩이 고정이고 baseURL + path 조합만 다뤄서 쓸 수 없다.
+    func data(from url: URL) async throws -> Data
 }
 
 final class DefaultApiClient: ApiClient {
@@ -54,6 +58,29 @@ final class DefaultApiClient: ApiClient {
         }
     }
     
+    func data(from url: URL) async throws -> Data {
+        let data: Data
+        let response: URLResponse
+
+        do {
+            (data, response) = try await session.data(from: url)
+        } catch let error as URLError {
+            throw NetworkError.transport(error)
+        } catch {
+            throw NetworkError.unknown(error)
+        }
+
+        guard let http = response as? HTTPURLResponse else {
+            throw NetworkError.transport(URLError(.badServerResponse))
+        }
+
+        guard (200..<300).contains(http.statusCode) else {
+            throw NetworkError.unknown(NSError(domain: "HTTPStatus", code: http.statusCode))
+        }
+
+        return data
+    }
+
     private func makeRequest(_ endpoint: Endpoint) throws -> URLRequest {
         var components = URLComponents(string: endpoint.baseURL + endpoint.path)
         components?.queryItems = endpoint.queryItems

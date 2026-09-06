@@ -1,4 +1,3 @@
-import Kingfisher
 import OSLog
 import RxCocoa
 import RxSwift
@@ -36,6 +35,9 @@ final class ExploreVocabViewController: BaseViewController {
     private static let loopCopyCount = 3
     private var baseItems: [VocabDisplayInfo] = []
     private var pendingRecenterPage: Int?
+
+    private var currentThemeImageFileURL: URL?
+    private var themeDecodeTask: Task<Void, Never>?
 
     init(viewModel: ExploreVocabViewModel) {
         self.viewModel = viewModel
@@ -212,12 +214,34 @@ final class ExploreVocabViewController: BaseViewController {
 }
 
 extension ExploreVocabViewController {
-    private func updateBackgroundImage(with urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        themeBackgroundImage.kf.setImage(
-            with: url,
-            options: [.transition(.fade(0.3)), .cacheOriginalImage]
-        )
+    private func updateBackgroundImage(with fileURL: URL?) {
+        guard currentThemeImageFileURL != fileURL else { return }
+        currentThemeImageFileURL = fileURL
+
+        themeDecodeTask?.cancel()
+
+        guard let fileURL else {
+            themeBackgroundImage.image = nil
+            return
+        }
+
+        // 디코딩은 백그라운드에서 끝낸다 — 메인 스레드에서 하면 첫 렌더링 때 프레임이 끊긴다
+        let maxPixelSize = Int(UIScreen.main.nativeBounds.height)
+        themeDecodeTask = Task { @MainActor [weak self] in
+            let image = await Task.detached(priority: .userInitiated) {
+                ImageDecoder.decode(fileURL: fileURL, maxPixelSize: maxPixelSize)
+            }.value
+
+            guard !Task.isCancelled, let self, let image else { return }
+
+            UIView.transition(
+                with: self.themeBackgroundImage,
+                duration: 0.3,
+                options: .transitionCrossDissolve
+            ) {
+                self.themeBackgroundImage.image = image
+            }
+        }
     }
     
     private func bind() {
@@ -231,9 +255,9 @@ extension ExploreVocabViewController {
 
         let output = viewModel.transform(input: input)
         
-        output.themeUrl
-            .drive(with: self) { owner, themeUrl in
-                owner.updateBackgroundImage(with: themeUrl)
+        output.themeImageFileURL
+            .drive(with: self) { owner, fileURL in
+                owner.updateBackgroundImage(with: fileURL)
             }
             .disposed(by: disposeBag)
 

@@ -7,12 +7,14 @@ final class AppDIContainer {
     let apiClient:ApiClient
     let vocabBookRepository: VocabBookRepository
     let petRepository: PetRepository
+    let themeImageStorage: ImageFileStorage
 
     init() {
         userInfoManager = UserInfoManager.shared
         ttsManager = TTSManager.shared
         coreDataStack = CoreDataStack.shared
         apiClient = DefaultApiClient()
+        themeImageStorage = ImageFileStorage(directoryName: "ThemeImage")
         vocabBookRepository = DefaultVocabBookRepository(context: coreDataStack.viewContext)
         petRepository = DefaultPetRepository(context: coreDataStack.viewContext)
     }
@@ -144,12 +146,20 @@ extension AppDIContainer {
         )
     }
 
+    func makeThemeImageRepository() -> ThemeImageRepository {
+        return DefaultThemeImageRepository(
+            apiClient: apiClient,
+            storage: themeImageStorage,
+            userInfo: userInfoManager
+        )
+    }
+
     func makeSaveThemeUseCase() -> SaveThemeUseCase {
-        return DefaultSaveThemeUseCase(userInfo: userInfoManager)
+        return DefaultSaveThemeUseCase(themeImageRepository: makeThemeImageRepository())
     }
 
     func makeObserveThemeUseCase() -> ObserveThemeUseCase {
-        return DefaultObserveThemeUseCase(userInfo: userInfoManager)
+        return DefaultObserveThemeUseCase(themeImageRepository: makeThemeImageRepository())
     }
 }
 
