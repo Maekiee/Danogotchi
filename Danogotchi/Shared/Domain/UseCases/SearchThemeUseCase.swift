@@ -1,8 +1,7 @@
 import Foundation
-import RxSwift
 
 protocol SearchThemeUseCase {
-    func execute(query: String, page: Int) -> Single<Result<SearchPhotoEntity, Error>>
+    func execute(query: String, page: Int) async throws -> SearchPhotoEntity
 }
 
 final class DefaultSearchThemeUseCase: SearchThemeUseCase {
@@ -12,7 +11,7 @@ final class DefaultSearchThemeUseCase: SearchThemeUseCase {
         self.repository = repository
     }
 
-    func execute(query: String, page: Int) -> Single<Result<SearchPhotoEntity, Error>> {
-        return repository.searchPhotos(query: query, page: page)
+    func execute(query: String, page: Int) async throws -> SearchPhotoEntity {
+        return try await repository.searchPhotos(query: query, page: page)
     }
 }

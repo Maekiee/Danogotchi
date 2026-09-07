@@ -9,6 +9,7 @@ final class SearchThemeViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let searchThemeUseCase: SearchThemeUseCase
     private let saveThemeUseCase: SaveThemeUseCase
+    private var searchTask: Task<Void, Never>?
 
     init(
         searchThemeUseCase: SearchThemeUseCase,
@@ -16,6 +17,10 @@ final class SearchThemeViewModel: BaseViewModel {
     ) {
         self.searchThemeUseCase = searchThemeUseCase
         self.saveThemeUseCase = saveThemeUseCase
+    }
+
+    deinit {
+        searchTask?.cancel()
     }
 
     struct Input {
@@ -50,95 +55,71 @@ final class SearchThemeViewModel: BaseViewModel {
         let isSaving = BehaviorRelay<Bool>(value: false)
 
 
+        // 초기 조회, 검색, 페이지 요청을 하나의 Task로 관리한다.
+        func loadPhotos(owner: SearchThemeViewModel, query: String, page: Int) {
+            owner.searchTask?.cancel()
+            isLoading.accept(true)
+
+            if page == 1 {
+                currentSearchWord.accept(query)
+                nextPage.accept(1)
+                totalImageCount.accept(0)
+                imageItems.accept([])
+                isEmptyResult.accept(false)
+            }
+
+            let useCase = owner.searchThemeUseCase
+            // owner를 캡처하지 않아 요청 중에도 ViewModel이 해제될 수 있다.
+            owner.searchTask = Task { @MainActor in
+                defer {
+                    // 이전 요청이 새 요청의 로딩 상태를 변경하지 않도록 한다.
+                    if !Task.isCancelled { isLoading.accept(false) }
+                }
+
+                do {
+                    let entity = try await useCase.execute(query: query, page: page)
+                    try Task.checkCancellation()
+
+                    let items = entity.results.map { ThemeImageViewData(from: $0) }
+                    totalImageCount.accept(entity.total)
+                    nextPage.accept(page + 1)
+                    imageItems.accept(page == 1 ? items : imageItems.value + items)
+                    isEmptyResult.accept(imageItems.value.isEmpty)
+                } catch {
+                    guard !Task.isCancelled, !(error is CancellationError) else { return }
+                    isEmptyResult.accept(false)
+                    AppLogger.network.error("테마 조회 실패(page=\(page)): \(String(describing: error), privacy: .public)")
+                    CrashReporter.record(error)
+                    alertMessageRelay.accept(Self.networkErrorMessage)
+                }
+            }
+        }
+
         // 초기값
         input.viewWillAppear
             .take(1)
-            .withLatestFrom(nextPage.asObservable())
-            .flatMapLatest{ page in
-                self.searchThemeUseCase.execute(query: "library", page: page)
-            }
-            .bind(with: self) { owner, result in
-                switch result {
-                case .success(let entity):
-                    let viewDataList = entity.results.map { photoEntity in
-                        ThemeImageViewData(from: photoEntity)
-                    }
-                    imageItems.accept(viewDataList)
-                    isEmptyResult.accept(viewDataList.isEmpty)
-                    totalImageCount.accept(entity.total)
-                    nextPage.accept(2)
-                    currentSearchWord.accept("library")
-                case .failure(let error):
-                    AppLogger.network.error("테마 초기 로드 실패: \(String(describing: error), privacy: .public)")
-                    CrashReporter.record(error)
-                    alertMessageRelay.accept(Self.networkErrorMessage)
-                }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, _ in
+                loadPhotos(owner: owner, query: "library", page: 1)
             }.disposed(by: disposeBag)
-        
-        
-        // 페이지 네이션
+
+        // 페이지네이션 — 요청 중에는 중복 호출을 무시한다.
         input.loadNextPage
-            .withLatestFrom(Observable.combineLatest(
-                currentSearchWord.asObservable(),
-                nextPage.asObservable(),
-                imageItems.asObservable(),
-                totalImageCount.asObservable(),
-            ))
-            .filter { (_, _, currentImages, total) in
-                return currentImages.count < total && total > 0
-            }
-            // 진행 중인 요청이 있으면 무시한다 (중복 요청 · 반복 알럿 방지)
-            .filter { _ in !isLoading.value }
-            .do(onNext: { _ in isLoading.accept(true) })
-            .flatMapLatest { (searchWrod, page, _, Int) in
-                self.searchThemeUseCase.execute(query: searchWrod, page: page)
-            }.bind(with: self) { owner, result in
-                isLoading.accept(false)
-                switch result {
-                case .success(let entity):
-                    let newViewDataList = entity.results.map { ThemeImageViewData(from: $0) }
-                    var currentList = imageItems.value
-                    currentList.append(contentsOf: newViewDataList)
-                    imageItems.accept(currentList)
-                    nextPage.accept(nextPage.value + 1)
-                case .failure(let error):
-                    AppLogger.network.error("테마 페이지네이션 실패: \(String(describing: error), privacy: .public)")
-                    CrashReporter.record(error)
-                    alertMessageRelay.accept(Self.networkErrorMessage)
-                }
+            .observe(on: MainScheduler.instance)
+            .filter { !isLoading.value && imageItems.value.count < totalImageCount.value }
+            .bind(with: self) { owner, _ in
+                loadPhotos(owner: owner, query: currentSearchWord.value, page: nextPage.value)
             }.disposed(by: disposeBag)
-        
-        
-        // 검색
+
+        // 검색 — 새 검색은 이전 조회 및 페이지 요청을 취소한다.
         input.textEndTrigger
             .withLatestFrom(input.searchText)
             .distinctUntilChanged()
-            .do { text in
-                currentSearchWord.accept(text)
-            }
-            .flatMap { text in
-                self.searchThemeUseCase.execute(query: text, page: 1)
-            }
-            .bind(with: self) { owner, result in
-                imageItems.accept([])
-                switch result {
-                case .success(let entity):
-                    let viewDataList = entity.results.map {
-                        ThemeImageViewData(from: $0)
-                    }
-                    imageItems.accept(viewDataList)
-                    isEmptyResult.accept(viewDataList.isEmpty)
-                    totalImageCount.accept(entity.total)
-                    nextPage.accept(2)
-                case .failure(let error):
-                    // 통신 실패는 "결과 없음"이 아니다 — 직전 검색이 0건이었어도 문구를 내린다
-                    isEmptyResult.accept(false)
-                    AppLogger.network.error("테마 검색 실패: \(String(describing: error), privacy: .public)")
-                    CrashReporter.record(error)
-                    alertMessageRelay.accept(Self.networkErrorMessage)
-                }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, text in
+                loadPhotos(owner: owner, query: text, page: 1)
             }.disposed(by: disposeBag)
-        
+
         input.selectedTheme
             .bind(with: self) { owner, selectedThemeUrl in
                 if selectedThemeUrl != nil {
