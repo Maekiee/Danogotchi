@@ -11,7 +11,7 @@ final class WeatherSpriteTests: XCTestCase {
     }
 
     private func loadSheet() throws -> CGImage {
-        try XCTUnwrap(UIImage(named: "weathersSheet")?.cgImage, "weathersSheet 로드 실패")
+        try XCTUnwrap(UIImage(named: "weatherBackgroundSheet")?.cgImage, "weatherBackgroundSheet 로드 실패")
     }
 
     func test_날씨_일곱_종류가_모두_시트_격자_안에_들어간다() throws {
@@ -65,39 +65,50 @@ final class WeatherSpriteTests: XCTestCase {
         )
     }
 
-    func test_모든_날씨_프레임은_격자_안에_여백을_두고_본체가_정렬된다() throws {
+    func test_배경은_1200x800_프레임_4열_7행으로_빈틈없이_채워진다() throws {
         let manifest = try loadManifest()
         let sheet = try loadSheet()
-        let pixels = try RGBAImage(sheet)
+        XCTAssertEqual(manifest.frameWidth, 1200)
+        XCTAssertEqual(manifest.frameHeight, 800)
+        XCTAssertEqual(sheet.width, 4800)
+        XCTAssertEqual(sheet.height, 5600)
 
-        XCTAssertEqual(sheet.width, manifest.frameWidth * 8)
-        XCTAssertEqual(sheet.height, manifest.frameHeight * 7)
-
-        for row in 0..<7 {
-            let frames = (0..<8).map { column in
-                CGRect(
-                    x: CGFloat(column * manifest.frameWidth),
-                    y: CGFloat(row * manifest.frameHeight),
-                    width: CGFloat(manifest.frameWidth),
-                    height: CGFloat(manifest.frameHeight)
-                )
-            }
-            let reference = try XCTUnwrap(pixels.bodyFeature(in: frames[0], row: row))
-
-            for (column, frame) in frames.enumerated() {
-                let bounds = try XCTUnwrap(pixels.alphaBounds(in: frame))
-                XCTAssertGreaterThanOrEqual(bounds.minX - frame.minX, 2, "row \(row), column \(column): 왼쪽 여백")
-                XCTAssertGreaterThanOrEqual(bounds.minY - frame.minY, 2, "row \(row), column \(column): 위쪽 여백")
-                XCTAssertGreaterThanOrEqual(frame.maxX - bounds.maxX, 2, "row \(row), column \(column): 오른쪽 여백")
-                XCTAssertGreaterThanOrEqual(frame.maxY - bounds.maxY, 2, "row \(row), column \(column): 아래쪽 여백")
-
-                let candidate = try XCTUnwrap(pixels.bodyFeature(in: frame, row: row))
-                let alignment = bestAlignmentOffset(reference: reference, candidate: candidate)
-                XCTAssertGreaterThan(alignment.score, 0.8, "row \(row), column \(column): 본체 상관도")
-                XCTAssertLessThanOrEqual(abs(alignment.dx), 1, "row \(row), column \(column): 가로 지터")
-                XCTAssertLessThanOrEqual(abs(alignment.dy), 1, "row \(row), column \(column): 세로 지터")
+        let types: [WeatherType] = [
+            .thunderstorm, .drizzle, .rain, .snow, .atmosphere, .clear, .clouds
+        ]
+        for (row, type) in types.enumerated() {
+            let clip = try XCTUnwrap(manifest.clip(type))
+            XCTAssertEqual(clip.row, row)
+            XCTAssertEqual(clip.frameCount, 4)
+            XCTAssertEqual(clip.fps, 4)
+            XCTAssertTrue(clip.loop)
+            let rects = manifest.unitRects(
+                of: clip,
+                sheetPixelSize: CGSize(width: sheet.width, height: sheet.height)
+            )
+            XCTAssertEqual(rects.count, 4)
+            for (column, rect) in rects.enumerated() {
+                XCTAssertEqual(rect.minX, Double(column) / 4, accuracy: 0.000001)
+                XCTAssertEqual(rect.minY, Double(row) / 7, accuracy: 0.000001)
+                XCTAssertEqual(rect.width, 0.25, accuracy: 0.000001)
+                XCTAssertEqual(rect.height, 1.0 / 7.0, accuracy: 0.000001)
+                XCTAssertLessThanOrEqual(rect.maxX, 1.0 + 0.000001)
+                XCTAssertLessThanOrEqual(rect.maxY, 1.0 + 0.000001)
             }
         }
+
+        let context = try XCTUnwrap(CGContext(
+            data: nil, width: sheet.width, height: sheet.height,
+            bitsPerComponent: 8, bytesPerRow: sheet.width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue
+                | CGImageAlphaInfo.premultipliedLast.rawValue
+        ))
+        context.draw(sheet, in: CGRect(x: 0, y: 0, width: sheet.width, height: sheet.height))
+        let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+        let hasTransparency = stride(from: 3, to: sheet.width * sheet.height * 4, by: 4)
+            .contains { pixels[$0] != 255 }
+        XCTAssertFalse(hasTransparency, "배경에 투명한 픽셀이 있다")
     }
 
     func test_매니페스트가_시트_격자를_벗어나면_아무_프레임도_주지_않는다() throws {
@@ -124,6 +135,8 @@ final class WeatherSpriteTests: XCTestCase {
             view.layer.animation(forKey: WeatherSpriteView.animationKey) as? CAKeyframeAnimation
         )
 
+        XCTAssertEqual(view.layer.contentsGravity, .resize)
+        XCTAssertEqual(animation.duration, 1, accuracy: .ulpOfOne)
         XCTAssertEqual(animation.keyPath, "contentsRect")
         // 보간되면 칸이 스르륵 밀린다 — 이 한 줄이 프레임을 튀게 만든다
         XCTAssertEqual(animation.calculationMode, .discrete)
@@ -165,133 +178,4 @@ final class WeatherSpriteTests: XCTestCase {
         )
         XCTAssertEqual(Set(manifest.clips.map { $0.row }).count, manifest.clips.count)
     }
-}
-
-private struct RGBAImage {
-    private enum PixelError: Error {
-        case contextCreationFailed
-    }
-
-    let width: Int
-    let height: Int
-    private let pixels: [UInt8]
-
-    init(_ image: CGImage) throws {
-        let width = image.width
-        let height = image.height
-        var pixels = [UInt8](repeating: 0, count: width * height * 4)
-        let rendered = pixels.withUnsafeMutableBytes { buffer in
-            guard let address = buffer.baseAddress,
-                  let context = CGContext(
-                    data: address,
-                    width: width,
-                    height: height,
-                    bitsPerComponent: 8,
-                    bytesPerRow: width * 4,
-                    space: CGColorSpaceCreateDeviceRGB(),
-                    bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue
-                        | CGImageAlphaInfo.premultipliedLast.rawValue
-                  ) else { return false }
-
-            context.draw(
-                image,
-                in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height))
-            )
-            return true
-        }
-        guard rendered else { throw PixelError.contextCreationFailed }
-
-        self.width = width
-        self.height = height
-        self.pixels = pixels
-    }
-
-    func alphaBounds(in rect: CGRect, alphaGreaterThan threshold: UInt8 = 0) -> CGRect? {
-        var minimumX = Int(rect.maxX)
-        var minimumY = Int(rect.maxY)
-        var maximumX = Int(rect.minX) - 1
-        var maximumY = Int(rect.minY) - 1
-
-        for y in Int(rect.minY)..<Int(rect.maxY) {
-            for x in Int(rect.minX)..<Int(rect.maxX) where alpha(x: x, y: y) > threshold {
-                minimumX = min(minimumX, x)
-                minimumY = min(minimumY, y)
-                maximumX = max(maximumX, x)
-                maximumY = max(maximumY, y)
-            }
-        }
-        guard maximumX >= minimumX, maximumY >= minimumY else { return nil }
-        return CGRect(
-            x: minimumX,
-            y: minimumY,
-            width: maximumX - minimumX + 1,
-            height: maximumY - minimumY + 1
-        )
-    }
-
-    func bodyFeature(in rect: CGRect, row: Int) -> [Double]? {
-        guard let bounds = alphaBounds(in: rect, alphaGreaterThan: 16) else { return nil }
-        let frameWidth = Int(rect.width)
-        let frameHeight = Int(rect.height)
-        let bodyBottom = row <= 3
-            ? Int(bounds.minY + (bounds.height * 0.65).rounded())
-            : Int(rect.maxY)
-        var result = [Double](repeating: 0, count: frameWidth * frameHeight)
-
-        for localY in 0..<frameHeight {
-            let y = Int(rect.minY) + localY
-            guard y < bodyBottom else { continue }
-            for localX in 0..<frameWidth {
-                let x = Int(rect.minX) + localX
-                guard alpha(x: x, y: y) > 16 else { continue }
-                let offset = pixelOffset(x: x, y: y)
-                result[localY * frameWidth + localX] =
-                    Double(pixels[offset]) * 0.2126
-                    + Double(pixels[offset + 1]) * 0.7152
-                    + Double(pixels[offset + 2]) * 0.0722
-            }
-        }
-        return result
-    }
-
-    private func pixelOffset(x: Int, y: Int) -> Int {
-        (y * width + x) * 4
-    }
-
-    private func alpha(x: Int, y: Int) -> UInt8 {
-        pixels[pixelOffset(x: x, y: y) + 3]
-    }
-}
-
-private func bestAlignmentOffset(
-    reference: [Double],
-    candidate: [Double],
-    frameSize: Int = 216
-) -> (dx: Int, dy: Int, score: Double) {
-    let referenceNorm = sqrt(reference.reduce(0) { $0 + $1 * $1 })
-    let candidateNorm = sqrt(candidate.reduce(0) { $0 + $1 * $1 })
-    var best = (dx: 0, dy: 0, score: -Double.infinity)
-
-    for dy in -2...2 {
-        for dx in -2...2 {
-            var product = 0.0
-            for y in 0..<frameSize {
-                let candidateY = y - dy
-                guard candidateY >= 0, candidateY < frameSize else { continue }
-                for x in 0..<frameSize {
-                    let candidateX = x - dx
-                    guard candidateX >= 0, candidateX < frameSize else { continue }
-                    product += reference[y * frameSize + x]
-                        * candidate[candidateY * frameSize + candidateX]
-                }
-            }
-            let score = product / (referenceNorm * candidateNorm)
-            let currentDistance = abs(dx) + abs(dy)
-            let bestDistance = abs(best.dx) + abs(best.dy)
-            if score > best.score || (score == best.score && currentDistance < bestDistance) {
-                best = (dx, dy, score)
-            }
-        }
-    }
-    return best
 }

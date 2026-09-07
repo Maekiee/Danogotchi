@@ -183,8 +183,6 @@ extension SearchThemeViewController {
                     return
                 }
                 
-                print("디버깅 2: \(selectedItem)")
-                
                 let newUrl = (owner.selectedThemeUrl.value == selectedItem.themeImageUrl) ? nil : selectedItem.themeImageUrl
                 owner.selectedThemeUrl.accept(newUrl)
             }.disposed(by: disposeBag)

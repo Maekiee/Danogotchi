@@ -1,52 +1,52 @@
 {
-    "frameWidth": 216,
-    "frameHeight": 216,
+    "frameWidth": 1200,
+    "frameHeight": 800,
     "clips": [
         {
             "name": "thunderstorm",
             "row": 0,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4, "loop": true
         },
         {
             "name": "drizzle",
             "row": 1,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4,
             "loop": true
         },
         {
             "name": "rain",
             "row": 2,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4,
             "loop": true
         },
         {
             "name": "snow",
             "row": 3,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4,
             "loop": true
         },
         {
             "name": "atmosphere",
             "row": 4,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4,
             "loop": true
         },
         {
             "name": "clear",
             "row": 5,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4,
             "loop": true
         },
         {
             "name": "clouds",
             "row": 6,
-            "frameCount": 8,
+            "frameCount": 4,
             "fps": 4,
             "loop": true
         }

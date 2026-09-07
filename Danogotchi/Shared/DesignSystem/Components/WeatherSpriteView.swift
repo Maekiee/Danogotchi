@@ -48,14 +48,14 @@ struct WeatherSpriteSheet: Decodable {
 
 final class WeatherSpriteView: UIView {
     static let animationKey = "weatherSprite"
-    private static let sheetName = "weathersSheet"
+    private static let sheetName = "weatherBackgroundSheet"
 
     private var current: WeatherType?
 
     init() {
         super.init(frame: .zero)
         layer.magnificationFilter = .nearest
-        layer.contentsGravity = .resizeAspect
+        layer.contentsGravity = .resize
     }
 
     required init?(coder: NSCoder) {

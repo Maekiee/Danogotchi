@@ -28,8 +28,9 @@ final class CharacterViewController: BaseViewController {
         stack.alignment = .fill
         return stack
     }()
+    private let weatherBackgroundView = WeatherSpriteView()
+    private let petContainerView = UIView()
     private let petSpriteView = PetSpriteView()
-    private let weatherSpriteView = WeatherSpriteView()
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = AppFont.title1
@@ -41,7 +42,8 @@ final class CharacterViewController: BaseViewController {
         let label = UILabel()
         label.font = AppFont.headline
         label.textColor = AppColor.textSecondary
-        label.textAlignment = .center
+        label.textAlignment = .left
+        label.numberOfLines = 0
         return label
     }()
     private let heartBarView = HeartBarView()
@@ -98,14 +100,14 @@ final class CharacterViewController: BaseViewController {
 
     override func configHierarchy() {
         view.addSubview(scrollView)
-        view.addSubview(weatherSpriteView)
+        scrollView.addSubview(weatherBackgroundView)
         scrollView.addSubview(contentStackView)
+        petContainerView.addSubview(petSpriteView)
 
         [
-            petSpriteView,
+            petContainerView,
             nameLabel,
-            moodLabel,
-            heartBarView,
+            makeStatusRow(),
             makeExperienceSection(),
             makeCareSection(),
             dangerLabel,
@@ -125,24 +127,28 @@ final class CharacterViewController: BaseViewController {
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
-        // 스크롤과 무관하게 화면 우측 상단에 머문다
-        weatherSpriteView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space20)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).inset(AppSpacing.space20)
-            make.size.equalTo(64)
+        weatherBackgroundView.snp.makeConstraints { make in
+            make.verticalEdges.equalTo(petContainerView)
+            make.centerX.equalTo(petContainerView)
+            make.width.equalTo(scrollView.frameLayoutGuide)
         }
 
-        // 남는 세로 공간을 전부 흡수한다. 콘텐츠가 화면보다 길면 이 최소값으로 돌아온다.
+        // 배경 영역은 화면 너비 기준 3:2로 유지한다.
+        petContainerView.snp.makeConstraints { make in
+            make.height.equalTo(scrollView.frameLayoutGuide.snp.width).multipliedBy(2.0 / 3.0)
+        }
+
         petSpriteView.snp.makeConstraints { make in
-            make.height.greaterThanOrEqualTo(160)
+            make.size.equalTo(160)
+            make.bottom.equalToSuperview().inset(AppSpacing.space20)
+            make.centerX.equalToSuperview()
         }
 
         contentStackView.snp.makeConstraints { make in
-            make.verticalEdges.equalToSuperview().inset(AppSpacing.space20)
+            make.top.equalToSuperview()
+            make.bottom.equalToSuperview().inset(AppSpacing.space20)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.width.equalToSuperview().offset(-AppSpacing.space20 * 2)
-            make.height.greaterThanOrEqualTo(scrollView.frameLayoutGuide.snp.height)
-                .offset(-AppSpacing.space20 * 2)
         }
 
         [levelUpButton, reviveButton].forEach { button in
@@ -160,14 +166,11 @@ final class CharacterViewController: BaseViewController {
     }
 
     override func configView() {
+        weatherBackgroundView.isUserInteractionEnabled = false
+        weatherBackgroundView.render(.clear)
+
         heartBarView.isAccessibilityElement = true
         heartBarView.accessibilityLabel = "체력"
-
-        // 날씨를 받기 전에는 빈 칸을 보이지 않는다
-        weatherSpriteView.isHidden = true
-
-        // 스택의 남는 공간을 가져갈 뷰를 명시한다 — 기본값(250)끼리 겹치면 어디가 늘어날지 불확실하다
-        petSpriteView.setContentHuggingPriority(.init(1), for: .vertical)
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
@@ -183,6 +186,15 @@ final class CharacterViewController: BaseViewController {
 
 // MARK: - 섹션 조립
 extension CharacterViewController {
+    private func makeStatusRow() -> UIView {
+        let row = UIStackView(arrangedSubviews: [heartBarView,moodLabel])
+        row.axis = .horizontal
+        row.alignment = .center
+        row.distribution = .equalSpacing
+        row.spacing = AppSpacing.space12
+        return row
+    }
+
     private func makeExperienceSection() -> UIView {
         let container = UIView()
         let headerStack = UIStackView(arrangedSubviews: [levelLabel, experiencePercentLabel])
@@ -286,8 +298,7 @@ extension CharacterViewController {
 
         output.weatherType
             .drive(with: self) { owner, type in
-                owner.weatherSpriteView.isHidden = false
-                owner.weatherSpriteView.render(type)
+                owner.weatherBackgroundView.render(type)
             }.disposed(by: disposeBag)
 
         // 되돌릴 수 없는 경험치 차감이라 확인을 받는다

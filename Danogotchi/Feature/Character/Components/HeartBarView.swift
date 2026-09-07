@@ -1,11 +1,6 @@
 import UIKit
 import SnapKit
 
-
-/// HP를 하트 10칸으로 표시한다.
-/// 하트 에셋이 없어 SF Symbol 하나를 두 겹으로 깔고 위쪽을 폭으로 잘라 부분 채움을 만든다 —
-/// `heart.fill` / `heart.righthalf.filled`만으로는 `2/3`·`1/3`을 표현할 수 없다.
-/// 에셋이 들어오면 바꿀 곳은 `slot(fill:)` 하나뿐이다.
 final class HeartBarView: UIView {
 
     private static let slotSize: CGFloat = 20
@@ -40,7 +35,6 @@ final class HeartBarView: UIView {
     private func configLayout() {
         stackView.snp.makeConstraints { make in
             make.leading.top.bottom.equalToSuperview()
-            make.trailing.lessThanOrEqualToSuperview()
         }
     }
 
