@@ -133,6 +133,7 @@ extension VocabBookDetailViewController {
         output.vocabList
             .drive(with: self) { owner, list in
                 owner.applySnapshot(items: list)
+                owner.updateEmptyView(isEmpty: list.isEmpty)
             }.disposed(by: disposeBag)
 
         startLearningButton.rx.tap
@@ -233,6 +234,15 @@ extension VocabBookDetailViewController {
                 for: indexPath,
                 item: itemIdentifier
             )
+        }
+    }
+    
+    /// 나의 단어장에만 안내를 띄운다 — 추천 단어장은 단어를 직접 추가할 수 없다.
+    private func updateEmptyView(isEmpty: Bool) {
+        if isEmpty && viewModel.topic == .myBook {
+            collectionView.setView(title: "학습할 단어를\n생성 및 추가해 주세요")
+        } else {
+            collectionView.restore()
         }
     }
     
