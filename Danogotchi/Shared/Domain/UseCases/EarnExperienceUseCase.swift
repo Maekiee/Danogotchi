@@ -1,5 +1,4 @@
 import Foundation
-import OSLog
 
 enum ExperiencePolicy {
     
@@ -24,8 +23,8 @@ enum ExperiencePolicy {
 
 
 protocol EarnExperienceUseCase {
-    func record(vocabId: UUID, isCorrect: Bool) -> Int
-    func commit(earned: Int, correct: Int, total: Int) -> ExperienceGain
+    func record(vocabId: UUID, isCorrect: Bool) throws -> Int
+    func commit(earned: Int, correct: Int, total: Int) throws -> ExperienceGain
 }
 
 final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
@@ -40,18 +39,17 @@ final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
         self.petRepository = petRepository
     }
 
-    func record(vocabId: UUID, isCorrect: Bool) -> Int {
-        let stats = learningHistoryRepository.fetchHistory(vocabId: vocabId)
+    func record(vocabId: UUID, isCorrect: Bool) throws -> Int {
+        let stats = try learningHistoryRepository.fetchHistory(vocabId: vocabId)
             .statsByVocab()[vocabId]
-        learningHistoryRepository.addHistory(vocabId: vocabId, isCorrect: isCorrect)
+        try learningHistoryRepository.addHistory(vocabId: vocabId, isCorrect: isCorrect)
         return isCorrect ? ExperiencePolicy.experience(for: stats) : 0
     }
 
-    func commit(earned: Int, correct: Int, total: Int) -> ExperienceGain {
+    func commit(earned: Int, correct: Int, total: Int) throws -> ExperienceGain {
         let bonus = ExperiencePolicy.perfectBonus(correct: correct, total: total)
-        if petRepository.addExperience(earned + bonus) == nil {
-            AppLogger.database.error("펫이 없어 경험치를 적립하지 못했다")
-            CrashReporter.log("펫이 없어 경험치를 적립하지 못했다")
+        guard try petRepository.addExperience(earned + bonus) != nil else {
+            throw PersistenceError.entityNotFound
         }
         return ExperienceGain(earned: earned, perfectBonus: bonus)
     }

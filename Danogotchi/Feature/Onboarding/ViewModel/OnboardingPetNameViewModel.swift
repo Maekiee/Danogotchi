@@ -59,12 +59,14 @@ final class OnboardingPetNameViewModel: BaseViewModel {
                 return name
             }
             .bind(with: self) { owner, name in
-                guard owner.createPetUseCase.execute(type: owner.petType, name: name) != nil else {
+                do {
+                    guard try owner.createPetUseCase.execute(type: owner.petType, name: name) != nil else {
+                        throw PersistenceError.entityNotFound
+                    }
+                    didCreatePet.accept(())
+                } catch {
                     alertMessage.accept(Self.saveFailureMessage)
-                    return
                 }
-
-                didCreatePet.accept(())
             }.disposed(by: disposeBag)
 
         return Output(

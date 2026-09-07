@@ -25,6 +25,7 @@ final class SettingTabViewModel: BaseViewModel {
         let isReminderOn: Driver<Bool>
         let action: Signal<SettingMenu.Action>
         let mailBody: Signal<String>
+        let alertMessage: Signal<String>
     }
     
     func transform(input: Input) -> Output {
@@ -34,7 +35,8 @@ final class SettingTabViewModel: BaseViewModel {
             }
         )
         let appVersion = Driver.just(appEnv.appVersionDisplay)
-        let isReminderOn = Driver.just(studyReminderUseCase.isEnabled)
+        let isReminderOn = BehaviorRelay(value: studyReminderUseCase.isEnabled)
+        let alertMessage = PublishRelay<String>()
         let actionRelay = PublishRelay<SettingMenu.Action>()
         let mailBodyRelay = PublishRelay<String>()
         
@@ -45,7 +47,12 @@ final class SettingTabViewModel: BaseViewModel {
         
         input.reminderToggled
             .bind(with: self) { owner, isOn in
-                owner.studyReminderUseCase.setEnabled(isOn)
+                do {
+                    try owner.studyReminderUseCase.setEnabled(isOn)
+                } catch {
+                    alertMessage.accept("알림 설정을 변경하지 못했어요. 다시 시도해주세요.")
+                }
+                isReminderOn.accept(owner.studyReminderUseCase.isEnabled)
             }
             .disposed(by: disposeBag)
 
@@ -58,9 +65,10 @@ final class SettingTabViewModel: BaseViewModel {
         return Output(
             sections: sections,
             appVersion: appVersion,
-            isReminderOn: isReminderOn,
+            isReminderOn: isReminderOn.asDriver(),
             action: actionRelay.asSignal(),
-            mailBody: mailBodyRelay.asSignal()
+            mailBody: mailBodyRelay.asSignal(),
+            alertMessage: alertMessage.asSignal()
         )
     }
 }

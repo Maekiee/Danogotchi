@@ -3,7 +3,7 @@ import Foundation
 
 protocol CarePetUseCase {
     /// 정산 후 대상 수치를 회복한다. 펫이 없으면 nil.
-    func execute(stat: PetCareStat) -> PetActionResult?
+    func execute(stat: PetCareStat) throws -> PetActionResult?
 }
 
 final class DefaultCarePetUseCase: CarePetUseCase {
@@ -14,8 +14,8 @@ final class DefaultCarePetUseCase: CarePetUseCase {
     }
 
     /// 이미 100이거나 사망 상태여도 정산분은 저장한다 — 저장하지 않으면 경과 시간이 유실된다.
-    func execute(stat: PetCareStat) -> PetActionResult? {
-        guard let pet = petRepository.readPet() else { return nil }
+    func execute(stat: PetCareStat) throws -> PetActionResult? {
+        guard let pet = try petRepository.readPet() else { return nil }
 
         let settled: Pet
         let rejection: PetActionRejection?
@@ -31,7 +31,7 @@ final class DefaultCarePetUseCase: CarePetUseCase {
             rejection = .dead
         }
 
-        petRepository.updatePet(settled)
+        try petRepository.updatePet(settled)
 
         return PetActionResult(info: PetDisplayInfo(pet: settled), rejection: rejection)
     }

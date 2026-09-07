@@ -1,7 +1,7 @@
 # 아키텍처
 
 Clean Architecture + MVVM-C Input/Output Pattern
-멀티모듈·TCA 전환(장기 목표)을 대비해 **App / Core / Shared / Feature** 구조로 디렉토리 개편 완료(2026-07). 
+멀티모듈·TCA 전환(장기 목표)을 대비해 **App / Core / Shared / Feature** 구조로 디렉토리 개편 완료(2026-07).
 ViewModel의 Repository 접근은 UseCase를 경유하며, 싱글턴 직접 참조 제거와 멀티모듈 전환은 점진적으로 진행한다.
 
 ## 레이어 구조 (디렉토리)
@@ -75,13 +75,17 @@ ViewModel의 Repository 접근은 UseCase를 경유하며, 싱글턴 직접 참�
 - 획득 경험치는 `EarnExperienceUseCase → PetRepository.addExperience(_:) → PetEntity.totalExperience`로 저장한다. CoreData 속성명은 과거 이름을 유지하지만 값은 현재 레벨에서 모은 경험치다.
 
 ### 테마 (Theme)
-- 조회: `SearchThemeViewModel → SearchThemeUseCase → SearchThemeRepository` → Unsplash REST (`Core/Network/ApiRouter.searchPhoto`).
-- 선택 결과 URL은 `UserInfoManager.currentThemeUrl`에 저장된다. 메인 화면 배경으로 쓰인다.
+- 조회: `SearchThemeViewModel → SearchThemeUseCase → SearchThemeRepository` → Unsplash REST (`Core/Network/UnsplashApiRouter.searchPhoto`).
+- 선택한 사진은 `DefaultThemeImageRepository`가 `ImageFileStorage`에 파일로 저장한다. `currentThemeImageFileName` 변경 신호를 통해 화면이 로컬 파일을 읽으며, `currentThemeUrl`은 파일 복구와 온보딩 판별에 사용한다.
 
 ## 핵심 데이터 흐름 (Write 패스)
 
-UseCase → Repository → CoreData 동기 저장 → `activeBookId` 등 Relay 신호 방출 → 구독 측이 재조회.
-즉 **저장이 먼저, UI 갱신은 신호 기반 재조회**다.
+UseCase → Repository → CoreData 동기 저장 성공 → `activeBookId` 등 Relay 신호 방출 → 구독 측이 재조회.
+Repository 조회·쓰기는 `throws`로 실패를 전달한다. 쓰기는 context의 큐에서 변경과 저장을 동기적으로 끝내며, 실패 시 `saveOrRollback()`이 롤백하고 로그를 한 번 기록한다. UI 입력을 미저장 Core Data 객체에 보관하지 않으므로 실패한 작업의 변경이 다음 저장에 섞이지 않는다.
+
+동기 UseCase는 `throws`, Rx 기반 UseCase는 요청마다 `Result` 값을 전달한다. ViewModel은 실패를 안내하고 이전 폼·목록을 유지한다. 실패 때문에 입력 스트림이 종료되거나 성공 신호가 발생하지 않는다.
+
+퀴즈는 답안 저장 성공 후에만 점수와 획득 예정 경험치를 반영한다. 최종 경험치 저장이 성공해야 완료 화면으로 이동한다. 재시도는 실패한 단계만 실행하고, 종료하면 이미 저장된 이력은 유지하되 저장되지 않은 경험치를 적립 완료로 표시하지 않는다.
 
 ## 데이터 매핑
 
@@ -91,7 +95,7 @@ UseCase → Repository → CoreData 동기 저장 → `activeBookId` 등 Relay �
 
 ## 전역 상태 / 싱글턴
 
-- `UserInfoManager` — UserDefaults: `username` / `userId`(미사용) / `themeUrl` 만. 활성 단어장·퀴즈 상태는 여기 없다(CoreData로 이관됨).
+- `UserInfoManager` — UserDefaults: `username` / `userId`(미사용) / `themeUrl` / `themeImageFileName` / 학습 알림 설정. 활성 단어장·퀴즈 상태는 여기 없다(CoreData로 이관됨).
 - `TTSManager` — AVSpeechSynthesizer 래퍼 (단어 발음)
 
 > 싱글턴 직접 참조는 점진적으로 줄여나가는 중. 신규 의존성은 **AppDIContainer를 통해 주입**하고, ViewModel의 Repository 접근은 UseCase 프로토콜을 경유한다.

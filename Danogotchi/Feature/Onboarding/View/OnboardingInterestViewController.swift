@@ -119,6 +119,11 @@ extension OnboardingInterestViewController {
 
         let output = viewModel.transform(input: input)
 
+        output.alertMessage
+            .emit(with: self) { owner, message in
+                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+            }.disposed(by: disposeBag)
+
         output.interestItems
             .drive(with: self) { owner, items in
                 owner.applySnapshot(items: items)

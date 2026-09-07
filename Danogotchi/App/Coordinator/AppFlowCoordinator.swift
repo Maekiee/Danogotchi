@@ -1,3 +1,4 @@
+import OSLog
 import UIKit
 
 final class AppFlowCoordinator: Coordinator {
@@ -17,24 +18,41 @@ final class AppFlowCoordinator: Coordinator {
 
 extension AppFlowCoordinator {
     func start() {
-        DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
+        do {
+            try DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
 
-        // 미학습 알림은 마지막 학습 시각 기준이라 실행마다 다시 계산해 덮어쓴다
-        container.makeStudyReminderUseCase().refresh()
+            // 알림 재예약은 부가 기능이다 — 실패해도 앱 진입을 막지 않는다.
+            do {
+                try container.makeStudyReminderUseCase().refresh()
+            } catch {
+                AppLogger.push.error("학습 알림 재예약 실패: \(String(describing: error), privacy: .public)")
+            }
 
-        // 테마와 펫이 모두 있어야 온보딩 완료다. 펫만 없으면 OnboardingCoordinator가 알 선택부터 시작한다.
-        let isOnboardingComplete = container.userInfoManager.currentThemeUrl != nil
-            && container.makeIsPetCreatedUseCase().execute()
-
-        if isOnboardingComplete {
-            startMainFlow()
-        } else {
-            startOnBoardingFlow()
+            let isOnboardingComplete = try container.userInfoManager.currentThemeUrl != nil
+                && container.makeIsPetCreatedUseCase().execute()
+            if isOnboardingComplete {
+                startMainFlow()
+            } else {
+                startOnBoardingFlow()
+            }
+            window.makeKeyAndVisible()
+        } catch {
+            let retryViewController = UIViewController()
+            retryViewController.view.backgroundColor = AppColor.background
+            window.rootViewController = retryViewController
+            window.makeKeyAndVisible()
+            DispatchQueue.main.async { [weak self, weak retryViewController] in
+                guard let retryViewController else { return }
+                AlertPresenter.showNotificationAlert(
+                    on: retryViewController,
+                    title: "데이터 준비 실패",
+                    message: "데이터를 준비하지 못했어요. 다시 시도해주세요.",
+                    confirmTitle: "재시도"
+                ) { [weak self] in self?.start() }
+            }
         }
-        
-        window.makeKeyAndVisible()
     }
-    
+
     func switchToMainScene() {
         startMainFlow()
         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve) { }

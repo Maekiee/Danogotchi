@@ -45,28 +45,33 @@ final class ExploreVocabViewModel: BaseViewModel {
         let startQuizRelay = PublishRelay<QuizData>()
         let alertMessageRelay = PublishRelay<String>()
 
-        let viewRefreshTrigger = input.viewWillAppear.startWith(())
-
         // 트리거마다 CoreData에서 다시 읽는다 — 단어 추가/삭제가 즉시 반영되도록
-        Observable.merge(fetchVocabsUseCase.activeBookChanged, viewRefreshTrigger)
-            .flatMapLatest { [weak self] _ -> Observable<(bookType: BookTopic, items: [VocabDisplayInfo])> in
+        Observable.merge(fetchVocabsUseCase.activeBookChanged, input.viewWillAppear)
+            .flatMapLatest { [weak self] _ -> Observable<Result<(bookType: BookTopic, items: [VocabDisplayInfo]), Error>> in
                 guard let self else { return .empty() }
                 return fetchVocabsUseCase.executeActive()
             }
-            .bind(with: self) { owner, content in
+            .bind(with: self) { owner, result in
+                guard case .success(let content) = result else {
+                    alertMessageRelay.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
+                    return
+                }
                 allWordItems.accept(owner.shuffledItems(content.items))
                 // 나의 단어장을 학습중이면 저장할 곳이 없다
                 showsSaveButton.accept(content.bookType != .myBook)
             }.disposed(by: disposeBag)
 
         input.saveVocabTrigger
-            .flatMap { [weak self] item -> Observable<(UUID, Bool)> in
+            .flatMap { [weak self] item -> Observable<Result<(UUID, Bool), Error>> in
                 guard let self else { return .empty() }
                 return toggleSaveVocabUseCase.execute(vocab: item.word)
-                    .map { (item.word.id, $0) }
+                    .map { result in result.map { (item.word.id, $0) } }
             }
             .bind { result in
-                let (vocabId, isSaved) = result
+                guard case .success(let (vocabId, isSaved)) = result else {
+                    alertMessageRelay.accept("저장하지 못했어요. 다시 시도해주세요.")
+                    return
+                }
                 let updatedList = allWordItems.value.map { info -> VocabDisplayInfo in
                     guard info.word.id == vocabId else { return info }
                     return VocabDisplayInfo(
@@ -81,13 +86,17 @@ final class ExploreVocabViewModel: BaseViewModel {
 
         input.startLearningTapped
             .bind(with: self) { owner, _ in
-                switch owner.startQuizUseCase.execute() {
-                case .success(let quizData):
-                    startQuizRelay.accept(quizData)
-                case .noWords:
-                    alertMessageRelay.accept("학습할 단어가 없습니다.")
-                case .notEnoughWords:
-                    alertMessageRelay.accept("최소 4개 이상의 단어가 필요합니다.")
+                do {
+                    switch try owner.startQuizUseCase.execute() {
+                    case .success(let quizData):
+                        startQuizRelay.accept(quizData)
+                    case .noWords:
+                        alertMessageRelay.accept("학습할 단어가 없습니다.")
+                    case .notEnoughWords:
+                        alertMessageRelay.accept("최소 4개 이상의 단어가 필요합니다.")
+                    }
+                } catch {
+                    alertMessageRelay.accept("학습을 시작하지 못했어요. 다시 시도해주세요.")
                 }
             }.disposed(by: disposeBag)
 

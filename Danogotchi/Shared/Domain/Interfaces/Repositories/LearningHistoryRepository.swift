@@ -1,8 +1,8 @@
 import Foundation
 
 protocol LearningHistoryRepository {
-    func addHistory(vocabId: UUID, isCorrect: Bool)
-    func fetchAllHistory() -> [LearningHistory]
-    func fetchHistory(vocabId: UUID) -> [LearningHistory]
-    func accuracy(vocabId: UUID) -> Double?
+    func addHistory(vocabId: UUID, isCorrect: Bool) throws
+    func fetchAllHistory() throws -> [LearningHistory]
+    func fetchHistory(vocabId: UUID) throws -> [LearningHistory]
+    func accuracy(vocabId: UUID) throws -> Double?
 }

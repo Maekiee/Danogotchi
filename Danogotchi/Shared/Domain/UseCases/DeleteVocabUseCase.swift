@@ -1,7 +1,7 @@
 import Foundation
 
 protocol DeleteVocabUseCase {
-    func execute(vocab: Vocab)
+    func execute(vocab: Vocab) throws
 }
 
 final class DefaultDeleteVocabUseCase: DeleteVocabUseCase {
@@ -11,7 +11,7 @@ final class DefaultDeleteVocabUseCase: DeleteVocabUseCase {
         self.vocabRepository = vocabRepository
     }
 
-    func execute(vocab: Vocab) {
-        vocabRepository.deleteVocab(id: vocab.id)
+    func execute(vocab: Vocab) throws {
+        try vocabRepository.deleteVocab(id: vocab.id)
     }
 }

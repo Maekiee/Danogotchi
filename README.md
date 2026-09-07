@@ -62,7 +62,7 @@
 ---
 ## 핵심 기능
 
-### 1. 테마 설젙
+### 1. 테마 설정
 * Unsplash 사진 검색으로 배경 테마 설정
 
 ### 2. 단어장
@@ -129,7 +129,7 @@ graph TD
 
     subgraph CORE["Core · 공통 기반"]
         CD[(CoreData)]
-        NW[Network · Alamofire]
+        NW[Network · URLSession]
         LG[AppLogger · OSLog]
     end
 
@@ -155,15 +155,15 @@ Danogotchi/
 ├── Core/          BaseViewController · CoreDataStack · 네트워크 · AppLogger
 ├── Shared/
 │   ├── Domain/    Entity · Repository 프로토콜 · UseCase · Policy
-│   ├── Data/      Repository 구현 5종 · Mapper · CoreData 모델 · 추천 단어 시드
+│   ├── Data/      Repository 구현 7종 · Mapper · CoreData 모델 · 추천 단어 시드
 │   └── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트
-└── Feature/       화면 단위 폴더 12개 (View / ViewModel / Components / Coordinator)
+└── Feature/       Feature 폴더 11개 (View / ViewModel / Components / Coordinator)
 ```
 
 ## 핵심 아키텍처 패턴
 
-### Clean Architecture*
-  - App / Core / Shared / Feature 4계층 분리, 의존 방향은 `Feature → Shared → Core` 단방향이며 Feature 간 참조 없음
+### Clean Architecture
+  - App / Core / Shared / Feature 4계층 분리, 의존 방향은 `Feature → Shared → Core` 단방향이며 Feature 간 화면 연결은 Coordinator에서 수행
 
 ### MVVM-C (Input/Output)
 - 모든 ViewModel이 `BaseViewModel` 프로토콜의 `transform(input:) -> Output`을 구현해 입력과 출력을 한 함수에 고정
@@ -185,16 +185,16 @@ Danogotchi/
 - `AppDIContainer`가 팩토리 메서드로 UseCase·ViewModel을 조립하고 조립은 App 계층에서만 수행. 단일 인스턴스가 필요한 Repository(활성 단어장 신호, 펫 1마리 불변식)는 컨테이너가 `lazy`로 보유
 
 ### Router 패턴 
-- `ApiRouter` enum이 엔드포인트·메서드·파라미터를 한곳에서 정의하고 `ApiService`가 실행 (Alamofire)
+- `UnsplashApiRouter` · `WeatherApiRouter`가 `Endpoint`를 구현하고, `DefaultApiClient`가 URLSession과 async/await로 요청을 실행
 
 ### 디자인 시스템 토큰화
 - `AppColor` · `AppFont` · `AppSpacing` · `AppRadius` 토큰과 공용 컴포넌트를 `Shared/DesignSystem`에 모아 UIKit·SwiftUI 양쪽에서 공유
 
 ### 데이터 플로우 
-- View → ViewModel → UseCase → Repository → CoreData 동기 저장 → 변경 신호(Relay) 방출 → 구독 측 재조회. 저장이 먼저이고 UI 갱신은 신호 기반 재조회로 처리
+- View → ViewModel → UseCase → Repository → CoreData 동기 저장 성공 → 변경 신호(Relay) 방출 → 구독 측 재조회. 저장 실패는 롤백 후 화면에 전달하며, 성공한 작업만 UI 갱신과 화면 전환으로 연결
 
 ### 테스트: 
-- 정책·UseCase·영속화 계층 중심 단위 테스트 93개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
+- 정책·UseCase·ViewModel·영속화·네트워크 테스트 153개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
 
 ---
 
@@ -282,7 +282,7 @@ flowchart LR
 * subsystem이 번들 ID라 개발용과 운영용 로그가 Console에서 자동으로 분리됩니다.
 
 ### XCTest
-* 도메인 정책·UseCase·영속화 단위 테스트 **93개**를 운영합니다.
+* 정책·UseCase·ViewModel·영속화·네트워크 테스트 **153개**를 운영합니다.
 
 ### 빌드 설정
 * `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
@@ -292,15 +292,23 @@ flowchart LR
 
 ## 테스트
 
-도메인 정책·UseCase·영속화 단위 테스트 **93개**를 운영합니다.
+정책·UseCase·ViewModel·영속화·네트워크 테스트 **153개**를 운영합니다.
 
 | 파일 | 검증 내용 |
 |---|---|
-| `PetStatePolicyTests` (34) | 시간에 따른 수치 감소, 돌보기 경계, 기분 판정 우선순위, 체력 구간별 정산, 사망·부활 페널티 |
-| `PetPersistenceTests` (22) | UseCase와 CoreData 저장 왕복, 레벨업·부활·경험치 적립의 실제 저장 결과 |
-| `PetLevelPolicyTests` (7) | 레벨별 요구 경험치, 게이지 진행률, 최고 레벨 처리, 경험치 이월 없음 |
-| `PetHeartPolicyTests` (7) | 체력의 하트 10칸 표시 변환 |
-| `PetNamePolicyTests` (7) | 캐릭터 이름 입력 규칙 |
-| `PetSpriteTests` (11) | 스프라이트 매니페스트·프레임 격자·애니메이션 전환 |
-| `PetTypeTests` (2) | 레벨별 이미지 로드와 범위 제한 |
-| `VocabUseCaseTests` (3) | 활성 단어장의 이력·저장 상태 조립과 변경 신호 |
+| `PetStatePolicyTests` (34) | 시간 경과, 돌보기, 체력 구간, 사망·부활 |
+| `PetPersistenceTests` (22) | 펫 UseCase·Repository 동작, 경험치 적립 실패 전달 |
+| `PetLevelPolicyTests` (7) · `PetHeartPolicyTests` (7) · `PetNamePolicyTests` (7) | 레벨·하트 표시·이름 정책 |
+| `PetSpriteTests` (13) · `PetTypeTests` (2) · `WeatherSpriteTests` (8) | 스프라이트 리소스·격자·애니메이션 구성 |
+| `VocabUseCaseTests` (3) · `StudyReminderPolicyTests` (4) | 단어 조회 조립·변경 신호·알림 일정 |
+| `SearchThemeViewModelTests` (6) | 검색 응답 순서·요청 취소·페이지 재시도 |
+| `PersistenceFailureTests` (8) | 저장 실패 롤백, 생성·삭제·활성 전환·이력·경험치·시드 재시도 |
+| `PersistenceViewModelTests` (5) | 실패 시 폼·목록 유지, 완료 이벤트 차단, 다음 입력으로 복구 |
+| `SQLitePersistenceTests` (2) | SQLite 저장소 재개방 후 데이터·삭제 결과 확인 |
+| `QuizUseCaseTests` (5) · `QuizViewModelTests` (5) | 출제 경계·채점·경험치·실패한 저장만 재시도 |
+| `ApiClientTests` (6) | URLSession 요청 구성·JSON·HTTP 오류·원시 바이트 |
+| `ThemeImagePersistenceTests` (6) | 이미지 교체, 포맷 요청 대체, 실패 시 기존 파일 보존 |
+| `WeatherUseCaseTests` (3) | 좌표 전달·위치 조회 실패·날씨 요청 실패 |
+
+2026-09-07, Xcode 26.6 / iPhone 17 Pro 시뮬레이터(iOS 26.5)에서 **153개 통과, 실패·건너뜀 0개**를 확인했습니다.
+테스트 실행 방법과 검증하지 않은 범위는 [테스트 문서](docs/testing.md)에 정리했습니다.

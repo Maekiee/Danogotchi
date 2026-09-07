@@ -11,7 +11,7 @@ enum StartQuizResult {
 
 protocol StartQuizUseCase {
     /// 활성 단어장에서 출제 세트를 선정
-    func execute() -> StartQuizResult
+    func execute() throws -> StartQuizResult
 }
 
 final class DefaultStartQuizUseCase: StartQuizUseCase {
@@ -28,8 +28,8 @@ final class DefaultStartQuizUseCase: StartQuizUseCase {
         self.learningHistoryRepository = learningHistoryRepository
     }
 
-    func execute() -> StartQuizResult {
-        guard let activeBook = vocabBookRepository.readActiveBook(),
+    func execute() throws -> StartQuizResult {
+        guard let activeBook = try vocabBookRepository.readActiveBook(),
               !activeBook.vocabList.isEmpty else {
             return .noWords
         }
@@ -44,7 +44,7 @@ final class DefaultStartQuizUseCase: StartQuizUseCase {
             return .success(QuizData(words: allWords.shuffled(), allWord: allWords))
         }
 
-        let stats = learningHistoryRepository.fetchAllHistory().statsByVocab()
+        let stats = try learningHistoryRepository.fetchAllHistory().statsByVocab()
         var generator = SystemRandomNumberGenerator()
         let selected = Self.selectByTournament(
             from: allWords,

@@ -38,6 +38,7 @@ final class AddVocabViewModel: BaseViewModel {
         let isValidSave: Driver<Bool>
         let resetTrigger: Signal<Void>
         let editCompleted: Signal<Void>
+        let alertMessage: Signal<String>
     }
 
     func transform(input: Input) -> Output {
@@ -46,6 +47,7 @@ final class AddVocabViewModel: BaseViewModel {
         let partOfSpeech = BehaviorRelay<PartOfSpeech>(value: PartOfSpeech.allCases[0])
         let resetTrigger = PublishRelay<Void>()
         let editCompleted = PublishRelay<Void>()
+        let alertMessage = PublishRelay<String>()
 
         input.wordTextField
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -74,33 +76,38 @@ final class AddVocabViewModel: BaseViewModel {
             .bind(with: self) { owner, validData in
                 let (word, meaning, selectedPartOfSpeech) = validData
 
-                if let vocab = owner.editingVocab {
-                    owner.updateVocabUseCase.execute(
-                        id: vocab.id,
+                do {
+                    if let vocab = owner.editingVocab {
+                        try owner.updateVocabUseCase.execute(
+                            id: vocab.id,
+                            word: word,
+                            meaning: meaning,
+                            partOfSpeech: selectedPartOfSpeech
+                        )
+                        editCompleted.accept(())
+                        return
+                    }
+
+                    _ = try owner.addVocabUseCase.execute(
                         word: word,
                         meaning: meaning,
                         partOfSpeech: selectedPartOfSpeech
                     )
-                    editCompleted.accept(())
-                    return
+
+                    wordText.accept("")
+                    meaningText.accept("")
+                    partOfSpeech.accept(PartOfSpeech.allCases[0])
+                    resetTrigger.accept(())
+                } catch {
+                    alertMessage.accept("저장하지 못했어요. 다시 시도해주세요.")
                 }
-
-                guard owner.addVocabUseCase.execute(
-                    word: word,
-                    meaning: meaning,
-                    partOfSpeech: selectedPartOfSpeech
-                ) != nil else { return }
-
-                wordText.accept("")
-                meaningText.accept("")
-                partOfSpeech.accept(PartOfSpeech.allCases[0])
-                resetTrigger.accept(())
             }.disposed(by: disposeBag)
 
         return Output(
             isValidSave: isValidSave.asDriver(onErrorJustReturn: false),
             resetTrigger: resetTrigger.asSignal(),
-            editCompleted: editCompleted.asSignal()
+            editCompleted: editCompleted.asSignal(),
+            alertMessage: alertMessage.asSignal()
         )
     }
 }

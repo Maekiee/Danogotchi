@@ -50,6 +50,10 @@ extension QuizCoordinator: QuizViewControllerDelegate {
         
     }
     
+    func quizDidAbortAfterSaveFailure() {
+        finish()
+    }
+
     func quizDidTapClose() {
         showInterruptAlert()
     }
@@ -64,15 +68,22 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
     ) {
         switch action {
         case .nextQuiz:
-            switch container.makeStartQuizUseCase().execute() {
-            case .success(let newQuizData):
-                navigationController.dismiss(animated: true) { [weak self] in
-                    self?.restartQuiz(with: newQuizData)
+            do {
+                switch try container.makeStartQuizUseCase().execute() {
+                case .success(let newQuizData):
+                    navigationController.dismiss(animated: true) { [weak self] in
+                        self?.restartQuiz(with: newQuizData)
+                    }
+                case .noWords, .notEnoughWords:
+                    finish()
                 }
-            case .noWords, .notEnoughWords:
-                finish()
+            } catch {
+                AlertPresenter.showNotificationAlert(
+                    on: navigationController.presentedViewController ?? navigationController,
+                    title: "알림", message: "학습을 시작하지 못했어요. 다시 시도해주세요."
+                )
             }
-            
+
         case .retryIncorrect(let words):
             let newQuizData = QuizData(words: words, allWord: originalQuizData.allWord)
             navigationController.dismiss(animated: true) { [weak self] in

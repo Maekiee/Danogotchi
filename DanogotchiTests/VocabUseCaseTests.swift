@@ -6,35 +6,36 @@ final class VocabUseCaseTests: XCTestCase {
 
     func test_executeActive는_활성_추천단어장에_이력과_저장상태를_합친다() throws {
         let sut = makeSUT()
-        let myBook = sut.books.createBook(title: "나의 단어장", bookType: .myBook, level: nil)
-        let travelBook = sut.books.createBook(title: "여행", bookType: .travel, level: .a1)
-        let savedWord = try XCTUnwrap(
-            sut.books.addVocab(
-                bookId: travelBook.id,
-                word: "airport",
-                meaning: "공항",
-                bookType: .travel,
-                level: .a1,
-                partOfSpeech: .noun
-            )
+        let myBook = try sut.books.createBook(title: "나의 단어장", bookType: .myBook, level: nil)
+        let travelBook = try sut.books.createBook(title: "여행", bookType: .travel, level: .a1)
+        let savedWord = try sut.books.addVocab(
+            bookId: travelBook.id,
+            word: "airport",
+            meaning: "공항",
+            bookType: .travel,
+            level: .a1,
+            partOfSpeech: .noun
         )
-        let unsavedWord = try XCTUnwrap(
-            sut.books.addVocab(
-                bookId: travelBook.id,
-                word: "depart",
-                meaning: "출발하다",
-                bookType: .travel,
-                level: .a1,
-                partOfSpeech: .verb
-            )
+        let unsavedWord = try sut.books.addVocab(
+            bookId: travelBook.id,
+            word: "depart",
+            meaning: "출발하다",
+            bookType: .travel,
+            level: .a1,
+            partOfSpeech: .verb
         )
-        XCTAssertNotNil(sut.books.addVocab(bookId: myBook.id, from: savedWord))
-        sut.histories.addHistory(vocabId: savedWord.id, isCorrect: true)
-        sut.histories.addHistory(vocabId: savedWord.id, isCorrect: false)
-        sut.books.setActiveBook(id: travelBook.id)
+        _ = try sut.books.addVocab(bookId: myBook.id, from: savedWord)
+        try sut.histories.addHistory(vocabId: savedWord.id, isCorrect: true)
+        try sut.histories.addHistory(vocabId: savedWord.id, isCorrect: false)
+        try sut.books.setActiveBook(id: travelBook.id)
 
         var received: (bookType: BookTopic, items: [VocabDisplayInfo])?
-        _ = sut.useCase.executeActive().subscribe(onNext: { received = $0 })
+        _ = sut.useCase.executeActive().subscribe(onNext: { result in
+            switch result {
+            case .success(let content): received = content
+            case .failure(let error): XCTFail("Unexpected error: \(error)")
+            }
+        })
 
         let content = try XCTUnwrap(received)
         let itemsById = Dictionary(uniqueKeysWithValues: content.items.map { ($0.word.id, $0) })
@@ -50,7 +51,7 @@ final class VocabUseCaseTests: XCTestCase {
         XCTAssertFalse(unsavedItem.isSaved)
     }
 
-    func test_executeActive는_활성단어장이_없으면_값을_방출하지_않는다() {
+    func test_executeActive는_활성단어장이_없으면_값을_방출하지_않는다() throws {
         let sut = makeSUT()
         var didEmit = false
         var didComplete = false
@@ -64,15 +65,14 @@ final class VocabUseCaseTests: XCTestCase {
         XCTAssertTrue(didComplete)
     }
 
-    func test_activeBookChanged는_활성단어장_변경을_전달한다() {
+    func test_activeBookChanged는_활성단어장_변경을_전달한다() throws {
         let sut = makeSUT()
-        let book = sut.books.createBook(title: "여행", bookType: .travel, level: .a1)
+        let book = try sut.books.createBook(title: "여행", bookType: .travel, level: .a1)
         var changeCount = 0
         let disposable = sut.useCase.activeBookChanged
-            .skip(1)
             .subscribe(onNext: { _ in changeCount += 1 })
 
-        sut.books.setActiveBook(id: book.id)
+        try sut.books.setActiveBook(id: book.id)
 
         XCTAssertEqual(changeCount, 1)
         disposable.dispose()

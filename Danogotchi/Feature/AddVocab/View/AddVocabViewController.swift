@@ -123,6 +123,11 @@ extension AddVocabViewController {
         )
         let output = viewModel.transform(input: input)
 
+        output.alertMessage
+            .emit(with: self) { owner, message in
+                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+            }.disposed(by: disposeBag)
+
         output.isValidSave
             .drive(saveButton.rx.isEnabled)
             .disposed(by: disposeBag)

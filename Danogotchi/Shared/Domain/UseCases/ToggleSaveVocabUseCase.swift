@@ -3,7 +3,7 @@ import RxSwift
 
 protocol ToggleSaveVocabUseCase {
     /// 추천 단어의 저장/해제를 토글하고 결과 상태(저장됨 = true)를 반환한다.
-    func execute(vocab: Vocab) -> Observable<Bool>
+    func execute(vocab: Vocab) -> Observable<Result<Bool, Error>>
 }
 
 final class DefaultToggleSaveVocabUseCase: ToggleSaveVocabUseCase {
@@ -18,17 +18,19 @@ final class DefaultToggleSaveVocabUseCase: ToggleSaveVocabUseCase {
         self.vocabRepository = vocabRepository
     }
 
-    func execute(vocab: Vocab) -> Observable<Bool> {
-        guard let myBook = vocabBookRepository.readAllBooks(bookType: .myBook).first else {
-            return .just(false)
+    func execute(vocab: Vocab) -> Observable<Result<Bool, Error>> {
+        return .deferred { [vocabBookRepository, vocabRepository] in
+            .just(Result {
+                guard let myBook = try vocabBookRepository.readAllBooks(bookType: .myBook).first else {
+                    throw PersistenceError.entityNotFound
+                }
+                if let savedVocab = try vocabBookRepository.findVocab(inBookId: myBook.id, sourceWordId: vocab.id) {
+                    try vocabRepository.deleteVocab(id: savedVocab.id)
+                    return false
+                }
+                _ = try vocabBookRepository.addVocab(bookId: myBook.id, from: vocab)
+                return true
+            })
         }
-
-        if let savedVocab = vocabBookRepository
-            .findVocab(inBookId: myBook.id, sourceWordId: vocab.id) {
-            vocabRepository.deleteVocab(id: savedVocab.id)
-            return .just(false)
-        }
-
-        return .just(vocabBookRepository.addVocab(bookId: myBook.id, from: vocab) != nil)
     }
 }

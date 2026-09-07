@@ -37,28 +37,38 @@ final class VocabBookDetailViewModel: BaseViewModel {
     struct Output {
         let vocabList: Driver<[VocabDisplayInfo]>
         let isActiveBook: Driver<Bool>
+        let alertMessage: Signal<String>
     }
 
     func transform(input: Input) -> Output {
         let vocabList = BehaviorRelay<[VocabDisplayInfo]>(value: [])
         let isActiveBook = BehaviorRelay<Bool>(value: false)
+        let alertMessage = PublishRelay<String>()
 
         input.viewWillAppear
-            .flatMapLatest { [weak self] _ -> Observable<[VocabDisplayInfo]> in
-                guard let self else { return .just([]) }
+            .flatMapLatest { [weak self] _ -> Observable<Result<[VocabDisplayInfo], Error>> in
+                guard let self else { return .empty() }
                 return fetchVocabsUseCase.execute(topic: self.topic)
             }
-            .bind(to: vocabList)
+            .bind(onNext: { result in
+                switch result {
+                case .success(let items): vocabList.accept(items)
+                case .failure: alertMessage.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
+                }
+            })
             .disposed(by: disposeBag)
 
         input.saveVocabTrigger
-            .flatMap { [weak self] item -> Observable<(UUID, Bool)> in
+            .flatMap { [weak self] item -> Observable<Result<(UUID, Bool), Error>> in
                 guard let self else { return .empty() }
                 return toggleSaveVocabUseCase.execute(vocab: item.word)
-                    .map { (item.word.id, $0) }
+                    .map { result in result.map { (item.word.id, $0) } }
             }
             .bind { result in
-                let (vocabId, isSaved) = result
+                guard case .success(let (vocabId, isSaved)) = result else {
+                    alertMessage.accept("저장하지 못했어요. 다시 시도해주세요.")
+                    return
+                }
                 let updatedList = vocabList.value.map { info -> VocabDisplayInfo in
                     guard info.word.id == vocabId else { return info }
                     return VocabDisplayInfo(
@@ -74,32 +84,46 @@ final class VocabBookDetailViewModel: BaseViewModel {
 
         input.deleteVocabTrigger
             .bind(with: self) { owner, vocab in
-                vocabList.accept(vocabList.value.filter { $0.word.id != vocab.id })
-                owner.deleteVocabUseCase.execute(vocab: vocab)
+                do {
+                    try owner.deleteVocabUseCase.execute(vocab: vocab)
+                    vocabList.accept(vocabList.value.filter { $0.word.id != vocab.id })
+                } catch {
+                    alertMessage.accept("삭제하지 못했어요. 다시 시도해주세요.")
+                }
             }
             .disposed(by: disposeBag)
 
         // 지정에 성공하면 화면에 머문 채 버튼만 "학습중"으로 바뀐다
         input.startLearningTrigger
-            .flatMapLatest { [weak self] _ -> Observable<Bool> in
+            .flatMapLatest { [weak self] _ -> Observable<Result<Bool, Error>> in
                 guard let self else { return .empty() }
                 return setActiveBookUseCase.execute(topic: self.topic)
             }
-            .filter { $0 } // 실패(false)는 흘리지 않는다 — 버튼 상태 유지
-            .bind(to: isActiveBook)
+            .bind(onNext: { result in
+                switch result {
+                case .success(let active): isActiveBook.accept(active)
+                case .failure: alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
+                }
+            })
             .disposed(by: disposeBag)
 
         input.viewWillAppear
-            .flatMapLatest { [weak self] _ -> Observable<Bool> in
+            .flatMapLatest { [weak self] _ -> Observable<Result<Bool, Error>> in
                 guard let self else { return .empty() }
                 return isActiveBookUseCase.execute(topic: self.topic)
             }
-            .bind(to: isActiveBook)
+            .bind(onNext: { result in
+                switch result {
+                case .success(let active): isActiveBook.accept(active)
+                case .failure: alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
+                }
+            })
             .disposed(by: disposeBag)
 
         return Output(
             vocabList: vocabList.asDriver(),
-            isActiveBook: isActiveBook.asDriver()
+            isActiveBook: isActiveBook.asDriver(),
+            alertMessage: alertMessage.asSignal()
         )
     }
 }

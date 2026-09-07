@@ -5,7 +5,7 @@ protocol FetchVocabBooksUseCase {
     /// 활성 단어장 변경 신호. 값 캐시가 아니므로 신호를 받으면 execute()로 다시 읽는다.
     var activeBookChanged: Observable<Void> { get }
     /// 전체 단어장 목록. 각 카드에 학습중 여부(isActive)를 함께 싣는다.
-    func execute() -> Observable<[VocabBookCardInfo]>
+    func execute() -> Observable<Result<[VocabBookCardInfo], Error>>
 }
 
 final class DefaultFetchVocabBooksUseCase: FetchVocabBooksUseCase {
@@ -16,14 +16,16 @@ final class DefaultFetchVocabBooksUseCase: FetchVocabBooksUseCase {
     }
 
     var activeBookChanged: Observable<Void> {
-        return vocabBookRepository.activeBookId.map { _ in () }
+        return vocabBookRepository.activeBookChanged
     }
 
-    func execute() -> Observable<[VocabBookCardInfo]> {
-        return .just(
-            vocabBookRepository.readAllBooks().map {
-                VocabBookCardInfo(id: $0.id, topic: $0.bookType, isActive: $0.isActive)
-            }
-        )
+    func execute() -> Observable<Result<[VocabBookCardInfo], Error>> {
+        return .deferred { [vocabBookRepository] in
+            .just(Result {
+                try vocabBookRepository.readAllBooks().map {
+                    VocabBookCardInfo(id: $0.id, topic: $0.bookType, isActive: $0.isActive)
+                }
+            })
+        }
     }
 }

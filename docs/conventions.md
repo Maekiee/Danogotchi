@@ -62,6 +62,9 @@
 
 - 프로토콜은 `Shared/Domain/Interfaces/Repositories/`, `Default*` 구현체는 `Shared/Data/Repositories/`에 둔다.
 - ViewModel은 Repository를 직접 받지 않고 UseCase 프로토콜을 경유한다. 외부 의존성이 없는 UI 상태 로직과 상태 없는 Domain Policy에는 형식적인 UseCase를 만들지 않는다.
+- Core Data Repository의 조회·쓰기는 `throws`를 사용한다. 데이터 부재와 조회 실패를 구분하며, 쓰기는 저장 성공 이후에만 결과·변경 신호를 전달한다.
+- 저장은 `NSManagedObjectContext.saveOrRollback()`을 경유한다. 실패 시 롤백·오류 기록·전파를 수행하므로 상위 계층에서 같은 저장 오류를 중복 기록하지 않는다.
+- 동기 UseCase는 `throws`, Rx UseCase는 `Observable<Result<T, Error>>`로 오류를 전달해 재시도할 입력 구독을 유지한다.
 - CRUD 메서드 네이밍: `readAll()` / `fetch*` / `create*` / `update*` / `delete(id:)`.
 - CoreData Entity → Domain은 `toDomain()`, Domain 전체 반영은 필요한 경우 `apply(_:)`, 네트워크 DTO → Domain은 현재 `toEntity()`를 쓴다. 사용하지 않는 역방향 Mapper는 만들지 않는다.
 - 새 Repository/UseCase를 만들면 반드시 `AppDIContainer`에 `make*()` 추가.

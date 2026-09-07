@@ -1,6 +1,5 @@
 import Foundation
 import CoreData
-import OSLog
 
 final class DefaultVocabRepository {
     private let context: NSManagedObjectContext
@@ -10,28 +9,18 @@ final class DefaultVocabRepository {
     }
     
     // CoreData에 저장된 값을 가져오기 위한 헬퍼 함수
-    private func fetchEntity(id: UUID) -> VocabEntity? {
+    private func fetchEntity(id: UUID) throws -> VocabEntity? {
         let request = VocabEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
         
-        return try? context.fetch(request).first
+        return try context.fetch(request).first
     }
     
-    // CoreData에 저장하기 위한 헬퍼 함수
-    private func saveContext() {
-        guard context.hasChanges else { return }
-        do {
-            try context.save()
-        } catch {
-            AppLogger.database.error("CoreData 저장 실패: \(String(describing: error), privacy: .public)")
-            CrashReporter.record(error)
-        }
-    }
 }
 
 extension DefaultVocabRepository: VocabRepository {
-    func createVocab(vocab: String, meaning: String) -> Vocab {
+    func createVocab(vocab: String, meaning: String) throws -> Vocab {
         let vocabEntity = VocabEntity(context: context)
         vocabEntity.id = UUID()
         vocabEntity.word = vocab
@@ -40,27 +29,27 @@ extension DefaultVocabRepository: VocabRepository {
         vocabEntity.createAt = Date()
         
         
-        saveContext()
+        try context.saveOrRollback()
         
         return vocabEntity.toDomain()
     }
     
-    func readAllVocab() -> [Vocab] {
+    func readAllVocab() throws -> [Vocab] {
         let request = VocabEntity.fetchRequest()
         request.sortDescriptors = [
             NSSortDescriptor(key: "createAt", ascending: true)
         ]
         
-        let vocabEntities = (try? context.fetch(request)) ?? []
+        let vocabEntities = try context.fetch(request)
         return vocabEntities.map { $0.toDomain() }
     }
     
-    func readVocab(id: UUID) -> Vocab? {
-        return fetchEntity(id: id)?.toDomain()
+    func readVocab(id: UUID) throws -> Vocab? {
+        return try fetchEntity(id: id)?.toDomain()
     }
     
-    func updateVocab(id: UUID, word: String?, meaning: String?, partOfSpeech: PartOfSpeech?) {
-        guard let vocabEntity = fetchEntity(id: id) else { return }
+    func updateVocab(id: UUID, word: String?, meaning: String?, partOfSpeech: PartOfSpeech?) throws {
+        guard let vocabEntity = try fetchEntity(id: id) else { throw PersistenceError.entityNotFound }
         
         if let word = word {
             vocabEntity.word = word
@@ -74,13 +63,13 @@ extension DefaultVocabRepository: VocabRepository {
             vocabEntity.partOfSpeech = partOfSpeech.rawValue
         }
         
-        saveContext()
+        try context.saveOrRollback()
     }
     
-    func deleteVocab(id: UUID) {
-        guard let vocabEntity = fetchEntity(id: id) else { return }
+    func deleteVocab(id: UUID) throws {
+        guard let vocabEntity = try fetchEntity(id: id) else { throw PersistenceError.entityNotFound }
         
         context.delete(vocabEntity)
-        saveContext()
+        try context.saveOrRollback()
     }
 }

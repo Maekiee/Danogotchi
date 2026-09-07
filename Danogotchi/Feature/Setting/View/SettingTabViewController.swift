@@ -187,6 +187,11 @@ extension SettingTabViewController {
         )
         let output = viewModel.transform(input: input)
 
+        output.alertMessage
+            .emit(with: self) { owner, message in
+                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+            }.disposed(by: disposeBag)
+
         navigationItem.rightBarButtonItem?.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.didTapClose()

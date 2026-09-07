@@ -19,16 +19,22 @@ final class CoreDataStack {
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
-    func saveContext() {
-        guard viewContext.hasChanges else { return }
-        do {
-            try viewContext.save()
-        } catch {
-            AppLogger.database.error("코어데이터 저장 실패: \(String(describing: error), privacy: .public)")
-            CrashReporter.record(error)
-        }
-        
+    func saveContext() throws {
+        try viewContext.saveOrRollback()
     }
-    
 }
 
+extension NSManagedObjectContext {
+    /// Repository 작업은 동기적으로 저장까지 마친다. 실패한 변경을 다음 저장에 섞지 않는다.
+    func saveOrRollback() throws {
+        guard hasChanges else { return }
+        do {
+            try save()
+        } catch {
+            rollback()
+            AppLogger.database.error("CoreData 저장 실패: \(String(describing: error), privacy: .public)")
+            CrashReporter.record(error)
+            throw error
+        }
+    }
+}

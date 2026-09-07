@@ -1,7 +1,7 @@
 import Foundation
 
 protocol AddVocabUseCase {
-    func execute(word: String, meaning: String, partOfSpeech: PartOfSpeech) -> Vocab?
+    func execute(word: String, meaning: String, partOfSpeech: PartOfSpeech) throws -> Vocab
 }
 
 final class DefaultAddVocabUseCase: AddVocabUseCase {
@@ -11,12 +11,12 @@ final class DefaultAddVocabUseCase: AddVocabUseCase {
         self.vocabBookRepository = vocabBookRepository
     }
 
-    func execute(word: String, meaning: String, partOfSpeech: PartOfSpeech) -> Vocab? {
-        guard let myBook = vocabBookRepository.readAllBooks(bookType: .myBook).first else {
-            return nil
+    func execute(word: String, meaning: String, partOfSpeech: PartOfSpeech) throws -> Vocab {
+        guard let myBook = try vocabBookRepository.readAllBooks(bookType: .myBook).first else {
+            throw PersistenceError.entityNotFound
         }
 
-        return vocabBookRepository.addVocab(
+        return try vocabBookRepository.addVocab(
             bookId: myBook.id,
             word: word,
             meaning: meaning,

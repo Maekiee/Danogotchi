@@ -7,6 +7,7 @@ import RxCocoa
 protocol QuizViewControllerDelegate: AnyObject {
     func quizDidComplete(originalData: QuizData, result: QuizResult)
     func quizDidTapClose()
+    func quizDidAbortAfterSaveFailure()
 }
 
 final class QuizViewController: BaseViewController {
@@ -125,6 +126,34 @@ final class QuizViewController: BaseViewController {
 }
 
 extension QuizViewController {
+    /// 재시도가 다시 실패하면 알림이 자기 액션 핸들러 안에서 재표시된다.
+    /// 이전 알림이 아직 떠 있으면 dismiss가 끝난 뒤에 띄워야 present가 유실되지 않는다.
+    private func presentSaveFailureAlert(
+        _ failure: QuizViewModel.SaveFailure,
+        onRetry: @escaping () -> Void
+    ) {
+        let alert = UIAlertController(
+            title: "저장 실패",
+            message: failure == .retryable
+                ? "학습 결과를 저장하지 못했어요. 다시 시도해주세요."
+                : "이 단어를 찾을 수 없어 학습 결과를 저장할 수 없어요. 학습을 종료합니다.",
+            preferredStyle: .alert
+        )
+        if failure == .retryable {
+            alert.addAction(UIAlertAction(title: "재시도", style: .default) { _ in onRetry() })
+        }
+        alert.addAction(UIAlertAction(title: "종료", style: .cancel) { [weak self] _ in
+            self?.viewModel.endSession()
+            self?.delegate?.quizDidAbortAfterSaveFailure()
+        })
+
+        if let presented = presentedViewController {
+            presented.dismiss(animated: true) { [weak self] in self?.present(alert, animated: true) }
+        } else {
+            present(alert, animated: true)
+        }
+    }
+
     private func bind() {
         let choiceTaps = Observable.merge(
             choiceButtons.enumerated().map { index, button in
@@ -132,11 +161,23 @@ extension QuizViewController {
             }
         )
         
+        let retrySave = PublishRelay<Void>()
         let input = QuizViewModel.Input(
-            choiceSelected: choiceTaps
+            choiceSelected: choiceTaps,
+            retrySave: retrySave.asObservable()
         )
         
         let output = viewModel.transform(input: input)
+
+        output.canAnswer
+            .drive(with: self) { owner, enabled in
+                owner.choiceButtons.forEach { $0.isEnabled = enabled }
+            }.disposed(by: disposeBag)
+
+        output.saveFailed
+            .emit(with: self) { owner, failure in
+                owner.presentSaveFailureAlert(failure) { retrySave.accept(()) }
+            }.disposed(by: disposeBag)
         
         
         output.progress
@@ -159,7 +200,6 @@ extension QuizViewController {
                 // 버튼 상태 초기화
                 owner.choiceButtons.forEach {
                     $0.apply(.idle)
-                    $0.isEnabled = true
                 }
 
                 zip(owner.choiceButtons, choices).forEach { button, title in

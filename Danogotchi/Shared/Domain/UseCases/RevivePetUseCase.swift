@@ -3,7 +3,7 @@ import Foundation
 
 protocol RevivePetUseCase {
     /// 사망 상태에서만 HP·돌봄 수치를 복구하고 경험치 페널티를 매긴다. 펫이 없으면 nil.
-    func execute() -> PetActionResult?
+    func execute() throws -> PetActionResult?
 }
 
 final class DefaultRevivePetUseCase: RevivePetUseCase {
@@ -14,8 +14,8 @@ final class DefaultRevivePetUseCase: RevivePetUseCase {
     }
 
     /// 정책이 복구와 페널티를 모두 반영한 Pet 하나를 돌려주므로 저장은 한 번이면 된다.
-    func execute() -> PetActionResult? {
-        guard let pet = petRepository.readPet() else { return nil }
+    func execute() throws -> PetActionResult? {
+        guard let pet = try petRepository.readPet() else { return nil }
 
         let settled: Pet
         let rejection: PetActionRejection?
@@ -28,7 +28,7 @@ final class DefaultRevivePetUseCase: RevivePetUseCase {
             rejection = .alive
         }
 
-        petRepository.updatePet(settled)
+        try petRepository.updatePet(settled)
 
         return PetActionResult(info: PetDisplayInfo(pet: settled), rejection: rejection)
     }

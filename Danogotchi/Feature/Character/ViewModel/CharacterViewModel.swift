@@ -54,7 +54,11 @@ final class CharacterViewModel: BaseViewModel {
         
         refreshTrigger
             .bind(with: self) { owner, _ in
-                state.accept(owner.fetchPetStateUseCase.execute())
+                do {
+                    state.accept(try owner.fetchPetStateUseCase.execute())
+                } catch {
+                    toastMessage.accept("상태를 불러오지 못했어요. 다시 시도해주세요.")
+                }
             }.disposed(by: disposeBag)
 
         refreshTrigger
@@ -75,22 +79,22 @@ final class CharacterViewModel: BaseViewModel {
 
         input.careTapped
             .bind(with: self) { owner, stat in
-                owner.apply(owner.carePetUseCase.execute(stat: stat), to: state, toast: toastMessage)
+                owner.apply(Result { try owner.carePetUseCase.execute(stat: stat) }, to: state, toast: toastMessage)
             }.disposed(by: disposeBag)
 
         input.levelUpTapped
             .bind(with: self) { owner, _ in
-                owner.apply(owner.levelUpPetUseCase.execute(), to: state, toast: toastMessage)
+                owner.apply(Result { try owner.levelUpPetUseCase.execute() }, to: state, toast: toastMessage)
             }.disposed(by: disposeBag)
 
         input.levelDeltaTapped
             .bind(with: self) { owner, delta in
-                owner.apply(owner.adjustPetLevelUseCase.execute(delta: delta), to: state, toast: toastMessage)
+                owner.apply(Result { try owner.adjustPetLevelUseCase.execute(delta: delta) }, to: state, toast: toastMessage)
             }.disposed(by: disposeBag)
 
         input.reviveTapped
             .bind(with: self) { owner, _ in
-                owner.apply(owner.revivePetUseCase.execute(), to: state, toast: toastMessage)
+                owner.apply(Result { try owner.revivePetUseCase.execute() }, to: state, toast: toastMessage)
             }.disposed(by: disposeBag)
 
         return Output(
@@ -102,12 +106,15 @@ final class CharacterViewModel: BaseViewModel {
 
     /// 거절 여부와 무관하게 항상 다시 그린다 — UseCase가 어느 결과든 정산분을 저장하기 때문이다.
     private func apply(
-        _ result: PetActionResult?,
+        _ outcome: Result<PetActionResult?, Error>,
         to state: BehaviorRelay<PetDisplayInfo?>,
         toast: PublishRelay<String>
     ) {
+        guard case .success(let result) = outcome else {
+            toast.accept("저장하지 못했어요. 다시 시도해주세요.")
+            return
+        }
         guard let result else { return }
-
         state.accept(result.info)
 
         if let rejection = result.rejection {

@@ -125,6 +125,11 @@ extension VocabBookDetailViewController {
         )
         let output = viewModel.transform(input: input)
 
+        output.alertMessage
+            .emit(with: self) { owner, message in
+                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+            }.disposed(by: disposeBag)
+
         output.vocabList
             .drive(with: self) { owner, list in
                 owner.applySnapshot(items: list)

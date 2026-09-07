@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import RxSwift
 import RxCocoa
 
@@ -11,7 +12,22 @@ final class QuizViewModel: BaseViewModel {
     
     private let currentIndex: BehaviorRelay<Int>
     private let nextQuestionTrigger = PublishRelay<Void>()
-    private var incorrectWords: [Vocab] = []
+    private let endSessionTrigger = PublishRelay<Void>()
+
+    /// 재시도로 넘길 수 있는 실패인지 구분한다 — 대상이 사라진 경우는 몇 번을 눌러도 같은 결과다.
+    enum SaveFailure {
+        case retryable
+        case unrecoverable
+    }
+
+    private enum Phase {
+        case acceptingAnswer
+        case answerFailed(Vocab, AnswerResult)
+        case answered
+        case commitFailed
+        case completed
+        case ended
+    }
     
     
     struct AnswerResult {
@@ -33,6 +49,7 @@ final class QuizViewModel: BaseViewModel {
 
     struct Input {
         let choiceSelected: Observable<Int>
+        let retrySave: Observable<Void>
     }
     
     struct Output {
@@ -42,6 +59,8 @@ final class QuizViewModel: BaseViewModel {
         let questionWord: Driver<String>
         let choices: Driver<[String]>
         let answerResult: Signal<AnswerResult>
+        let saveFailed: Signal<SaveFailure>
+        let canAnswer: Driver<Bool>
         let quizCompleted: Signal<(originalData: QuizData, result: QuizResult)>
     }
     
@@ -50,6 +69,57 @@ final class QuizViewModel: BaseViewModel {
         let quizCompletedRelay = PublishRelay<(originalData: QuizData, result: QuizResult)>()
         var correctCount = 0
         var earnedExperience = 0
+        var incorrectWords: [Vocab] = []
+        var phase = Phase.acceptingAnswer
+        let saveFailed = PublishRelay<SaveFailure>()
+        // PersistenceError는 조회 대상 자체가 없다는 뜻이라 재시도가 성립하지 않는다.
+        func failure(for error: Error) -> SaveFailure { error is PersistenceError ? .unrecoverable : .retryable }
+        let canAnswer = BehaviorRelay(value: true)
+
+        func saveAnswer(owner: QuizViewModel, word: Vocab, result: AnswerResult) {
+            phase = .answerFailed(word, result)
+            canAnswer.accept(false)
+            do {
+                let earned = try owner.earnExperienceUseCase.record(vocabId: word.id, isCorrect: result.isCorrect)
+                earnedExperience += earned
+                if result.isCorrect {
+                    correctCount += 1
+                } else {
+                    incorrectWords.append(word)
+                }
+                phase = .answered
+                answerResultRelay.accept(result)
+            } catch {
+                saveFailed.accept(failure(for: error))
+            }
+        }
+
+        func commit(owner: QuizViewModel) {
+            phase = .commitFailed
+            do {
+                let experience = try owner.earnExperienceUseCase.commit(
+                    earned: earnedExperience,
+                    correct: correctCount,
+                    total: owner.quizDataRelay.value.words.count
+                )
+                phase = .completed
+                // 알림 재예약 실패는 이미 적립된 경험치를 재시도하게 만들지 않는다.
+                do {
+                    try owner.studyReminderUseCase.refresh()
+                } catch {
+                    AppLogger.database.error("학습 알림 갱신 실패: \(String(describing: error), privacy: .public)")
+                }
+                let result = QuizResult(
+                    correct: correctCount,
+                    total: owner.quizDataRelay.value.words.count,
+                    incorrectWords: incorrectWords,
+                    experience: experience
+                )
+                quizCompletedRelay.accept((originalData: owner.quizDataRelay.value, result: result))
+            } catch {
+                saveFailed.accept(failure(for: error))
+            }
+        }
 
         // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
         let currentQuizData = Observable.combineLatest(
@@ -90,62 +160,50 @@ final class QuizViewModel: BaseViewModel {
             .compactMap { $0?.1 }
             .asDriver(onErrorJustReturn: [])
         
-//        var correctCount = 0
-        
         input.choiceSelected
             .withLatestFrom(currentQuizData) { ($0, $1) }
-            .compactMap { [weak self] selectedIndex, quizData -> AnswerResult? in
-                guard let self = self,
-                      let (word, _, correctIndex) = quizData else { return nil }
-                
-                let isCorrect = selectedIndex == correctIndex
-
-                // 이력 저장과 경험치 산정을 한 번에 (오답은 0)
-                earnedExperience += earnExperienceUseCase.record(vocabId: word.id, isCorrect: isCorrect)
-
-                if isCorrect {
-                    correctCount += 1
-                } else {
-                    incorrectWords.append(word)
-                }
-
-                return AnswerResult(
-                    isCorrect: isCorrect,
-                    selectedIndex: selectedIndex,
+            .bind(with: self) { owner, selection in
+                guard case .acceptingAnswer = phase,
+                      let (word, choices, correctIndex) = selection.1,
+                      choices.indices.contains(selection.0) else { return }
+                saveAnswer(owner: owner, word: word, result: AnswerResult(
+                    isCorrect: selection.0 == correctIndex,
+                    selectedIndex: selection.0,
                     correctIndex: correctIndex
-                )
-            }.bind(to: answerResultRelay)
-            .disposed(by: disposeBag)
-        
+                ))
+            }.disposed(by: disposeBag)
+
         nextQuestionTrigger
-            .withLatestFrom(Observable.combineLatest(currentIndex, quizDataRelay))
-            .bind(with: self) { owner, result in
-                let (index, quizData) = result
-                let nextIndex = index + 1
-
-                if nextIndex >= quizData.words.count {
-                    // 세션이 끝나는 시점에만 적립한다 (중도 이탈은 경험치 없음)
-                    let experience = owner.earnExperienceUseCase.commit(
-                        earned: earnedExperience,
-                        correct: correctCount,
-                        total: quizData.words.count
-                    )
-                    // 학습 이력이 늘었으니 미학습 알림 기준일을 다시 잡는다
-                    owner.studyReminderUseCase.refresh()
-
-                    let result = QuizResult(
-                        correct: correctCount,
-                        total: quizData.words.count,
-                        incorrectWords: owner.incorrectWords,
-                        experience: experience
-                    )
-                    quizCompletedRelay.accept((originalData: quizData, result: result))
+            .bind(with: self) { owner, _ in
+                guard case .answered = phase else { return }
+                let nextIndex = owner.currentIndex.value + 1
+                if nextIndex >= owner.quizDataRelay.value.words.count {
+                    commit(owner: owner)
                 } else {
+                    phase = .acceptingAnswer
                     owner.currentIndex.accept(nextIndex)
+                    canAnswer.accept(true)
                 }
-            }
-            .disposed(by: disposeBag)
-        
+            }.disposed(by: disposeBag)
+
+        input.retrySave
+            .bind(with: self) { owner, _ in
+                switch phase {
+                case .answerFailed(let word, let result):
+                    saveAnswer(owner: owner, word: word, result: result)
+                case .commitFailed:
+                    commit(owner: owner)
+                default:
+                    break
+                }
+            }.disposed(by: disposeBag)
+
+        endSessionTrigger
+            .bind(onNext: {
+                phase = .ended
+                canAnswer.accept(false)
+            }).disposed(by: disposeBag)
+
         return Output(
             currentQuestion: currentQuestionCount,
             totalQuestion: totalQuestionCount,
@@ -153,6 +211,8 @@ final class QuizViewModel: BaseViewModel {
             questionWord: questionWord,
             choices: choices,
             answerResult: answerResultRelay.asSignal(),
+            saveFailed: saveFailed.asSignal(),
+            canAnswer: canAnswer.asDriver(),
             quizCompleted: quizCompletedRelay.asSignal()
         )
     }
@@ -161,6 +221,10 @@ final class QuizViewModel: BaseViewModel {
         nextQuestionTrigger.accept(())
     }
     
+    func endSession() {
+        endSessionTrigger.accept(())
+    }
+
     private func generateChoices(for word: Vocab, allWords: [Vocab]) -> ([String], Int) {
         // 오답 3개 만들기
         var wrongChoices = allWords

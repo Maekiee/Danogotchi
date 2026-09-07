@@ -68,13 +68,20 @@ extension OnboardingCoordinator: OnboardingInterestViewControllerDelegate {
 
 extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
     func didSelectTheme() {
-        // 테마 없이 펫만 있는 기기(개발 중 UserDefaults 초기화)는 알·이름을 다시 묻지 않는다
-        if container.makeIsPetCreatedUseCase().execute() {
-            delegate?.onboardingDidComplete()
-            return
+        do {
+            if try container.makeIsPetCreatedUseCase().execute() {
+                delegate?.onboardingDidComplete()
+            } else {
+                showEggSelection()
+            }
+        } catch {
+            AlertPresenter.showNotificationAlert(
+                on: navigationController,
+                title: "데이터 조회 실패",
+                message: "데이터를 불러오지 못했어요. 다시 시도해주세요.",
+                confirmTitle: "재시도"
+            ) { [weak self] in self?.didSelectTheme() }
         }
-
-        showEggSelection()
     }
 }
 

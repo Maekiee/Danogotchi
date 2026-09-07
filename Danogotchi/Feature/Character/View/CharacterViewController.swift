@@ -158,7 +158,7 @@ final class CharacterViewController: BaseViewController {
         }
 
         #if DEBUG
-        // 화면 높이에 비례 — 기기가 커져 아래 여백이 늘어도 첫 화면에는 안 걸린다
+        // 화면 높이에 비례 — 기기가 커져 아래 여백이 늘어도 첫 화면에는 안 걸린x다
         debugLevelSpacer.snp.makeConstraints { make in
             make.height.equalTo(scrollView.frameLayoutGuide.snp.height).multipliedBy(0.3)
         }
