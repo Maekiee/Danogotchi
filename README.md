@@ -309,6 +309,3 @@ flowchart LR
 | `ApiClientTests` (6) | URLSession 요청 구성·JSON·HTTP 오류·원시 바이트 |
 | `ThemeImagePersistenceTests` (6) | 이미지 교체, 포맷 요청 대체, 실패 시 기존 파일 보존 |
 | `WeatherUseCaseTests` (3) | 좌표 전달·위치 조회 실패·날씨 요청 실패 |
-
-2026-09-07, Xcode 26.6 / iPhone 17 Pro 시뮬레이터(iOS 26.5)에서 **153개 통과, 실패·건너뜀 0개**를 확인했습니다.
-테스트 실행 방법과 검증하지 않은 범위는 [테스트 문서](docs/testing.md)에 정리했습니다.
