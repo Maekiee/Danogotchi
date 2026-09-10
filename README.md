@@ -50,7 +50,7 @@
     <tr>
       <td align="center">
         <img
-          src="https://github.com/user-attachments/assets/1571ce05-7d56-4e84-a14f-3572c58e69b3"
+          src="https://github.com/user-attachments/assets/b499d18b-52af-4c46-bb27-679fea5628e8"
           width="260"
           alt="캐릭터 관리 화면"
         >
