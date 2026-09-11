@@ -116,47 +116,6 @@
 
 ![앱 아키텍처 구조도](https://github.com/user-attachments/assets/7ea73cbc-8d82-41c5-ab61-20e87a2ef9e5)
 
-```mermaid
-graph TD
-    subgraph APP["App · 조립과 화면 전환"]
-        DI[AppDIContainer]
-        CO[Coordinator]
-    end
-
-    subgraph FEATURE["Feature · 화면 12종"]
-        VC[ViewController]
-        VM[ViewModel<br/>Input · Output]
-    end
-
-    subgraph SHARED["Shared · 도메인과 데이터"]
-        UC[UseCase · Policy]
-        EN[Entity]
-        IF[Repository 프로토콜]
-        RP[Repository 구현]
-        MP[Mapper]
-        DS[DesignSystem 토큰]
-    end
-
-    subgraph CORE["Core · 공통 기반"]
-        CD[(CoreData)]
-        NW[Network · URLSession]
-        LG[AppLogger · OSLog]
-    end
-
-    CO --> VC
-    DI -. 주입 .-> VM
-    VC --> VM
-    VC --> DS
-    VM --> UC
-    UC --> EN
-    UC --> IF
-    RP -. 구현 .-> IF
-    RP --> MP
-    RP --> CD
-    RP --> NW
-    MP --> EN
-```
-
 ### 디렉토리
 
 ```
