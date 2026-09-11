@@ -113,11 +113,8 @@
 ## 아키텍처
 
 ### Clean Architecture + MVVM-C
-<img
-src="https://github.com/user-attachments/assets/7ea73cbc-8d82-41c5-ab61-20e87a2ef9e5"
-width="260"
-alt="앱 아미텍처 구조도">
 
+![앱 아키텍처 구조도](https://github.com/user-attachments/assets/7ea73cbc-8d82-41c5-ab61-20e87a2ef9e5)
 
 ```mermaid
 graph TD
