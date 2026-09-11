@@ -100,6 +100,14 @@
 * 앱 종료 중 흐른 시간을 재실행 시 일괄 정산
 * 스프라이트 시트 기반 픽셀 아트 애니메이션
 
+### 7. 날씨 연동 배경
+
+* 현재 위치(CoreLocation)로 OpenWeatherMap 현재 날씨를 조회
+* 날씨 상태 코드를 `WeatherType` 7종(뇌우·가랑비·비·눈·안개 등 대기 현상·맑음·구름)으로 환산
+* 캐릭터와 같은 스프라이트 시트 방식으로, 날씨에 해당하는 행만 골라 배경을 애니메이션
+* 위치 거부·네트워크 실패 시 기본 배경(맑음)을 유지하고 화면을 막지 않음
+* 화면 진입과 앱 복귀 때 갱신하며, 진행 중 요청이 있으면 중복 호출하지 않음
+
 ---
 
 ## 아키텍처
@@ -194,7 +202,7 @@ Danogotchi/
 - View → ViewModel → UseCase → Repository → CoreData 동기 저장 성공 → 변경 신호(Relay) 방출 → 구독 측 재조회. 저장 실패는 롤백 후 화면에 전달하며, 성공한 작업만 UI 갱신과 화면 전환으로 연결
 
 ### 테스트: 
-- 정책·UseCase·ViewModel·영속화·네트워크 테스트 153개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
+- 정책·UseCase·ViewModel·영속화·네트워크 테스트 154개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
 
 ---
 
@@ -251,6 +259,16 @@ flowchart LR
 * ViewModel은 `Input` / `Output` 구조체와 `transform(input:)` 단일 진입점을 갖습니다.
 * 외부에는 `Driver` · `Signal`로 노출해 메인 스레드 실행을 보장합니다.
 
+### Swift Concurrency
+
+* 원격 I/O 경로만 `async`/`await`로 씁니다 — `DefaultApiClient`(URLSession) → `DefaultWeatherRepository` · `DefaultSearchThemeRepository` · `DefaultThemeImageRepository` → `FetchCurrentWeatherUseCase` · `SearchThemeUseCase`. `ApiClient`와 `Endpoint`는 `Sendable`입니다.
+* Core Data 경로는 동기 `throws`를 유지합니다. "저장 성공 이후에만 변경 신호를 방출한다"는 불변식이 동기 저장에 기대고 있어, 바꿀 이유가 없는 곳을 바꾸지 않았습니다.
+* **Rx ↔ async 경계를 한 곳에 고정**했습니다. `DefaultThemeImageRepository.replace`가 `Single.create` 안에서 `Task`를 띄우고, dispose되면 `task.cancel()`로 취소를 전달하며, 오류는 `Result`로 감싸 구독이 끊기지 않게 합니다.
+* **델리게이트 → async**: `DeviceLocationProvider`가 `withCheckedThrowingContinuation`으로 `CLLocationManager` 1회 조회를 `async` 함수로 바꿉니다. 이중 resume과 동시 요청을 막고(`LocationError.requestInProgress`), `@MainActor final class` + `nonisolated override init()`으로 DI 조립부는 메인 격리 밖에 둡니다. 델리게이트 채택은 `@preconcurrency`입니다.
+* **취소를 기능으로 씁니다.** 테마 검색은 `searchTask`를 새 검색과 `deinit`에서 취소하고 `Task.isCancelled` · `CancellationError`를 걸러 낡은 응답이 화면을 덮지 않게 합니다. 이미지 포맷 폴백 루프는 `Task.checkCancellation()`으로 다음 포맷 시도를 멈추고, 셀 썸네일은 `prepareForReuse`에서 취소합니다.
+* 메인 스레드에서 내보내는 작업은 이미지 디코딩 하나입니다 — `Task.detached(priority: .userInitiated)`로 돌리고 결과 적용만 `@MainActor`에서 합니다.
+* 현재 Swift 5 언어 모드입니다. 싱글턴 `CoreDataStack.viewContext`가 DI로 흐르는 구조라 strict concurrency를 켜려면 격리 설계가 먼저 필요해, 앱 코드에는 `actor`를 도입하지 않았습니다. 테스트에서는 `actor` 더블(`ControlledSearchRepository` 등)로 응답 순서를 결정적으로 만듭니다.
+
 ### Coordinator
 * `AppFlowCoordinator` → `MainCoordinator` / `OnboardingCoordinator` → 화면별 Coordinator 계층입니다.
 * 온보딩 완료 여부에 따른 첫 화면 분기도 여기서 결정합니다.
@@ -260,10 +278,32 @@ flowchart LR
 * `Mapper`의 `toDomain()`과 필요한 모델의 `apply(_:)`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다.
 * 네트워크 DTO는 `toEntity()`로 Domain Model에 변환하며, 읽기 전용 흐름에 사용하지 않는 `toDTO()`는 만들지 않습니다.
 
-### 배경 테마 이미지
-* 선택한 사진은 URL만 저장하지 않고 `Library/Application Support/ThemeImage/`에 실제 파일로 내려받아 보관합니다. URL이 내려가거나 오프라인이어도 배경이 유지됩니다.
-* Unsplash 이미지 CDN에 `fit=crop`으로 화면 픽셀 크기를 요청해 업스케일 없이 받고, HEIC로 저장합니다(실패 시 WebP로 대체).
-* 표시할 때는 `ImageDecoder`가 ImageIO로 백그라운드에서 디코딩까지 끝내 첫 렌더링이 끊기지 않게 합니다.
+### 배경 테마 이미지 — Kingfisher 제거 후 직접 구현
+
+* **Before** — Kingfisher가 다운로드·디코딩·캐싱을 모두 맡았습니다. 원본 해상도를 그대로 받아 디코딩했고, 내려받는 크기·저장 포맷·디코딩 시점을 제어할 지점이 없었습니다.
+* **After** — `URLSession`(`ApiClient.data(from:)`) · `ImageIO` · `ImageFileStorage`로 단계를 나눠 직접 구현하고 외부 이미지 라이브러리 의존성을 제거했습니다.
+
+**내려받기 — 크기는 서버에서 맞춥니다**
+
+* Unsplash 이미지 CDN에 `w`·`h`를 `UIScreen.main.nativeBounds` 픽셀로, `fit=crop&crop=center&q=85`로 요청합니다. 기기가 `scaleAspectFill`로 하던 센터 크롭을 서버가 미리 해주므로 전송량과 디코딩 메모리가 같이 줄고 업스케일이 없습니다.
+* 포맷은 HEIC → WebP 순으로 시도합니다. CDN은 `fm`을 못 알아들어도 200에 다른 포맷을 주기 때문에 **상태 코드로는 판정할 수 없습니다.** `ImageDecoder.validate(_:)`가 `CGImageSourceGetType`으로 실제 바이트의 타입을 읽고 64px 썸네일까지 뽑아 디코딩 가능함을 확인한 뒤, 저장 확장자를 그 결과에서 가져옵니다.
+
+**저장 — 로컬 파일로 보관합니다**
+
+* `ImageFileStorage`가 `Library/Application Support/ThemeImage/`에 `UUID + 실제 확장자` 이름으로 `.atomic` 쓰기 후 `isExcludedFromBackup`을 세웁니다. URL이 내려가거나 오프라인이어도 배경이 유지됩니다.
+* UserDefaults에는 절대 경로가 아니라 **파일명만** 둡니다. 재설치·복원으로 컨테이너 경로가 바뀌어도 파일을 다시 찾습니다.
+* 순서가 불변식입니다 — 새 파일을 커밋한 **뒤** `removeAllExcept(fileName:)`로 이전 파일을 정리합니다. 다운로드가 실패해도 기존 배경을 잃지 않고, 중간에 앱이 죽어도 남은 파일은 다음 저장 때 함께 치워집니다.
+* 파일이 사라졌으면 `ObserveThemeUseCase`가 저장해둔 원본 URL로 다시 받아 스스로 복구합니다.
+
+**표시 — ImageIO 다운샘플 디코딩**
+
+* `ImageDecoder.decode(fileURL:maxPixelSize:)`가 `CGImageSourceCreateThumbnailAtIndex`로 **화면 높이 픽셀까지만** 디코딩합니다. 전체 비트맵을 메모리에 펼치지 않습니다.
+* 디코딩은 `Task.detached(priority: .userInitiated)`에서 끝내고 메인에서는 크로스 디졸브만 합니다. 같은 파일이면 건너뛰고, 새 이미지가 오면 직전 디코딩을 취소합니다.
+* 확장자가 아니라 내용으로 포맷을 판별하므로 HEIC·WebP·JPEG 어느 것이 저장돼 있든 같은 경로로 동작합니다.
+
+**테마 검색 그리드**
+
+* 썸네일(`urls.small`)은 `RemoteImageLoader`가 `URLSession` + `NSCache`로 메모리에만 올립니다. 디스크에 쓰지 않고, 셀 재사용 시 `prepareForReuse`에서 요청을 취소하며, 캐시에 있으면 동기로 꺼내 빈 칸이 깜빡이지 않게 합니다.
 
 ### DiffableDataSource
 * 단어 카드·단어장·테마 목록에 사용합니다.
@@ -282,7 +322,7 @@ flowchart LR
 * subsystem이 번들 ID라 개발용과 운영용 로그가 Console에서 자동으로 분리됩니다.
 
 ### XCTest
-* 정책·UseCase·ViewModel·영속화·네트워크 테스트 **153개**를 운영합니다.
+* 정책·UseCase·ViewModel·영속화·네트워크 테스트 **154개**를 운영합니다.
 
 ### 빌드 설정
 * `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
@@ -292,7 +332,7 @@ flowchart LR
 
 ## 테스트
 
-정책·UseCase·ViewModel·영속화·네트워크 테스트 **153개**를 운영합니다.
+정책·UseCase·ViewModel·영속화·네트워크 테스트 **154개**를 운영합니다.
 
 | 파일 | 검증 내용 |
 |---|---|
@@ -305,7 +345,7 @@ flowchart LR
 | `PersistenceFailureTests` (8) | 저장 실패 롤백, 생성·삭제·활성 전환·이력·경험치·시드 재시도 |
 | `PersistenceViewModelTests` (5) | 실패 시 폼·목록 유지, 완료 이벤트 차단, 다음 입력으로 복구 |
 | `SQLitePersistenceTests` (2) | SQLite 저장소 재개방 후 데이터·삭제 결과 확인 |
-| `QuizUseCaseTests` (5) · `QuizViewModelTests` (5) | 출제 경계·채점·경험치·실패한 저장만 재시도 |
+| `QuizUseCaseTests` (5) · `QuizViewModelTests` (6) | 출제 경계·채점·경험치·실패한 저장만 재시도 |
 | `ApiClientTests` (6) | URLSession 요청 구성·JSON·HTTP 오류·원시 바이트 |
 | `ThemeImagePersistenceTests` (6) | 이미지 교체, 포맷 요청 대체, 실패 시 기존 파일 보존 |
 | `WeatherUseCaseTests` (3) | 좌표 전달·위치 조회 실패·날씨 요청 실패 |

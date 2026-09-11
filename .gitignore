@@ -1,6 +1,7 @@
 Secret.swift
 Secret/
 .claude/settings.local.json
+output/
 
 ### macOS ###
 # General
