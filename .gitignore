@@ -2,6 +2,9 @@ Secret.swift
 Secret/
 .claude/settings.local.json
 output/
+/docs/
+/AGENTS.md
+/CLAUDE.md
 
 ### macOS ###
 # General
