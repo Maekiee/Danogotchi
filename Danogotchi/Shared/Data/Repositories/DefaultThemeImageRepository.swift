@@ -111,12 +111,21 @@ private extension DefaultThemeImageRepository {
     /// scaleAspectFill이 기기에서 하는 센터 크롭을 서버에서 미리 한다.
     /// 화면에 나오는 결과는 같고 용량과 디코딩 메모리만 줄어든다.
     ///
-    /// urls.raw에는 이미 쿼리가 붙어 있으므로 `&`로 이어붙인다.
-    /// urls.full은 fm=jpg를 이미 포함해 fm이 중복되므로 쓰지 않는다.
+    /// 기존 urls.full을 복구할 때도 변환 조건이 중복되지 않도록 교체한다.
     private func makeImageURL(rawUrl: String, format: Format) -> URL? {
-        let width = Int(targetPixelSize.width)
-        let height = Int(targetPixelSize.height)
-        let query = "&w=\(width)&h=\(height)&fit=crop&crop=center&fm=\(format.rawValue)&q=\(Self.quality)"
-        return URL(string: rawUrl + query)
+        guard var components = URLComponents(string: rawUrl) else { return nil }
+        let transformationItems = [
+            URLQueryItem(name: "w", value: String(Int(targetPixelSize.width))),
+            URLQueryItem(name: "h", value: String(Int(targetPixelSize.height))),
+            URLQueryItem(name: "fit", value: "crop"),
+            URLQueryItem(name: "crop", value: "center"),
+            URLQueryItem(name: "fm", value: format.rawValue),
+            URLQueryItem(name: "q", value: String(Self.quality))
+        ]
+        let transformationNames = Set(transformationItems.map(\.name))
+        components.queryItems = (components.queryItems ?? []).filter {
+            !transformationNames.contains($0.name)
+        } + transformationItems
+        return components.url
     }
 }
