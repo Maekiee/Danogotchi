@@ -8,6 +8,7 @@ import UIKit
 protocol ExploreVocabViewControllerDelegate: AnyObject {
     func exploreVocabDidTapLibrary()
     func exploreVocabDidTapSetting()
+    func exploreVocabDidTapStudyReport()
     func exploreVocabDidTapStartQuiz(quizData: QuizData)
     func didTapCharacter()
 }
@@ -54,54 +55,10 @@ final class ExploreVocabViewController: BaseViewController {
         view.contentMode = .scaleAspectFill
         return view
     }()
-    private let settingTabButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
-        config.image = UIImage(systemName: "gearshape", withConfiguration: symbolConfig)
-        config.baseForegroundColor = AppColor.white
-        config.background.backgroundColor = AppColor.black.withAlphaComponent(
-            0.25
-        )
-        config.background.cornerRadius = AppSpacing.space24
-        config.background.visualEffect = UIBlurEffect(
-            style: .systemMaterialDark
-        )
-        let button = UIButton(configuration: config)
-        return button
-    }()
-    private let openCharacterButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        if let icon = UIImage(named: "character-icon") {
-            let height = AppSpacing.space32
-            let size = CGSize(width: height * icon.size.width / icon.size.height, height: height)
-            config.image = UIGraphicsImageRenderer(size: size).image { _ in
-                icon.draw(in: CGRect(origin: .zero, size: size))
-            }.withRenderingMode(.alwaysTemplate)
-        }
-        config.baseForegroundColor = AppColor.white
-        config.background.backgroundColor = AppColor.black.withAlphaComponent(
-            0.25
-        )
-        config.background.cornerRadius = AppSpacing.space24
-        config.background.visualEffect = UIBlurEffect(
-            style: .systemMaterialDark
-        )
-        let button = UIButton(configuration: config)
-        return button
-    }()
-    private let showLibraryVCButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium, scale: .default)
-        config.image = UIImage(systemName: "square.grid.2x2", withConfiguration: symbolConfig)
-        config.baseForegroundColor = AppColor.white
-        config.background.backgroundColor = AppColor.black.withAlphaComponent(0.25)
-        config.background.cornerRadius = AppSpacing.space24
-        config.background.visualEffect = UIBlurEffect(
-            style: .systemMaterialDark
-        )
-        let button = UIButton(configuration: config)
-        return button
-    }()
+    private let settingTabButton = CircularIconButton(systemName: "gearshape")
+    private let studyReportButton = CircularIconButton(systemName: "chart.bar.xaxis")
+    private let openCharacterButton = CircularIconButton(assetNamed: "character-icon")
+    private let showLibraryVCButton = CircularIconButton(systemName: "square.grid.2x2")
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.title = "학습하기"
@@ -170,6 +127,7 @@ final class ExploreVocabViewController: BaseViewController {
             collectionView,
             showLibraryVCButton,
             settingTabButton,
+            studyReportButton,
             startLearningButton,
             openCharacterButton,
             
@@ -185,7 +143,6 @@ final class ExploreVocabViewController: BaseViewController {
         showLibraryVCButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space20)
-            make.size.equalTo(AppSpacing.space24 * 2)
         }
         
         collectionView.snp.makeConstraints { make in
@@ -201,13 +158,16 @@ final class ExploreVocabViewController: BaseViewController {
         openCharacterButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
-            make.size.equalTo(AppSpacing.space24 * 2)
         }
         
         settingTabButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space20)
+        }
+
+        studyReportButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
-            make.size.equalTo(AppSpacing.space24 * 2)
         }
     }
 
@@ -288,6 +248,11 @@ extension ExploreVocabViewController {
         settingTabButton.rx.tap
             .bind(with: self) { owner, _ in
                 owner.delegate?.exploreVocabDidTapSetting()
+            }.disposed(by: disposeBag)
+
+        studyReportButton.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.delegate?.exploreVocabDidTapStudyReport()
             }.disposed(by: disposeBag)
         
         openCharacterButton.rx.tap

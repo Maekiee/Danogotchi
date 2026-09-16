@@ -48,6 +48,16 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
+    // 학습 리포트
+    func exploreVocabDidTapStudyReport() {
+        let vm = container.makeStudyReportViewModel()
+        let vc = StudyReportViewController(viewModel: vm)
+        vc.delegate = self
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .fullScreen
+        navigationController.present(nav, animated: true)
+    }
+
     // 학습하기
     func exploreVocabDidTapStartQuiz(quizData: QuizData) {
         let nav = UINavigationController()
@@ -78,6 +88,12 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
 
 extension MainCoordinator: CharacterViewControllerDelegate {
     func characterDidTapClose() {
+        navigationController.dismiss(animated: true)
+    }
+}
+
+extension MainCoordinator: StudyReportViewControllerDelegate {
+    func studyReportDidTapClose() {
         navigationController.dismiss(animated: true)
     }
 }

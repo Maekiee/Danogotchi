@@ -286,3 +286,10 @@ extension AppDIContainer {
         return DefaultCreatePetUseCase(petRepository: petRepository)
     }
 }
+
+// MARK: - StudyReport
+extension AppDIContainer {
+    func makeStudyReportViewModel() -> StudyReportViewModel {
+        return StudyReportViewModel()
+    }
+}
