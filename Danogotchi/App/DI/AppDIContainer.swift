@@ -161,6 +161,14 @@ extension AppDIContainer {
     func makeObserveThemeUseCase() -> ObserveThemeUseCase {
         return DefaultObserveThemeUseCase(themeImageRepository: makeThemeImageRepository())
     }
+
+    func makeSavePhotoThemeUseCase() -> SavePhotoThemeUseCase {
+        return DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository())
+    }
+
+    func makePhotoThemeViewModel() -> PhotoThemeViewModel {
+        return PhotoThemeViewModel(savePhotoThemeUseCase: makeSavePhotoThemeUseCase())
+    }
 }
 
 // MARK: - Weather

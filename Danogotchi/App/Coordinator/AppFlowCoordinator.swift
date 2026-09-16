@@ -28,7 +28,7 @@ extension AppFlowCoordinator {
                 AppLogger.push.error("학습 알림 재예약 실패: \(String(describing: error), privacy: .public)")
             }
 
-            let isOnboardingComplete = try container.userInfoManager.currentThemeUrl != nil
+            let isOnboardingComplete = try container.userInfoManager.hasSelectedTheme
                 && container.makeIsPetCreatedUseCase().execute()
             if isOnboardingComplete {
                 startMainFlow()

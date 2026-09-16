@@ -60,6 +60,10 @@ extension DefaultThemeImageRepository: ThemeImageRepository {
             return Disposables.create { task.cancel() }
         }
     }
+
+    func replace(imageData: Data) async throws {
+        try performReplace(imageData: imageData)
+    }
 }
 
 private extension DefaultThemeImageRepository {
@@ -74,6 +78,23 @@ private extension DefaultThemeImageRepository {
         userInfo.currentThemeUrl = rawUrl
 
         // 마지막에 정리한다. 여기서 실패하거나 직전에 앱이 죽어도 다음 저장 때 함께 치워진다.
+        storage.removeAllExcept(fileName: fileName)
+    }
+
+    /// 순서가 중요하다. rawUrl을 먼저 지우면 저장이 실패했을 때 기존 배경의 복구 경로까지 잃는다.
+    func performReplace(imageData: Data) throws {
+        // 확장자는 사진첩이 준 이름이 아니라 실제 바이트에서 뽑는다
+        guard let fileExtension = ImageDecoder.validate(imageData) else {
+            throw PhotoThemeError.unsupportedFormat
+        }
+
+        let fileName = UUID().uuidString + "." + fileExtension
+        try storage.save(imageData, fileName: fileName)
+
+        userInfo.currentThemeImageFileName = fileName
+        // 로컬 사진은 다시 내려받을 원본이 없다 — 복구 대상에서 제외한다
+        userInfo.currentThemeUrl = nil
+
         storage.removeAllExcept(fileName: fileName)
     }
 

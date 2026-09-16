@@ -2,6 +2,7 @@ import UIKit
 import OSLog
 import MessageUI
 import SafariServices
+import SwiftUI
 
 protocol SettingCoordinatorDelegate: AnyObject {
     func settingCoordinatorDidFinish()
@@ -93,6 +94,20 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
 extension SettingCoordinator: SearchThemeViewControllerDelegate {
     func didSelectTheme() {
         navigationController.popViewController(animated: true)
+    }
+
+    @MainActor
+    func didTapMyPhoto() {
+        let vm = container.makePhotoThemeViewModel()
+        vm.onThemeSaved = { [weak self] in
+            // 사진 화면과 테마 검색 화면을 함께 걷어낸다 — didSelectTheme과 같은 목적지인 설정 화면으로 돌아온다.
+            // 루트는 start()가 처음 push한 SettingTabViewController다.
+            self?.navigationController.popToRootViewController(animated: true)
+        }
+
+        let vc = UIHostingController(rootView: PhotoThemeView(viewModel: vm))
+        vc.title = "내 사진으로 지정"
+        navigationController.pushViewController(vc, animated: true)
     }
 }
 

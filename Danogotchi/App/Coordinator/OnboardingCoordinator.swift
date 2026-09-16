@@ -18,7 +18,7 @@ final class OnboardingCoordinator: Coordinator {
 
     func start() {
         // 테마까지 끝냈는데 펫이 없는 상태(테마 직후 강제 종료)면 관심사·테마를 반복하지 않는다
-        if container.userInfoManager.currentThemeUrl != nil {
+        if container.userInfoManager.hasSelectedTheme {
             showEggSelection(asRoot: true)
         } else {
             showInterestSelection()

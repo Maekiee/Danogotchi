@@ -11,6 +11,14 @@ enum ImageDecoder {
         return UIImage(cgImage: cgImage)
     }
 
+    /// 사진첩에서 받은 바이트는 아직 파일이 아니다 — 미리보기를 위해 메모리에서 바로 다운샘플한다.
+    /// UIImage(data:)는 원본 해상도를 그대로 올려 48MP 사진이면 수백 MB를 잡는다.
+    static func decode(data: Data, maxPixelSize: Int) -> UIImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let cgImage = makeThumbnail(from: source, maxPixelSize: maxPixelSize) else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
+
     static func validate(_ data: Data) -> String? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let uti = CGImageSourceGetType(source),

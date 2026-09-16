@@ -271,6 +271,114 @@ final class ThemeImagePersistenceTests: XCTestCase {
         XCTAssertEqual(fixture.userInfo.currentThemeUrl, rawURL)
     }
 
+    // MARK: - 사진첩에서 고른 이미지
+
+    func test_localPhotoReplacesBytesClearsRawUrlAndRemovesPreviousImage() async throws {
+        let data = imageData(color: .blue)
+        let fixture = try Fixture(responses: [])
+        defer { fixture.cleanup() }
+        let published = expectation(description: "new file is published")
+        let observation = fixture.repository.storedImageChanged
+            .compactMap { $0 }
+            .filter { $0 != fixture.previousFile }
+            .subscribe(onNext: { file in
+                XCTAssertEqual(try? Data(contentsOf: file), data)
+                published.fulfill()
+            })
+        defer { observation.dispose() }
+
+        try await fixture.repository.replace(imageData: data)
+        await fulfillment(of: [published], timeout: 2)
+
+        let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
+        XCTAssertEqual(try Data(contentsOf: file), data)
+        XCTAssertEqual(file.pathExtension, "png")
+        XCTAssertNotEqual(file, fixture.previousFile)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fixture.previousFile.path))
+        // 로컬 사진은 복구할 원본이 없으므로 URL을 비운다
+        XCTAssertNil(fixture.userInfo.currentThemeUrl)
+        let urls = await fixture.api.urls
+        XCTAssertTrue(urls.isEmpty, "사진첩 저장은 네트워크를 쓰지 않는다")
+    }
+
+    func test_storedExtensionFollowsActualBytesNotPickerMetadata() async throws {
+        let fixtureFile = try XCTUnwrap(
+            Bundle(for: Self.self).url(forResource: "theme-pattern", withExtension: "heic")
+        )
+        let data = try Data(contentsOf: fixtureFile)
+        let fixture = try Fixture(responses: [])
+        defer { fixture.cleanup() }
+
+        try await fixture.repository.replace(imageData: data)
+
+        let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
+        XCTAssertEqual(file.pathExtension, "heic")
+        XCTAssertEqual(try Data(contentsOf: file), data)
+    }
+
+    func test_unsupportedBytesNeverReplacePreviousImage() async throws {
+        let fixture = try Fixture(responses: [])
+        defer { fixture.cleanup() }
+
+        do {
+            try await fixture.repository.replace(imageData: Data("invalid".utf8))
+            XCTFail("Unsupported bytes must not be stored")
+        } catch {
+            XCTAssertEqual(error as? PhotoThemeError, .unsupportedFormat)
+        }
+        try assertPreviousImage(fixture)
+    }
+
+    func test_localPhotoFileStorageFailureKeepsPreviousBytesAndSelection() async throws {
+        let fixture = try Fixture(responses: [])
+        defer { fixture.cleanup() }
+        fixture.fileManager.failsDirectoryLookup = true
+
+        do {
+            try await fixture.repository.replace(imageData: imageData(color: .blue))
+            XCTFail("A failed file write must not replace the stored image")
+        } catch {
+            // 어떤 실패든 기존 배경과 복구 정보가 남아 있어야 한다
+        }
+        try assertPreviousImage(fixture)
+    }
+
+    func test_localThemeIsNotRecoveredAfterFileLoss() async throws {
+        let request = expectation(description: "local theme must not trigger a download")
+        request.isInverted = true
+        let fixture = try Fixture(responses: [], requestReceived: request)
+        defer { fixture.cleanup() }
+        try await fixture.repository.replace(imageData: imageData(color: .blue))
+        try FileManager.default.removeItem(at: XCTUnwrap(fixture.repository.storedImageFileURL()))
+
+        let empty = expectation(description: "missing local file")
+        let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
+        let observation = useCase.execute().subscribe(onNext: {
+            XCTAssertNil($0)
+            empty.fulfill()
+        })
+        defer { observation.dispose() }
+        await fulfillment(of: [empty, request], timeout: 0.1)
+        let urls = await fixture.api.urls
+        XCTAssertTrue(urls.isEmpty)
+    }
+
+    func test_localSaveThenRemoteSaveRestoresRecovery() async throws {
+        let remoteData = imageData(color: .green)
+        let fixture = try Fixture(responses: [.success(remoteData)])
+        defer { fixture.cleanup() }
+
+        try await fixture.repository.replace(imageData: imageData(color: .blue))
+        XCTAssertNil(fixture.repository.lastSelectedRawUrl)
+
+        try await fixture.repository.replace(rawUrl: rawURL).value.get()
+
+        XCTAssertEqual(fixture.repository.lastSelectedRawUrl, rawURL)
+        XCTAssertEqual(fixture.userInfo.currentThemeUrl, rawURL)
+        let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
+        XCTAssertEqual(try Data(contentsOf: file), remoteData)
+    }
+
     private func assertPreviousImage(_ fixture: Fixture, file: StaticString = #filePath, line: UInt = #line) throws {
         XCTAssertEqual(fixture.userInfo.currentThemeImageFileName, "previous.png", file: file, line: line)
         XCTAssertEqual(fixture.userInfo.currentThemeUrl, "https://images.example.test/previous?ixid=test", file: file, line: line)

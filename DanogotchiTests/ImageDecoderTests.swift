@@ -46,6 +46,18 @@ final class ImageDecoderTests: XCTestCase {
         XCTAssertNil(ImageDecoder.decode(fileURL: file, maxPixelSize: 80))
     }
 
+    func test_dataOverloadDownsamplesTheSameBytesWithoutAFile() throws {
+        for fileExtension in ["heic", "webp"] {
+            let data = try Data(contentsOf: fixtureURL(fileExtension))
+            let image = try XCTUnwrap(ImageDecoder.decode(data: data, maxPixelSize: 80)?.cgImage, fileExtension)
+            XCTAssertEqual(image.width, 80, fileExtension)
+            XCTAssertEqual(image.height, 40, fileExtension)
+            try assertPatternPixels(image)
+        }
+        XCTAssertNil(ImageDecoder.decode(data: Data("invalid image".utf8), maxPixelSize: 80))
+        XCTAssertNil(ImageDecoder.decode(data: Data(), maxPixelSize: 80))
+    }
+
     private func fixtureURL(_ fileExtension: String) throws -> URL {
         try XCTUnwrap(Bundle(for: Self.self).url(forResource: "theme-pattern", withExtension: fileExtension))
     }

@@ -6,6 +6,12 @@ import UIKit
 
 protocol SearchThemeViewControllerDelegate: AnyObject {
     func didSelectTheme()
+    func didTapMyPhoto()
+}
+
+extension SearchThemeViewControllerDelegate {
+    /// 온보딩은 네비게이션 바를 숨겨(AppFlowCoordinator) 이 진입점 자체가 없다 — 설정 진입에서만 호출된다.
+    func didTapMyPhoto() { }
 }
 
 final class SearchThemeViewController: BaseViewController {
@@ -127,6 +133,15 @@ final class SearchThemeViewController: BaseViewController {
             make.center.equalTo(collectionView)
         }
     }
+
+    override func configView() {
+        // 온보딩은 네비게이션 바가 숨겨져 있어 버튼을 달아도 보이지 않는다
+        guard entryMode == .settings else { return }
+
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: nil, action: nil
+        )
+    }
 }
 
 
@@ -223,6 +238,11 @@ extension SearchThemeViewController {
         output.themeSaved
             .emit(with: self) { owner, _ in
                 owner.delegate?.didSelectTheme()
+            }.disposed(by: disposeBag)
+
+        navigationItem.rightBarButtonItem?.rx.tap
+            .bind(with: self) { owner, _ in
+                owner.delegate?.didTapMyPhoto()
             }.disposed(by: disposeBag)
     }
 }
