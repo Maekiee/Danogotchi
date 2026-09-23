@@ -85,8 +85,13 @@ extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
     }
 
     func didTapMyPhoto() {
-        let vm = container.makePhotoThemeViewModel()
-        let vc = PhotoThemeViewController(viewModel: vm)
+        // 저장 성공 시 모달을 닫고 검색 테마 저장과 같은 다음 단계로 진행
+        let feature = container.makePhotoThemeFeature { [weak self] in
+            self?.navigationController.dismiss(animated: true) {
+                self?.didSelectTheme()
+            }
+        }
+        let vc = PhotoThemeViewController(feature: feature)
 
         // 온보딩은 네비게이션 바를 숨기므로 자체 바와 닫기 버튼을 가진 모달로 띄운다
         let photoNavigationController = UINavigationController(rootViewController: vc)
@@ -101,12 +106,6 @@ extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
         closeButton.accessibilityIdentifier = "photoTheme.close"
         vc.navigationItem.leftBarButtonItem = closeButton
 
-        // 저장 성공 시 모달을 닫고 검색 테마 저장과 같은 다음 단계로 진행
-        vm.onThemeSaved = { [weak self] in
-            self?.navigationController.dismiss(animated: true) {
-                self?.didSelectTheme()
-            }
-        }
         navigationController.present(photoNavigationController, animated: true)
     }
 }

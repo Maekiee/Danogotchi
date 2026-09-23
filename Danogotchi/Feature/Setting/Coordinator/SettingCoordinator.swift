@@ -96,14 +96,13 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
     }
 
     func didTapMyPhoto() {
-        let vm = container.makePhotoThemeViewModel()
-        vm.onThemeSaved = { [weak self] in
+        let feature = container.makePhotoThemeFeature { [weak self] in
             // 사진 화면과 테마 검색 화면을 함께 걷어낸다 — didSelectTheme과 같은 목적지인 설정 화면으로 돌아온다.
             // 루트는 start()가 처음 push한 SettingTabViewController다.
             self?.navigationController.popToRootViewController(animated: true)
         }
 
-        let vc = PhotoThemeViewController(viewModel: vm)
+        let vc = PhotoThemeViewController(feature: feature)
         navigationController.pushViewController(vc, animated: true)
     }
 }

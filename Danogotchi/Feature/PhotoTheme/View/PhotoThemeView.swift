@@ -1,23 +1,21 @@
 import Combine
+import ComposableArchitecture
 import PhotosUI
 import SwiftUI
 
 struct PhotoThemeView: View {
-    @StateObject private var viewModel: PhotoThemeViewModel
-
-    init(viewModel: PhotoThemeViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
-    }
+    @Bindable
+    var store: StoreOf<PhotoThemeFeature>
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            if let image = viewModel.previewImage {
+            if let image = store.previewImage {
                 PhotoCropView(image: image) { rect in
-                    viewModel.updateCropRect(rect, for: image)
+                    store.send(.cropChanged(rect, image))
                 }
-                    .aspectRatio(viewModel.targetAspectRatio, contentMode: .fit)
+                    .aspectRatio(targetAspectRatio, contentMode: .fit)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipped()
                     .ignoresSafeArea()
@@ -25,7 +23,7 @@ struct PhotoThemeView: View {
                 emptyState
             }
 
-            if viewModel.isLoading || viewModel.isSaving {
+            if store.isLoading || store.isSaving {
                 ZStack {
                     Color.black.opacity(0.25).ignoresSafeArea()
                     ProgressView().tint(.white).scaleEffect(1.4)
@@ -33,26 +31,29 @@ struct PhotoThemeView: View {
             }
         }
         .overlay(alignment: .bottom) { bottomBar }
-        .disabled(viewModel.isSaving || viewModel.isLoading)
+        .disabled(store.isSaving || store.isLoading)
         .photosPicker(
-            isPresented: $viewModel.isPickerPresented,
-            selection: $viewModel.pickedItem,
+            isPresented: $store.isPickerPresented,
+            selection: $store.pickedItem,
             matching: .images
         )
-        .onChange(of: viewModel.pickedItem) { viewModel.load(item: $0) }
         .alert("알림", isPresented: isAlertPresented) {
             Button("확인", role: .cancel) { }
         } message: {
-            Text(viewModel.alertMessage ?? "")
+            Text(store.alertMessage ?? "")
         }
     }
 }
 
 private extension PhotoThemeView {
+    var targetAspectRatio: CGFloat {
+        UIScreen.main.nativeBounds.width / UIScreen.main.nativeBounds.height
+    }
+
     var isAlertPresented: Binding<Bool> {
         Binding(
-            get: { viewModel.alertMessage != nil },
-            set: { if !$0 { viewModel.alertMessage = nil } }
+            get: { store.alertMessage != nil },
+            set: { if !$0 { store.alertMessage = nil } }
         )
     }
 
@@ -69,9 +70,9 @@ private extension PhotoThemeView {
 
     var bottomBar: some View {
         VStack(spacing: AppSpacing.space12) {
-            PhotosPicker(selection: $viewModel.pickedItem, matching: .images) {
+            PhotosPicker(selection: $store.pickedItem, matching: .images) {
                 capsuleLabel(
-                    viewModel.previewImage == nil ? "사진첩에서 사진 고르기" : "다른 사진 고르기",
+                    store.previewImage == nil ? "사진첩에서 사진 고르기" : "다른 사진 고르기",
                     foreground: AppColor.white,
                     background: AppColor.black.withAlphaComponent(0.55)
                 )
@@ -79,16 +80,16 @@ private extension PhotoThemeView {
             .buttonStyle(.plain)
 
             Button {
-                viewModel.confirmSelection()
+                store.send(.confirmTapped)
             } label: {
                 // PrimaryFillButton과 같은 스펙 — 비활성 색까지 맞춘다
                 capsuleLabel(
                     "이미지 테마로 지정",
-                    foreground: viewModel.canConfirm ? AppColor.white : AppColor.gray45,
-                    background: viewModel.canConfirm ? AppColor.black : AppColor.gray30
+                    foreground: store.canConfirm ? AppColor.white : AppColor.gray45,
+                    background: store.canConfirm ? AppColor.black : AppColor.gray30
                 )
             }
-            .disabled(!viewModel.canConfirm)
+            .disabled(!store.canConfirm)
             .buttonStyle(.plain)
         }
         .padding(.horizontal, AppSpacing.space20)
@@ -116,7 +117,9 @@ private struct PreviewSavePhotoThemeUseCase: SavePhotoThemeUseCase {
 
 #Preview("PhotoThemeView") {
     PhotoThemeView(
-        viewModel: PhotoThemeViewModel(savePhotoThemeUseCase: PreviewSavePhotoThemeUseCase())
+        store: Store(initialState: PhotoThemeFeature.State()) {
+            PhotoThemeFeature(savePhotoThemeUseCase: PreviewSavePhotoThemeUseCase(), onThemeSaved: {})
+        }
     )
 }
 #endif

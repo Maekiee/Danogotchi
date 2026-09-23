@@ -1,3 +1,4 @@
+import ComposableArchitecture
 import UIKit
 import XCTest
 @testable import Danogotchi
@@ -22,20 +23,20 @@ final class PhotoThemeViewControllerTests: XCTestCase {
         let viewController = screen.viewController
 
         viewController.beginAppearanceTransition(true, animated: false)
-        XCTAssertFalse(screen.viewModel.isPickerPresented, "전환 중에는 사진첩을 띄우지 않는다")
+        XCTAssertFalse(screen.store.isPickerPresented, "전환 중에는 사진첩을 띄우지 않는다")
         viewController.endAppearanceTransition()
-        XCTAssertTrue(screen.viewModel.isPickerPresented)
+        XCTAssertTrue(screen.store.isPickerPresented)
 
         // 사진첩을 취소하고 화면이 다시 나타나도 자동으로 열지 않는다
-        screen.viewModel.isPickerPresented = false
+        screen.store.isPickerPresented = false
         viewController.beginAppearanceTransition(false, animated: false)
         viewController.endAppearanceTransition()
         viewController.beginAppearanceTransition(true, animated: false)
         viewController.endAppearanceTransition()
-        XCTAssertFalse(screen.viewModel.isPickerPresented)
+        XCTAssertFalse(screen.store.isPickerPresented)
     }
 
-    func test_savingBlocksBackAndCloseUntilSaveFinishes() throws {
+    func test_savingBlocksBackAndCloseUntilSaveFinishes() async throws {
         let screen = Screen()
         let navigationItem = screen.viewController.navigationItem
         let close = try XCTUnwrap(navigationItem.leftBarButtonItem)
@@ -43,31 +44,43 @@ final class PhotoThemeViewControllerTests: XCTestCase {
         XCTAssertTrue(close.isEnabled)
 
         try screen.selectImage()
-        screen.viewModel.confirmSelection()
+        screen.store.send(.confirmTapped)
+        await drainMainQueue()
         XCTAssertTrue(navigationItem.hidesBackButton)
         XCTAssertFalse(close.isEnabled)
 
         // 실패하면 이탈과 재시도가 모두 다시 가능하다
         screen.save.complete(.failure(CocoaError(.fileWriteOutOfSpace)))
+        await drainMainQueue()
         XCTAssertFalse(navigationItem.hidesBackButton)
         XCTAssertTrue(close.isEnabled)
 
-        screen.viewModel.confirmSelection()
+        screen.store.send(.confirmTapped)
+        await drainMainQueue()
         XCTAssertTrue(navigationItem.hidesBackButton)
         screen.save.complete(.success(()))
+        await drainMainQueue()
         XCTAssertFalse(navigationItem.hidesBackButton)
         XCTAssertTrue(close.isEnabled)
+    }
+
+    /// observe는 변경을 다음 메인 큐 차례에 반영한다
+    private func drainMainQueue() async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { continuation.resume() }
+        }
     }
 
     @MainActor
     private final class Screen {
         let save = ControlledSavePhotoThemeUseCase()
-        let viewModel: PhotoThemeViewModel
         let viewController: PhotoThemeViewController
+        var store: StoreOf<PhotoThemeFeature> { viewController.store }
 
         init() {
-            viewModel = PhotoThemeViewModel(savePhotoThemeUseCase: save)
-            viewController = PhotoThemeViewController(viewModel: viewModel)
+            viewController = PhotoThemeViewController(
+                feature: PhotoThemeFeature(savePhotoThemeUseCase: save, onThemeSaved: {})
+            )
             // 온보딩 코디네이터처럼 닫기 버튼을 단 뒤 화면을 올린다
             viewController.navigationItem.leftBarButtonItem = UIBarButtonItem(systemItem: .close)
             viewController.loadViewIfNeeded()
@@ -75,8 +88,8 @@ final class PhotoThemeViewControllerTests: XCTestCase {
 
         func selectImage() throws {
             let (data, image) = try solidImage(color: .blue)
-            viewModel.apply(data: data, image: image)
-            viewModel.updateCropRect(CGRect(x: 0.25, y: 0, width: 0.5, height: 1), for: image)
+            store.send(.imageLoaded(data: data, image: image))
+            store.send(.cropChanged(CGRect(x: 0.25, y: 0, width: 0.5, height: 1), image))
         }
     }
 }

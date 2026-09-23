@@ -166,8 +166,8 @@ extension AppDIContainer {
         return DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository())
     }
 
-    func makePhotoThemeViewModel() -> PhotoThemeViewModel {
-        return PhotoThemeViewModel(savePhotoThemeUseCase: makeSavePhotoThemeUseCase())
+    func makePhotoThemeFeature(onThemeSaved: @escaping @MainActor @Sendable () -> Void) -> PhotoThemeFeature {
+        return PhotoThemeFeature(savePhotoThemeUseCase: makeSavePhotoThemeUseCase(), onThemeSaved: onThemeSaved)
     }
 }
 
