@@ -28,6 +28,13 @@
 			remoteGlobalIDString = 765182CA2E843A75005EE2F7;
 			remoteInfo = Danogotchi;
 		};
+		76196C523063C002005A049F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 765182C32E843A75005EE2F7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 765182CA2E843A75005EE2F7;
+			remoteInfo = Danogotchi;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -45,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		5A153F48302F01CC0091AB19 /* DanogotchiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DanogotchiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		76196C4C3063C002005A049F /* DanogotchiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DanogotchiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		765182CB2E843A75005EE2F7 /* Danogotchi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Danogotchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		765183672E843CF0005EE2F7 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -67,6 +75,11 @@
 			path = DanogotchiTests;
 			sourceTree = "<group>";
 		};
+		76196C4D3063C002005A049F /* DanogotchiUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DanogotchiUITests;
+			sourceTree = "<group>";
+		};
 		765182CD2E843A75005EE2F7 /* Danogotchi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -79,6 +92,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		5A153F45302F01CC0091AB19 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		76196C493063C002005A049F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -111,6 +131,7 @@
 				765183672E843CF0005EE2F7 /* .gitignore */,
 				765182CD2E843A75005EE2F7 /* Danogotchi */,
 				5A153F49302F01CC0091AB19 /* DanogotchiTests */,
+				76196C4D3063C002005A049F /* DanogotchiUITests */,
 				765182CC2E843A75005EE2F7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -120,6 +141,7 @@
 			children = (
 				765182CB2E843A75005EE2F7 /* Danogotchi.app */,
 				5A153F48302F01CC0091AB19 /* DanogotchiTests.xctest */,
+				76196C4C3063C002005A049F /* DanogotchiUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -149,6 +171,29 @@
 			productName = DanogotchiTests;
 			productReference = 5A153F48302F01CC0091AB19 /* DanogotchiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		76196C4B3063C002005A049F /* DanogotchiUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 76196C543063C002005A049F /* Build configuration list for PBXNativeTarget "DanogotchiUITests" */;
+			buildPhases = (
+				76196C483063C002005A049F /* Sources */,
+				76196C493063C002005A049F /* Frameworks */,
+				76196C4A3063C002005A049F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				76196C533063C002005A049F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				76196C4D3063C002005A049F /* DanogotchiUITests */,
+			);
+			name = DanogotchiUITests;
+			packageProductDependencies = (
+			);
+			productName = DanogotchiUITests;
+			productReference = 76196C4C3063C002005A049F /* DanogotchiUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		765182CA2E843A75005EE2F7 /* Danogotchi */ = {
 			isa = PBXNativeTarget;
@@ -199,6 +244,10 @@
 						CreatedOnToolsVersion = 26.6;
 						TestTargetID = 765182CA2E843A75005EE2F7;
 					};
+					76196C4B3063C002005A049F = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 765182CA2E843A75005EE2F7;
+					};
 					765182CA2E843A75005EE2F7 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -227,12 +276,20 @@
 			targets = (
 				765182CA2E843A75005EE2F7 /* Danogotchi */,
 				5A153F47302F01CC0091AB19 /* DanogotchiTests */,
+				76196C4B3063C002005A049F /* DanogotchiUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		5A153F46302F01CC0091AB19 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		76196C4A3063C002005A049F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -301,6 +358,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		76196C483063C002005A049F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		765182C72E843A75005EE2F7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -315,6 +379,11 @@
 			isa = PBXTargetDependency;
 			target = 765182CA2E843A75005EE2F7 /* Danogotchi */;
 			targetProxy = 5A153F4C302F01CC0091AB19 /* PBXContainerItemProxy */;
+		};
+		76196C533063C002005A049F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 765182CA2E843A75005EE2F7 /* Danogotchi */;
+			targetProxy = 76196C523063C002005A049F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -360,6 +429,48 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Danogotchi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Danogotchi";
+			};
+			name = Release;
+		};
+		76196C553063C002005A049F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HVS8D6M24R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maekie.DanogotchiUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Danogotchi;
+			};
+			name = Debug;
+		};
+		76196C563063C002005A049F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HVS8D6M24R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maekie.DanogotchiUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Danogotchi;
 			};
 			name = Release;
 		};
@@ -579,6 +690,15 @@
 			buildConfigurations = (
 				5A153F4E302F01CC0091AB19 /* Debug */,
 				5A153F4F302F01CC0091AB19 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		76196C543063C002005A049F /* Build configuration list for PBXNativeTarget "DanogotchiUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76196C553063C002005A049F /* Debug */,
+				76196C563063C002005A049F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

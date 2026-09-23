@@ -1,3 +1,4 @@
+import ImageIO
 import RxCocoa
 import RxSwift
 import UIKit
@@ -52,6 +53,9 @@ private actor ImageApiStub: ApiClient {
 @MainActor
 final class ThemeImagePersistenceTests: XCTestCase {
     private let rawURL = "https://images.example.test/photo?ixid=test"
+    private func fullCrop() throws -> PhotoThemeCrop {
+        try XCTUnwrap(PhotoThemeCrop(CGRect(x: 0, y: 0, width: 1, height: 1)))
+    }
 
     func test_successReplacesBytesPublishesFileAndRemovesPreviousImage() async throws {
         let data = imageData(color: .blue)
@@ -282,17 +286,18 @@ final class ThemeImagePersistenceTests: XCTestCase {
             .compactMap { $0 }
             .filter { $0 != fixture.previousFile }
             .subscribe(onNext: { file in
-                XCTAssertEqual(try? Data(contentsOf: file), data)
+                XCTAssertNotNil(ImageDecoder.decode(fileURL: file, maxPixelSize: 80))
+                XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.previousFile.path))
                 published.fulfill()
             })
         defer { observation.dispose() }
 
-        try await fixture.repository.replace(imageData: data)
+        try await fixture.repository.replace(imageData: data, crop: fullCrop())
         await fulfillment(of: [published], timeout: 2)
 
         let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
-        XCTAssertEqual(try Data(contentsOf: file), data)
-        XCTAssertEqual(file.pathExtension, "png")
+        XCTAssertEqual(ImageDecoder.validate(try Data(contentsOf: file)), file.pathExtension)
+        XCTAssertTrue(["heic", "jpg"].contains(file.pathExtension))
         XCTAssertNotEqual(file, fixture.previousFile)
         XCTAssertFalse(FileManager.default.fileExists(atPath: fixture.previousFile.path))
         // 로컬 사진은 복구할 원본이 없으므로 URL을 비운다
@@ -301,7 +306,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         XCTAssertTrue(urls.isEmpty, "사진첩 저장은 네트워크를 쓰지 않는다")
     }
 
-    func test_storedExtensionFollowsActualBytesNotPickerMetadata() async throws {
+    func test_localPhotoStoredExtensionMatchesEncodedBytes() async throws {
         let fixtureFile = try XCTUnwrap(
             Bundle(for: Self.self).url(forResource: "theme-pattern", withExtension: "heic")
         )
@@ -309,11 +314,46 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let fixture = try Fixture(responses: [])
         defer { fixture.cleanup() }
 
-        try await fixture.repository.replace(imageData: data)
+        try await fixture.repository.replace(imageData: data, crop: fullCrop())
 
         let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
-        XCTAssertEqual(file.pathExtension, "heic")
-        XCTAssertEqual(try Data(contentsOf: file), data)
+        XCTAssertTrue(["heic", "jpg"].contains(file.pathExtension))
+        let stored = try Data(contentsOf: file)
+        XCTAssertEqual(ImageDecoder.validate(stored), file.pathExtension)
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(stored as CFData, nil))
+        let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        let screen = UIScreen.main.nativeBounds.size
+        let scale = min(1, min(320 / screen.width, 160 / screen.height))
+        XCTAssertEqual(Double(image.width), Double(floor(screen.width * scale)), accuracy: 1)
+        XCTAssertEqual(Double(image.height), Double(floor(screen.height * scale)), accuracy: 1)
+    }
+
+    func test_localPhotoStoresReducedPixelsAndBytes() async throws {
+        let screen = UIScreen.main.nativeBounds.size
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        let size = CGSize(width: screen.width * 2, height: screen.height * 2)
+        let data = UIGraphicsImageRenderer(size: size, format: format).jpegData(withCompressionQuality: 1) { context in
+            for x in 0..<Int(size.width) {
+                UIColor(hue: CGFloat((x * 137) % 360) / 360, saturation: 1, brightness: 1, alpha: 1).setFill()
+                context.fill(CGRect(x: CGFloat(x), y: 0, width: 1, height: size.height))
+            }
+        }
+        let fixture = try Fixture(responses: [])
+        defer { fixture.cleanup() }
+
+        try await fixture.repository.replace(imageData: data, crop: XCTUnwrap(PhotoThemeCrop(CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8))))
+
+        let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
+        let stored = try Data(contentsOf: file)
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(stored as CFData, nil))
+        let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        XCTAssertEqual(image.width, Int(screen.width))
+        XCTAssertEqual(image.height, Int(screen.height))
+        XCTAssertLessThan(stored.count, data.count)
+        XCTAssertTrue(["heic", "jpg"].contains(file.pathExtension))
+        XCTAssertEqual(ImageDecoder.validate(stored), file.pathExtension)
     }
 
     func test_unsupportedBytesNeverReplacePreviousImage() async throws {
@@ -321,10 +361,25 @@ final class ThemeImagePersistenceTests: XCTestCase {
         defer { fixture.cleanup() }
 
         do {
-            try await fixture.repository.replace(imageData: Data("invalid".utf8))
+            try await fixture.repository.replace(imageData: Data("invalid".utf8), crop: fullCrop())
             XCTFail("Unsupported bytes must not be stored")
         } catch {
             XCTAssertEqual(error as? PhotoThemeError, .unsupportedFormat)
+        }
+        try assertPreviousImage(fixture)
+    }
+
+    func test_unrenderableCropKeepsPreviousBytesAndSelection() async throws {
+        let fixture = try Fixture(responses: [])
+        defer { fixture.cleanup() }
+        // 저장할 수 없는 영역은 PhotoThemeCrop이 막으므로, 캔버스를 만들 수 없는 크기로 확인한다
+        let unbounded = try XCTUnwrap(PhotoThemeCrop(CGRect(x: 0, y: 0, width: CGFloat.greatestFiniteMagnitude,
+                                                            height: CGFloat.greatestFiniteMagnitude)))
+        do {
+            try await fixture.repository.replace(imageData: imageData(color: .blue), crop: unbounded)
+            XCTFail("An unrenderable crop must not replace the stored image")
+        } catch {
+            XCTAssertEqual(error as? PhotoThemeError, .invalidCrop)
         }
         try assertPreviousImage(fixture)
     }
@@ -335,7 +390,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         fixture.fileManager.failsDirectoryLookup = true
 
         do {
-            try await fixture.repository.replace(imageData: imageData(color: .blue))
+            try await fixture.repository.replace(imageData: imageData(color: .blue), crop: fullCrop())
             XCTFail("A failed file write must not replace the stored image")
         } catch {
             // 어떤 실패든 기존 배경과 복구 정보가 남아 있어야 한다
@@ -348,7 +403,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         request.isInverted = true
         let fixture = try Fixture(responses: [], requestReceived: request)
         defer { fixture.cleanup() }
-        try await fixture.repository.replace(imageData: imageData(color: .blue))
+        try await fixture.repository.replace(imageData: imageData(color: .blue), crop: fullCrop())
         try FileManager.default.removeItem(at: XCTUnwrap(fixture.repository.storedImageFileURL()))
 
         let empty = expectation(description: "missing local file")
@@ -368,7 +423,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let fixture = try Fixture(responses: [.success(remoteData)])
         defer { fixture.cleanup() }
 
-        try await fixture.repository.replace(imageData: imageData(color: .blue))
+        try await fixture.repository.replace(imageData: imageData(color: .blue), crop: fullCrop())
         XCTAssertNil(fixture.repository.lastSelectedRawUrl)
 
         try await fixture.repository.replace(rawUrl: rawURL).value.get()

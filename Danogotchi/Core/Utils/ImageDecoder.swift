@@ -29,7 +29,8 @@ enum ImageDecoder {
         return fileExtension
     }
 
-    private static func makeThumbnail(from source: CGImageSource, maxPixelSize: Int) -> CGImage? {
+    // 저장용 합성도 같은 다운샘플 경로를 쓴다 — ThemeImageRenderer가 호출한다
+    static func makeThumbnail(from source: CGImageSource, maxPixelSize: Int) -> CGImage? {
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,

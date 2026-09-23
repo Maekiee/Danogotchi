@@ -41,6 +41,17 @@
                ReferencedContainer = "container:Danogotchi.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "76196C4B3063C002005A049F"
+               BuildableName = "DanogotchiUITests.xctest"
+               BlueprintName = "DanogotchiUITests"
+               ReferencedContainer = "container:Danogotchi.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

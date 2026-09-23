@@ -2,7 +2,6 @@ import UIKit
 import OSLog
 import MessageUI
 import SafariServices
-import SwiftUI
 
 protocol SettingCoordinatorDelegate: AnyObject {
     func settingCoordinatorDidFinish()
@@ -96,7 +95,6 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
         navigationController.popViewController(animated: true)
     }
 
-    @MainActor
     func didTapMyPhoto() {
         let vm = container.makePhotoThemeViewModel()
         vm.onThemeSaved = { [weak self] in
@@ -105,8 +103,7 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
             self?.navigationController.popToRootViewController(animated: true)
         }
 
-        let vc = UIHostingController(rootView: PhotoThemeView(viewModel: vm))
-        vc.title = "내 사진으로 지정"
+        let vc = PhotoThemeViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)
     }
 }

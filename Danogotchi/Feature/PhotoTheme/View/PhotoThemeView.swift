@@ -4,8 +4,6 @@ import SwiftUI
 
 struct PhotoThemeView: View {
     @StateObject private var viewModel: PhotoThemeViewModel
-    /// 진입 직후 한 번만 사진첩을 연다 — 취소하면 빈 상태 UI가 남는다
-    @State private var didAutoPresentPicker = false
 
     init(viewModel: PhotoThemeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -13,23 +11,18 @@ struct PhotoThemeView: View {
 
     var body: some View {
         ZStack {
-            Color(AppColor.background).ignoresSafeArea()
+            Color.black.ignoresSafeArea()
 
             if let image = viewModel.previewImage {
-                // 실제 배경(scaleAspectFill)과 같은 크롭으로 보여준다
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
+                PhotoCropView(image: image) { rect in
+                    viewModel.updateCropRect(rect, for: image)
+                }
+                    .aspectRatio(viewModel.targetAspectRatio, contentMode: .fit)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipped()
                     .ignoresSafeArea()
             } else {
                 emptyState
-            }
-
-            VStack {
-                Spacer()
-                bottomBar
             }
 
             if viewModel.isLoading || viewModel.isSaving {
@@ -39,18 +32,14 @@ struct PhotoThemeView: View {
                 }
             }
         }
-        .disabled(viewModel.isSaving)
+        .overlay(alignment: .bottom) { bottomBar }
+        .disabled(viewModel.isSaving || viewModel.isLoading)
         .photosPicker(
             isPresented: $viewModel.isPickerPresented,
             selection: $viewModel.pickedItem,
             matching: .images
         )
         .onChange(of: viewModel.pickedItem) { viewModel.load(item: $0) }
-        .task {
-            guard !didAutoPresentPicker else { return }
-            didAutoPresentPicker = true
-            viewModel.isPickerPresented = true
-        }
         .alert("알림", isPresented: isAlertPresented) {
             Button("확인", role: .cancel) { }
         } message: {
@@ -87,6 +76,7 @@ private extension PhotoThemeView {
                     background: AppColor.black.withAlphaComponent(0.55)
                 )
             }
+            .buttonStyle(.plain)
 
             Button {
                 viewModel.confirmSelection()
@@ -99,6 +89,7 @@ private extension PhotoThemeView {
                 )
             }
             .disabled(!viewModel.canConfirm)
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, AppSpacing.space20)
         .padding(.bottom, AppSpacing.space20)
@@ -111,13 +102,14 @@ private extension PhotoThemeView {
             .foregroundColor(Color(foreground))
             .background(Color(background))
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.radius20))
+            .contentShape(RoundedRectangle(cornerRadius: AppRadius.radius20))
     }
 }
 
 // MARK: - Preview
 #if DEBUG
 private struct PreviewSavePhotoThemeUseCase: SavePhotoThemeUseCase {
-    func execute(imageData: Data) -> AnyPublisher<Void, Error> {
+    func execute(imageData: Data, crop: PhotoThemeCrop) -> AnyPublisher<Void, Error> {
         return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 }

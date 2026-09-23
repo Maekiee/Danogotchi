@@ -4,14 +4,10 @@ import SnapKit
 import UIKit
 
 
+@MainActor
 protocol SearchThemeViewControllerDelegate: AnyObject {
     func didSelectTheme()
     func didTapMyPhoto()
-}
-
-extension SearchThemeViewControllerDelegate {
-    /// 온보딩은 네비게이션 바를 숨겨(AppFlowCoordinator) 이 진입점 자체가 없다 — 설정 진입에서만 호출된다.
-    func didTapMyPhoto() { }
 }
 
 final class SearchThemeViewController: BaseViewController {
@@ -43,6 +39,14 @@ final class SearchThemeViewController: BaseViewController {
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
         return label
+    }()
+    // 온보딩은 네비게이션 바가 숨겨져 있어 타이틀 옆에 사진 진입 버튼을 둔다
+    private let myPhotoButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "photo.on.rectangle"), for: .normal)
+        button.tintColor = AppColor.textPrimary
+        button.accessibilityLabel = "내 사진으로 지정"
+        return button
     }()
     private let textField = RoundedTextField(placeholder: "이미지를 검색해주세요")
     private lazy var collectionView: UICollectionView = {
@@ -98,6 +102,7 @@ final class SearchThemeViewController: BaseViewController {
     override func configHierarchy() {
         [
             titleText,
+            myPhotoButton,
             textField,
             collectionView,
             submitButton,
@@ -108,9 +113,16 @@ final class SearchThemeViewController: BaseViewController {
     override func configLayout() {
         titleText.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space16)
-            make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
+            make.leading.equalToSuperview().inset(AppSpacing.space20)
+            make.trailing.lessThanOrEqualTo(myPhotoButton.snp.leading).offset(-AppSpacing.space8)
         }
-        
+
+        myPhotoButton.snp.makeConstraints { make in
+            make.centerY.equalTo(titleText)
+            make.trailing.equalToSuperview().inset(AppSpacing.space20)
+            make.size.equalTo(44)
+        }
+
         textField.snp.makeConstraints { make in
             make.top.equalTo(titleText.snp.bottom).offset(AppSpacing.space12)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space16)
@@ -135,7 +147,8 @@ final class SearchThemeViewController: BaseViewController {
     }
 
     override func configView() {
-        // 온보딩은 네비게이션 바가 숨겨져 있어 버튼을 달아도 보이지 않는다
+        // 온보딩은 타이틀 옆 버튼, 설정은 네비게이션 바 버튼으로 사진 화면 진입
+        myPhotoButton.isHidden = entryMode != .onboarding
         guard entryMode == .settings else { return }
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -225,6 +238,8 @@ extension SearchThemeViewController {
                     owner.savingIndicator.stopAnimating()
                 }
                 owner.submitButton.isEnabled = !isSaving
+                owner.myPhotoButton.isEnabled = !isSaving
+                owner.navigationItem.rightBarButtonItem?.isEnabled = !isSaving
                 owner.collectionView.isUserInteractionEnabled = !isSaving
                 owner.textField.isEnabled = !isSaving
             }.disposed(by: disposeBag)
@@ -240,7 +255,10 @@ extension SearchThemeViewController {
                 owner.delegate?.didSelectTheme()
             }.disposed(by: disposeBag)
 
-        navigationItem.rightBarButtonItem?.rx.tap
+        Observable.merge(
+            myPhotoButton.rx.tap.asObservable(),
+            navigationItem.rightBarButtonItem?.rx.tap.asObservable() ?? .empty()
+        )
             .bind(with: self) { owner, _ in
                 owner.delegate?.didTapMyPhoto()
             }.disposed(by: disposeBag)

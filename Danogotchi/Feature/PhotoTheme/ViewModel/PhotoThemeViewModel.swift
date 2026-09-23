@@ -13,13 +13,16 @@ final class PhotoThemeViewModel: ObservableObject {
     @Published var isPickerPresented = false
     @Published var alertMessage: String?
     @Published private(set) var previewImage: UIImage?
+    /// 스크롤마다 바뀌므로 발행하지 않는다 — 확인 버튼 활성 상태가 바뀔 때만 화면 갱신
+    private(set) var crop: PhotoThemeCrop?
     @Published private(set) var isLoading = false
     @Published private(set) var isSaving = false
 
     /// 저장이 끝났다는 "사실"만 위로 올린다 — 어디로 갈지는 Coordinator가 정한다
     var onThemeSaved: (() -> Void)?
 
-    var canConfirm: Bool { imageData != nil && !isSaving && !isLoading }
+    var canConfirm: Bool { imageData != nil && crop != nil && !isSaving && !isLoading }
+    let targetAspectRatio = UIScreen.main.nativeBounds.width / UIScreen.main.nativeBounds.height
 
     private var imageData: Data?
     /// 새 선택이 이전 로딩을 대체한다 — 재할당이 곧 취소다
@@ -59,6 +62,7 @@ final class PhotoThemeViewModel: ObservableObject {
     /// image가 nil이면 ImageIO가 읽지 못한 포맷이다 — "지정" 이후가 아니라 선택 직후에 거른다.
     /// PhotosPickerItem은 테스트에서 만들 수 없어 이 지점을 internal로 연다.
     func apply(data: Data, image: UIImage?) {
+        crop = nil
         guard let image else {
             imageData = nil
             previewImage = nil
@@ -70,13 +74,22 @@ final class PhotoThemeViewModel: ObservableObject {
         previewImage = image
     }
 
+    // 늦게 도착한 이전 이미지의 레이아웃 결과 제외 — 저장할 수 없는 영역은 선택을 비운다
+    func updateCropRect(_ rect: CGRect, for image: UIImage) {
+        guard !isSaving, !isLoading, previewImage === image else { return }
+        let updated = PhotoThemeCrop(rect)
+        guard updated != crop else { return }
+        if (updated == nil) != (crop == nil) { objectWillChange.send() }
+        crop = updated
+    }
+
     /// isSaving을 구독 이전에 세워 중복 탭이 두 번째 저장을 시작하지 못하게 한다.
     func confirmSelection() {
-        guard !isSaving, let imageData else { return }
+        guard canConfirm, let imageData, let crop else { return }
         isSaving = true
 
         // UseCase가 메인 전달을 보장하므로 여기서 스케줄러를 갈아타지 않는다
-        saveCancellable = savePhotoThemeUseCase.execute(imageData: imageData)
+        saveCancellable = savePhotoThemeUseCase.execute(imageData: imageData, crop: crop)
             .map { _ in Result<Void, Error>.success(()) }
             .catch { Just(Result<Void, Error>.failure($0)) }
             .sink { [weak self] result in
