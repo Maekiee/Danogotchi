@@ -1,3 +1,5 @@
+import ComposableArchitecture
+import SwiftUI
 import UIKit
 import OSLog
 import MessageUI
@@ -102,8 +104,16 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
             self?.navigationController.popToRootViewController(animated: true)
         }
 
-        let vc = PhotoThemeViewController(feature: feature)
+        let store = Store(initialState: PhotoThemeFeature.State()) { feature }
+        let vc = UIHostingController(rootView: PhotoThemeView(store: store))
         navigationController.pushViewController(vc, animated: true)
+
+        // 전환 애니메이션 종료 후 사진첩 자동 표시 — 전환 중 present 충돌 방지
+        guard let transition = navigationController.transitionCoordinator else {
+            store.isPickerPresented = true
+            return
+        }
+        transition.animate(alongsideTransition: nil) { _ in store.isPickerPresented = true }
     }
 }
 

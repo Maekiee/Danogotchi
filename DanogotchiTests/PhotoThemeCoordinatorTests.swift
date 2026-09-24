@@ -1,3 +1,4 @@
+import SwiftUI
 import UIKit
 import XCTest
 @testable import Danogotchi
@@ -11,6 +12,6 @@ final class PhotoThemeCoordinatorTests: XCTestCase {
 
         coordinator.didTapMyPhoto()
 
-        XCTAssertTrue(navigationController.topViewController is PhotoThemeViewController)
+        XCTAssertTrue(navigationController.topViewController is UIHostingController<PhotoThemeView>)
     }
 }

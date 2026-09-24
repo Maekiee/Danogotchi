@@ -166,8 +166,15 @@ extension AppDIContainer {
         return DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository())
     }
 
-    func makePhotoThemeFeature(onThemeSaved: @escaping @MainActor @Sendable () -> Void) -> PhotoThemeFeature {
-        return PhotoThemeFeature(savePhotoThemeUseCase: makeSavePhotoThemeUseCase(), onThemeSaved: onThemeSaved)
+    func makePhotoThemeFeature(
+        onThemeSaved: @escaping @MainActor @Sendable () -> Void,
+        onClose: @escaping @MainActor @Sendable () -> Void = {}
+    ) -> PhotoThemeFeature {
+        return PhotoThemeFeature(
+            savePhotoThemeUseCase: makeSavePhotoThemeUseCase(),
+            onThemeSaved: onThemeSaved,
+            onClose: onClose
+        )
     }
 }
 
@@ -297,7 +304,7 @@ extension AppDIContainer {
 
 // MARK: - StudyReport
 extension AppDIContainer {
-    func makeStudyReportViewModel() -> StudyReportViewModel {
-        return StudyReportViewModel()
+    func makeStudyReportFeature(onClose: @escaping @MainActor @Sendable () -> Void) -> StudyReportFeature {
+        return StudyReportFeature(onClose: onClose)
     }
 }

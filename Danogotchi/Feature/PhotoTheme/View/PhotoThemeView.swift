@@ -42,6 +42,26 @@ struct PhotoThemeView: View {
         } message: {
             Text(store.alertMessage ?? "")
         }
+        // 검은 배경 위 투명 바 — 타이틀을 흰색으로
+        .navigationTitle("내 사진으로 지정")
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        // 저장 중 이탈 차단 — 설정의 뒤로(스와이프 포함), 온보딩의 닫기
+        .navigationBarBackButtonHidden(store.isSaving)
+        .toolbar {
+            if store.showsCloseButton {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        store.send(.closeButtonTapped)
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .disabled(store.isSaving)
+                    // 사진첩의 닫기 버튼과 구분하기 위한 UI 테스트 식별자
+                    .accessibilityIdentifier("photoTheme.close")
+                }
+            }
+        }
     }
 }
 

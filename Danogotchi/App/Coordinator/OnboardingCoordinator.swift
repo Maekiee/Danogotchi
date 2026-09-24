@@ -1,3 +1,5 @@
+import ComposableArchitecture
+import SwiftUI
 import UIKit
 
 protocol OnboardingCoordinatorDelegate: AnyObject {
@@ -86,27 +88,26 @@ extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
 
     func didTapMyPhoto() {
         // 저장 성공 시 모달을 닫고 검색 테마 저장과 같은 다음 단계로 진행
-        let feature = container.makePhotoThemeFeature { [weak self] in
-            self?.navigationController.dismiss(animated: true) {
-                self?.didSelectTheme()
+        let feature = container.makePhotoThemeFeature(
+            onThemeSaved: { [weak self] in
+                self?.navigationController.dismiss(animated: true) {
+                    self?.didSelectTheme()
+                }
+            },
+            onClose: { [weak self] in
+                self?.navigationController.dismiss(animated: true)
             }
-        }
-        let vc = PhotoThemeViewController(feature: feature)
+        )
+        let store = Store(initialState: PhotoThemeFeature.State(showsCloseButton: true)) { feature }
+        let vc = UIHostingController(rootView: PhotoThemeView(store: store))
 
         // 온보딩은 네비게이션 바를 숨기므로 자체 바와 닫기 버튼을 가진 모달로 띄운다
         let photoNavigationController = UINavigationController(rootViewController: vc)
         photoNavigationController.modalPresentationStyle = .fullScreen
-        let closeButton = UIBarButtonItem(
-            systemItem: .close,
-            primaryAction: UIAction { [weak photoNavigationController] _ in
-                photoNavigationController?.dismiss(animated: true)
-            }
-        )
-        // 사진첩의 닫기 버튼과 구분하기 위한 UI 테스트 식별자
-        closeButton.accessibilityIdentifier = "photoTheme.close"
-        vc.navigationItem.leftBarButtonItem = closeButton
-
-        navigationController.present(photoNavigationController, animated: true)
+        // 전환 애니메이션 종료 후 사진첩 자동 표시 — 모달 위 모달 충돌 방지
+        navigationController.present(photoNavigationController, animated: true) {
+            store.isPickerPresented = true
+        }
     }
 }
 

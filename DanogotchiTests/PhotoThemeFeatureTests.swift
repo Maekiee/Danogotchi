@@ -196,15 +196,28 @@ final class PhotoThemeFeatureTests: XCTestCase {
         XCTAssertTrue(store.canConfirm)
     }
 
+    func test_closeButtonTappedCallsOnClose() async {
+        let fixture = Fixture()
+
+        await fixture.store.send(.closeButtonTapped)
+
+        XCTAssertEqual(fixture.closedCount.value, 1)
+    }
+
     @MainActor
     private final class Fixture {
         let save = ControlledSavePhotoThemeUseCase()
         let savedCount = LockIsolated(0)
+        let closedCount = LockIsolated(0)
         let store: TestStoreOf<PhotoThemeFeature>
 
         init(initialState: PhotoThemeFeature.State = PhotoThemeFeature.State()) {
-            store = TestStore(initialState: initialState) { [save, savedCount] in
-                PhotoThemeFeature(savePhotoThemeUseCase: save, onThemeSaved: { savedCount.withValue { $0 += 1 } })
+            store = TestStore(initialState: initialState) { [save, savedCount, closedCount] in
+                PhotoThemeFeature(
+                    savePhotoThemeUseCase: save,
+                    onThemeSaved: { savedCount.withValue { $0 += 1 } },
+                    onClose: { closedCount.withValue { $0 += 1 } }
+                )
             }
         }
 

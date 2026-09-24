@@ -23,6 +23,8 @@ struct PhotoThemeFeature {
         var crop: PhotoThemeCrop?
         /// 확인 버튼 활성 상태가 바뀔 때만 화면 갱신 — Equatable 필드는 같은 값 대입 시 알리지 않는다
         var hasCrop = false
+        /// 온보딩 모달만 닫기 버튼을 단다 — 설정 push는 뒤로 버튼을 쓴다
+        var showsCloseButton = false
 
         var canConfirm: Bool { imageData != nil && hasCrop && !isSaving && !isLoading }
     }
@@ -34,6 +36,7 @@ struct PhotoThemeFeature {
         case cropChanged(CGRect, UIImage)
         case confirmTapped
         case saveResponse(Result<Void, Error>)
+        case closeButtonTapped
     }
 
     enum CancelID { case load }
@@ -41,6 +44,7 @@ struct PhotoThemeFeature {
     let savePhotoThemeUseCase: SavePhotoThemeUseCase
     /// 저장이 끝났다는 "사실"만 위로 올린다 — 어디로 갈지는 Coordinator가 정한다
     let onThemeSaved: @MainActor @Sendable () -> Void
+    var onClose: @MainActor @Sendable () -> Void = {}
     /// UIScreen은 메인 스레드 전용이라 로딩 중이 아니라 생성 시점에 읽어둔다
     let previewPixelSize = Int(UIScreen.main.nativeBounds.height)
 
@@ -120,6 +124,9 @@ struct PhotoThemeFeature {
                 state.isSaving = false
                 Self.fail(&state, with: error)
                 return .none
+
+            case .closeButtonTapped:
+                return .run { _ in await onClose() }
             }
         }
     }

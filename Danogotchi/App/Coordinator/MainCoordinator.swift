@@ -1,3 +1,5 @@
+import ComposableArchitecture
+import SwiftUI
 import UIKit
 
 final class MainCoordinator: Coordinator {
@@ -50,9 +52,11 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     
     // 학습 리포트
     func exploreVocabDidTapStudyReport() {
-        let vm = container.makeStudyReportViewModel()
-        let vc = StudyReportViewController(viewModel: vm)
-        vc.delegate = self
+        let feature = container.makeStudyReportFeature { [weak self] in
+            self?.navigationController.dismiss(animated: true)
+        }
+        let store = Store(initialState: StudyReportFeature.State()) { feature }
+        let vc = UIHostingController(rootView: StudyReportView(store: store))
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen
         navigationController.present(nav, animated: true)
@@ -88,12 +92,6 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
 
 extension MainCoordinator: CharacterViewControllerDelegate {
     func characterDidTapClose() {
-        navigationController.dismiss(animated: true)
-    }
-}
-
-extension MainCoordinator: StudyReportViewControllerDelegate {
-    func studyReportDidTapClose() {
         navigationController.dismiss(animated: true)
     }
 }
