@@ -25,8 +25,8 @@ final class VocabUseCaseTests: XCTestCase {
             partOfSpeech: .verb
         )
         _ = try sut.books.addVocab(bookId: myBook.id, from: savedWord)
-        try sut.histories.addHistory(vocabId: savedWord.id, isCorrect: true)
-        try sut.histories.addHistory(vocabId: savedWord.id, isCorrect: false)
+        try sut.histories.addHistory(makeQuizAnswer(savedWord))
+        try sut.histories.addHistory(makeQuizAnswer(savedWord, isCorrect: false))
         try sut.books.setActiveBook(id: travelBook.id)
 
         var received: (bookType: BookTopic, items: [VocabDisplayInfo])?

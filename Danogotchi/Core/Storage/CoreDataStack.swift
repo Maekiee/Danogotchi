@@ -5,18 +5,33 @@ final class CoreDataStack {
     static let shared = CoreDataStack()
     
     let container: NSPersistentContainer
+    private var isPrepared = false
     
     var viewContext: NSManagedObjectContext { container.viewContext }
     
     private init() {
         container = NSPersistentContainer(name: "Model")
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("코어 데이터 store 로드 실패: \(error)")
-            }
-        }
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+    }
+
+    func prepareStore() throws {
+        guard !isPrepared else { return }
+        if container.persistentStoreCoordinator.persistentStores.isEmpty {
+            for description in container.persistentStoreDescriptions {
+                if let url = description.url, description.type == NSSQLiteStoreType {
+                    try StudyReportMigration.preflight(storeURL: url, destinationModel: container.managedObjectModel)
+                }
+                description.shouldAddStoreAsynchronously = false
+                description.shouldMigrateStoreAutomatically = true
+                description.shouldInferMappingModelAutomatically = true
+            }
+            var loadError: Error?
+            container.loadPersistentStores { _, error in loadError = error }
+            if let loadError { throw loadError }
+        }
+        try StudyReportMigration.backfillIfNeeded(context: viewContext)
+        isPrepared = true
     }
     
     func saveContext() throws {

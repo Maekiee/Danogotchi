@@ -19,6 +19,7 @@ final class AppFlowCoordinator: Coordinator {
 extension AppFlowCoordinator {
     func start() {
         do {
+            try container.coreDataStack.prepareStore()
             try DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
 
             // 알림 재예약은 부가 기능이다 — 실패해도 앱 진입을 막지 않는다.

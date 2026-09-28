@@ -7,6 +7,7 @@ final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let earnExperienceUseCase: EarnExperienceUseCase
     private let studyReminderUseCase: StudyReminderUseCase
+    private let session: QuizSession
 
     private let quizDataRelay: BehaviorRelay<QuizData>
     
@@ -22,7 +23,7 @@ final class QuizViewModel: BaseViewModel {
 
     private enum Phase {
         case acceptingAnswer
-        case answerFailed(Vocab, AnswerResult)
+        case answerFailed(Vocab, AnswerResult, QuizAnswer)
         case answered
         case commitFailed
         case completed
@@ -43,6 +44,7 @@ final class QuizViewModel: BaseViewModel {
     ) {
         self.earnExperienceUseCase = earnExperienceUseCase
         self.studyReminderUseCase = studyReminderUseCase
+        self.session = QuizSession(id: UUID(), startedAt: Date(), questionCount: quizData.words.count)
         self.quizDataRelay = BehaviorRelay(value: quizData)
         self.currentIndex = BehaviorRelay(value: 0)
     }
@@ -72,15 +74,17 @@ final class QuizViewModel: BaseViewModel {
         var incorrectWords: [Vocab] = []
         var phase = Phase.acceptingAnswer
         let saveFailed = PublishRelay<SaveFailure>()
-        // PersistenceError는 조회 대상 자체가 없다는 뜻이라 재시도가 성립하지 않는다.
-        func failure(for error: Error) -> SaveFailure { error is PersistenceError ? .unrecoverable : .retryable }
+        // 대상 부재와 기록 충돌은 같은 요청의 재시도로 복구 불가
+        func failure(for error: Error) -> SaveFailure {
+            error is PersistenceError || error is StudyReportDataError ? .unrecoverable : .retryable
+        }
         let canAnswer = BehaviorRelay(value: true)
 
-        func saveAnswer(owner: QuizViewModel, word: Vocab, result: AnswerResult) {
-            phase = .answerFailed(word, result)
+        func saveAnswer(owner: QuizViewModel, word: Vocab, result: AnswerResult, answer: QuizAnswer) {
+            phase = .answerFailed(word, result, answer)
             canAnswer.accept(false)
             do {
-                let earned = try owner.earnExperienceUseCase.record(vocabId: word.id, isCorrect: result.isCorrect)
+                let earned = try owner.earnExperienceUseCase.record(answer)
                 earnedExperience += earned
                 if result.isCorrect {
                     correctCount += 1
@@ -170,6 +174,9 @@ final class QuizViewModel: BaseViewModel {
                     isCorrect: selection.0 == correctIndex,
                     selectedIndex: selection.0,
                     correctIndex: correctIndex
+                ), answer: QuizAnswer(
+                    word: word, isCorrect: selection.0 == correctIndex,
+                    session: owner.session, questionIndex: owner.currentIndex.value
                 ))
             }.disposed(by: disposeBag)
 
@@ -189,8 +196,8 @@ final class QuizViewModel: BaseViewModel {
         input.retrySave
             .bind(with: self) { owner, _ in
                 switch phase {
-                case .answerFailed(let word, let result):
-                    saveAnswer(owner: owner, word: word, result: result)
+                case .answerFailed(let word, let result, let answer):
+                    saveAnswer(owner: owner, word: word, result: result, answer: answer)
                 case .commitFailed:
                     commit(owner: owner)
                 default:

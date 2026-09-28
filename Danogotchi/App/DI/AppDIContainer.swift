@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 final class AppDIContainer {
     let userInfoManager: UserInfoProtocol
@@ -304,7 +305,25 @@ extension AppDIContainer {
 
 // MARK: - StudyReport
 extension AppDIContainer {
-    func makeStudyReportFeature(onClose: @escaping @MainActor @Sendable () -> Void) -> StudyReportFeature {
-        return StudyReportFeature(onClose: onClose)
+    func makeStudyReportFeature(
+        onClose: @escaping @MainActor @Sendable () -> Void,
+        onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
+    ) -> StudyReportFeature {
+        let repository = DefaultLearningHistoryRepository(
+            context: coreDataStack.viewContext,
+            reportContext: coreDataStack.container.newBackgroundContext()
+        )
+        let useCase: FetchStudyReportUseCase = DefaultFetchStudyReportUseCase(repository: repository)
+        return StudyReportFeature(
+            fetch: { period, now, calendar in
+                try await useCase.execute(period: period, now: now, calendar: calendar)
+            },
+            reportError: { error in
+                AppLogger.database.error("학습 리포트 조회 실패: \(String(describing: error), privacy: .public)")
+                CrashReporter.record(error)
+            },
+            onClose: onClose,
+            onNavigate: onNavigate
+        )
     }
 }

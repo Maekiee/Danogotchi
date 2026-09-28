@@ -50,10 +50,10 @@ final class QuizUseCaseTests: XCTestCase {
         let history = DefaultLearningHistoryRepository(context: context)
         let useCase = DefaultEarnExperienceUseCase(learningHistoryRepository: history,
                                                     petRepository: DefaultPetRepository(context: context))
-        XCTAssertEqual(try useCase.record(vocabId: word.id, isCorrect: false), 0)
-        XCTAssertEqual(try useCase.record(vocabId: word.id, isCorrect: true), 38)
+        XCTAssertEqual(try useCase.record(makeQuizAnswer(word, isCorrect: false)), 0)
+        XCTAssertEqual(try useCase.record(makeQuizAnswer(word)), 38)
         XCTAssertEqual(try history.fetchHistory(vocabId: word.id).count, 2)
-        XCTAssertEqual(try useCase.record(vocabId: word.id, isCorrect: true), 26)
+        XCTAssertEqual(try useCase.record(makeQuizAnswer(word)), 26)
     }
 
     func test_perfectBonusRequiresNonEmptyPerfectSession() {

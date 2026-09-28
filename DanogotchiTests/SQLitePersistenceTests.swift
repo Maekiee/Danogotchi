@@ -17,7 +17,7 @@ final class SQLitePersistenceTests: XCTestCase {
                                       bookType: .myBook, level: nil, partOfSpeech: .noun)
         try books.setActiveBook(id: book.id)
         try DefaultVocabRepository(context: context).updateVocab(id: word.id, word: "pear", meaning: "배", partOfSpeech: nil)
-        try DefaultLearningHistoryRepository(context: context).addHistory(vocabId: word.id, isCorrect: true)
+        try DefaultLearningHistoryRepository(context: context).addHistory(makeQuizAnswer(word))
         let pets = DefaultPetRepository(context: context)
         let pet = try XCTUnwrap(pets.createPet(makePet(name: "saved", experience: 10)))
         _ = try pets.addExperience(25)
@@ -40,7 +40,7 @@ final class SQLitePersistenceTests: XCTestCase {
         XCTAssertEqual(persistedPet.experience, 35)
     }
 
-    func test_wordDeletionAndHistoryCascadeSurviveStoreReopening() throws {
+    func test_wordDeletionPreservesHistoryAfterStoreReopening() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -48,14 +48,17 @@ final class SQLitePersistenceTests: XCTestCase {
         let first = try openStore(url: url)
         let words = DefaultVocabRepository(context: first.viewContext)
         let word = try words.createVocab(vocab: "apple", meaning: "사과")
-        try DefaultLearningHistoryRepository(context: first.viewContext).addHistory(vocabId: word.id, isCorrect: true)
+        try DefaultLearningHistoryRepository(context: first.viewContext).addHistory(makeQuizAnswer(word))
         try words.deleteVocab(id: word.id)
         try closeStore(first)
 
         let reopened = try openStore(url: url)
         defer { try? closeStore(reopened) }
         XCTAssertNil(try DefaultVocabRepository(context: reopened.viewContext).readVocab(id: word.id))
-        XCTAssertTrue(try DefaultLearningHistoryRepository(context: reopened.viewContext).fetchAllHistory().isEmpty)
+        let history = try DefaultLearningHistoryRepository(context: reopened.viewContext).fetchAllHistory()
+        XCTAssertEqual(history.count, 1)
+        XCTAssertEqual(history.first?.vocabId, word.id)
+        XCTAssertEqual(history.first?.wordSnapshot, "apple")
     }
 
     private func openStore(url: URL) throws -> NSPersistentContainer {

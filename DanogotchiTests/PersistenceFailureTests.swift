@@ -104,12 +104,13 @@ extension PersistenceFailureTests {
         let history = DefaultLearningHistoryRepository(context: context)
         let useCase = DefaultEarnExperienceUseCase(learningHistoryRepository: history,
                                                     petRepository: DefaultPetRepository(context: context))
+        let answer = makeQuizAnswer(word)
         context.failsSave = true
-        XCTAssertThrowsError(try useCase.record(vocabId: word.id, isCorrect: true))
+        XCTAssertThrowsError(try useCase.record(answer))
         XCTAssertFalse(context.hasChanges)
         XCTAssertTrue(try history.fetchAllHistory().isEmpty)
         context.failsSave = false
-        XCTAssertEqual(try useCase.record(vocabId: word.id, isCorrect: true), 20)
+        XCTAssertEqual(try useCase.record(answer), 20)
         XCTAssertEqual(try history.fetchHistory(vocabId: word.id).count, 1)
     }
 
@@ -132,7 +133,7 @@ extension PersistenceFailureTests {
         XCTAssertThrowsError(try words.updateVocab(id: UUID(), word: "missing", meaning: nil, partOfSpeech: nil))
         XCTAssertThrowsError(try words.deleteVocab(id: UUID()))
         XCTAssertThrowsError(try DefaultVocabBookRepository(context: context).setActiveBook(id: UUID()))
-        XCTAssertThrowsError(try DefaultLearningHistoryRepository(context: context).addHistory(vocabId: UUID(), isCorrect: true))
+        XCTAssertThrowsError(try DefaultLearningHistoryRepository(context: context).addHistory(makeQuizAnswer(makeQuizWords(1)[0])))
         XCTAssertThrowsError(try DefaultPetRepository(context: context).addExperience(10))
         let books = DefaultVocabBookRepository(context: context)
         XCTAssertThrowsError(try books.addVocab(bookId: UUID(), word: "missing", meaning: "없음",

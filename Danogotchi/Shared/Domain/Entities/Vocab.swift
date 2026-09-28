@@ -9,4 +9,9 @@ struct Vocab: Hashable, Identifiable {
     let partOfSpeech: PartOfSpeech?
     let sourceWordId: UUID? 
     let createAt: Date
+    var originalTopic: String?
+
+    var studyTopic: String? {
+        bookType == .myBook ? originalTopic : bookType.rawValue
+    }
 }

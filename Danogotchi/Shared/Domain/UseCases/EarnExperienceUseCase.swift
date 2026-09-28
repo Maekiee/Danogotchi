@@ -23,7 +23,7 @@ enum ExperiencePolicy {
 
 
 protocol EarnExperienceUseCase {
-    func record(vocabId: UUID, isCorrect: Bool) throws -> Int
+    func record(_ answer: QuizAnswer) throws -> Int
     func commit(earned: Int, correct: Int, total: Int) throws -> ExperienceGain
 }
 
@@ -39,11 +39,13 @@ final class DefaultEarnExperienceUseCase: EarnExperienceUseCase {
         self.petRepository = petRepository
     }
 
-    func record(vocabId: UUID, isCorrect: Bool) throws -> Int {
-        let stats = try learningHistoryRepository.fetchHistory(vocabId: vocabId)
-            .statsByVocab()[vocabId]
-        try learningHistoryRepository.addHistory(vocabId: vocabId, isCorrect: isCorrect)
-        return isCorrect ? ExperiencePolicy.experience(for: stats) : 0
+    func record(_ answer: QuizAnswer) throws -> Int {
+        let value = answer.history
+        let stats = try learningHistoryRepository.fetchHistory(vocabId: value.vocabId)
+            .filter { $0.id != value.id }
+            .statsByVocab()[value.vocabId]
+        try learningHistoryRepository.addHistory(answer)
+        return value.isCorrect ? ExperiencePolicy.experience(for: stats) : 0
     }
 
     func commit(earned: Int, correct: Int, total: Int) throws -> ExperienceGain {

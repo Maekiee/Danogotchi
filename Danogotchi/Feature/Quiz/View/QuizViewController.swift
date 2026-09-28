@@ -136,7 +136,7 @@ extension QuizViewController {
             title: "저장 실패",
             message: failure == .retryable
                 ? "학습 결과를 저장하지 못했어요. 다시 시도해주세요."
-                : "이 단어를 찾을 수 없어 학습 결과를 저장할 수 없어요. 학습을 종료합니다.",
+                : "학습 정보를 확인할 수 없어 결과를 저장할 수 없어요. 학습을 종료합니다.",
             preferredStyle: .alert
         )
         if failure == .retryable {

@@ -52,14 +52,43 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     
     // 학습 리포트
     func exploreVocabDidTapStudyReport() {
-        let feature = container.makeStudyReportFeature { [weak self] in
-            self?.navigationController.dismiss(animated: true)
-        }
+        let nav = UINavigationController()
+        let feature = container.makeStudyReportFeature(
+            onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
+            onNavigate: { [weak self, weak nav] destination in
+                guard let nav else { return }
+                self?.showStudyReport(destination, in: nav)
+            }
+        )
         let store = Store(initialState: StudyReportFeature.State()) { feature }
         let vc = UIHostingController(rootView: StudyReportView(store: store))
-        let nav = UINavigationController(rootViewController: vc)
+        nav.setViewControllers([vc], animated: false)
         nav.modalPresentationStyle = .fullScreen
         navigationController.present(nav, animated: true)
+    }
+
+    private func showStudyReport(_ destination: StudyReportDestination, in nav: UINavigationController) {
+        switch destination {
+        case let .words(list):
+            let view = StudyReportWordListView(
+                list: list,
+                onSelect: { [weak self, weak nav] word in
+                    guard let nav else { return }
+                    self?.showStudyReport(.word(word, list), in: nav)
+                },
+                onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) }
+            )
+            nav.pushViewController(UIHostingController(rootView: view), animated: true)
+        case let .word(word, list):
+            let view = StudyReportWordDetailView(word: word, list: list) { [weak nav] in
+                nav?.dismiss(animated: true)
+            }
+            let controller = UIHostingController(rootView: view)
+            controller.modalPresentationStyle = .pageSheet
+            controller.sheetPresentationController?.detents = [.medium(), .large()]
+            controller.sheetPresentationController?.prefersGrabberVisible = true
+            nav.present(controller, animated: true)
+        }
     }
 
     // 학습하기

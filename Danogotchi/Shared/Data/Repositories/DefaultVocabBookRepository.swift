@@ -138,6 +138,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         vocabEntity.level = vocab.level?.rawValue
         vocabEntity.partOfSpeech = vocab.partOfSpeech?.rawValue
         vocabEntity.sourceWordId = vocab.id
+        vocabEntity.originalTopic = vocab.studyTopic
         vocabEntity.createAt = Date()
 
         vocabBookEntity.addToVocabs(vocabEntity)

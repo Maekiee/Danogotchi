@@ -16,7 +16,8 @@ extension VocabEntity {
             level: level.flatMap(VocabLevel.init(rawValue:)),
             partOfSpeech: partOfSpeech.flatMap(PartOfSpeech.init(rawValue:)),
             sourceWordId: sourceWordId,
-            createAt: createAt
+            createAt: createAt,
+            originalTopic: originalTopic
         )
     }
 }

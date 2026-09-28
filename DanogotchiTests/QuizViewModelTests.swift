@@ -17,10 +17,13 @@ final class RecordingExperienceUseCase: EarnExperienceUseCase {
     var failsAsMissingEntity = false
     private var failure: Error { failsAsMissingEntity ? PersistenceError.entityNotFound : CocoaError(.fileWriteOutOfSpace) }
     var records: [(UUID, Bool)] = []
+    var attempts: [QuizAnswer] = []
     var commits: [(Int, Int, Int)] = []
 
-    func record(vocabId: UUID, isCorrect: Bool) throws -> Int {
-        records.append((vocabId, isCorrect))
+    func record(_ answer: QuizAnswer) throws -> Int {
+        attempts.append(answer)
+        let isCorrect = answer.history.isCorrect
+        records.append((answer.history.vocabId, isCorrect))
         if failsRecord { throw failure }
         return isCorrect ? 20 : 0
     }
@@ -84,6 +87,17 @@ private final class QuizTestScreen {
 
 @MainActor
 final class QuizViewModelTests: XCTestCase {
+    func test_newQuizInstanceStartsNewSessionAndUnansweredQuizStoresNothing() throws {
+        let first = QuizTestScreen()
+        XCTAssertTrue(first.experience.attempts.isEmpty)
+        try first.answer()
+        let next = QuizTestScreen()
+        try next.answer()
+        XCTAssertNotEqual(first.experience.attempts.first?.session.id, next.experience.attempts.first?.session.id)
+        XCTAssertEqual(first.experience.attempts.first?.history.questionIndex, 0)
+        XCTAssertEqual(next.experience.attempts.first?.history.questionIndex, 0)
+    }
+
     func test_answerFailureRetainsSelectionAndRetryRecordsOnce() throws {
         let screen = QuizTestScreen()
         screen.experience.failsRecord = true
@@ -104,6 +118,7 @@ final class QuizViewModelTests: XCTestCase {
         XCTAssertEqual(screen.experience.records.last?.0, firstAttempt.0)
         XCTAssertEqual(screen.experience.records.last?.1, firstAttempt.1)
         XCTAssertEqual(screen.answers.count, 1)
+        XCTAssertEqual(screen.experience.attempts.first, screen.experience.attempts.last)
         screen.viewModel.moveToNextQuestion()
         XCTAssertEqual(screen.completions.first?.correct, 1)
         XCTAssertEqual(screen.completions.first?.experience.earned, 20)
@@ -177,6 +192,8 @@ final class QuizViewModelTests: XCTestCase {
         XCTAssertEqual(result.incorrectWords.map(\.word), ["word1"])
         XCTAssertEqual(result.experience.earned, 20)
         XCTAssertEqual(result.experience.perfectBonus, 0)
+        XCTAssertEqual(screen.experience.attempts.map(\.history.questionIndex), [0, 1])
+        XCTAssertEqual(Set(screen.experience.attempts.map(\.session.id)).count, 1)
     }
 
     func test_reminderFailureDoesNotRetryAlreadySavedExperience() throws {
