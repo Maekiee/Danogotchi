@@ -309,6 +309,11 @@ extension AppDIContainer {
         onClose: @escaping @MainActor @Sendable () -> Void,
         onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
     ) -> StudyReportFeature {
+        #if DEBUG
+        if let feature = UITestingSupport.makeStudyReportFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
+            return feature
+        }
+        #endif
         let repository = DefaultLearningHistoryRepository(
             context: coreDataStack.viewContext,
             reportContext: coreDataStack.container.newBackgroundContext()

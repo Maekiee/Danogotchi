@@ -79,10 +79,8 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
                 onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) }
             )
             nav.pushViewController(UIHostingController(rootView: view), animated: true)
-        case let .word(word, list):
-            let view = StudyReportWordDetailView(word: word, list: list) { [weak nav] in
-                nav?.dismiss(animated: true)
-            }
+        case let .word(word, _):
+            let view = StudyReportWordDetailView(word: word)
             let controller = UIHostingController(rootView: view)
             controller.modalPresentationStyle = .pageSheet
             controller.sheetPresentationController?.detents = [.medium(), .large()]

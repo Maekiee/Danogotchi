@@ -3,6 +3,9 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var appCoordinator: AppFlowCoordinator?
+    #if DEBUG
+    private var studyReportTestCoordinator: MainCoordinator?
+    #endif
     
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -12,6 +15,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         #endif
         let container = AppDIContainer()
         window = UIWindow(windowScene: scene)
+        #if DEBUG
+        if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window!, container: container) {
+            studyReportTestCoordinator = coordinator
+            return
+        }
+        #endif
         appCoordinator = AppFlowCoordinator(window: window!, container: container)
         appCoordinator?.start()
     }

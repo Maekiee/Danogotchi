@@ -74,4 +74,20 @@ private struct StudyReportPreview: View {
 #Preview("불러오기 실패") { StudyReportPreview(scenario: .error) }
 #Preview("이전 기록만 있음") { StudyReportPreview(scenario: .legacy) }
 #Preview("완료 회차 1개") { StudyReportPreview(scenario: .single) }
+#Preview("정답·오답 막대") {
+    StudyReportCategoryBars(
+        categories: [.init(id: "travel", total: 342, wrong: 75), .init(id: "business")],
+        kind: .topic, showsMistakes: true, selected: nil
+    ) { _ in }
+    .padding()
+}
+#Preview("단어 상세 카드") {
+    let date = Date()
+    let snapshot = LearningHistory(
+        id: UUID(), vocabId: UUID(), isCorrect: true, createAt: date,
+        wordSnapshot: "journey", meaningSnapshot: "여행", topicSnapshot: "travel", partOfSpeechSnapshot: "noun"
+    )
+    let word = StudyReport.Word(id: snapshot.vocabId, snapshot: snapshot, total: 342, correct: 267)
+    StudyReportWordDetailView(word: word)
+}
 #endif

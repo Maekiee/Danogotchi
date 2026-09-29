@@ -78,14 +78,16 @@ struct StudyReportCard<Content: View>: View {
 
 struct StudyReportHeading: View {
     let title: String
-    let subtitle: String
+    var subtitle: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.space4) {
             Text(title).font(StudyReportStyle.font(AppFont.title3, relativeTo: .headline))
                 .accessibilityAddTraits(.isHeader)
-            Text(subtitle).font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
-                .foregroundStyle(.secondary)
+            if let subtitle {
+                Text(subtitle).font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
@@ -99,6 +101,49 @@ struct StudyReportSelection: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(AppSpacing.space12)
             .background(Color(AppColor.gray45).opacity(0.12), in: RoundedRectangle(cornerRadius: AppRadius.radius8))
+    }
+}
+
+struct StudyReportWordCard: View {
+    let word: StudyReport.Word
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.space12) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top, spacing: AppSpacing.space8) {
+                    Text(StudyReportCategoryKind.partOfSpeech.title(for: word.snapshot.partOfSpeechSnapshot))
+                        .font(StudyReportStyle.font(AppFont.label, relativeTo: .subheadline))
+                        .padding(.horizontal, AppSpacing.space12)
+                        .frame(minHeight: 24)
+                        .overlay(Capsule().stroke(.black, lineWidth: AppBorder.regular))
+                    Spacer(minLength: AppSpacing.space8)
+                    Text("정답 \(word.correct) / \(word.total)회")
+                        .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
+                        .multilineTextAlignment(.trailing)
+                }
+                Spacer(minLength: AppSpacing.space24)
+                HStack(alignment: .bottom, spacing: AppSpacing.space12) {
+                    VStack(alignment: .leading, spacing: AppSpacing.space4) {
+                        Text(word.snapshot.wordSnapshot)
+                            .font(StudyReportStyle.font(AppFont.title1, relativeTo: .title))
+                        Text(word.snapshot.meaningSnapshot)
+                            .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
+                    }
+                    Spacer(minLength: AppSpacing.space8)
+                    Text(StudyReportStyle.percent(word.correct, word.total))
+                        .font(StudyReportStyle.font(AppFont.largeDisplay, relativeTo: .largeTitle))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 132, alignment: .leading)
+            .padding(18)
+            .foregroundStyle(.black)
+            .background(Color(AppColor.pastel(for: word.snapshot.wordSnapshot)))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.radius20))
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -120,6 +165,48 @@ struct StudyReportHorizontalBar: View {
         .frame(height: 8)
         .clipShape(Capsule())
         .accessibilityHidden(true)
+    }
+}
+
+struct StudyReportAnswerBar: View {
+    let total: Int
+    let wrong: Int
+
+    var body: some View {
+        let correct = total - wrong
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let correctWidth = wrong == 0 ? width : correct == 0 ? 0 : min(
+                max(width * CGFloat(correct) / CGFloat(total), min(70, width / 2)),
+                width - min(52, width / 2)
+            )
+            HStack(spacing: 0) {
+                if total == 0 {
+                    Color(AppColor.gray45).opacity(0.15)
+                        .frame(width: width, height: 20)
+                } else {
+                    if correct > 0 {
+                        Text("\(correct)")
+                            .foregroundStyle(.black)
+                            .frame(width: correctWidth, height: 20)
+                            .background(Color(AppColor.appGreen))
+                    }
+                    if wrong > 0 {
+                        Text("\(wrong)")
+                            .foregroundStyle(.white)
+                            .frame(width: width - correctWidth, height: 20)
+                            .background(Color(AppColor.appRed))
+                    }
+                }
+            }
+            .font(StudyReportStyle.font(AppFont.font(.medium, size: 11), relativeTo: .caption))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .clipShape(Capsule())
+        }
+        .frame(height: 20)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("정답 \(correct)회, 오답 \(wrong)회")
     }
 }
 
@@ -148,37 +235,45 @@ struct StudyReportCategoryBars: View {
                         HStack {
                             Text(kind.title(for: group.id))
                             Spacer()
-                            Text("\(showsMistakes ? group.wrong : group.total)회").monospacedDigit()
+                            if showsMistakes && group.total > 0 {
+                                Text("전체 \(group.total)회 · 오답률 \(StudyReportStyle.percent(group.wrong, group.total))")
+                                    .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                            } else if !showsMistakes {
+                                Text("\(group.total)회").monospacedDigit()
+                            }
                             if selected == group.id { Image(systemName: "checkmark.circle.fill") }
                         }
-                        StudyReportHorizontalBar(
-                            value: showsMistakes ? group.wrong : group.total,
-                            maximum: maximum,
-                            color: Color(AppColor.primary).opacity(selected == nil || selected == group.id ? 1 : 0.5)
-                        )
                         if showsMistakes {
-                            Text("전체 \(group.total)회 풀이 · 오답률 \(StudyReportStyle.percent(group.wrong, group.total))")
-                                .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
-                                .foregroundStyle(.secondary)
+                            StudyReportAnswerBar(total: group.total, wrong: group.wrong)
+                        } else {
+                            StudyReportHorizontalBar(
+                                value: group.total,
+                                maximum: maximum,
+                                color: Color(AppColor.primary).opacity(selected == nil || selected == group.id ? 1 : 0.5)
+                            )
                         }
                     }
                     .frame(minHeight: 44)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("studyReport.\(showsMistakes ? "mistakes" : "topics").\(group.id)")
                 .accessibilityElement(children: .combine)
                 .accessibilityAddTraits(selected == group.id ? .isSelected : [])
             }
-            HStack { Text("0회"); Spacer(); Text("\(maximum)회") }
-                .font(StudyReportStyle.font(AppFont.caption, relativeTo: .caption))
-                .foregroundStyle(.secondary)
-            if let group = categories.first(where: { $0.id == selected }) {
+            if !showsMistakes {
+                HStack { Text("0회"); Spacer(); Text("\(maximum)회") }
+                    .font(StudyReportStyle.font(AppFont.caption, relativeTo: .caption))
+                    .foregroundStyle(.secondary)
+            }
+            if let group = categories.first(where: { $0.id == selected }), !showsMistakes || group.total > 0 {
                 StudyReportSelection(text: showsMistakes
                     ? "\(kind.title(for: group.id)) · 오답 \(group.wrong) / 풀이 \(group.total)회 · \(StudyReportStyle.percent(group.wrong, group.total))"
                     : "\(kind.title(for: group.id)) · \(group.total)회 풀이 · 전체의 \(StudyReportStyle.percent(group.total, total))")
-            } else {
-                StudyReportSelection(text: "\(kind.title)를 누르면 \(showsMistakes ? "오답 내역" : "풀이 비중")을 확인할 수 있어요.")
             }
+            // else { StudyReportSelection(text: "\(kind.title)를 누르면 \(showsMistakes ? "오답 내역" : "풀이 비중")을 확인할 수 있어요.") }
         }
     }
 }
@@ -228,12 +323,11 @@ struct StudyReportActivityChart: View {
             .frame(height: 190)
             if let day = report.activity.first(where: { $0.date == selected }) {
                 StudyReportSelection(text: "\(StudyReportStyle.date(day.date, calendar: report.calendar, format: report.period == .all ? "yyyy년 M월" : "M월 d일")) · 학습한 단어 \(day.count)개")
-            } else {
-                StudyReportSelection(text: "막대를 누르면 학습한 단어 수를 확인할 수 있어요.")
             }
-            Text("같은 단어를 여러 \(report.period == .all ? "달" : "날") 학습할 수 있어 막대의 합과 기간 전체 단어 수는 달라요.")
-                .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
-                .foregroundStyle(.secondary)
+            // else { StudyReportSelection(text: "막대를 누르면 학습한 단어 수를 확인할 수 있어요.") }
+            // Text("같은 단어를 여러 \(report.period == .all ? "달" : "날") 학습할 수 있어 막대의 합과 기간 전체 단어 수는 달라요.")
+            //     .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote))
+            //     .foregroundStyle(.secondary)
         }
     }
 }
@@ -343,9 +437,8 @@ struct StudyReportPartsChart: View {
             }
             if let part = report.parts.first(where: { $0.id == selected }) {
                 StudyReportSelection(text: "\(StudyReportCategoryKind.partOfSpeech.title(for: part.id)) · \(part.total) / \(report.words.count)개 · \(StudyReportStyle.percent(part.total, report.words.count))")
-            } else {
-                StudyReportSelection(text: "품사를 누르면 비율을 확인할 수 있어요.")
             }
+            // else { StudyReportSelection(text: "품사를 누르면 비율을 확인할 수 있어요.") }
         }
     }
 }
