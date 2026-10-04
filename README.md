@@ -7,8 +7,7 @@
 **유지보수**: 2025.10 ~ 현재<br>
 **개발 인원**: 1인 개발<br>
 **최소 지원 버전**: iOS 17.0<br>
-
-[![App Store](https://img.shields.io/badge/App%20Store-다운로드-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/kr/app/%EB%8B%A8%EC%96%B4%EA%B3%A0%EC%B9%98/id6753820016)
+**다운로드**: [![App Store](https://img.shields.io/badge/App%20Store-다운로드-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/kr/app/%EB%8B%A8%EC%96%B4%EA%B3%A0%EC%B9%98/id6753820016)<br>
 
 ## 주요 화면
 
