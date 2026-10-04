@@ -49,10 +49,9 @@
 
 ### 1. 테마 설정
 * Unsplash 사진 검색으로 배경 테마 설정
-* 내 사진첩(PhotosPicker)에서 고른 사진을 핀치 줌·드래그로 구도를 맞춰 배경 테마로 저장
-  — 사진을 화면보다 작게 줄이거나 밖으로 옮긴 영역은 검은 여백으로 채워 저장
-* 온보딩(모달)과 설정(push) 두 진입점에서 같은 화면을 재사용, 진입 후 사진첩 자동 표시
-* 지원하지 않는 포맷은 선택 직후 안내하고, 저장 실패 시 선택한 사진을 유지해 바로 재시도
+* 내 사진첩 사진을 확대·이동으로 구도 조절 후 배경 테마로 저장
+* 화면 밖 영역은 검은 여백으로 채움
+* 온보딩·설정 두 진입점에서 같은 화면 재사용
 
 ### 2. 단어장
 
@@ -99,13 +98,11 @@
 
 ### 8. 학습 리포트
 
-* 단어 탐색 화면의 리포트 버튼으로 진입하는 학습 기록 대시보드
-* 누적 학습 단어·총 정답률·연속 학습일·최근 7일 학습 여부 요약
-* 최근 7일 / 이번 달 / 전체 기간별 분석 (Swift Charts)
-  — 학습한 단어 수(막대), 회차별 정답률(최근 완료 10회, 선), 학습 단어 품사(도넛), 주제별 학습 비중, 주제·품사별 오답
-* 많이 맞힌 단어 순위 → 전체 단어 목록 → 단어 상세(시트)
-* 단어를 삭제하거나 수정해도 기록이 남도록 답변 시점의 단어·뜻·주제·품사를 스냅샷으로 저장
-* 앱 복귀·날짜 변경·시간대 변경 시 자동 갱신, 로딩 / 빈 상태 / 오류 + 재시도 상태 제공
+* 누적 학습 단어·정답률·연속 학습일 요약
+* 최근 7일 / 이번 달 / 전체 기간별 차트 분석
+  — 학습량, 회차별 정답률, 품사 비중, 주제별 비중, 오답 유형
+* 많이 맞힌 단어 순위 및 단어별 상세
+* 단어 삭제·수정과 무관하게 기록 유지 (답변 시점 스냅샷 저장)
 
 ---
 
@@ -140,13 +137,12 @@ Danogotchi/
 - Input은 `Observable`, Output은 `Driver`/`Signal`로 노출해 UI 스레드와 에러 처리를 타입으로 강제
 
 ### TCA (SwiftUI 화면)
-- v2.2.0에서 추가한 SwiftUI 화면(`PhotoThemeFeature` · `StudyReportFeature`)은 TCA `@Reducer` + `@ObservableState`로 구성하고, 기존 UIKit 화면은 MVVM-C(RxSwift)를 유지해 **화면 단위로 점진 도입**
-- Coordinator가 `Store`를 만들어 `UIHostingController(rootView:)`로 감싸 기존 네비게이션 흐름에 연결하며, 호스팅 서브클래스 없이 네비게이션 바는 SwiftUI 모디파이어로 처리
-- Reducer는 화면을 전환하지 않음 — `onThemeSaved` · `onClose` · `onNavigate(StudyReportDestination)` 클로저로 "무슨 일이 일어났는지"만 올리고 목적지는 Coordinator가 결정. 덕분에 같은 `PhotoThemeFeature`를 온보딩(모달 + 닫기 버튼)과 설정(push)에서 그대로 재사용
-- 의존성은 `AppDIContainer.makePhotoThemeFeature` · `makeStudyReportFeature`가 생성자로 주입(UseCase 프로토콜 · async 클로저)해 기존 DI 규칙을 따르고, TCA `@Dependency`는 요청 ID용 `uuid`에만 사용
-- Effect 취소를 상태 규칙으로 사용 — `.cancellable(id:cancelInFlight: true)`로 새 사진 선택·기간 변경 시 이전 작업을 취소하고, 요청 ID가 다른 늦은 응답은 버림. 화면을 닫거나 사라질 때도 조회를 취소
-- Combine을 반환하는 `SavePhotoThemeUseCase`는 `.publisher` Effect로 연결하고, 저장 중 플래그를 구독 전에 세워 중복 탭에 의한 이중 저장을 차단
-- `TestStore`로 액션별 상태 변화와 Effect 결과를 빠짐없이 검증
+- 신규 SwiftUI 화면(`PhotoThemeFeature` · `StudyReportFeature`)만 TCA 적용, 기존 UIKit 화면은 MVVM-C 유지 (화면 단위 점진 도입)
+- Coordinator가 `Store` 생성 후 `UIHostingController`로 감싸 기존 네비게이션에 연결
+- Reducer는 화면 전환 없이 `onClose` · `onNavigate` 등 클로저로 이벤트만 전달, 목적지는 Coordinator가 결정
+- 의존성은 `AppDIContainer`에서 생성자 주입, `@Dependency`는 `uuid`만 사용
+- `.cancellable(id:cancelInFlight:)`로 이전 요청 취소, 요청 ID로 늦은 응답 무시
+- `TestStore`로 상태 변화 검증
 
 ### Coordinator 패턴 
 - 모든 화면 전환을 `Coordinator`가 담당(`AppFlowCoordinator` → `MainCoordinator` / `OnboardingCoordinator` → Feature별 Coordinator), VC 직접 push 금지, VC ↔ Coordinator는 delegate로 통신
@@ -228,8 +224,7 @@ flowchart LR
 
 * 원격 I/O 경로만 `async`/`await`로 씁니다 — `DefaultApiClient`(URLSession) → `DefaultWeatherRepository` · `DefaultSearchThemeRepository` · `DefaultThemeImageRepository` → `FetchCurrentWeatherUseCase` · `SearchThemeUseCase`. `ApiClient`와 `Endpoint`는 `Sendable`입니다.
 * Core Data 쓰기 경로는 동기 `throws`를 유지합니다. "저장 성공 이후에만 변경 신호를 방출한다"는 불변식이 동기 저장에 기대고 있어, 바꿀 이유가 없는 곳을 바꾸지 않았습니다.
-* 예외는 학습 리포트 읽기 하나입니다. 전체 기록을 집계하는 무거운 조회라 `fetchReportRecords()`를 `async`로 두고 전용 background context의 `perform`에서 실행해 메인 스레드를 막지 않습니다.
-* 사진첩 테마 저장은 `SavePhotoThemeUseCase`가 `Deferred { Future { Task { ... } } }`로 async 저장을 Combine으로 감싸 구독 시점에 시작하고, 결과는 메인에서 방출해 TCA `.publisher` Effect가 그대로 받습니다.
+* 학습 리포트 조회만 예외로 `async` — background context에서 집계해 메인 스레드 비차단
 * **Rx ↔ async 경계를 한 곳에 고정**했습니다. `DefaultThemeImageRepository.replace`가 `Single.create` 안에서 `Task`를 띄우고, dispose되면 `task.cancel()`로 취소를 전달하며, 오류는 `Result`로 감싸 구독이 끊기지 않게 합니다.
 * **델리게이트 → async**: `DeviceLocationProvider`가 `withCheckedThrowingContinuation`으로 `CLLocationManager` 1회 조회를 `async` 함수로 바꿉니다. 이중 resume과 동시 요청을 막고(`LocationError.requestInProgress`), `@MainActor final class` + `nonisolated override init()`으로 DI 조립부는 메인 격리 밖에 둡니다. 델리게이트 채택은 `@preconcurrency`입니다.
 * **취소를 기능으로 씁니다.** 테마 검색은 `searchTask`를 새 검색과 `deinit`에서 취소하고 `Task.isCancelled` · `CancellationError`를 걸러 낡은 응답이 화면을 덮지 않게 합니다. 이미지 포맷 폴백 루프는 `Task.checkCancellation()`으로 다음 포맷 시도를 멈추고, 셀 썸네일은 `prepareForReuse`에서 취소합니다.
@@ -242,12 +237,10 @@ flowchart LR
 
 ### CoreData
 * 엔티티 5종(`VocabEntity` · `VocabBookEntity` · `LearningHistoryEntity` · `QuizSessionEntity` · `PetEntity`)을 사용합니다.
-* **ModelV2 마이그레이션(v2.2.0)** — 학습 리포트를 위해 퀴즈 회차(`QuizSessionEntity`)와 답변 스냅샷 필드를 추가하고 `id`에 유니크 제약을 걸었습니다.
-  * 경량 마이그레이션 전에 `StudyReportMigration.preflight`가 기존 저장소를 읽기 전용으로 열어 중복·누락 ID를 검사합니다. 유니크 제약 위반으로 마이그레이션이 깨지기 전에 멈추고 기존 행은 지우지 않습니다.
-  * 마이그레이션 후 `backfillIfNeeded`가 기존 학습 기록에 단어·뜻·주제·품사 스냅샷을 채우고, 완료 버전을 저장소 메타데이터에 기록합니다. 실패하면 롤백하고 메타데이터도 되돌려 다음 실행에서 재시도합니다.
-  * 저장소 로드를 `init`의 `fatalError`에서 `prepareStore() throws`로 바꿔 앱 시작 흐름에서 실패를 처리합니다.
-* 리포트 조회는 background context에서 `setQueryGenerationFrom(.current)`로 학습 기록과 회차 두 조회를 같은 저장소 시점에 고정합니다.
-* 답변 저장은 회차 ID + 문제 번호로 중복을 판정해, 같은 답변의 재시도는 무시하고 내용이 다른 중복은 `StudyReportDataError`로 거부합니다.
+* **ModelV2 마이그레이션** — 퀴즈 회차·답변 스냅샷 추가
+  * 마이그레이션 전 중복 ID 사전 검사, 실패 시 기존 데이터 보존
+  * 기존 학습 기록에 스냅샷 백필, 실패 시 롤백 후 다음 실행에서 재시도
+* 답변 저장 시 회차 ID + 문제 번호로 중복 저장 방지
 * `Mapper`의 `toDomain()`과 필요한 모델의 `apply(_:)`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다.
 * 네트워크 DTO는 `toEntity()`로 Domain Model에 변환하며, 읽기 전용 흐름에 사용하지 않는 `toDTO()`는 만들지 않습니다.
 
@@ -280,41 +273,26 @@ flowchart LR
 
 ### 내 사진 테마 — PhotosUI + 크롭 합성 직접 구현
 
-**불러오기 — 선택 직후 다운샘플**
-
-* `PhotosPicker`의 `loadTransferable(type: Data.self)`로 원본 바이트를 받습니다. iCloud 원본이면 다운로드가 일어나므로 로딩 상태를 두고, 새 사진을 고르면 이전 로딩을 취소합니다.
-* 미리보기는 `ImageDecoder.decode(data:maxPixelSize:)`로 메모리에서 바로 화면 높이 픽셀까지만 다운샘플합니다. `UIImage(data:)`처럼 48MP 원본을 그대로 펼치지 않습니다.
-* ImageIO가 디코딩하지 못하는 포맷은 "지정" 버튼이 아니라 선택 직후에 걸러 안내합니다.
-
-**구도 조절 — UIScrollView 기반 크롭 뷰**
-
-* SwiftUI 제스처 대신 `UIViewRepresentable`로 감싼 `PhotoCropScrollView`(UIScrollView 줌·스크롤)를 씁니다. 처음에는 화면을 꽉 채우는 배율로 가운데를 보여주고, 화면보다 작게 줄이거나 사진 전체가 화면 밖으로 나갈 만큼 옮길 수 있습니다.
-* 보이는 영역을 원본 기준 **0...1 정규화 좌표**(`PhotoThemeCrop`)로 보고합니다. 0...1 밖은 검은 여백이고, 유한하지 않거나 원본과 겹치지 않는 영역은 타입 생성 자체가 실패해 화면과 저장이 같은 규칙을 공유합니다.
-* 회전·리사이즈 때 선택 중심과 상대 배율을 유지하고, VoiceOver에서는 확대·축소·상하좌우 이동 커스텀 액션을 제공합니다.
-
-**저장 — 화면 규격으로 합성**
-
-* `ThemeImageRenderer`가 선택 영역에 필요한 만큼만 다운샘플한 뒤, `UIGraphicsImageRenderer`로 화면 픽셀 크기의 불투명 캔버스에 검은 여백과 함께 합성합니다. EXIF 방향은 디코딩 단계에서 한 번만 적용합니다.
-* 원본 픽셀이 화면보다 모자라면 여백과 사진의 비율을 유지한 채 캔버스 전체를 줄여 **업스케일하지 않습니다.**
-* 인코딩은 HEIC → JPEG 순으로 시도하고, 저장은 Unsplash 테마와 같은 `ImageFileStorage` 경로(새 파일 커밋 → 이전 파일 정리)를 탑니다.
-* 사진첩 사진은 다시 받을 원본 URL이 없어 `currentThemeUrl`을 비워 재다운로드 복구 대상에서 제외합니다. 온보딩 완료 판별도 URL이 아니라 `hasSelectedTheme`(파일명 또는 URL 존재)으로 바꿨습니다.
+* `PhotosPicker`로 원본 로드, 미리보기는 ImageIO로 화면 크기까지만 다운샘플
+* `UIScrollView` 기반 크롭 뷰(`UIViewRepresentable`)로 확대·이동
+* 선택 영역을 0...1 정규화 좌표(`PhotoThemeCrop`)로 관리해 화면과 저장 결과 일치
+* `ThemeImageRenderer`로 화면 픽셀 크기에 맞춰 합성, 원본이 작으면 업스케일 없이 축소
+* HEIC → JPEG 순 인코딩, 기존 `ImageFileStorage` 저장 경로 재사용
 
 ### 학습 리포트 — Swift Charts + 스냅샷 집계
 
-* 퀴즈를 시작할 때 `QuizSession`(회차 ID · 문제 수)을 만들고, 답변마다 회차 ID와 문제 번호, 그 시점의 단어·뜻·주제·품사 스냅샷을 함께 저장합니다. 원본 단어가 삭제·수정돼도 리포트가 변하지 않습니다.
-* 같은 추천 단어를 여러 번 담아도 하나로 세도록 `sourceWordId`가 있으면 그것을, 없으면 단어 ID를 집계 키로 씁니다.
-* `FetchStudyReportUseCase.aggregate`는 `now`·`Calendar`를 받는 순수 함수로, 기간별 필터·연속 학습일·일/월 단위 활동량·주제/품사별 오답을 계산합니다. 모든 문제를 푼 회차만 회차별 정답률에 포함합니다.
-* 차트는 Swift Charts의 `BarMark` · `LineMark` + `PointMark` · `SectorMark`로 그리고, `chartXSelection` · `chartAngleSelection`으로 막대·점·조각을 선택합니다. 각 마크에 접근성 라벨·값을 달고 Dynamic Type 접근성 크기에서는 가로 배치를 세로로 바꿉니다.
-* 화면 전환(단어 목록 push, 단어 상세 `.pageSheet` medium/large)은 Reducer가 아니라 `MainCoordinator`가 담당합니다.
+* 답변마다 회차 ID·문제 번호·단어 스냅샷 저장
+* `sourceWordId` 기준 집계로 같은 추천 단어 중복 카운트 방지
+* 집계 로직은 `now`·`Calendar`를 주입받는 순수 함수로 분리
+* Swift Charts(`BarMark` · `LineMark` · `SectorMark`) + 차트 선택 인터랙션
 
 ### DiffableDataSource
 * 단어 카드·단어장·테마 목록에 사용합니다.
 * 테마 검색 화면은 높이가 제각각인 사진을 위해 워터폴 레이아웃(`WaterFallLayout`)을 직접 구현했습니다.
 
 ### SwiftUI 부분 도입
-* 단어 카드의 블러 레이어를 SwiftUI로 구현.
-* v2.2.0의 사진 테마·학습 리포트 화면은 SwiftUI + TCA로 화면 전체를 구현.
-* `UIHostingController`로 UIKit 네비게이션에 SwiftUI 화면을 연결.
+* 단어 카드 블러 레이어, 사진 테마·학습 리포트 화면을 SwiftUI로 구현.
+* `UIHostingController`로 UIKit 네비게이션에 연결.
 
 ### 디자인 시스템
 * 색·폰트·여백·모서리 반경을 토큰(`AppColor` · `AppFont` · `AppSpacing` · `AppRadius` · `AppBorder`)으로 고정했습니다.
@@ -326,7 +304,7 @@ flowchart LR
 
 ### XCTest
 * 정책·UseCase·ViewModel·Reducer·영속화·네트워크·이미지 처리 테스트 **250개**를 운영합니다.
-* 사진 테마 온보딩·학습 리포트는 XCUITest **8개**로 실제 화면 흐름을 검증합니다. 실행 인자(`-uiTestingReset`)로 첫 설치 상태를 만들고, 환경 변수로 고정된 리포트 시나리오를 주입합니다.
+* 사진 테마·학습 리포트 화면 흐름은 XCUITest **8개**로 검증합니다.
 
 ### 빌드 설정
 * `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
