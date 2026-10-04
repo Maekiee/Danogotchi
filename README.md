@@ -122,6 +122,151 @@ Danogotchi/
 └── Feature/       Feature 폴더 13개 (View / ViewModel 또는 Reducer / Components / Coordinator)
 ```
 
+### TCA
+
+SwiftUI 화면(사진 테마 · 학습 리포트)에만 적용, 화면 전환은 기존 Coordinator가 담당
+
+#### 데이터 흐름
+
+```mermaid
+flowchart LR
+    C[Coordinator] -- Store 생성 · UIHostingController --> V[SwiftUI View]
+    V -- Action --> R[Reducer]
+    R -- State 변경 --> S[State]
+    S -- 관찰 --> V
+    R -- Effect --> E[".run / .publisher"]
+    E --> U[UseCase] --> RP[Repository]
+    E -- 결과 Action --> R
+    R -- "onClose · onNavigate · onThemeSaved" --> C
+```
+
+* View는 Action만 보내고 State만 읽음
+* 비동기 작업은 Effect에서 실행, 결과는 다시 Action으로 Reducer에 전달
+* 화면 이동은 클로저로 Coordinator에 위임
+
+#### 사진 테마 상태 변경 (`PhotoThemeFeature`)
+
+```mermaid
+stateDiagram-v2
+    state "빈 화면" as Empty
+    state "사진 로딩" as Loading
+    state "미리보기 · 구도 조절" as Preview
+    state "저장 중" as Saving
+    state "저장 완료" as Saved
+
+    [*] --> Empty
+    Empty --> Loading: pickedItem 선택
+    Loading --> Preview: imageLoaded
+    Loading --> Empty: 미지원 포맷 · 알림
+    Preview --> Preview: cropChanged
+    Preview --> Loading: 다른 사진 선택 · 이전 로딩 취소
+    Preview --> Saving: confirmTapped
+    Saving --> Preview: saveResponse 실패 · 알림
+    Saving --> Saved: saveResponse 성공
+    Saved --> [*]: onThemeSaved → Coordinator
+```
+
+* 로딩·저장 중에는 입력 비활성화
+* 저장 실패 시 선택한 사진 유지 후 재시도 가능
+
+#### 학습 리포트 상태 변경 (`StudyReportFeature`)
+
+```mermaid
+stateDiagram-v2
+    state "조회 중" as Loading
+    state "리포트 표시" as Loaded
+    state "오류" as Failed
+
+    [*] --> Loading: appeared
+    Loading --> Loading: periodChanged · 이전 요청 취소
+    Loading --> Loaded: loaded · 요청 ID 일치
+    Loading --> Failed: loadFailed
+    Loaded --> Loading: periodChanged · refresh
+    Failed --> Loading: refresh
+    Loaded --> Loaded: wordTapped → onNavigate
+    Loaded --> [*]: closeButtonTapped → onClose
+```
+
+* 요청마다 ID를 발급해 늦게 도착한 이전 응답 무시
+* 앱 복귀·날짜 변경 시 `refresh`로 재조회
+
+## 기술 스택
+
+### 핵심 프레임워크
+
+| 기술 | 용도 |
+|---|---|
+| Swift 5 · iOS 17.0+ | 개발 언어 · 최소 지원 버전 |
+| UIKit | 기존 화면 구성 |
+| SwiftUI | 단어 카드 블러, 사진 테마·학습 리포트 화면 |
+| RxSwift / RxCocoa 6 | MVVM-C 화면의 Input/Output 바인딩 |
+| TCA 1.26 | SwiftUI 화면의 상태 관리 (`@Reducer` · `Store`) |
+| Combine | 사진 테마 저장 UseCase ↔ TCA Effect 연결 |
+| Swift Concurrency | 네트워크·리포트 조회 비동기 처리 |
+
+### UI
+
+| 기술 | 용도 |
+|---|---|
+| SnapKit | 코드 기반 오토레이아웃 |
+| DiffableDataSource | 단어 카드·단어장·테마 목록 |
+| Swift Charts | 학습 리포트 차트 |
+| PhotosUI | 사진첩 사진 선택 (`PhotosPicker`) |
+| Toast-Swift | 토스트 메시지 |
+| IQKeyboardManager | 키보드 가림 처리 |
+
+### 네트워킹
+
+| 기술 | 용도 |
+|---|---|
+| URLSession + async/await | API 요청 (`DefaultApiClient`) |
+| Router 패턴 (`Endpoint`) | API 요청 정의 |
+| Unsplash API | 배경 테마 사진 검색 |
+| OpenWeatherMap API | 현재 날씨 조회 |
+
+### 데이터 저장
+
+| 기술 | 용도 |
+|---|---|
+| Core Data | 단어·단어장·학습 기록·퀴즈 회차·펫 저장 |
+| UserDefaults | 사용자 설정·테마 파일명 |
+| FileManager | 배경 테마 이미지 로컬 파일 저장 |
+
+### 이미지 처리
+
+| 기술 | 용도 |
+|---|---|
+| ImageIO | 포맷 판별·다운샘플 디코딩 |
+| UIGraphicsImageRenderer | 사진 테마 크롭 합성 |
+| NSCache | 테마 검색 썸네일 메모리 캐시 |
+
+### 시스템 연동
+
+| 기술 | 용도 |
+|---|---|
+| CoreLocation | 날씨 조회용 현재 위치 |
+| AVFoundation | 단어 발음 TTS |
+| UserNotifications | 학습 알림 예약 |
+| MessageUI · SafariServices | 문의 메일 · 웹 페이지 열기 |
+
+### 모니터링 · 푸시
+
+| 기술 | 용도 |
+|---|---|
+| Firebase Crashlytics | 크래시·비정상 오류 수집 |
+| Firebase Cloud Messaging | 원격 푸시 알림 |
+| OSLog (`AppLogger`) | 카테고리별 로그 |
+
+### 테스트 · 빌드
+
+| 기술 | 용도 |
+|---|---|
+| XCTest | 단위 테스트 |
+| XCUITest | 사진 테마·학습 리포트 UI 테스트 |
+| TCA `TestStore` | Reducer 상태 변화 검증 |
+| Swift Package Manager | 의존성 관리 |
+| xcconfig | 개발·운영 스킴 분리 |
+
 ## 핵심 아키텍처 패턴
 
 ### Clean Architecture
