@@ -49,9 +49,7 @@
 
 ### 1. 테마 설정
 * Unsplash 사진 검색으로 배경 테마 설정
-* 내 사진첩 사진을 확대·이동으로 구도 조절 후 배경 테마로 저장
-* 화면 밖 영역은 검은 여백으로 채움
-* 온보딩·설정 두 진입점에서 같은 화면 재사용
+* PhotoPicker를 사용해 사진첩에서 나의 사진 테마 지정기능
 
 ### 2. 단어장
 
@@ -98,11 +96,10 @@
 
 ### 8. 학습 리포트
 
-* 누적 학습 단어·정답률·연속 학습일 요약
+* 누적 학습 단어 · 정답률 · 연속 학습일 요약
+* Swift Chart를 이용해 막대, 선, 원형, 그래프 생성
 * 최근 7일 / 이번 달 / 전체 기간별 차트 분석
   — 학습량, 회차별 정답률, 품사 비중, 주제별 비중, 오답 유형
-* 많이 맞힌 단어 순위 및 단어별 상세
-* 단어 삭제·수정과 무관하게 기록 유지 (답변 시점 스냅샷 저장)
 
 ---
 
@@ -137,7 +134,7 @@ Danogotchi/
 - Input은 `Observable`, Output은 `Driver`/`Signal`로 노출해 UI 스레드와 에러 처리를 타입으로 강제
 
 ### TCA (SwiftUI 화면)
-- 신규 SwiftUI 화면(`PhotoThemeFeature` · `StudyReportFeature`)만 TCA 적용, 기존 UIKit 화면은 MVVM-C 유지 (화면 단위 점진 도입)
+- 신규 SwiftUI 화면(`PhotoThemeFeature` · `StudyReportFeature`) TCA 적용, 기존 UIKit 화면은 MVVM-C 유지 (화면 단위 점진 도입)
 - Coordinator가 `Store` 생성 후 `UIHostingController`로 감싸 기존 네비게이션에 연결
 - Reducer는 화면 전환 없이 `onClose` · `onNavigate` 등 클로저로 이벤트만 전달, 목적지는 Coordinator가 결정
 - 의존성은 `AppDIContainer`에서 생성자 주입, `@Dependency`는 `uuid`만 사용
