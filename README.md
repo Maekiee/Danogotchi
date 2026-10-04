@@ -1,44 +1,30 @@
-<div align="left">
-
 # 단어고치
 
-단어고치는 영어학습을 하고 사용자의 성장을 캐릭터의 성장으로 표현해<br/>
-학습의 재미와 성장을 직관적으로 보여주는 앱 입니다
+> 단어고치는 영어학습을 하고 사용자의 성장을 캐릭터의 성장으로 표현해<br/>
+> 학습의 재미와 성장을 직관적으로 보여주는 앱 입니다
+
+**핵심 개발**: 2025.09 ~ 2025.10<br>
+**유지보수**: 2025.10 ~ 현재<br>
+**개발 인원**: 1인 개발<br>
+**최소 지원 버전**: iOS 17.0<br>
 
 [![App Store](https://img.shields.io/badge/App%20Store-다운로드-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/kr/app/%EB%8B%A8%EC%96%B4%EA%B3%A0%EC%B9%98/id6753820016)
 
-</div>
-
----
-
-- **핵심 개발**: 2025.09–2025.10
-- **유지보수**: 2025.10–현재
-- **개발 인원**: 1인 개발
-- **최소 지원 버전**: iOS 16.0
-
----
-
-## 스크린샷
-
-### 온보딩
+## 주요 화면
 
 | 관심사 선택 | 배경 테마 선택 | 알 선택 |
 |:---:|:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/cd975405-940f-4be7-83d5-fd3ebacd9b9c" width="260" alt="관심사 선택 온보딩 화면"> | <img src="https://github.com/user-attachments/assets/33212c73-f934-4c6f-b846-2b8775a741db" width="260" alt="배경 테마 선택 화면"> | <img src="https://github.com/user-attachments/assets/cc5aaf06-fcb3-4c61-95e5-70535c9cfe4a"  width="260" alt="알 선택 화면"> |
 
-### 학습
 
 | 단어 탐색 | 4지선다 퀴즈 | 학습 결과 |
 |:---:|:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="260" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="260" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="260" alt="학습 결과 화면"> |
 
-### 단어장
 
 | 추천 단어장 | 단어 추가 | 단어장 상세 |
 |:---:|:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="260" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="260" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/48a52402-3975-4a06-b7cb-db45dd116685" width="260" alt="단어장 상세 화면"> |
-
-### 캐릭터
 
 <table>
   <thead>
@@ -59,8 +45,7 @@
   </tbody>
 </table>
 
----
-## 핵심 기능
+## 주요 기능
 
 ### 1. 테마 설정
 * Unsplash 사진 검색으로 배경 테마 설정
@@ -165,8 +150,6 @@ Danogotchi/
 ### 테스트: 
 - 정책·UseCase·ViewModel·영속화·네트워크 테스트 154개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
 
----
-
 ## 데이터 흐름
 
 ### 퀴즈 정답 → 경험치 적립
@@ -211,8 +194,6 @@ flowchart LR
     J --> K
     K --> L[화면 갱신]
 ```
-
----
 
 ## 주요 기술
 
@@ -289,9 +270,7 @@ flowchart LR
 * `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
 * 번들 ID, 앱 이름, 스킴에 따라 자동으로 바뀝니다.
 
----
-
-## 테스트
+### 테스트
 
 정책·UseCase·ViewModel·영속화·네트워크 테스트 **154개**를 운영합니다.
 
