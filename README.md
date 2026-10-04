@@ -148,7 +148,7 @@ Danogotchi/
 - View → ViewModel → UseCase → Repository → CoreData 동기 저장 성공 → 변경 신호(Relay) 방출 → 구독 측 재조회. 저장 실패는 롤백 후 화면에 전달하며, 성공한 작업만 UI 갱신과 화면 전환으로 연결
 
 ### 테스트: 
-- 정책·UseCase·ViewModel·영속화·네트워크 테스트 154개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
+- 정책·UseCase·ViewModel·Reducer·영속화·네트워크·이미지 처리 테스트 250개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
 
 ## 데이터 흐름
 
@@ -264,7 +264,7 @@ flowchart LR
 * subsystem이 번들 ID라 개발용과 운영용 로그가 Console에서 자동으로 분리됩니다.
 
 ### XCTest
-* 정책·UseCase·ViewModel·영속화·네트워크 테스트 **154개**를 운영합니다.
+* 정책·UseCase·ViewModel·Reducer·영속화·네트워크·이미지 처리 테스트 **250개**를 운영합니다.
 
 ### 빌드 설정
 * `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
@@ -272,20 +272,34 @@ flowchart LR
 
 ### 테스트
 
-정책·UseCase·ViewModel·영속화·네트워크 테스트 **154개**를 운영합니다.
+#### 테스트 가능한 구조 설계
 
-| 파일 | 검증 내용 |
-|---|---|
-| `PetStatePolicyTests` (34) | 시간 경과, 돌보기, 체력 구간, 사망·부활 |
-| `PetPersistenceTests` (22) | 펫 UseCase·Repository 동작, 경험치 적립 실패 전달 |
-| `PetLevelPolicyTests` (7) · `PetHeartPolicyTests` (7) · `PetNamePolicyTests` (7) | 레벨·하트 표시·이름 정책 |
-| `PetSpriteTests` (13) · `PetTypeTests` (2) · `WeatherSpriteTests` (8) | 스프라이트 리소스·격자·애니메이션 구성 |
-| `VocabUseCaseTests` (3) · `StudyReminderPolicyTests` (4) | 단어 조회 조립·변경 신호·알림 일정 |
-| `SearchThemeViewModelTests` (6) | 검색 응답 순서·요청 취소·페이지 재시도 |
-| `PersistenceFailureTests` (8) | 저장 실패 롤백, 생성·삭제·활성 전환·이력·경험치·시드 재시도 |
-| `PersistenceViewModelTests` (5) | 실패 시 폼·목록 유지, 완료 이벤트 차단, 다음 입력으로 복구 |
-| `SQLitePersistenceTests` (2) | SQLite 저장소 재개방 후 데이터·삭제 결과 확인 |
-| `QuizUseCaseTests` (5) · `QuizViewModelTests` (6) | 출제 경계·채점·경험치·실패한 저장만 재시도 |
-| `ApiClientTests` (6) | URLSession 요청 구성·JSON·HTTP 오류·원시 바이트 |
-| `ThemeImagePersistenceTests` (6) | 이미지 교체, 포맷 요청 대체, 실패 시 기존 파일 보존 |
-| `WeatherUseCaseTests` (3) | 좌표 전달·위치 조회 실패·날씨 요청 실패 |
+- Repository·UseCase·`ApiClient`·`LocationProviding`을 **프로토콜로 추상화**하고 **생성자 주입**으로 연결해, 테스트에서 Controlled·Recording 더블로 대체합니다.
+- 비즈니스 규칙을 `PetStatePolicy`·`StudyReminderPolicy` 등 정책과 UseCase로 분리해 **UI 없이 로직만 단독으로 검증**합니다. ViewModel은 `transform(input:)`의 Output을, 학습 리포트 Reducer는 TCA `TestStore`로 상태 변화를 검증합니다.
+- 시간·랜덤 값은 **매개변수로 주입**합니다.
+  - 정책과 리포트 집계는 `now`·`Calendar`를 받아 테스트에서 시각과 타임존을 고정합니다.
+  - 퀴즈 출제(`selectByTournament`)는 `RandomNumberGenerator`를 받습니다.
+- 외부 자원은 테스트용 구현으로 교체합니다.
+  - 네트워크: `URLProtocol` 스텁
+  - Core Data: 인메모리 저장소, 저장 실패를 일으키는 `FailingSaveContext`
+  - 파일: 임시 디렉터리 `FileManager`
+
+#### 테스트 적용 범위
+
+- 모든 코드를 테스트하기보다, **로직이 복잡하거나 사이드 이펙트의 영향 범위가 큰 부분**에 유닛 테스트를 집중했습니다.
+  - 상태 전이: 펫 체력 감소·돌보기·사망·부활, 레벨·경험치 정책
+  - 데이터 계산: 퀴즈 출제·채점, 학습 리포트 기간별 집계·연속 학습일, 학습 알림 일정
+  - 저장·동기화: 저장 실패 시 롤백·재시도, SQLite 재개방, Core Data 마이그레이션, 테마 이미지 교체 실패 시 기존 파일 보존
+  - 비동기 흐름: 검색 응답 순서 보장·이전 요청 취소·페이지 재시도
+- 단순한 UI 코드나 변경 영향이 작은 코드는 테스트 비용 대비 효과를 고려해 제외했습니다.
+
+#### 테스트 원칙
+
+- **일관성 있는 결과**: 시각·타임존을 고정한 입력으로 같은 결과를 보장하고, 비동기 응답 순서는 `actor` 더블로 직접 제어합니다.
+- **독립성**: 테스트마다 새 인메모리 저장소와 임시 디렉터리를 만들어 실행 순서에 영향받지 않게 했습니다.
+- **사이드 이펙트 격리**: 경험치 적립·알림 예약·테마 저장 같은 외부 상태 변경은 Recording·Controlled 더블로 대체해, 호출 여부와 전달된 값을 검증합니다.
+
+#### 테스트 환경
+
+- 프레임워크: XCTest, TCA `TestStore`
+- 테스트 대상: Policy, UseCase, ViewModel, Reducer, Repository, ApiClient, 이미지 디코딩·렌더링
