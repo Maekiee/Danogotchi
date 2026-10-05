@@ -34,9 +34,38 @@ final class StudyReportFeatureTests: XCTestCase {
         await store.receive(.loaded(firstID, report)) {
             $0.requestID = nil
             $0.report = report
-            $0.selectedActivity = report.activity.last?.date
         }
+        // 막대 값이 모두 0이면 선택 문구를 띄우지 않음
+        await store.send(.activitySelected(report.activity.last?.date))
         await store.send(.appeared)
+    }
+
+    func test_chartSelectionsDefaultToLatestAndIgnoreTouchEnd() async throws {
+        let words = makeQuizWords(2)
+        let answers = [makeQuizAnswer(words[0], createAt: reportDate(2026, 9, 24)),
+                       makeQuizAnswer(words[1], isCorrect: false, createAt: reportDate())]
+        let report = try DefaultFetchStudyReportUseCase.aggregate(
+            .init(histories: answers.map(\.history), sessions: answers.map(\.session)),
+            period: .week, now: reportDate(), calendar: reportCalendar()
+        )
+        let earlier = reportCalendar().startOfDay(for: reportDate(2026, 9, 24))
+        let store = TestStore(initialState: StudyReportFeature.State()) {
+            StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
+        } withDependencies: { $0.uuid = .incrementing }
+        await store.send(.appeared) { $0.requestID = self.firstID }
+        await store.receive(.loaded(firstID, report)) {
+            $0.requestID = nil
+            $0.report = report
+            $0.selectedActivity = reportCalendar().startOfDay(for: reportDate())
+            $0.selectedSession = 1
+        }
+        await store.send(.activitySelected(earlier)) { $0.selectedActivity = earlier }
+        await store.send(.activitySelected(nil))
+        await store.send(.sessionSelected(0)) { $0.selectedSession = 0 }
+        await store.send(.sessionSelected(nil))
+        await store.send(.sessionSelected(2))
+        await store.send(.partSelected("noun")) { $0.selectedPart = "noun" }
+        await store.send(.partSelected(nil))
     }
 
     func test_newPeriodCancelsPreviousRequestAndIgnoresItsLateResponse() async throws {
@@ -60,7 +89,6 @@ final class StudyReportFeatureTests: XCTestCase {
         await store.receive(.loaded(secondID, month)) {
             $0.requestID = nil
             $0.report = month
-            $0.selectedActivity = month.activity.last?.date
         }
         await store.send(.loaded(firstID, week))
         await store.finish()
@@ -86,7 +114,6 @@ final class StudyReportFeatureTests: XCTestCase {
         await store.receive(.loaded(secondID, report)) {
             $0.requestID = nil
             $0.report = report
-            $0.selectedActivity = report.activity.last?.date
         }
         XCTAssertEqual(store.state.report?.totalAnswers, 0)
         XCTAssertEqual(errors.value.count, 1)

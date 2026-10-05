@@ -77,7 +77,7 @@ struct StudyReportFeature {
                 state.requestID = nil
                 state.report = report
                 state.hasError = false
-                state.selectedActivity = report.activity.last?.date
+                state.selectedActivity = report.hasActivity ? report.activity.last?.date : nil
                 state.selectedSession = report.sessions.isEmpty ? nil : report.sessions.count - 1
                 return .none
             case let .loadFailed(id):
@@ -86,15 +86,21 @@ struct StudyReportFeature {
                 state.hasError = true
                 return .none
             case let .activitySelected(value):
+                // 터치 종료(nil)·값 없는 차트는 기존 선택 유지
+                guard let value, state.report?.hasActivity == true else { return .none }
                 state.selectedActivity = value
                 return .none
             case let .sessionSelected(value):
+                // 터치 종료(nil)·범위 밖 회차는 기존 선택 유지
+                guard let value, state.report?.sessions.indices.contains(value) == true else { return .none }
                 state.selectedSession = value
                 return .none
             case let .topicSelected(value):
                 state.selectedTopic = value
                 return .none
             case let .partSelected(value):
+                // 터치 종료(nil)는 기존 선택 유지
+                guard let value else { return .none }
                 state.selectedPart = value
                 return .none
             case let .mistakeSelected(value):

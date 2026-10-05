@@ -84,4 +84,6 @@ struct StudyReport: Equatable, Sendable {
     var accuracy: Double? {
         totalAnswers == 0 ? nil : Double(totalCorrect) / Double(totalAnswers)
     }
+
+    var hasActivity: Bool { activity.contains { $0.count > 0 } }
 }

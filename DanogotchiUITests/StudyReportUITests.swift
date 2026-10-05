@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 @MainActor
@@ -57,6 +58,47 @@ final class StudyReportUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["학습한 단어"].waitForExistence(timeout: 5))
     }
 
+    func test_activityChartShowsBarForStudiedDay() {
+        let app = launchReport()
+        dismissNotificationPermissionIfNeeded()
+        let selection = app.staticTexts["9월 29일 · 학습한 단어 5개"]
+        scrollTo(selection, in: app)
+        let bar = chartMark("2026년 9월 29일", value: "학습 단어 5개", in: app)
+        XCTAssertTrue(bar.waitForExistence(timeout: 5))
+        attachScreen(app, name: "activity-chart")
+        // 접근성 frame은 막대 폭이 0이어도 잡히므로 실제 막대 색 픽셀로 판정
+        XCTAssertTrue(containsBarColor(bar.screenshot().image), "막대가 화면에 그려지지 않음: \(bar.frame)")
+    }
+
+    func test_activitySelectionStaysAfterTouchEnds() {
+        let app = launchReport()
+        dismissNotificationPermissionIfNeeded()
+        scrollTo(app.staticTexts["9월 29일 · 학습한 단어 5개"], in: app)
+        press(chartMark("2026년 9월 27일", value: "학습 단어 0개", in: app))
+        XCTAssertTrue(app.staticTexts["9월 27일 · 학습한 단어 0개"].waitForExistence(timeout: 3))
+        attachScreen(app, name: "activity-selection")
+    }
+
+    func test_sessionSelectionStaysAfterTouchEnds() {
+        let app = launchReport()
+        dismissNotificationPermissionIfNeeded()
+        scrollTo(app.staticTexts["9.29 11:59 · 정답 0 / 1문제 · 0%"], in: app)
+        // 선 차트의 점은 개별 접근성 요소가 없어 플롯 좌표로 누름 (회차 2개 중 첫 회차 = 왼쪽 1/4 지점)
+        press(app.otherElements["studyReport.sessionChart"].firstMatch, dx: 0.25)
+        XCTAssertTrue(app.staticTexts["9.29 11:54 · 정답 1 / 1문제 · 100%"].waitForExistence(timeout: 3))
+        attachScreen(app, name: "session-selection")
+    }
+
+    func test_partSelectionStaysAfterTouchEnds() {
+        let app = launchReport()
+        dismissNotificationPermissionIfNeeded()
+        // 다음 카드 제목이 보이면 품사 카드 전체가 화면 안에 있음
+        scrollTo(app.staticTexts["많이 틀린 종류"], in: app)
+        press(chartMark("명사", value: "2개, 40%", in: app))
+        XCTAssertTrue(app.staticTexts["명사 · 2 / 5개 · 40%"].waitForExistence(timeout: 3))
+        attachScreen(app, name: "part-selection")
+    }
+
     func test_emptyReportKeepsEmptyGuidance() {
         let app = launchReport(scenario: "empty")
         XCTAssertTrue(app.staticTexts["첫 학습을 기다리고 있어요"].waitForExistence(timeout: 5))
@@ -112,6 +154,37 @@ final class StudyReportUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    // 알림 권한 팝업의 dim·터치 가로채기 방지
+    private func dismissNotificationPermissionIfNeeded() {
+        let permission = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.firstMatch
+        if permission.waitForExistence(timeout: 3) { permission.buttons.element(boundBy: 0).tap() }
+    }
+
+    private func chartMark(_ label: String, value: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@ AND value == %@", label, value))
+            .firstMatch
+    }
+
+    // 짧은 탭은 스크롤 뷰 안 차트 선택 제스처로 인식되지 않아 길게 누른 뒤 뗌
+    private func press(_ element: XCUIElement, dx: CGFloat = 0.5) {
+        XCTAssertTrue(element.waitForExistence(timeout: 5))
+        element.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).press(forDuration: 0.5)
+    }
+
+    // 막대 색(coral) 계열 픽셀 존재 여부 — 흰 카드·회색 축은 R과 B 차이가 거의 없음
+    private func containsBarColor(_ image: UIImage) -> Bool {
+        guard let cgImage = image.cgImage else { return false }
+        let width = cgImage.width, height = cgImage.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        pixels.withUnsafeMutableBytes { buffer in
+            CGContext(data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+                      space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)?
+                .draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        }
+        return stride(from: 0, to: pixels.count, by: 4).contains { Int(pixels[$0]) - Int(pixels[$0 + 2]) > 40 }
     }
 
     private func dismissDetail(in app: XCUIApplication) {

@@ -296,7 +296,7 @@ struct StudyReportActivityChart: View {
             GeometryReader { geometry in
                 ScrollView(.horizontal) {
                     Chart(Array(report.activity.enumerated()), id: \.element.id) { index, day in
-                        BarMark(x: .value("날짜", index), y: .value("고유 단어", day.count), width: .ratio(0.65))
+                        BarMark(x: .value("날짜", index), y: .value("고유 단어", day.count), width: .fixed(24))
                             .foregroundStyle(Color(AppColor.primary).opacity(selected == day.date ? 1 : 0.45))
                             .cornerRadius(4)
                             .accessibilityLabel(StudyReportStyle.date(day.date, calendar: report.calendar, format: "yyyy년 M월 d일"))
@@ -370,6 +370,7 @@ struct StudyReportSessionChart: View {
             }
             .chartXSelection(value: $selected)
             .frame(height: 180)
+            .accessibilityIdentifier("studyReport.sessionChart")
             if let selected, report.sessions.indices.contains(selected) {
                 let session = report.sessions[selected]
                 StudyReportSelection(text: "\(StudyReportStyle.date(session.completedAt, calendar: report.calendar, format: "M.d HH:mm")) · 정답 \(session.correct) / \(session.total)문제 · \(StudyReportStyle.percent(session.correct, session.total))")

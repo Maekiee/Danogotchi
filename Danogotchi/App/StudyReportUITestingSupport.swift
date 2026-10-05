@@ -34,18 +34,29 @@ extension UITestingSupport {
             ("moment", "순간", "unknown", "noun", 3, 2),
             ("happily", "행복하게", "unknown", "adv", 2, 1)
         ]
+        // 회차 차트용: journey 첫 풀이(정답)·prepare 마지막 풀이(오답)를 각각 1문제 회차로 묶음
+        let sessions = [QuizSession(id: UUID(), startedAt: now, questionCount: 1),
+                        QuizSession(id: UUID(), startedAt: now, questionCount: 1)]
+        let sessionRows = ["journey": (index: 0, id: sessions[0].id), "prepare": (index: 3, id: sessions[1].id)]
         let histories = examples.flatMap { word, meaning, topic, part, total, correct in
             let wordID = UUID()
             return (0..<total).map { index in
-                LearningHistory(
+                var history = LearningHistory(
                     id: UUID(), vocabId: wordID, isCorrect: index < correct,
                     createAt: now.addingTimeInterval(-Double(total - index)),
                     wordSnapshot: word, meaningSnapshot: meaning,
                     topicSnapshot: topic, partOfSpeechSnapshot: part
                 )
+                if let row = sessionRows[word], row.index == index {
+                    history.sessionId = row.id
+                    history.questionIndex = 0
+                }
+                return history
             }
         }
-        let records = StudyReportRecords(histories: scenario == "empty" ? [] : histories, sessions: [])
+        let records = scenario == "empty"
+            ? StudyReportRecords(histories: [], sessions: [])
+            : StudyReportRecords(histories: histories, sessions: sessions)
         return StudyReportFeature(
             fetch: { period, now, calendar in
                 if scenario == "error" { throw CocoaError(.fileReadUnknown) }
