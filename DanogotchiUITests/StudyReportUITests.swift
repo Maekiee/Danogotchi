@@ -174,7 +174,7 @@ final class StudyReportUITests: XCTestCase {
         element.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).press(forDuration: 0.5)
     }
 
-    // 막대 색(coral) 계열 픽셀 존재 여부 — 흰 카드·회색 축은 R과 B 차이가 거의 없음
+    // 막대 색(ocean) 계열 픽셀 존재 여부 — 흰 카드·회색 축은 R과 B 차이가 거의 없음
     private func containsBarColor(_ image: UIImage) -> Bool {
         guard let cgImage = image.cgImage else { return false }
         let width = cgImage.width, height = cgImage.height
@@ -184,7 +184,7 @@ final class StudyReportUITests: XCTestCase {
                       space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)?
                 .draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         }
-        return stride(from: 0, to: pixels.count, by: 4).contains { Int(pixels[$0]) - Int(pixels[$0 + 2]) > 40 }
+        return stride(from: 0, to: pixels.count, by: 4).contains { Int(pixels[$0 + 2]) - Int(pixels[$0]) > 40 }
     }
 
     private func dismissDetail(in app: XCUIApplication) {

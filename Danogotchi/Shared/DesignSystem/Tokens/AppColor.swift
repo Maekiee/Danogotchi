@@ -8,6 +8,7 @@ enum AppColor {
     static let sky = named("sky")
     static let lavender = named("lavender")
     static let butter = named("butter")
+    static let ocean = named("ocean")
 
     static let white = named("white")
     static let black = named("black")
@@ -23,7 +24,7 @@ enum AppColor {
     static let textPrimary = named("textColor")        // light/dark 자동 대응
     static let textSecondary = gray75
     static let card = white
-    static let primary = coral    // ← 디자인 확정 후 조정
+    static let primary = ocean    // ← 디자인 확정 후 조정
     static let error = appRed
 
     // MARK: - Legacy
