@@ -144,7 +144,7 @@ final class StudyReportAggregationTests: XCTestCase {
             let calendar = reportCalendar(zone)
             for date in [reportDate(2024, 3, 1, calendar: calendar), reportDate(2026, 3, 9, calendar: calendar),
                          reportDate(2027, 1, 1, calendar: calendar)] {
-                let start = StudyReportPeriod.week.start(now: date, calendar: calendar)!
+                let start = try XCTUnwrap(StudyReportPeriod.week.start(now: date, calendar: calendar))
                 let rows = [makeQuizAnswer(word, createAt: start).history,
                             makeQuizAnswer(word, createAt: start.addingTimeInterval(-1)).history,
                             makeQuizAnswer(word, createAt: date.addingTimeInterval(1)).history]
@@ -175,7 +175,8 @@ final class StudyReportAggregationTests: XCTestCase {
         XCTAssertNil(empty.accuracy)
         XCTAssertEqual(empty.streak, 0)
         XCTAssertEqual(empty.activity.map(\.count), Array(repeating: 0, count: 7))
-        let ids = [UUID(uuidString: "00000000-0000-0000-0000-000000000001")!, UUID(uuidString: "00000000-0000-0000-0000-000000000002")!]
+        let ids = try [XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-000000000001")),
+                       XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-000000000002"))]
         let rows = ids.reversed().map { LearningHistory(id: UUID(), vocabId: $0, isCorrect: true, createAt: now) }
         let legacy = try aggregate(rows)
         XCTAssertEqual(legacy.words.map(\.id), ids)

@@ -70,14 +70,14 @@ final class SearchThemeSavingTests: XCTestCase {
         XCTAssertEqual(screen.alerts.count, 1)
     }
 
-    func test_closingScreenDuringSaveDoesNotReportLateFailure() async {
+    func test_closingScreenDuringSaveDoesNotReportLateFailure() async throws {
         let save = ControlledSaveThemeUseCase()
         var viewModel: SearchThemeViewModel? = SearchThemeViewModel(
             searchThemeUseCase: UnusedSearchThemeUseCase(), saveThemeUseCase: save
         )
         let selection = BehaviorRelay<String?>(value: rawURL)
         let submit = PublishRelay<Void>()
-        let output = viewModel!.transform(input: .init(
+        let output = try XCTUnwrap(viewModel).transform(input: .init(
             viewWillAppear: .never(), searchText: .never(), loadNextPage: .never(), textEndTrigger: .never(),
             selectedTheme: selection.asObservable(), submitTapped: submit.asObservable()
         ))

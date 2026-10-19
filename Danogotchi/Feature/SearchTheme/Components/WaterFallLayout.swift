@@ -63,7 +63,7 @@ final class WaterfallLayout: UICollectionViewLayout {
             cache.append(attributes)
             
             contentHeight = max(contentHeight, frame.maxY)
-            yOffset[column] = yOffset[column] + height
+            yOffset[column] += height
             
             column = yOffset.firstIndex(of: yOffset.min() ?? 0) ?? 0
         }

@@ -2,7 +2,7 @@ import Foundation
 
 struct SearchPhotoEntity {
     let total: Int
-    let total_pages: Int
+    let totalPages: Int
     let results: [PhotoEntity]
 }
 

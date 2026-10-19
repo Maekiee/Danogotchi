@@ -125,16 +125,18 @@ final class VocabUseCaseTests: XCTestCase {
         XCTAssertNotNil(received)
     }
 
-    private func makeSUT() -> (
-        useCase: DefaultFetchVocabsUseCase,
-        books: DefaultVocabBookRepository,
-        histories: DefaultLearningHistoryRepository,
-        words: DefaultVocabRepository
-    ) {
+    private struct SUT {
+        let useCase: DefaultFetchVocabsUseCase
+        let books: DefaultVocabBookRepository
+        let histories: DefaultLearningHistoryRepository
+        let words: DefaultVocabRepository
+    }
+
+    private func makeSUT() -> SUT {
         let context = makeInMemoryContext()
         let books = DefaultVocabBookRepository(context: context)
         let histories = DefaultLearningHistoryRepository(context: context)
-        return (
+        return SUT(
             useCase: DefaultFetchVocabsUseCase(
                 vocabBookRepository: books,
                 learningHistoryRepository: histories

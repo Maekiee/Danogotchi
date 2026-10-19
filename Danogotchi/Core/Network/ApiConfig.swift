@@ -14,7 +14,12 @@ enum APIConfig {
         private static let apiKeys: [String] = APIConfig.value("UnsplashAPIKeys")
         
         static let baseURL: String = "https://\(domain)"
-        static var apiKey: String { apiKeys.randomElement()! }
+        static var apiKey: String {
+            guard let key = apiKeys.randomElement() else {
+                fatalError("Info.plist의 UnsplashAPIKeys가 비어 있습니다.")
+            }
+            return key
+        }
     }
     
     // MARK: - OpenWeatherMap

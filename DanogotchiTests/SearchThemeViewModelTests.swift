@@ -181,7 +181,7 @@ final class SearchThemeViewModelTests: XCTestCase {
     }
 
     private func photos(_ ids: [String], total: Int) -> SearchPhotoEntity {
-        SearchPhotoEntity(total: total, total_pages: total, results: ids.map {
+        SearchPhotoEntity(total: total, totalPages: total, results: ids.map {
             PhotoEntity(id: $0, width: 100, height: 200, urls: ImageURLEntity(
                 raw: "https://example.com/\($0)", small: "small", full: "full", regular: "regular", thumb: "thumb"
             ))

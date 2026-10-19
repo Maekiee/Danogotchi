@@ -14,15 +14,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         UITestingSupport.resetIfRequested()
         #endif
         let container = AppDIContainer()
-        window = UIWindow(windowScene: scene)
+        let window = UIWindow(windowScene: scene)
+        self.window = window
         #if DEBUG
         UITestingSupport.seedMainFlowIfRequested(container: container)
-        if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window!, container: container) {
+        if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window, container: container) {
             studyReportTestCoordinator = coordinator
             return
         }
         #endif
-        appCoordinator = AppFlowCoordinator(window: window!, container: container)
+        appCoordinator = AppFlowCoordinator(window: window, container: container)
         appCoordinator?.start()
     }
 

@@ -58,19 +58,19 @@ final class CompleteQuizViewModel: BaseViewModel {
         let incorrectCountText = Driver.just("\(incorrectCount)개")
         let experienceText = Driver.just("+\(experience.total) EXP")
         
-        let (primaryTitle, secondaryTitle, primaryAction, secondaryAction) = determineButtons()
-        
+        let secondaryButton = determineSecondaryButton()
+
         let isEndLearningButtonHidden = Driver.just(
             result.incorrectWords.isEmpty
           )
         
         input.primaryButtonTap
-            .map { primaryAction }
+            .map { ActionType.nextQuiz }
             .bind(to: primaryActionRelay)
             .disposed(by: disposeBag)
-        
+
         input.secondaryButtonTap
-            .map { secondaryAction }
+            .map { secondaryButton.action }
             .bind(to: secondaryActionRelay)
             .disposed(by: disposeBag)
         
@@ -85,8 +85,8 @@ final class CompleteQuizViewModel: BaseViewModel {
             correctCountText: correctCountText,
             incorrectCountText: incorrectCountText,
             experienceText: experienceText,
-            primaryButtonTitle: Driver.just(primaryTitle),
-            secondaryButtonTitle: Driver.just(secondaryTitle),
+            primaryButtonTitle: Driver.just("계속 학습하기"),
+            secondaryButtonTitle: Driver.just(secondaryButton.title),
             primaryAction: primaryActionRelay.asSignal(),
             secondaryAction: secondaryActionRelay.asSignal(),
             endLearningAction: endLearningActionRelay.asSignal(),
@@ -94,21 +94,12 @@ final class CompleteQuizViewModel: BaseViewModel {
         )
     }
     
-    private func determineButtons() -> (String, String, ActionType, ActionType) {
+    // 주 버튼은 항상 계속 학습하기, 보조 버튼만 오답 유무에 따라 변경
+    private func determineSecondaryButton() -> (title: String, action: ActionType) {
         if result.incorrectWords.isEmpty {
-            return (
-                "계속 학습하기",
-                "학습 끝내기",
-                .nextQuiz,
-                .finish
-            )
+            return (title: "학습 끝내기", action: .finish)
         } else {
-            return (
-                "계속 학습하기",
-                "틀린 문제 다시 풀기",
-                .nextQuiz,
-                .retryIncorrect(words: result.incorrectWords)
-            )
+            return (title: "틀린 문제 다시 풀기", action: .retryIncorrect(words: result.incorrectWords))
         }
     }
 }

@@ -1,0 +1,39 @@
+disabled_rules:
+  - todo
+  - nesting
+  - trailing_whitespace      # formatter 담당
+  - function_parameter_count
+
+opt_in_rules:
+  # 안전성
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - fatal_error_message
+  # UIKit 생명주기
+  - overridden_super_call
+  - prohibited_super_call
+  # 관용 표현
+  - empty_count
+  - empty_string
+  - first_where
+  - last_where
+  - contains_over_first_not_nil
+  - toggle_bool
+  - redundant_nil_coalescing
+  # 설계
+  - convenience_type
+
+# CI를 실패시킬 규칙은 error로
+force_cast: error
+force_try: error
+force_unwrapping: error
+
+# 끄지 않고 기준만 완화
+line_length:
+  warning: 140
+  ignores_comments: true
+  ignores_urls: true
+function_body_length: [60, 120]
+type_body_length: [400, 600]
+identifier_name:
+  excluded: [id, x, y, i, to, at]

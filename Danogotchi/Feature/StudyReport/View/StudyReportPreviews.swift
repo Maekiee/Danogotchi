@@ -39,20 +39,21 @@ private struct StudyReportPreview: View {
 
     private var records: StudyReportRecords {
         guard scenario != .empty else { return StudyReportRecords(histories: [], sessions: []) }
-        let examples: [(String, String, BookTopic, PartOfSpeech)] = [
-            ("journey", "여행", .travel, .noun), ("prepare", "준비하다", .life, .verb),
-            ("efficient", "효율적인", .business, .adj), ("happily", "행복하게", .emotion, .adv),
-            ("moment", "순간", .myBook, .noun)
-        ]
         let now = Date()
-        let words = examples.map {
-            Vocab(id: UUID(), word: $0.0, meaning: $0.1, bookType: $0.2,
-                  level: nil, partOfSpeech: $0.3, sourceWordId: nil, createAt: now)
+        func vocab(_ word: String, _ meaning: String, _ topic: BookTopic, _ part: PartOfSpeech) -> Vocab {
+            Vocab(id: UUID(), word: word, meaning: meaning, bookType: topic,
+                  level: nil, partOfSpeech: part, sourceWordId: nil, createAt: now)
         }
+        let words = [
+            vocab("journey", "여행", .travel, .noun), vocab("prepare", "준비하다", .life, .verb),
+            vocab("efficient", "효율적인", .business, .adj), vocab("happily", "행복하게", .emotion, .adv),
+            vocab("moment", "순간", .myBook, .noun)
+        ]
         var histories: [LearningHistory] = []
         var sessions: [QuizSession] = []
         for offset in (scenario == .single ? [0] : [20, 8, 5, 4, 3, 2, 1, 0]) {
-            let date = Calendar.current.date(byAdding: .day, value: -offset, to: now)!.addingTimeInterval(-600)
+            guard let day = Calendar.current.date(byAdding: .day, value: -offset, to: now) else { continue }
+            let date = day.addingTimeInterval(-600)
             let session = QuizSession(id: UUID(), startedAt: date, questionCount: words.count)
             sessions.append(session)
             for (index, word) in words.enumerated() {

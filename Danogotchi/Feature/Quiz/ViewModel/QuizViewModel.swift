@@ -74,10 +74,6 @@ final class QuizViewModel: BaseViewModel {
         var incorrectWords: [Vocab] = []
         var phase = Phase.acceptingAnswer
         let saveFailed = PublishRelay<SaveFailure>()
-        // 대상 부재와 기록 충돌은 같은 요청의 재시도로 복구 불가
-        func failure(for error: Error) -> SaveFailure {
-            error is PersistenceError || error is StudyReportDataError ? .unrecoverable : .retryable
-        }
         let canAnswer = BehaviorRelay(value: true)
 
         func saveAnswer(owner: QuizViewModel, word: Vocab, result: AnswerResult, answer: QuizAnswer) {
@@ -94,7 +90,7 @@ final class QuizViewModel: BaseViewModel {
                 phase = .answered
                 answerResultRelay.accept(result)
             } catch {
-                saveFailed.accept(failure(for: error))
+                saveFailed.accept(Self.failure(for: error))
             }
         }
 
@@ -121,39 +117,21 @@ final class QuizViewModel: BaseViewModel {
                 )
                 quizCompletedRelay.accept((originalData: owner.quizDataRelay.value, result: result))
             } catch {
-                saveFailed.accept(failure(for: error))
+                saveFailed.accept(Self.failure(for: error))
             }
         }
 
-        // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
-        let currentQuizData = Observable.combineLatest(
-            currentIndex,
-            quizDataRelay
-        ).map { [weak self] index, quizData -> (Vocab, [String], Int)? in
-            guard let self else { return nil }
-            guard index < quizData.words.count else { return nil }
+        let currentQuizData = makeCurrentQuizData()
 
-            let word = quizData.words[index]
-            let (choices, correctIndex) = self.generateChoices(
-                for: word, allWords: quizData.allWord)
-            return (word, choices, correctIndex)
-        }.share(replay: 1, scope: .whileConnected)
-        
         // 현제 문제 카운트
         let currentQuestionCount = currentIndex
             .map { $0 + 1 }
             .asDriver(onErrorJustReturn: 1)
-        
+
         let totalQuestionCount = quizDataRelay.asDriver()
             .map { $0.words.count }
-        
-        
-        let progress = Observable.combineLatest(currentIndex, quizDataRelay)
-            .map { index, quizData in
-                Float(index + 1) / Float(max(1, quizData.words.count))
-            }
-            .asDriver(onErrorJustReturn: 0)
-        
+
+
         // 단어
         let questionWord = currentQuizData
             .compactMap { $0?.0.word }
@@ -214,7 +192,7 @@ final class QuizViewModel: BaseViewModel {
         return Output(
             currentQuestion: currentQuestionCount,
             totalQuestion: totalQuestionCount,
-            progress: progress,
+            progress: makeProgress(),
             questionWord: questionWord,
             choices: choices,
             answerResult: answerResultRelay.asSignal(),
@@ -230,6 +208,35 @@ final class QuizViewModel: BaseViewModel {
     
     func endSession() {
         endSessionTrigger.accept(())
+    }
+
+    // 대상 부재와 기록 충돌은 같은 요청의 재시도로 복구 불가
+    private static func failure(for error: Error) -> SaveFailure {
+        error is PersistenceError || error is StudyReportDataError ? .unrecoverable : .retryable
+    }
+
+    // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
+    private func makeCurrentQuizData() -> Observable<(Vocab, [String], Int)?> {
+        Observable.combineLatest(
+            currentIndex,
+            quizDataRelay
+        ).map { [weak self] index, quizData -> (Vocab, [String], Int)? in
+            guard let self else { return nil }
+            guard index < quizData.words.count else { return nil }
+
+            let word = quizData.words[index]
+            let (choices, correctIndex) = self.generateChoices(
+                for: word, allWords: quizData.allWord)
+            return (word, choices, correctIndex)
+        }.share(replay: 1, scope: .whileConnected)
+    }
+
+    private func makeProgress() -> Driver<Float> {
+        Observable.combineLatest(currentIndex, quizDataRelay)
+            .map { index, quizData in
+                Float(index + 1) / Float(max(1, quizData.words.count))
+            }
+            .asDriver(onErrorJustReturn: 0)
     }
 
     private func generateChoices(for word: Vocab, allWords: [Vocab]) -> ([String], Int) {

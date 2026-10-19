@@ -78,12 +78,12 @@ struct StudyReportView: View {
                         ForEach(report.recentDays) { day in
                             VStack(spacing: AppSpacing.space8) {
                                 Text(StudyReportStyle.date(day.date, calendar: report.calendar, format: "E"))
-                                Image(systemName: day.count > 0 ? "checkmark.circle.fill" : "minus.circle")
-                                    .foregroundStyle(day.count > 0 ? Color(AppColor.primary) : Color(AppColor.gray45))
+                                Image(systemName: day.hasStudied ? "checkmark.circle.fill" : "minus.circle")
+                                    .foregroundStyle(day.hasStudied ? Color(AppColor.primary) : Color(AppColor.gray45))
                             }
                             .frame(maxWidth: .infinity)
                             .accessibilityElement(children: .ignore)
-                            .accessibilityLabel("\(StudyReportStyle.date(day.date, calendar: report.calendar, format: "M월 d일")), \(day.count > 0 ? "학습함" : "학습 안 함")")
+                            .accessibilityLabel("\(StudyReportStyle.date(day.date, calendar: report.calendar, format: "M월 d일")), \(day.hasStudied ? "학습함" : "학습 안 함")")
                         }
                     }
                     .font(StudyReportStyle.font(AppFont.label, relativeTo: .subheadline))

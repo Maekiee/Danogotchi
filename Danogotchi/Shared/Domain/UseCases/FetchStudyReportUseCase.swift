@@ -25,15 +25,20 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
         let allWords = words(from: all)
         let selectedWords = period == .all ? allWords : words(from: rows)
         let days = Set(all.map { calendar.startOfDay(for: $0.createAt) })
-        let weekStart = StudyReportPeriod.week.start(now: now, calendar: calendar)!
-        let monthStart = StudyReportPeriod.month.start(now: now, calendar: calendar)!
         let firstDate = all.map(\.createAt).min() ?? now
         let periodStart = start ?? calendar.startOfDay(for: firstDate)
         let activityUnit: Calendar.Component = period == .all ? .month : .day
-        let activityStart = calendar.dateInterval(of: activityUnit, for: periodStart)!.start
+        // 날짜 계산 실패 시 크래시 대신 기록 오류로 처리
+        guard let weekStart = StudyReportPeriod.week.start(now: now, calendar: calendar),
+              let monthStart = StudyReportPeriod.month.start(now: now, calendar: calendar),
+              let activityStart = calendar.dateInterval(of: activityUnit, for: periodStart)?.start else {
+            throw StudyReportDataError.invalidRecord
+        }
         var bucketWords: [Date: Set<UUID>] = [:]
         for row in rows {
-            let bucket = calendar.dateInterval(of: activityUnit, for: row.createAt)!.start
+            guard let bucket = calendar.dateInterval(of: activityUnit, for: row.createAt)?.start else {
+                throw StudyReportDataError.invalidRecord
+            }
             bucketWords[bucket, default: []].insert(row.reportWordId)
         }
         let activity = dates(from: activityStart, through: now, unit: activityUnit, calendar: calendar)
@@ -64,10 +69,10 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
 
     private static func words(from rows: [LearningHistory]) -> [StudyReport.Word] {
         let grouped = Dictionary(grouping: rows, by: \.reportWordId)
-        let words = grouped.map { id, answers in
-            let latest = answers.max {
+        let words = grouped.compactMap { id, answers -> StudyReport.Word? in
+            guard let latest = answers.max(by: {
                 $0.createAt == $1.createAt ? $0.id.uuidString < $1.id.uuidString : $0.createAt < $1.createAt
-            }!
+            }) else { return nil }
             return StudyReport.Word(id: id, snapshot: latest, total: answers.count,
                                     correct: answers.filter(\.isCorrect).count)
         }
@@ -127,11 +132,12 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
 
     private static func streak(days: Set<Date>, now: Date, calendar: Calendar) -> Int {
         var day = calendar.startOfDay(for: now)
-        if !days.contains(day) { day = calendar.date(byAdding: .day, value: -1, to: day)! }
+        if !days.contains(day), let yesterday = calendar.date(byAdding: .day, value: -1, to: day) { day = yesterday }
         var count = 0
         while days.contains(day) {
             count += 1
-            day = calendar.date(byAdding: .day, value: -1, to: day)!
+            guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+            day = previous
         }
         return count
     }

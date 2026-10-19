@@ -162,6 +162,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				76560F513086088700727A2E /* PBXTargetDependency */,
 				5A153F4D302F01CC0091AB19 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -185,6 +186,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				76560F533086088F00727A2E /* PBXTargetDependency */,
 				76196C533063C002005A049F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -211,6 +213,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				76560F4F3086087100727A2E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				765182CD2E843A75005EE2F7 /* Danogotchi */,
@@ -272,6 +275,7 @@
 				76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 				76BE04FD2E9FF93600F80D8A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				76196EA83063CC63005A049F /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				76560F4D3086082F00727A2E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 765182CC2E843A75005EE2F7 /* Products */;
@@ -388,6 +392,18 @@
 			isa = PBXTargetDependency;
 			target = 765182CA2E843A75005EE2F7 /* Danogotchi */;
 			targetProxy = 76196C523063C002005A049F /* PBXContainerItemProxy */;
+		};
+		76560F4F3086087100727A2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 76560F4E3086087100727A2E /* SwiftLintBuildToolPlugin */;
+		};
+		76560F513086088700727A2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 76560F503086088700727A2E /* SwiftLintBuildToolPlugin */;
+		};
+		76560F533086088F00727A2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 76560F523086088F00727A2E /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -760,6 +776,14 @@
 				minimumVersion = 5.1.1;
 			};
 		};
+		76560F4D3086082F00727A2E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.65.1;
+			};
+		};
 		76BC852B2E86CBA7009EEE9C /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
@@ -803,6 +827,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7651837B2E844260005EE2F7 /* XCRemoteSwiftPackageReference "Toast-Swift" */;
 			productName = Toast;
+		};
+		76560F4E3086087100727A2E /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76560F4D3086082F00727A2E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		76560F503086088700727A2E /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76560F4D3086082F00727A2E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		76560F523086088F00727A2E /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76560F4D3086082F00727A2E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
 		};
 		76BC852C2E86CBA7009EEE9C /* IQKeyboardManagerSwift */ = {
 			isa = XCSwiftPackageProductDependency;

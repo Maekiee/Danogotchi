@@ -45,6 +45,9 @@ struct StudyReport: Equatable, Sendable {
         let date: Date
         let count: Int
         var id: Date { date }
+        // count가 Int라 isEmpty 대체 불가 (empty_count 오탐)
+        // swiftlint:disable:next empty_count
+        var hasStudied: Bool { count > 0 }
     }
 
     struct Session: Equatable, Sendable, Identifiable {
@@ -85,5 +88,5 @@ struct StudyReport: Equatable, Sendable {
         totalAnswers == 0 ? nil : Double(totalCorrect) / Double(totalAnswers)
     }
 
-    var hasActivity: Bool { activity.contains { $0.count > 0 } }
+    var hasActivity: Bool { activity.contains(where: \.hasStudied) }
 }

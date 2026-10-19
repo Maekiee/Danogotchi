@@ -4,8 +4,8 @@ import XCTest
 
 @MainActor
 final class StudyReportFeatureTests: XCTestCase {
-    private let firstID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
-    private let secondID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+    private let firstID = UUID(0)
+    private let secondID = UUID(1)
 
     func test_closeButtonTappedCallsOnCloseAndCancelsLoading() async throws {
         let closedCount = LockIsolated(0)

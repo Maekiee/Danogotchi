@@ -15,8 +15,13 @@ struct WeatherConditionDTO: Decodable {
 
 struct MainWeatherDTO: Decodable {
     let temp: Double
-    let feels_like: Double
+    let feelsLike: Double
     let humidity: Int
+
+    enum CodingKeys: String, CodingKey {
+        case temp, humidity
+        case feelsLike = "feels_like"
+    }
 }
 
 extension CurrentWeatherDTO {
@@ -25,7 +30,7 @@ extension CurrentWeatherDTO {
         return CurrentWeather(
             cityName: name,
             temperature: main.temp,
-            feelsLike: main.feels_like,
+            feelsLike: main.feelsLike,
             humidity: main.humidity,
             weatherType: condition.map { WeatherType(id: $0.id) } ?? .clear,
             description: condition?.description ?? "",
