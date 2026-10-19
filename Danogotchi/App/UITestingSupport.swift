@@ -28,9 +28,7 @@ enum UITestingSupport {
         do {
             try container.coreDataStack.prepareStore()
             try DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
-            if let travel = try container.vocabBookRepository.readAllBooks(bookType: .travel).first {
-                try container.vocabBookRepository.setActiveBook(id: travel.id)
-            }
+            try container.makeSetActiveBookUseCase().execute(topic: .travel)
             _ = try container.makeCreatePetUseCase().execute(type: .sprout, name: "테스트")
             // 없는 파일명만 지정 — 원본 URL이 없어 복구 다운로드가 일어나지 않는다
             container.userInfoManager.currentThemeImageFileName = "ui-test-theme.png"

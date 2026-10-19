@@ -46,11 +46,7 @@ final class ExploreVocabViewModel: BaseViewModel {
         let alertMessageRelay = PublishRelay<String>()
 
         // 트리거마다 CoreData에서 다시 읽는다 — 단어 추가/삭제가 즉시 반영되도록
-        // 구독마다 새 스트림을 받고, 브리지가 메인 밖에서 돌아 메인으로 옮긴다
-        let activeBookChanged = Observable.deferred { [fetchVocabsUseCase] in
-            fetchVocabsUseCase.activeBookChanged.asObservable()
-        }
-        .observe(on: MainScheduler.instance)
+        let activeBookChanged = Observable.onMain { [fetchVocabsUseCase] in fetchVocabsUseCase.activeBookChanged }
 
         Observable.merge(activeBookChanged, input.viewWillAppear)
             .bind(with: self) { owner, _ in
@@ -108,10 +104,8 @@ final class ExploreVocabViewModel: BaseViewModel {
             startQuiz: startQuizRelay.asSignal(),
             alertMessage: alertMessageRelay.asSignal(),
             // nil도 그대로 흘린다 — 저장된 이미지가 사라진 상태가 화면에 반영돼야 한다
-            themeImageFileURL: Observable.deferred { [observeThemeUseCase] in
-                observeThemeUseCase.execute().asObservable()
-            }
-            .asDriver(onErrorDriveWith: .empty())
+            themeImageFileURL: Observable.onMain { [observeThemeUseCase] in observeThemeUseCase.execute() }
+                .asDriver(onErrorDriveWith: .empty())
         )
     }
 

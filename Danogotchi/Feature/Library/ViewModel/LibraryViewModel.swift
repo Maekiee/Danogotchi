@@ -24,11 +24,7 @@ final class LibraryViewModel: BaseViewModel {
         let alertMessage = PublishRelay<String>()
 
         // 상세에서 학습하기를 누르면 Library는 살아 있는 채로 갱신된다 — pop을 기다리지 않는다
-        // 구독마다 새 스트림을 받고, 브리지가 메인 밖에서 돌아 메인으로 옮긴다
-        let activeBookChanged = Observable.deferred { [fetchVocabBooksUseCase] in
-            fetchVocabBooksUseCase.activeBookChanged.asObservable()
-        }
-        .observe(on: MainScheduler.instance)
+        let activeBookChanged = Observable.onMain { [fetchVocabBooksUseCase] in fetchVocabBooksUseCase.activeBookChanged }
 
         Observable.merge(
             input.viewWillAppear,
