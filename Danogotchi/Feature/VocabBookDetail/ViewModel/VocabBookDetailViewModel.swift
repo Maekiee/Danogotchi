@@ -46,31 +46,26 @@ final class VocabBookDetailViewModel: BaseViewModel {
         let alertMessage = PublishRelay<String>()
 
         input.viewWillAppear
-            .flatMapLatest { [weak self] _ -> Observable<Result<[VocabDisplayInfo], Error>> in
-                guard let self else { return .empty() }
-                return fetchVocabsUseCase.execute(topic: self.topic)
-            }
-            .bind(onNext: { result in
-                switch result {
-                case .success(let items): vocabList.accept(items)
-                case .failure: alertMessage.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
+            .bind(with: self) { owner, _ in
+                do {
+                    vocabList.accept(try owner.fetchVocabsUseCase.execute(topic: owner.topic))
+                } catch {
+                    alertMessage.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
                 }
-            })
+            }
             .disposed(by: disposeBag)
 
         input.saveVocabTrigger
-            .flatMap { [weak self] item -> Observable<Result<(UUID, Bool), Error>> in
-                guard let self else { return .empty() }
-                return toggleSaveVocabUseCase.execute(vocab: item.word)
-                    .map { result in result.map { (item.word.id, $0) } }
-            }
-            .bind { result in
-                guard case .success(let (vocabId, isSaved)) = result else {
+            .bind(with: self) { owner, item in
+                let isSaved: Bool
+                do {
+                    isSaved = try owner.toggleSaveVocabUseCase.execute(vocab: item.word)
+                } catch {
                     alertMessage.accept("저장하지 못했어요. 다시 시도해주세요.")
                     return
                 }
                 let updatedList = vocabList.value.map { info -> VocabDisplayInfo in
-                    guard info.word.id == vocabId else { return info }
+                    guard info.word.id == item.word.id else { return info }
                     return VocabDisplayInfo(
                         word: info.word,
                         learningCount: info.learningCount,
@@ -95,29 +90,24 @@ final class VocabBookDetailViewModel: BaseViewModel {
 
         // 지정에 성공하면 화면에 머문 채 버튼만 "학습중"으로 바뀐다
         input.startLearningTrigger
-            .flatMapLatest { [weak self] _ -> Observable<Result<Bool, Error>> in
-                guard let self else { return .empty() }
-                return setActiveBookUseCase.execute(topic: self.topic)
-            }
-            .bind(onNext: { result in
-                switch result {
-                case .success(let active): isActiveBook.accept(active)
-                case .failure: alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
+            .bind(with: self) { owner, _ in
+                do {
+                    try owner.setActiveBookUseCase.execute(topic: owner.topic)
+                    isActiveBook.accept(true)
+                } catch {
+                    alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
                 }
-            })
+            }
             .disposed(by: disposeBag)
 
         input.viewWillAppear
-            .flatMapLatest { [weak self] _ -> Observable<Result<Bool, Error>> in
-                guard let self else { return .empty() }
-                return isActiveBookUseCase.execute(topic: self.topic)
-            }
-            .bind(onNext: { result in
-                switch result {
-                case .success(let active): isActiveBook.accept(active)
-                case .failure: alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
+            .bind(with: self) { owner, _ in
+                do {
+                    isActiveBook.accept(try owner.isActiveBookUseCase.execute(topic: owner.topic))
+                } catch {
+                    alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
                 }
-            })
+            }
             .disposed(by: disposeBag)
 
         return Output(

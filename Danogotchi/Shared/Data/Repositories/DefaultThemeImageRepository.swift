@@ -1,6 +1,5 @@
 import UIKit
 import OSLog
-import RxSwift
 
 final class DefaultThemeImageRepository {
     /// 내려받을 포맷. 앞에서부터 시도하고, 실패하면 다음으로 넘어간다.
@@ -30,12 +29,18 @@ final class DefaultThemeImageRepository {
 }
 
 extension DefaultThemeImageRepository: ThemeImageRepository {
-    var storedImageChanged: Observable<URL?> {
-        return userInfo.themeImageFileNameObservable
-            .map { [storage] fileName in
-                guard let fileName else { return nil }
-                return storage.existingFileURL(fileName: fileName)
+    var storedImageChanged: AsyncStream<URL?> {
+        // 파일명 구독을 먼저 등록하고, Task는 파일 URL로 바꿔 전달만 한다
+        let fileNames = userInfo.themeImageFileNameChanges
+        let (stream, continuation) = AsyncStream.makeStream(of: URL?.self, bufferingPolicy: .bufferingNewest(1))
+        let task = Task { [storage] in
+            for await fileName in fileNames {
+                continuation.yield(fileName.flatMap { storage.existingFileURL(fileName: $0) })
             }
+            continuation.finish()
+        }
+        continuation.onTermination = { _ in task.cancel() }
+        return stream
     }
 
     var lastSelectedRawUrl: String? {
@@ -47,18 +52,8 @@ extension DefaultThemeImageRepository: ThemeImageRepository {
         return storage.existingFileURL(fileName: fileName)
     }
 
-    func replace(rawUrl: String) -> Single<Result<Void, Error>> {
-        return Single.create { observer in
-            let task = Task { [self] in
-                do {
-                    try await performReplace(rawUrl: rawUrl)
-                    observer(.success(.success(())))
-                } catch {
-                    observer(.success(.failure(error)))
-                }
-            }
-            return Disposables.create { task.cancel() }
-        }
+    func replace(rawUrl: String) async throws {
+        try await performReplace(rawUrl: rawUrl)
     }
 
     func replace(imageData: Data, crop: PhotoThemeCrop) async throws {

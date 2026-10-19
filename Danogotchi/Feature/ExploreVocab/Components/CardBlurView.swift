@@ -36,6 +36,9 @@ struct CardBlurView: View {
                                 .font(.title3)
                                 .foregroundStyle(.white)
                         }
+                        .accessibilityIdentifier("explore.save")
+                        .accessibilityLabel("\(title) 저장")
+                        .accessibilityValue(isSaved ? "저장됨" : "저장 안 됨")
                     }
 
                     Spacer()

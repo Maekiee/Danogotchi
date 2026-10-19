@@ -16,6 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let container = AppDIContainer()
         window = UIWindow(windowScene: scene)
         #if DEBUG
+        UITestingSupport.seedMainFlowIfRequested(container: container)
         if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window!, container: container) {
             studyReportTestCoordinator = coordinator
             return

@@ -10,6 +10,7 @@ final class SearchThemeViewModel: BaseViewModel {
     private let searchThemeUseCase: SearchThemeUseCase
     private let saveThemeUseCase: SaveThemeUseCase
     private var searchTask: Task<Void, Never>?
+    private var saveTask: Task<Void, Never>?
 
     init(
         searchThemeUseCase: SearchThemeUseCase,
@@ -21,6 +22,7 @@ final class SearchThemeViewModel: BaseViewModel {
 
     deinit {
         searchTask?.cancel()
+        saveTask?.cancel()
     }
 
     struct Input {
@@ -134,19 +136,24 @@ final class SearchThemeViewModel: BaseViewModel {
             .withLatestFrom(input.selectedTheme)
             .compactMap { $0 }
             .filter { _ in !isSaving.value }
-            .do(onNext: { _ in isSaving.accept(true) })
-            .flatMapLatest { [saveThemeUseCase] rawUrl in
-                saveThemeUseCase.execute(rawUrl: rawUrl)
-            }
-            .bind(with: self) { owner, result in
-                isSaving.accept(false)
-                switch result {
-                case .success:
-                    themeSavedRelay.accept(())
-                case .failure(let error):
-                    AppLogger.network.error("테마 이미지 저장 실패: \(String(describing: error), privacy: .public)")
-                    CrashReporter.record(error)
-                    alertMessageRelay.accept(Self.networkErrorMessage)
+            .bind(with: self) { owner, rawUrl in
+                // 저장 중 표시를 동기로 켜 중복 저장을 막는다
+                isSaving.accept(true)
+                let useCase = owner.saveThemeUseCase
+                // owner를 캡처하지 않아 저장 중에도 ViewModel이 해제될 수 있다.
+                owner.saveTask = Task { @MainActor in
+                    do {
+                        try await useCase.execute(rawUrl: rawUrl)
+                        isSaving.accept(false)
+                        themeSavedRelay.accept(())
+                    } catch {
+                        // 화면이 닫혀 취소된 저장은 실패로 알리지 않는다
+                        guard !Task.isCancelled else { return }
+                        isSaving.accept(false)
+                        AppLogger.network.error("테마 이미지 저장 실패: \(String(describing: error), privacy: .public)")
+                        CrashReporter.record(error)
+                        alertMessageRelay.accept(Self.networkErrorMessage)
+                    }
                 }
             }.disposed(by: disposeBag)
 

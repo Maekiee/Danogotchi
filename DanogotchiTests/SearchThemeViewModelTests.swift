@@ -270,8 +270,7 @@ private final class SearchThemeTestScreen {
 }
 
 private struct UnusedSaveThemeUseCase: SaveThemeUseCase {
-    func execute(rawUrl: String) -> Single<Result<Void, Error>> {
+    func execute(rawUrl: String) async throws {
         XCTFail("Search must not save a theme")
-        return .never()
     }
 }

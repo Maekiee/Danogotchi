@@ -1,6 +1,4 @@
 import ImageIO
-import RxCocoa
-import RxSwift
 import UIKit
 import XCTest
 @testable import Danogotchi
@@ -21,12 +19,18 @@ final class TestUserInfo: UserInfoProtocol {
     var userId: String?
     var currentThemeUrl: String?
     var isStudyReminderEnabled = true
-    private let fileName = BehaviorRelay<String?>(value: nil)
+    /// 파일명이 바뀐 직후, 구독자에게 알리기 전에 호출된다 — 저장 순서를 검사할 때 쓴다
+    var willPublishFileName: ((String?) -> Void)?
+    private let fileNames = AsyncBroadcaster<String?>()
     var currentThemeImageFileName: String? {
-        get { fileName.value }
-        set { fileName.accept(newValue) }
+        didSet {
+            willPublishFileName?(currentThemeImageFileName)
+            fileNames.send(currentThemeImageFileName)
+        }
     }
-    var themeImageFileNameObservable: Observable<String?> { fileName.asObservable() }
+    var themeImageFileNameChanges: AsyncStream<String?> {
+        fileNames.stream(current: { self.currentThemeImageFileName })
+    }
 }
 
 private actor ImageApiStub: ApiClient {
@@ -61,19 +65,24 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let data = imageData(color: .blue)
         let fixture = try Fixture(responses: [.success(data)])
         defer { fixture.cleanup() }
-        let published = expectation(description: "new file is readable before the previous file is removed")
-        let observation = fixture.repository.storedImageChanged
-            .compactMap { $0 }
-            .filter { $0 != fixture.previousFile }
-            .subscribe(onNext: { file in
-                XCTAssertEqual(try? Data(contentsOf: file), data)
-                XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.previousFile.path))
+        let readable = expectation(description: "new file is readable before the previous file is removed")
+        fixture.userInfo.willPublishFileName = { [weak fixture] _ in
+            guard let fixture, let file = fixture.repository.storedImageFileURL() else { return }
+            XCTAssertEqual(try? Data(contentsOf: file), data)
+            XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.previousFile.path))
+            readable.fulfill()
+        }
+        let published = expectation(description: "new file is published")
+        let images = fixture.repository.storedImageChanged
+        let observation = Task {
+            for await file in images where file != nil && file != fixture.previousFile {
                 published.fulfill()
-            })
-        defer { observation.dispose() }
-        let result = try await fixture.repository.replace(rawUrl: rawURL).value
-        try result.get()
-        await fulfillment(of: [published], timeout: 2)
+                break
+            }
+        }
+        defer { observation.cancel() }
+        try await fixture.repository.replace(rawUrl: rawURL)
+        await fulfillment(of: [readable, published], timeout: 2)
         let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
         XCTAssertEqual(try Data(contentsOf: file), data)
         XCTAssertEqual(file.pathExtension, "png")
@@ -87,7 +96,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
     func test_failedFirstFormatFallsBackAndPreservesOriginalQuery() async throws {
         let fixture = try Fixture(responses: [.failure(URLError(.cannotDecodeContentData)), .success(imageData(color: .blue))])
         defer { fixture.cleanup() }
-        try await fixture.repository.replace(rawUrl: rawURL).value.get()
+        try await fixture.repository.replace(rawUrl: rawURL)
         let urls = await fixture.api.urls
         let queries = urls.compactMap { URLComponents(url: $0, resolvingAgainstBaseURL: false)?.queryItems }
         XCTAssertEqual(queries.map { $0.first(where: { $0.name == "fm" })?.value }, ["heic", "webp"])
@@ -98,7 +107,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
     func test_invalidFirstImageAlsoFallsBack() async throws {
         let fixture = try Fixture(responses: [.success(Data("invalid".utf8)), .success(imageData(color: .blue))])
         defer { fixture.cleanup() }
-        try await fixture.repository.replace(rawUrl: rawURL).value.get()
+        try await fixture.repository.replace(rawUrl: rawURL)
         let requests = await fixture.api.urls
         XCTAssertEqual(requests.count, 2)
     }
@@ -106,16 +115,20 @@ final class ThemeImagePersistenceTests: XCTestCase {
     func test_downloadFailureKeepsPreviousBytesAndSelection() async throws {
         let fixture = try Fixture(responses: [.failure(URLError(.notConnectedToInternet)), .failure(URLError(.notConnectedToInternet))])
         defer { fixture.cleanup() }
-        let result = try await fixture.repository.replace(rawUrl: rawURL).value
-        XCTAssertThrowsError(try result.get())
+        do {
+            try await fixture.repository.replace(rawUrl: rawURL)
+            XCTFail("A failed replacement must keep the previous image")
+        } catch {}
         try assertPreviousImage(fixture)
     }
 
     func test_invalidBytesNeverReplacePreviousImage() async throws {
         let fixture = try Fixture(responses: [.success(Data()), .success(Data("invalid".utf8))])
         defer { fixture.cleanup() }
-        let result = try await fixture.repository.replace(rawUrl: rawURL).value
-        XCTAssertThrowsError(try result.get())
+        do {
+            try await fixture.repository.replace(rawUrl: rawURL)
+            XCTFail("A failed replacement must keep the previous image")
+        } catch {}
         try assertPreviousImage(fixture)
     }
 
@@ -123,15 +136,17 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let fixture = try Fixture(responses: [.success(imageData(color: .blue))])
         defer { fixture.cleanup() }
         fixture.fileManager.failsDirectoryLookup = true
-        let result = try await fixture.repository.replace(rawUrl: rawURL).value
-        XCTAssertThrowsError(try result.get())
+        do {
+            try await fixture.repository.replace(rawUrl: rawURL)
+            XCTFail("A failed replacement must keep the previous image")
+        } catch {}
         try assertPreviousImage(fixture)
     }
 
     func test_requestUsesScreenPixelsCenterCropAndQuality() async throws {
         let fixture = try Fixture(responses: [.success(imageData(color: .blue))])
         defer { fixture.cleanup() }
-        try await fixture.repository.replace(rawUrl: rawURL).value.get()
+        try await fixture.repository.replace(rawUrl: rawURL)
         let urls = await fixture.api.urls
         XCTAssertEqual(urls.count, 1)
         let url = try XCTUnwrap(urls.first)
@@ -148,7 +163,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let fixture = try Fixture(responses: [.failure(URLError(.cannotDecodeContentData)), .success(imageData(color: .blue))])
         defer { fixture.cleanup() }
         let legacyURL = rawURL + "&fm=jpg&q=80&w=4000&h=3000&fit=max&crop=faces&fm=png"
-        try await fixture.repository.replace(rawUrl: legacyURL).value.get()
+        try await fixture.repository.replace(rawUrl: legacyURL)
         let urls = await fixture.api.urls
         XCTAssertEqual(urls.count, 2)
         let size = UIScreen.main.nativeBounds.size
@@ -166,7 +181,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
     func test_urlWithoutQueryReceivesTransformationParameters() async throws {
         let fixture = try Fixture(responses: [.success(imageData(color: .blue))])
         defer { fixture.cleanup() }
-        try await fixture.repository.replace(rawUrl: "https://images.example.test/photo").value.get()
+        try await fixture.repository.replace(rawUrl: "https://images.example.test/photo")
         let urls = await fixture.api.urls
         let url = try XCTUnwrap(urls.first)
         XCTAssertEqual(url.path, "/photo")
@@ -183,8 +198,10 @@ final class ThemeImagePersistenceTests: XCTestCase {
             fixture.cleanup()
         }
         try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: directory.path)
-        let result = try await fixture.repository.replace(rawUrl: rawURL).value
-        XCTAssertThrowsError(try result.get())
+        do {
+            try await fixture.repository.replace(rawUrl: rawURL)
+            XCTFail("A failed replacement must keep the previous image")
+        } catch {}
         try assertPreviousImage(fixture)
     }
 
@@ -195,12 +212,15 @@ final class ThemeImagePersistenceTests: XCTestCase {
         defer { fixture.cleanup() }
         let loaded = expectation(description: "initial local file")
         let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
-        let observation = useCase.execute().subscribe(onNext: { file in
-            XCTAssertEqual(file, fixture.previousFile)
-            XCTAssertEqual(file.flatMap { try? Data(contentsOf: $0) }, fixture.previousData)
-            loaded.fulfill()
-        }, onError: { XCTFail("Unexpected observation error: \($0)") })
-        defer { observation.dispose() }
+        let images = useCase.execute()
+        let observation = Task {
+            for await file in images {
+                XCTAssertEqual(file, fixture.previousFile)
+                XCTAssertEqual(file.flatMap { try? Data(contentsOf: $0) }, fixture.previousData)
+                loaded.fulfill()
+            }
+        }
+        defer { observation.cancel() }
         await fulfillment(of: [loaded, request], timeout: 0.1)
         let urls = await fixture.api.urls
         XCTAssertTrue(urls.isEmpty)
@@ -215,11 +235,14 @@ final class ThemeImagePersistenceTests: XCTestCase {
         fixture.userInfo.currentThemeUrl = nil
         let empty = expectation(description: "initial missing file")
         let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
-        let observation = useCase.execute().subscribe(onNext: {
-            XCTAssertNil($0)
-            empty.fulfill()
-        })
-        defer { observation.dispose() }
+        let images = useCase.execute()
+        let observation = Task {
+            for await file in images {
+                XCTAssertNil(file)
+                empty.fulfill()
+            }
+        }
+        defer { observation.cancel() }
         await fulfillment(of: [empty, request], timeout: 0.1)
         let urls = await fixture.api.urls
         XCTAssertTrue(urls.isEmpty)
@@ -233,12 +256,16 @@ final class ThemeImagePersistenceTests: XCTestCase {
         try FileManager.default.removeItem(at: fixture.previousFile)
         let restored = expectation(description: "restored file")
         let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
-        let observation = useCase.execute().compactMap { $0 }.subscribe(onNext: { file in
-            XCTAssertTrue(file.isFileURL)
-            XCTAssertEqual(try? Data(contentsOf: file), data)
-            restored.fulfill()
-        }, onError: { XCTFail("Unexpected recovery error: \($0)") })
-        defer { observation.dispose() }
+        let images = useCase.execute()
+        let observation = Task {
+            for await file in images {
+                guard let file else { continue }
+                XCTAssertTrue(file.isFileURL)
+                XCTAssertEqual(try? Data(contentsOf: file), data)
+                restored.fulfill()
+            }
+        }
+        defer { observation.cancel() }
         await fulfillment(of: [restored], timeout: 2)
         let urls = await fixture.api.urls
         XCTAssertEqual(urls.count, 1)
@@ -258,17 +285,21 @@ final class ThemeImagePersistenceTests: XCTestCase {
         try FileManager.default.removeItem(at: fixture.previousFile)
         let saved = expectation(description: "observation stays active after failed recovery")
         let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
-        let observation = useCase.execute().compactMap { $0 }.subscribe(onNext: { file in
-            XCTAssertEqual(try? Data(contentsOf: file), data)
-            saved.fulfill()
-        }, onError: { XCTFail("Recovery failure must not terminate observation: \($0)") })
-        defer { observation.dispose() }
+        let images = useCase.execute()
+        let observation = Task {
+            for await file in images {
+                guard let file else { continue }
+                XCTAssertEqual(try? Data(contentsOf: file), data)
+                saved.fulfill()
+            }
+        }
+        defer { observation.cancel() }
         await fulfillment(of: [attempts], timeout: 2)
         XCTAssertEqual(fixture.userInfo.currentThemeImageFileName, "previous.png")
         XCTAssertEqual(fixture.userInfo.currentThemeUrl, "https://images.example.test/previous?ixid=test")
         XCTAssertNil(fixture.repository.storedImageFileURL())
 
-        try await fixture.repository.replace(rawUrl: rawURL).value.get()
+        try await fixture.repository.replace(rawUrl: rawURL)
         await fulfillment(of: [saved], timeout: 2)
         let urls = await fixture.api.urls
         XCTAssertEqual(urls.count, 3)
@@ -281,19 +312,25 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let data = imageData(color: .blue)
         let fixture = try Fixture(responses: [])
         defer { fixture.cleanup() }
+        let readable = expectation(description: "new file is readable before the previous file is removed")
+        fixture.userInfo.willPublishFileName = { [weak fixture] _ in
+            guard let fixture, let file = fixture.repository.storedImageFileURL() else { return }
+            XCTAssertNotNil(ImageDecoder.decode(fileURL: file, maxPixelSize: 80))
+            XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.previousFile.path))
+            readable.fulfill()
+        }
         let published = expectation(description: "new file is published")
-        let observation = fixture.repository.storedImageChanged
-            .compactMap { $0 }
-            .filter { $0 != fixture.previousFile }
-            .subscribe(onNext: { file in
-                XCTAssertNotNil(ImageDecoder.decode(fileURL: file, maxPixelSize: 80))
-                XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.previousFile.path))
+        let images = fixture.repository.storedImageChanged
+        let observation = Task {
+            for await file in images where file != nil && file != fixture.previousFile {
                 published.fulfill()
-            })
-        defer { observation.dispose() }
+                break
+            }
+        }
+        defer { observation.cancel() }
 
         try await fixture.repository.replace(imageData: data, crop: fullCrop())
-        await fulfillment(of: [published], timeout: 2)
+        await fulfillment(of: [readable, published], timeout: 2)
 
         let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
         XCTAssertEqual(ImageDecoder.validate(try Data(contentsOf: file)), file.pathExtension)
@@ -408,11 +445,14 @@ final class ThemeImagePersistenceTests: XCTestCase {
 
         let empty = expectation(description: "missing local file")
         let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
-        let observation = useCase.execute().subscribe(onNext: {
-            XCTAssertNil($0)
-            empty.fulfill()
-        })
-        defer { observation.dispose() }
+        let images = useCase.execute()
+        let observation = Task {
+            for await file in images {
+                XCTAssertNil(file)
+                empty.fulfill()
+            }
+        }
+        defer { observation.cancel() }
         await fulfillment(of: [empty, request], timeout: 0.1)
         let urls = await fixture.api.urls
         XCTAssertTrue(urls.isEmpty)
@@ -426,7 +466,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         try await fixture.repository.replace(imageData: imageData(color: .blue), crop: fullCrop())
         XCTAssertNil(fixture.repository.lastSelectedRawUrl)
 
-        try await fixture.repository.replace(rawUrl: rawURL).value.get()
+        try await fixture.repository.replace(rawUrl: rawURL)
 
         XCTAssertEqual(fixture.repository.lastSelectedRawUrl, rawURL)
         XCTAssertEqual(fixture.userInfo.currentThemeUrl, rawURL)

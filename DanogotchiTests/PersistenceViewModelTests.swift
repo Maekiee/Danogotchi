@@ -137,10 +137,33 @@ extension PersistenceViewModelTests {
         appear.accept(())
         XCTAssertTrue(ids.isEmpty)
     }
+
+    func test_libraryRefreshesOnMainWhenActiveBookChangesElsewhere() async throws {
+        let books = DefaultVocabBookRepository(context: makeInMemoryContext())
+        let travel = try books.createBook(title: "travel", bookType: .travel, level: nil)
+        let life = try books.createBook(title: "life", bookType: .life, level: nil)
+        try books.setActiveBook(id: travel.id)
+        let vm = LibraryViewModel(fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(vocabBookRepository: books))
+        let appear = PublishRelay<Void>()
+        let output = vm.transform(input: .init(viewWillAppear: appear.asObservable()))
+        let bag = DisposeBag()
+        let refreshed = expectation(description: "activation from another screen refreshes the library")
+        output.bookItems.drive(onNext: { items in
+            guard items.first(where: \.isActive)?.id == life.id else { return }
+            XCTAssertTrue(Thread.isMainThread)
+            refreshed.fulfill()
+        }).disposed(by: bag)
+        appear.accept(())
+
+        // 단어장 상세 화면이 학습 단어장을 바꾼 상황
+        try books.setActiveBook(id: life.id)
+
+        await fulfillment(of: [refreshed], timeout: 2)
+    }
 }
 
 private final class ControlledBookListUseCase: FetchVocabBooksUseCase {
     var result: Result<[VocabBookCardInfo], Error> = .success([])
-    var activeBookChanged: Observable<Void> { .never() }
-    func execute() -> Observable<Result<[VocabBookCardInfo], Error>> { .just(result) }
+    var activeBookChanged: AsyncStream<Void> { AsyncStream { _ in } }
+    func execute() throws -> [VocabBookCardInfo] { try result.get() }
 }

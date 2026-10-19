@@ -24,20 +24,23 @@ final class LibraryViewModel: BaseViewModel {
         let alertMessage = PublishRelay<String>()
 
         // 상세에서 학습하기를 누르면 Library는 살아 있는 채로 갱신된다 — pop을 기다리지 않는다
+        // 구독마다 새 스트림을 받고, 브리지가 메인 밖에서 돌아 메인으로 옮긴다
+        let activeBookChanged = Observable.deferred { [fetchVocabBooksUseCase] in
+            fetchVocabBooksUseCase.activeBookChanged.asObservable()
+        }
+        .observe(on: MainScheduler.instance)
+
         Observable.merge(
             input.viewWillAppear,
-            fetchVocabBooksUseCase.activeBookChanged
+            activeBookChanged
         )
-        .flatMapLatest { [weak self] _ -> Observable<Result<[VocabBookCardInfo], Error>> in
-            guard let self else { return .empty() }
-            return fetchVocabBooksUseCase.execute()
-        }
-        .bind(onNext: { result in
-            switch result {
-            case .success(let items): bookItems.accept(items)
-            case .failure: alertMessage.accept("단어장을 불러오지 못했어요. 다시 시도해주세요.")
+        .bind(with: self) { owner, _ in
+            do {
+                bookItems.accept(try owner.fetchVocabBooksUseCase.execute())
+            } catch {
+                alertMessage.accept("단어장을 불러오지 못했어요. 다시 시도해주세요.")
             }
-        })
+        }
         .disposed(by: disposeBag)
 
         return Output(bookItems: bookItems.asDriver(), alertMessage: alertMessage.asSignal())

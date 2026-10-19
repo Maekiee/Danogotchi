@@ -81,6 +81,7 @@ final class LibraryViewController: BaseViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "library.close"
     }
 }
 

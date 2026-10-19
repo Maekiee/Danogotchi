@@ -1,11 +1,11 @@
 import Foundation
-import RxSwift
 
 protocol FetchVocabsUseCase {
     /// 활성 단어장 변경 신호. 값 캐시가 아니므로 신호를 받으면 executeActive()로 다시 읽는다.
-    var activeBookChanged: Observable<Void> { get }
-    func execute(topic: BookTopic) -> Observable<Result<[VocabDisplayInfo], Error>>
-    func executeActive() -> Observable<Result<(bookType: BookTopic, items: [VocabDisplayInfo]), Error>>
+    var activeBookChanged: AsyncStream<Void> { get }
+    func execute(topic: BookTopic) throws -> [VocabDisplayInfo]
+    /// 활성 단어장이 없으면 nil
+    func executeActive() throws -> (bookType: BookTopic, items: [VocabDisplayInfo])?
 }
 
 final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
@@ -20,29 +20,19 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
         self.learningHistoryRepository = learningHistoryRepository
     }
 
-    var activeBookChanged: Observable<Void> {
+    var activeBookChanged: AsyncStream<Void> {
         return vocabBookRepository.activeBookChanged
     }
     
-    func execute(topic: BookTopic) -> Observable<Result<[VocabDisplayInfo], Error>> {
-        return .deferred { [self] in
-            .just(Result {
-                let vocabs = try fetchVocabs(topic: topic)
-                return try joinWithHistory(vocabs, savedSourceIDs: savedSourceIDs(topic: topic))
-            })
-        }
+    func execute(topic: BookTopic) throws -> [VocabDisplayInfo] {
+        let vocabs = try fetchVocabs(topic: topic)
+        return try joinWithHistory(vocabs, savedSourceIDs: savedSourceIDs(topic: topic))
     }
 
-    func executeActive() -> Observable<Result<(bookType: BookTopic, items: [VocabDisplayInfo]), Error>> {
-        return .deferred { [self] in
-            do {
-                guard let book = try vocabBookRepository.readActiveBook() else { return .empty() }
-                let items = try joinWithHistory(book.vocabList, savedSourceIDs: savedSourceIDs(topic: book.bookType))
-                return .just(.success((bookType: book.bookType, items: items)))
-            } catch {
-                return .just(.failure(error))
-            }
-        }
+    func executeActive() throws -> (bookType: BookTopic, items: [VocabDisplayInfo])? {
+        guard let book = try vocabBookRepository.readActiveBook() else { return nil }
+        let items = try joinWithHistory(book.vocabList, savedSourceIDs: savedSourceIDs(topic: book.bookType))
+        return (bookType: book.bookType, items: items)
     }
 
     private func fetchVocabs(topic: BookTopic) throws -> [Vocab] {

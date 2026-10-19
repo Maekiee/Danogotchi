@@ -7,10 +7,13 @@ import XCTest
 final class SearchThemeSavingTests: XCTestCase {
     private let rawURL = "https://images.example.test/photo?ixid=test"
 
-    func test_noSelectionOrDeselectionPreventsSaving() {
+    func test_noSelectionOrDeselectionPreventsSaving() async {
         let screen = Fixture()
+        let started = expectation(description: "save must not start without a selection")
+        started.isInverted = true
+        await screen.save.setOnStart { started.fulfill() }
+
         screen.submit.accept(())
-        XCTAssertTrue(screen.save.rawURLs.isEmpty)
         XCTAssertTrue(screen.submitHidden)
 
         screen.selection.accept(rawURL)
@@ -18,34 +21,37 @@ final class SearchThemeSavingTests: XCTestCase {
         screen.selection.accept(nil)
         screen.submit.accept(())
         XCTAssertTrue(screen.submitHidden)
-        XCTAssertTrue(screen.save.rawURLs.isEmpty)
+        await fulfillment(of: [started], timeout: 0.1)
+        let rawURLs = await screen.save.rawURLs
+        XCTAssertTrue(rawURLs.isEmpty)
         XCTAssertEqual(screen.savingStates, [false])
         XCTAssertEqual(screen.savedCount, 0)
     }
 
-    func test_pendingSaveBlocksDuplicateSubmitsAndFinishesOnlyAfterSuccess() {
+    func test_pendingSaveBlocksDuplicateSubmitsAndFinishesOnlyAfterSuccess() async {
         let screen = Fixture()
         screen.selection.accept(rawURL)
-        screen.submit.accept(())
+        await submitAndWaitForStart(screen)
         screen.submit.accept(())
         screen.submit.accept(())
 
-        XCTAssertEqual(screen.save.rawURLs, [rawURL])
+        let rawURLs = await screen.save.rawURLs
+        XCTAssertEqual(rawURLs, [rawURL])
         XCTAssertEqual(screen.savingStates, [false, true])
         XCTAssertEqual(screen.savedCount, 0)
         XCTAssertTrue(screen.alerts.isEmpty)
 
-        screen.save.complete(.success(()))
+        await finish(screen, with: .success(()))
         XCTAssertEqual(screen.savingStates, [false, true, false])
         XCTAssertEqual(screen.savedCount, 1)
         XCTAssertTrue(screen.alerts.isEmpty)
     }
 
-    func test_failureClearsLoadingWithoutFinishingAndSameSelectionCanRetry() {
+    func test_failureClearsLoadingWithoutFinishingAndSameSelectionCanRetry() async {
         let screen = Fixture()
         screen.selection.accept(rawURL)
-        screen.submit.accept(())
-        screen.save.complete(.failure(CocoaError(.fileWriteOutOfSpace)))
+        await submitAndWaitForStart(screen)
+        await finish(screen, with: .failure(CocoaError(.fileWriteOutOfSpace)))
 
         XCTAssertEqual(screen.savingStates, [false, true, false])
         XCTAssertEqual(screen.savedCount, 0)
@@ -53,14 +59,64 @@ final class SearchThemeSavingTests: XCTestCase {
         XCTAssertEqual(screen.selection.value, rawURL)
         XCTAssertFalse(screen.submitHidden)
 
-        screen.submit.accept(())
-        XCTAssertEqual(screen.save.rawURLs, [rawURL, rawURL])
+        await submitAndWaitForStart(screen)
+        let rawURLs = await screen.save.rawURLs
+        XCTAssertEqual(rawURLs, [rawURL, rawURL])
         XCTAssertEqual(screen.savingStates.last, true)
         XCTAssertEqual(screen.savedCount, 0)
-        screen.save.complete(.success(()))
+        await finish(screen, with: .success(()))
         XCTAssertEqual(screen.savingStates, [false, true, false, true, false])
         XCTAssertEqual(screen.savedCount, 1)
         XCTAssertEqual(screen.alerts.count, 1)
+    }
+
+    func test_closingScreenDuringSaveDoesNotReportLateFailure() async {
+        let save = ControlledSaveThemeUseCase()
+        var viewModel: SearchThemeViewModel? = SearchThemeViewModel(
+            searchThemeUseCase: UnusedSearchThemeUseCase(), saveThemeUseCase: save
+        )
+        let selection = BehaviorRelay<String?>(value: rawURL)
+        let submit = PublishRelay<Void>()
+        let output = viewModel!.transform(input: .init(
+            viewWillAppear: .never(), searchText: .never(), loadNextPage: .never(), textEndTrigger: .never(),
+            selectedTheme: selection.asObservable(), submitTapped: submit.asObservable()
+        ))
+        let bag = DisposeBag()
+        let reported = expectation(description: "a save cancelled by closing the screen must not be reported")
+        reported.isInverted = true
+        output.alertMessage.emit(onNext: { _ in reported.fulfill() }).disposed(by: bag)
+        output.themeSaved.emit(onNext: { reported.fulfill() }).disposed(by: bag)
+        let started = expectation(description: "save started")
+        await save.setOnStart { started.fulfill() }
+        submit.accept(())
+        await fulfillment(of: [started], timeout: 2)
+
+        // 화면이 닫혀 ViewModel이 해제된 뒤 저장이 실패로 끝난다
+        weak var released = viewModel
+        viewModel = nil
+        XCTAssertNil(released)
+        await save.complete(.failure(URLError(.cancelled)))
+
+        await fulfillment(of: [reported], timeout: 0.2)
+    }
+
+    // MARK: - Helpers
+
+    /// 저장은 ViewModel의 Task 안에서 시작되므로 시작될 때까지 기다린다
+    private func submitAndWaitForStart(_ screen: Fixture) async {
+        let started = expectation(description: "save started")
+        await screen.save.setOnStart { started.fulfill() }
+        screen.submit.accept(())
+        await fulfillment(of: [started], timeout: 2)
+    }
+
+    /// 저장을 끝내고 로딩 표시가 꺼질 때까지 기다린다
+    private func finish(_ screen: Fixture, with result: Result<Void, Error>) async {
+        let finished = expectation(description: "save finished")
+        screen.onSavingState = { if !$0 { finished.fulfill() } }
+        await screen.save.complete(result)
+        await fulfillment(of: [finished], timeout: 2)
+        screen.onSavingState = nil
     }
 
     @MainActor
@@ -74,6 +130,7 @@ final class SearchThemeSavingTests: XCTestCase {
         var savedCount = 0
         var alerts: [String] = []
         var submitHidden = true
+        var onSavingState: ((Bool) -> Void)?
 
         init() {
             viewModel = SearchThemeViewModel(searchThemeUseCase: UnusedSearchThemeUseCase(), saveThemeUseCase: save)
@@ -81,7 +138,10 @@ final class SearchThemeSavingTests: XCTestCase {
                 viewWillAppear: .never(), searchText: .never(), loadNextPage: .never(), textEndTrigger: .never(),
                 selectedTheme: selection.asObservable(), submitTapped: submit.asObservable()
             ))
-            output.isSaving.drive(onNext: { [weak self] in self?.savingStates.append($0) }).disposed(by: disposeBag)
+            output.isSaving.drive(onNext: { [weak self] in
+                self?.savingStates.append($0)
+                self?.onSavingState?($0)
+            }).disposed(by: disposeBag)
             output.themeSaved.emit(onNext: { [weak self] in self?.savedCount += 1 }).disposed(by: disposeBag)
             output.alertMessage.emit(onNext: { [weak self] in self?.alerts.append($0) }).disposed(by: disposeBag)
             output.buttonEnable.drive(onNext: { [weak self] in self?.submitHidden = $0 }).disposed(by: disposeBag)
@@ -89,26 +149,33 @@ final class SearchThemeSavingTests: XCTestCase {
     }
 }
 
-private final class ControlledSaveThemeUseCase: SaveThemeUseCase {
+// 저장 완료 시점을 테스트가 직접 정하도록 continuation을 붙잡아 둔다
+private actor ControlledSaveThemeUseCase: SaveThemeUseCase {
     private(set) var rawURLs: [String] = []
-    private var pending: ((SingleEvent<Result<Void, Error>>) -> Void)?
+    private var pending: CheckedContinuation<Void, Error>?
+    private var onStart: (@Sendable () -> Void)?
 
-    func execute(rawUrl: String) -> Single<Result<Void, Error>> {
+    func setOnStart(_ handler: @escaping @Sendable () -> Void) {
+        onStart = handler
+    }
+
+    func execute(rawUrl: String) async throws {
         rawURLs.append(rawUrl)
-        return Single.create { [self] observer in
-            XCTAssertNil(pending, "A pending save must not be replaced by another submit")
-            pending = observer
-            return Disposables.create()
+        XCTAssertNil(pending, "A pending save must not be replaced by another submit")
+        try await withCheckedThrowingContinuation { continuation in
+            pending = continuation
+            onStart?()
+            onStart = nil
         }
     }
 
     func complete(_ result: Result<Void, Error>) {
-        guard let observer = pending else {
+        guard let pending else {
             XCTFail("No pending save")
             return
         }
-        pending = nil
-        observer(.success(result))
+        self.pending = nil
+        pending.resume(with: result)
     }
 }
 

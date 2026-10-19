@@ -1,5 +1,4 @@
 import CoreData
-import RxSwift
 import XCTest
 @testable import Danogotchi
 
@@ -34,25 +33,31 @@ final class PersistenceFailureTests: XCTestCase {
         XCTAssertEqual(try repository.readVocab(id: word.id)?.word, "pear")
     }
 
-    func test_failedActivationDoesNotPublishOrChangeActiveBook() throws {
+    @MainActor
+    func test_failedActivationDoesNotPublishOrChangeActiveBook() async throws {
         let context = makeFailingSaveContext()
         let repository = DefaultVocabBookRepository(context: context)
         let first = try repository.createBook(title: "first", bookType: .travel, level: nil)
         let second = try repository.createBook(title: "second", bookType: .life, level: nil)
         try repository.setActiveBook(id: first.id)
-        var changes = 0
-        let subscription = repository.activeBookChanged.subscribe(onNext: { _ in changes += 1 })
-        defer { subscription.dispose() }
+        // 실패 전에 구독을 등록해야 신호가 없었음을 확인할 수 있다
+        let changes = repository.activeBookChanged
+        let unexpected = expectation(description: "failed activation must not publish")
+        unexpected.isInverted = true
+        let observation = Task { for await _ in changes { unexpected.fulfill() } }
         context.failsSave = true
 
         XCTAssertThrowsError(try repository.setActiveBook(id: second.id))
-        XCTAssertEqual(changes, 0)
+        await fulfillment(of: [unexpected], timeout: 0.1)
+        observation.cancel()
         XCTAssertFalse(context.hasChanges)
         XCTAssertEqual(try repository.readActiveBook()?.id, first.id)
 
+        var retryChanges = repository.activeBookChanged.makeAsyncIterator()
         context.failsSave = false
         try repository.setActiveBook(id: second.id)
-        XCTAssertEqual(changes, 1)
+        let received: Void? = await retryChanges.next()
+        XCTAssertNotNil(received)
         XCTAssertEqual(try repository.readActiveBook()?.id, second.id)
     }
 

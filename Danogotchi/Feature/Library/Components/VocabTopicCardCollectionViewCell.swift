@@ -117,6 +117,9 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         textLabel.text = item.topic.title
         backgroundColor = item.topic.color
         activeIcon.isHidden = !item.isActive
+        button.accessibilityIdentifier = "library.book.\(item.topic.rawValue)"
+        button.accessibilityLabel = item.topic.title
+        button.accessibilityValue = item.isActive ? "학습중" : nil
     }
     
 }

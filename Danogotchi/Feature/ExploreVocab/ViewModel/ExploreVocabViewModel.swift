@@ -46,34 +46,36 @@ final class ExploreVocabViewModel: BaseViewModel {
         let alertMessageRelay = PublishRelay<String>()
 
         // 트리거마다 CoreData에서 다시 읽는다 — 단어 추가/삭제가 즉시 반영되도록
-        Observable.merge(fetchVocabsUseCase.activeBookChanged, input.viewWillAppear)
-            .flatMapLatest { [weak self] _ -> Observable<Result<(bookType: BookTopic, items: [VocabDisplayInfo]), Error>> in
-                guard let self else { return .empty() }
-                return fetchVocabsUseCase.executeActive()
-            }
-            .bind(with: self) { owner, result in
-                guard case .success(let content) = result else {
+        // 구독마다 새 스트림을 받고, 브리지가 메인 밖에서 돌아 메인으로 옮긴다
+        let activeBookChanged = Observable.deferred { [fetchVocabsUseCase] in
+            fetchVocabsUseCase.activeBookChanged.asObservable()
+        }
+        .observe(on: MainScheduler.instance)
+
+        Observable.merge(activeBookChanged, input.viewWillAppear)
+            .bind(with: self) { owner, _ in
+                do {
+                    // 활성 단어장이 없으면 화면을 그대로 둔다
+                    guard let content = try owner.fetchVocabsUseCase.executeActive() else { return }
+                    allWordItems.accept(owner.shuffledItems(content.items))
+                    // 나의 단어장을 학습중이면 저장할 곳이 없다
+                    showsSaveButton.accept(content.bookType != .myBook)
+                } catch {
                     alertMessageRelay.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
-                    return
                 }
-                allWordItems.accept(owner.shuffledItems(content.items))
-                // 나의 단어장을 학습중이면 저장할 곳이 없다
-                showsSaveButton.accept(content.bookType != .myBook)
             }.disposed(by: disposeBag)
 
         input.saveVocabTrigger
-            .flatMap { [weak self] item -> Observable<Result<(UUID, Bool), Error>> in
-                guard let self else { return .empty() }
-                return toggleSaveVocabUseCase.execute(vocab: item.word)
-                    .map { result in result.map { (item.word.id, $0) } }
-            }
-            .bind { result in
-                guard case .success(let (vocabId, isSaved)) = result else {
+            .bind(with: self) { owner, item in
+                let isSaved: Bool
+                do {
+                    isSaved = try owner.toggleSaveVocabUseCase.execute(vocab: item.word)
+                } catch {
                     alertMessageRelay.accept("저장하지 못했어요. 다시 시도해주세요.")
                     return
                 }
                 let updatedList = allWordItems.value.map { info -> VocabDisplayInfo in
-                    guard info.word.id == vocabId else { return info }
+                    guard info.word.id == item.word.id else { return info }
                     return VocabDisplayInfo(
                         word: info.word,
                         learningCount: info.learningCount,
@@ -106,8 +108,10 @@ final class ExploreVocabViewModel: BaseViewModel {
             startQuiz: startQuizRelay.asSignal(),
             alertMessage: alertMessageRelay.asSignal(),
             // nil도 그대로 흘린다 — 저장된 이미지가 사라진 상태가 화면에 반영돼야 한다
-            themeImageFileURL: observeThemeUseCase.execute()
-                .asDriver(onErrorDriveWith: .empty())
+            themeImageFileURL: Observable.deferred { [observeThemeUseCase] in
+                observeThemeUseCase.execute().asObservable()
+            }
+            .asDriver(onErrorDriveWith: .empty())
         )
     }
 

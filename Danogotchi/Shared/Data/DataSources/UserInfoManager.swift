@@ -1,6 +1,4 @@
 import Foundation
-import RxSwift
-import RxCocoa
 
 
 final class UserInfoManager: UserInfoProtocol {
@@ -12,13 +10,11 @@ final class UserInfoManager: UserInfoProtocol {
         static let studyReminder = "studyReminderEnabled"
     }
 
-    // 저장된 값으로 출발시킨다 — nil에서 시작하면 구독 직후 nil이 흘러 화면이 비워진다
-    private let themeImageFileNameRelay = BehaviorRelay<String?>(
-        value: UserDefaults.standard.string(forKey: Keys.themeImageFileName)
-    )
+    private let themeImageFileNameBroadcaster = AsyncBroadcaster<String?>()
 
-    var themeImageFileNameObservable: Observable<String?> {
-        return themeImageFileNameRelay.asObservable()
+    // 저장된 값으로 출발시킨다 — nil에서 시작하면 구독 직후 nil이 흘러 화면이 비워진다
+    var themeImageFileNameChanges: AsyncStream<String?> {
+        return themeImageFileNameBroadcaster.stream(current: { self.currentThemeImageFileName })
     }
 
     static let shared = UserInfoManager()
@@ -43,7 +39,7 @@ final class UserInfoManager: UserInfoProtocol {
 
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.themeImageFileName)
-            themeImageFileNameRelay.accept(newValue)
+            themeImageFileNameBroadcaster.send(newValue)
         }
     }
 

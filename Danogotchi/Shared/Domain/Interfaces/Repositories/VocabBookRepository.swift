@@ -1,9 +1,8 @@
 import Foundation
-import RxSwift
 
 protocol VocabBookRepository {
     /// 활성 단어장이 바뀌었다는 신호. 값 캐시가 아니므로 신호를 받으면 readActiveBook()으로 다시 읽는다.
-    var activeBookChanged: Observable<Void> { get }
+    var activeBookChanged: AsyncStream<Void> { get }
     func readActiveBook() throws -> VocabBook?
     func setActiveBook(id: UUID) throws
     func createBook(title: String, bookType: BookTopic, level: VocabLevel?) throws -> VocabBook

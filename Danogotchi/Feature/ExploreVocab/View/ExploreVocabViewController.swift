@@ -58,7 +58,11 @@ final class ExploreVocabViewController: BaseViewController {
     private let settingTabButton = CircularIconButton(systemName: "gearshape")
     private let studyReportButton = CircularIconButton(systemName: "chart.line.uptrend.xyaxis")
     private let openCharacterButton = CircularIconButton(assetNamed: "character-icon")
-    private let showLibraryVCButton = CircularIconButton(systemName: "square.grid.2x2")
+    private let showLibraryVCButton: CircularIconButton = {
+        let button = CircularIconButton(systemName: "square.grid.2x2")
+        button.accessibilityIdentifier = "explore.library"
+        return button
+    }()
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.title = "학습하기"

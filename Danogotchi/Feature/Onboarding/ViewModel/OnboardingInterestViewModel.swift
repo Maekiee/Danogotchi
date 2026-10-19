@@ -43,17 +43,14 @@ final class OnboardingInterestViewModel: BaseViewModel {
         input.nextTapped
             .withLatestFrom(selectedTopic)
             .compactMap { $0 }
-            .flatMapLatest { [weak self] topic -> Observable<Result<Bool, Error>> in
-                guard let self else { return .empty() }
-                return setActiveBookUseCase.execute(topic: topic)
-            }
-            .bind(onNext: { result in
-                switch result {
-                case .success(true): didFinish.accept(())
-                case .success(false), .failure:
+            .bind(with: self) { owner, topic in
+                do {
+                    try owner.setActiveBookUseCase.execute(topic: topic)
+                    didFinish.accept(())
+                } catch {
                     alertMessage.accept("저장하지 못했어요. 다시 시도해주세요.")
                 }
-            })
+            }
             .disposed(by: disposeBag)
 
         return Output(

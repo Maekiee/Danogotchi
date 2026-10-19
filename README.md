@@ -366,7 +366,8 @@ flowchart LR
 * 원격 I/O 경로만 `async`/`await`로 씁니다 — `DefaultApiClient`(URLSession) → `DefaultWeatherRepository` · `DefaultSearchThemeRepository` · `DefaultThemeImageRepository` → `FetchCurrentWeatherUseCase` · `SearchThemeUseCase`. `ApiClient`와 `Endpoint`는 `Sendable`입니다.
 * Core Data 쓰기 경로는 동기 `throws`를 유지합니다. "저장 성공 이후에만 변경 신호를 방출한다"는 불변식이 동기 저장에 기대고 있어, 바꿀 이유가 없는 곳을 바꾸지 않았습니다.
 * 학습 리포트 조회만 예외로 `async` — background context에서 집계해 메인 스레드 비차단
-* **Rx ↔ async 경계를 한 곳에 고정**했습니다. `DefaultThemeImageRepository.replace`가 `Single.create` 안에서 `Task`를 띄우고, dispose되면 `task.cancel()`로 취소를 전달하며, 오류는 `Result`로 감싸 구독이 끊기지 않게 합니다.
+* **Rx ↔ async 경계를 ViewModel에 고정**했습니다. Domain과 Data 계층은 RxSwift를 import하지 않고 동기 `throws` · `async throws` · `AsyncStream`만 노출합니다. ViewModel이 `AsyncStream`을 `asObservable()`로 받아 `observe(on: MainScheduler.instance)`로 메인에 옮기고, `async` 저장은 `Task`로 실행해 `deinit`에서 취소합니다.
+* 변경 신호는 `AsyncBroadcaster`가 구독마다 새 `AsyncStream`을 만들어 여러 화면에 함께 전달합니다. 현재 값이 필요한 배경 테마는 구독 즉시 현재 파일명을 먼저 보냅니다.
 * **델리게이트 → async**: `DeviceLocationProvider`가 `withCheckedThrowingContinuation`으로 `CLLocationManager` 1회 조회를 `async` 함수로 바꿉니다. 이중 resume과 동시 요청을 막고(`LocationError.requestInProgress`), `@MainActor final class` + `nonisolated override init()`으로 DI 조립부는 메인 격리 밖에 둡니다. 델리게이트 채택은 `@preconcurrency`입니다.
 * **취소를 기능으로 씁니다.** 테마 검색은 `searchTask`를 새 검색과 `deinit`에서 취소하고 `Task.isCancelled` · `CancellationError`를 걸러 낡은 응답이 화면을 덮지 않게 합니다. 이미지 포맷 폴백 루프는 `Task.checkCancellation()`으로 다음 포맷 시도를 멈추고, 셀 썸네일은 `prepareForReuse`에서 취소합니다.
 * 메인 스레드에서 내보내는 작업은 이미지 디코딩 하나입니다 — `Task.detached(priority: .userInitiated)`로 돌리고 결과 적용만 `@MainActor`에서 합니다.

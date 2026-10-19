@@ -1,12 +1,10 @@
 import Foundation
 import CoreData
-import RxSwift
-import RxCocoa
 
 final class DefaultVocabBookRepository {
     private let context: NSManagedObjectContext
     /// 변경 신호 전용. 내용은 캐시하지 않고 매번 CoreData에서 다시 읽는다.
-    private let activeBookChangedRelay = PublishRelay<Void>()
+    private let activeBookChangedBroadcaster = AsyncBroadcaster<Void>()
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -31,8 +29,8 @@ final class DefaultVocabBookRepository {
 }
 
 extension DefaultVocabBookRepository: VocabBookRepository {
-    var activeBookChanged: Observable<Void> {
-        return activeBookChangedRelay.asObservable()
+    var activeBookChanged: AsyncStream<Void> {
+        return activeBookChangedBroadcaster.stream()
     }
 
     func readActiveBook() throws -> VocabBook? {
@@ -48,7 +46,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
 
         try context.saveOrRollback()
 
-        activeBookChangedRelay.accept(())
+        activeBookChangedBroadcaster.send(())
     }
 
     func createBook(title: String, bookType: BookTopic, level: VocabLevel?) throws -> VocabBook {
@@ -101,7 +99,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         try context.saveOrRollback()
 
         if wasActive {
-            activeBookChangedRelay.accept(())
+            activeBookChangedBroadcaster.send(())
         }
     }
     
