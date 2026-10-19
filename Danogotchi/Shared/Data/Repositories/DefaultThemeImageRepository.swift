@@ -1,4 +1,4 @@
-import UIKit
+import Foundation
 import OSLog
 
 final class DefaultThemeImageRepository {
@@ -13,18 +13,19 @@ final class DefaultThemeImageRepository {
     private let apiClient: ApiClient
     private let storage: ImageFileStorage
     private let userInfo: UserInfoProtocol
-    /// 화면 픽셀 크기. UIScreen은 메인 스레드 전용이라 다운로드 중이 아니라 생성 시점에 읽어둔다.
+    /// 내려받기·합성 기준 화면 픽셀 크기
     private let targetPixelSize: CGSize
 
     init(
         apiClient: ApiClient,
         storage: ImageFileStorage,
-        userInfo: UserInfoProtocol
+        userInfo: UserInfoProtocol,
+        targetPixelSize: CGSize
     ) {
         self.apiClient = apiClient
         self.storage = storage
         self.userInfo = userInfo
-        self.targetPixelSize = UIScreen.main.nativeBounds.size
+        self.targetPixelSize = targetPixelSize
     }
 }
 

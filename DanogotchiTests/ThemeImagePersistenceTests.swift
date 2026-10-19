@@ -508,7 +508,12 @@ final class ThemeImagePersistenceTests: XCTestCase {
             previousFile = try storage.save(previousData, fileName: "previous.png")
             userInfo.currentThemeUrl = "https://images.example.test/previous?ixid=test"
             userInfo.currentThemeImageFileName = "previous.png"
-            repository = DefaultThemeImageRepository(apiClient: api, storage: storage, userInfo: userInfo)
+            repository = DefaultThemeImageRepository(
+                apiClient: api,
+                storage: storage,
+                userInfo: userInfo,
+                targetPixelSize: UIScreen.main.nativeBounds.size
+            )
         }
         func cleanup() { try? FileManager.default.removeItem(at: root) }
     }

@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 import OSLog
 
 final class AppDIContainer {
@@ -151,7 +151,9 @@ extension AppDIContainer {
         return DefaultThemeImageRepository(
             apiClient: apiClient,
             storage: themeImageStorage,
-            userInfo: userInfoManager
+            userInfo: userInfoManager,
+            // UIScreen은 메인 스레드 전용이라 조립 시점에 읽어 주입
+            targetPixelSize: UIScreen.main.nativeBounds.size
         )
     }
 
