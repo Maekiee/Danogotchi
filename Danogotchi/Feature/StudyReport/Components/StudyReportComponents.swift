@@ -306,7 +306,7 @@ struct StudyReportActivityChart: View {
                     .chartYScale(domain: 0...max(1, report.activity.map(\.count).max() ?? 0))
                     .chartXAxis {
                         AxisMarks(values: Array(report.activity.indices)) { value in
-                            AxisValueLabel {
+                            AxisValueLabel(anchor: .top) {
                                 if let index = value.as(Int.self), report.activity.indices.contains(index) {
                                     Text(StudyReportStyle.date(report.activity[index].date, calendar: report.calendar,
                                                               format: report.period == .all ? "yy.M" : "M.d"))
@@ -361,7 +361,7 @@ struct StudyReportSessionChart: View {
             }
             .chartXAxis {
                 AxisMarks(values: Array(Set([0, report.sessions.count / 2, report.sessions.count - 1])).sorted()) { value in
-                    AxisValueLabel {
+                    AxisValueLabel(anchor: .top) {
                         if let index = value.as(Int.self), report.sessions.indices.contains(index) {
                             Text(StudyReportStyle.date(report.sessions[index].completedAt, calendar: report.calendar))
                         }
