@@ -18,10 +18,15 @@ enum StudyReportDestination: Equatable, Sendable {
 struct StudyReportFeature {
     @ObservableState
     struct State: Equatable {
+        enum LoadStatus: Equatable {
+            case idle
+            case loading(UUID)
+            case failed
+        }
+
         var period: StudyReportPeriod = .week
         var report: StudyReport?
-        var requestID: UUID?
-        var hasError = false
+        var loadStatus: LoadStatus = .idle
         var selectedActivity: Date?
         var selectedSession: Int?
         var selectedTopic: String?
@@ -29,7 +34,10 @@ struct StudyReportFeature {
         var selectedMistake: String?
         var mistakeKind: StudyReportCategoryKind = .topic
 
-        var isLoading: Bool { requestID != nil }
+        var isLoading: Bool {
+            if case .loading = loadStatus { return true }
+            return false
+        }
     }
 
     enum Action: Equatable {
@@ -73,17 +81,19 @@ struct StudyReportFeature {
                 state.period = period
                 return load(&state)
             case let .loaded(id, report):
-                guard state.requestID == id else { return .none }
-                state.requestID = nil
+                guard state.loadStatus == .loading(id) else { return .none }
+                state.loadStatus = .idle
                 state.report = report
-                state.hasError = false
                 state.selectedActivity = report.hasActivity ? report.activity.last?.date : nil
                 state.selectedSession = report.sessions.isEmpty ? nil : report.sessions.count - 1
+                // 로딩 중엔 이전 선택 유지, 새 리포트 도착 시 초기화
+                state.selectedTopic = nil
+                state.selectedPart = nil
+                state.selectedMistake = nil
                 return .none
             case let .loadFailed(id):
-                guard state.requestID == id else { return .none }
-                state.requestID = nil
-                state.hasError = true
+                guard state.loadStatus == .loading(id) else { return .none }
+                state.loadStatus = .failed
                 return .none
             case let .activitySelected(value):
                 // 터치 종료(nil)·값 없는 차트는 기존 선택 유지
@@ -111,19 +121,20 @@ struct StudyReportFeature {
                 state.selectedMistake = nil
                 return .none
             case let .wordsTapped(period):
-                guard let report = state.report, !state.isLoading, !state.hasError else { return .none }
+                guard let report = state.report, state.loadStatus == .idle else { return .none }
                 let list = wordList(report, period: period)
                 return .run { _ in await onNavigate(.words(list)) }
             case let .wordTapped(id):
-                guard let report = state.report, !state.isLoading, !state.hasError,
+                guard let report = state.report, state.loadStatus == .idle,
                       let word = report.words.first(where: { $0.id == id }) else { return .none }
                 let list = wordList(report, period: state.period)
                 return .run { _ in await onNavigate(.word(word, list)) }
             case .closeButtonTapped:
-                state.requestID = nil
+                // 로딩만 취소, 오류 상태는 유지
+                if state.isLoading { state.loadStatus = .idle }
                 return .concatenate(.cancel(id: CancelID.load), .run { _ in await onClose() })
             case .disappeared:
-                state.requestID = nil
+                if state.isLoading { state.loadStatus = .idle }
                 return .cancel(id: CancelID.load)
             }
         }
@@ -134,13 +145,7 @@ struct StudyReportFeature {
         let period = state.period
         let date = now()
         let calendar = calendar()
-        state.requestID = id
-        state.hasError = false
-        state.selectedActivity = nil
-        state.selectedSession = nil
-        state.selectedTopic = nil
-        state.selectedPart = nil
-        state.selectedMistake = nil
+        state.loadStatus = .loading(id)
         return .run { send in
             do {
                 let report = try await fetch(period, date, calendar)

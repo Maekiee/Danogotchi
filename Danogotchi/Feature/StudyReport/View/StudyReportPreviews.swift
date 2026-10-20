@@ -32,8 +32,8 @@ private struct StudyReportPreview: View {
         state.report = try? DefaultFetchStudyReportUseCase.aggregate(records, period: .week, now: Date(), calendar: .current)
         state.selectedActivity = state.report?.activity.last?.date
         state.selectedSession = state.report?.sessions.indices.last
-        if scenario == .loading { state.requestID = UUID() }
-        if scenario == .error { state.hasError = true }
+        if scenario == .loading { state.report = nil; state.loadStatus = .loading(UUID()) }
+        if scenario == .error { state.loadStatus = .failed }
         return state
     }
 

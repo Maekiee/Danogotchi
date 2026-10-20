@@ -18,8 +18,8 @@ final class StudyReportFeatureTests: XCTestCase {
             }, reportError: { _ in errorCount.withValue { $0 += 1 } },
                onClose: { closedCount.withValue { $0 += 1 } })
         } withDependencies: { $0.uuid = .incrementing }
-        await store.send(.appeared) { $0.requestID = self.firstID }
-        await store.send(.closeButtonTapped) { $0.requestID = nil }
+        await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
+        await store.send(.closeButtonTapped) { $0.loadStatus = .idle }
         await store.finish()
         XCTAssertEqual(closedCount.value, 1)
         XCTAssertEqual(errorCount.value, 0)
@@ -30,9 +30,9 @@ final class StudyReportFeatureTests: XCTestCase {
         let store = TestStore(initialState: StudyReportFeature.State()) {
             StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
-        await store.send(.appeared) { $0.requestID = self.firstID }
+        await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
         await store.receive(.loaded(firstID, report)) {
-            $0.requestID = nil
+            $0.loadStatus = .idle
             $0.report = report
         }
         // 막대 값이 모두 0이면 선택 문구를 띄우지 않음
@@ -52,9 +52,9 @@ final class StudyReportFeatureTests: XCTestCase {
         let store = TestStore(initialState: StudyReportFeature.State()) {
             StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
-        await store.send(.appeared) { $0.requestID = self.firstID }
+        await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
         await store.receive(.loaded(firstID, report)) {
-            $0.requestID = nil
+            $0.loadStatus = .idle
             $0.report = report
             $0.selectedActivity = reportCalendar().startOfDay(for: reportDate())
             $0.selectedSession = 1
@@ -81,13 +81,13 @@ final class StudyReportFeatureTests: XCTestCase {
                 return month
             }, reportError: { _ in errorCount.withValue { $0 += 1 } }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
-        await store.send(.appeared) { $0.requestID = self.firstID }
+        await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
         await store.send(.periodChanged(.month)) {
             $0.period = .month
-            $0.requestID = self.secondID
+            $0.loadStatus = .loading(self.secondID)
         }
         await store.receive(.loaded(secondID, month)) {
-            $0.requestID = nil
+            $0.loadStatus = .idle
             $0.report = month
         }
         await store.send(.loaded(firstID, week))
@@ -106,13 +106,14 @@ final class StudyReportFeatureTests: XCTestCase {
                 return report
             }, reportError: { error in errors.withValue { $0.append(error as NSError) } }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
-        await store.send(.appeared) { $0.requestID = self.firstID }
-        await store.receive(.loadFailed(firstID)) { $0.requestID = nil; $0.hasError = true }
+        await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
+        await store.receive(.loadFailed(firstID)) { $0.loadStatus = .failed }
+        await store.send(.disappeared)
         XCTAssertEqual(errors.value.map(\.domain), [NSCocoaErrorDomain])
         XCTAssertEqual(errors.value.map(\.code), [CocoaError.Code.fileReadUnknown.rawValue])
-        await store.send(.refresh) { $0.requestID = self.secondID; $0.hasError = false }
+        await store.send(.refresh) { $0.loadStatus = .loading(self.secondID) }
         await store.receive(.loaded(secondID, report)) {
-            $0.requestID = nil
+            $0.loadStatus = .idle
             $0.report = report
         }
         XCTAssertEqual(store.state.report?.totalAnswers, 0)
@@ -156,23 +157,23 @@ final class StudyReportFeatureTests: XCTestCase {
         state.selectedPart = "noun"
         state.selectedMistake = "travel"
         let store = TestStore(initialState: state) {
-            StudyReportFeature(fetch: { _, _, _ in
-                try await Task.sleep(for: .seconds(3600))
-                return report
-            }, reportError: { _ in }, onClose: {})
+            StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
         await store.send(.mistakeKindChanged(.partOfSpeech)) {
             $0.mistakeKind = .partOfSpeech
             $0.selectedMistake = nil
         }
+        // 로딩 중엔 선택 유지, 새 리포트 도착 시 초기화
         await store.send(.periodChanged(.all)) {
             $0.period = .all
-            $0.requestID = self.firstID
+            $0.loadStatus = .loading(self.firstID)
+        }
+        await store.receive(.loaded(firstID, report)) {
+            $0.loadStatus = .idle
             $0.selectedActivity = nil
             $0.selectedTopic = nil
             $0.selectedPart = nil
         }
-        await store.send(.disappeared) { $0.requestID = nil }
         await store.finish()
     }
 
