@@ -3,10 +3,10 @@ import UIKit
 enum AppFont {
     
     enum Weight: String {
-        case regular = "Pretendard-Regular"
-        case medium = "Pretendard-Medium"
-        case semibold = "Pretendard-SemiBold"
-        case bold = "Pretendard-Bold"
+        case regular = "PretendardJP-Regular"
+        case medium = "PretendardJP-Medium"
+        case semibold = "PretendardJP-SemiBold"
+        case bold = "PretendardJP-Bold"
     }
     
     static func font(_ weight: Weight, size: CGFloat) -> UIFont {
