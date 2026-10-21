@@ -2,22 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UnsplashPhotoSearch</key>
-	<string>$(UNSPLASH_PHOTO_SEARCH_URL)</string>
-	<key>UnsplashAPIKeys</key>
+	<key>UIAppFonts</key>
 	<array>
-		<string>$(UNSPLASH_API_KEY1)</string>
-		<string>$(UNSPLASH_API_KEY2)</string>
-		<string>$(UNSPLASH_API_KEY3)</string>
+		<string>Pretendard-Regular.otf</string>
+		<string>Pretendard-Medium.otf</string>
+		<string>Pretendard-SemiBold.otf</string>
+		<string>Pretendard-Bold.otf</string>
 	</array>
-	<key>UnsplashBaseURL</key>
-	<string>$(UNSPLASH_BASE_URL)</string>
-	<key>WeatherBaseURL</key>
-	<string>$(WEATHER_BASE_URL)</string>
-	<key>WeatherAPIKey</key>
-	<string>$(WEATHER_API_KEY)</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>현재 위치의 날씨를 보여주기 위해 위치 정보를 사용합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -39,12 +30,19 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-	<key>UIAppFonts</key>
+	<key>UnsplashAPIKeys</key>
 	<array>
-		<string>Pretendard-Regular.otf</string>
-		<string>Pretendard-Medium.otf</string>
-		<string>Pretendard-SemiBold.otf</string>
-		<string>Pretendard-Bold.otf</string>
+		<string>$(UNSPLASH_API_KEY1)</string>
+		<string>$(UNSPLASH_API_KEY2)</string>
+		<string>$(UNSPLASH_API_KEY3)</string>
 	</array>
+	<key>UnsplashBaseURL</key>
+	<string>$(UNSPLASH_BASE_URL)</string>
+	<key>UnsplashPhotoSearch</key>
+	<string>$(UNSPLASH_PHOTO_SEARCH_URL)</string>
+	<key>WeatherAPIKey</key>
+	<string>$(WEATHER_API_KEY)</string>
+	<key>WeatherBaseURL</key>
+	<string>$(WEATHER_BASE_URL)</string>
 </dict>
 </plist>
