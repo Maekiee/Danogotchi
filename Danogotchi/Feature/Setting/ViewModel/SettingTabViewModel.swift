@@ -50,7 +50,7 @@ final class SettingTabViewModel: BaseViewModel {
                 do {
                     try owner.studyReminderUseCase.setEnabled(isOn)
                 } catch {
-                    alertMessage.accept("알림 설정을 변경하지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "알림 설정을 변경하지 못했어요. 다시 시도해주세요."))
                 }
                 isReminderOn.accept(owner.studyReminderUseCase.isEnabled)
             }
@@ -75,7 +75,7 @@ final class SettingTabViewModel: BaseViewModel {
 
 extension SettingTabViewModel {
     private func makeMailBody() -> String {
-        return  """
+        return String(localized: """
                     궁금하신 점이나 불편 사항을 편하게 남겨주세요.
                     
                     
@@ -86,6 +86,6 @@ extension SettingTabViewModel {
                     기기: \(appEnv.deviceModel)
                     OS 버전: \(appEnv.systemVersion)
                     -------------------
-                    """
+                    """)
     }
 }

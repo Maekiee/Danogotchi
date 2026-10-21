@@ -119,7 +119,7 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
         activeIcon.isHidden = !item.isActive
         button.accessibilityIdentifier = "library.book.\(item.topic.rawValue)"
         button.accessibilityLabel = item.topic.title
-        button.accessibilityValue = item.isActive ? "학습중" : nil
+        button.accessibilityValue = item.isActive ? String(localized: "학습중") : nil
     }
     
 }

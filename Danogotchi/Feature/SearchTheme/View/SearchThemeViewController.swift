@@ -35,7 +35,7 @@ final class SearchThemeViewController: BaseViewController {
 
     private let titleText: UILabel = {
         let label = UILabel()
-        label.text = "배경 테마를 골라주세요"
+        label.text = String(localized: "배경 테마를 골라주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
         return label
@@ -45,10 +45,10 @@ final class SearchThemeViewController: BaseViewController {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "photo.on.rectangle"), for: .normal)
         button.tintColor = AppColor.textPrimary
-        button.accessibilityLabel = "내 사진으로 지정"
+        button.accessibilityLabel = String(localized: "내 사진으로 지정")
         return button
     }()
-    private let textField = RoundedTextField(placeholder: "이미지를 검색해주세요")
+    private let textField = RoundedTextField(placeholder: String(localized: "이미지를 검색해주세요"))
     private lazy var collectionView: UICollectionView = {
         waterfallLayout.delegate = self
         let view = UICollectionView(
@@ -60,7 +60,7 @@ final class SearchThemeViewController: BaseViewController {
         return view
     }()
     private lazy var  submitButton: PrimaryFillButton = {
-        let button = entryMode == .onboarding ? "시작하기" : "수정하기"
+        let button = entryMode == .onboarding ? String(localized: "시작하기") : String(localized: "수정하기")
         return PrimaryFillButton(title: button)
     }()
     private let savingIndicator: UIActivityIndicatorView = {
@@ -185,7 +185,7 @@ extension SearchThemeViewController {
         output.isEmptyResult
             .drive(with: self) { owner, isEmpty in
                 if isEmpty {
-                    owner.collectionView.setView(title: "검색 결과가 없습니다")
+                    owner.collectionView.setView(title: String(localized: "검색 결과가 없습니다"))
                 } else {
                     owner.collectionView.restore()
                 }
@@ -246,7 +246,7 @@ extension SearchThemeViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         // 저장까지 끝난 뒤 다음 화면으로 넘긴다 (온보딩/설정 분기는 Coordinator가 담당)

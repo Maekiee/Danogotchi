@@ -74,6 +74,6 @@ extension LibraryCoordinator: AddVocabViewControllerDelegate {
         navigationController.popViewController(animated: true)
         // showToast는 VC 자기 view에 붙으므로, pop으로 노출되는 화면에 띄운다.
         (navigationController.topViewController as? BaseViewController)?
-            .showToast("단어가 수정 되었습니다.")
+            .showToast(String(localized: "단어가 수정 되었습니다."))
     }
 }

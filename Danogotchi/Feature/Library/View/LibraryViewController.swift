@@ -94,7 +94,7 @@ extension LibraryViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         output.bookItems

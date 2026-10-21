@@ -1,11 +1,154 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
+    " · %lld번 학습" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " · %lld回学習"
+          }
+        }
+      }
+    },
     "%" : {
-
+      "shouldTranslate" : false
+    },
+    "%.2f배" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.2f倍"
+          }
+        }
+      }
+    },
+    "%@ · %lld / %lld개 · %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld / %3$lld個 · %4$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld / %3$lld개 · %4$@"
+          }
+        }
+      }
+    },
+    "%@ · %lld회 풀이 · 전체의 %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld回解答 · 全体の%3$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld회 풀이 · 전체의 %3$@"
+          }
+        }
+      }
+    },
+    "%@ · 오답 %lld / 풀이 %lld회 · %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · 不正解 %2$lld / 解答 %3$lld回 · %4$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · 오답 %2$lld / 풀이 %3$lld회 · %4$@"
+          }
+        }
+      }
+    },
+    "%@ · 정답 %lld / %lld문제 · %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · 正解 %2$lld / %3$lld問 · %4$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · 정답 %2$lld / %3$lld문제 · %4$@"
+          }
+        }
+      }
+    },
+    "%@ · 중복 제외 %lld개" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · 重複を除く%2$lld個"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · 중복 제외 %2$lld개"
+          }
+        }
+      }
+    },
+    "%@ · 학습한 단어 %lld개" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · 学習した単語 %2$lld個"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · 학습한 단어 %2$lld개"
+          }
+        }
+      }
+    },
+    "%@ 알" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の卵"
+          }
+        }
+      }
     },
     "%@ 저장" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を保存"
+          }
+        }
+      }
+    },
+    "%@ 학습 단어" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の学習単語"
+          }
+        }
+      }
     },
     "%@, %@" : {
       "localizations" : {
@@ -15,19 +158,59 @@
             "value" : "%1$@, %2$@"
           }
         }
+      },
+      "shouldTranslate" : false
+    },
+    "%@이(가) 위험해요. 체력이 줄고 있어요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@が危険です。体力が減っています。"
+          }
+        }
       }
     },
     "%lld" : {
-
+      "shouldTranslate" : false
+    },
+    "%lld 중 %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld中%2$lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld 중 %2$lld"
+          }
+        }
+      }
     },
     "%lld%%" : {
-
+      "shouldTranslate" : false
     },
     "%lld개" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld個"
+          }
+        }
+      }
     },
     "%lld개 · %@" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld個 · %2$@"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -36,8 +219,30 @@
         }
       }
     },
+    "%lld개 전부 정답! 보너스 +%lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld問すべて正解！ボーナス +%2$lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld개 전부 정답! 보너스 +%2$lld"
+          }
+        }
+      }
+    },
     "%lld개, %@" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld個、%2$@"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -46,59 +251,1306 @@
         }
       }
     },
+    "%lld개를 학습했어요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld個の単語を学習しました"
+          }
+        }
+      }
+    },
     "%lld번 학습" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld回学習"
+          }
+        }
+      }
     },
     "%lld일 연속 학습" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld日連続学習"
+          }
+        }
+      }
+    },
+    "%lld퍼센트" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldパーセント"
+          }
+        }
+      }
+    },
+    "%lld퍼센트, 위험" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldパーセント、危険"
+          }
+        }
+      }
     },
     "%lld회" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld回"
+          }
+        }
+      }
     },
     "0회" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0回"
+          }
+        }
+      }
+    },
+    "M월 d일" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M月d日"
+          }
+        }
+      }
+    },
+    "M월 d일 HH:mm" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M月d日 HH:mm"
+          }
+        }
+      }
+    },
+    "yyyy년 M월" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "yyyy年M月"
+          }
+        }
+      }
+    },
+    "yyyy년 M월 d일" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "yyyy年M月d日"
+          }
+        }
+      }
+    },
+    "갈증" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "水分"
+          }
+        }
+      }
+    },
+    "감정" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "感情"
+          }
+        }
+      }
+    },
+    "개인정보 처리방침" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライバシーポリシー"
+          }
+        }
+      }
+    },
+    "검색 결과가 없습니다" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索結果がありません"
+          }
+        }
+      }
+    },
+    "경험치" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "経験値"
+          }
+        }
+      }
+    },
+    "경험치가 부족해요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "経験値が足りません"
+          }
+        }
+      }
+    },
+    "경험치가 일부 차감돼요. 부활할까요?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "経験値が一部減ります。復活させますか？"
+          }
+        }
+      }
+    },
+    "계속 학습하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習を続ける"
+          }
+        }
+      }
     },
     "고유 단어" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニーク単語"
+          }
+        }
+      }
+    },
+    "관심 있는 주제를 골라주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "興味のあるテーマを選んでください"
+          }
+        }
+      }
+    },
+    "궁금하신 점이나 불편 사항을 편하게 남겨주세요.\n\n\n\n\n-------------------\n앱 버전: %@\n기기: %@\nOS 버전: %@\n-------------------" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ご質問やご不便な点がございましたら、お気軽にお書きください。\n\n\n\n\n-------------------\nアプリのバージョン: %1$@\n端末: %2$@\nOSバージョン: %3$@\n-------------------"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "궁금하신 점이나 불편 사항을 편하게 남겨주세요.\n\n\n\n\n-------------------\n앱 버전: %1$@\n기기: %2$@\nOS 버전: %3$@\n-------------------"
+          }
+        }
+      }
+    },
+    "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この端末にメールアカウントが設定されていません。iPhoneの「設定」アプリでメールアカウントを追加してください。"
+          }
+        }
+      }
+    },
+    "기록을 불러오지 못했어요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録を読み込めませんでした"
+          }
+        }
+      }
     },
     "날짜" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付"
+          }
+        }
+      }
     },
     "내 사진으로 지정" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の写真に設定"
+          }
+        }
+      }
+    },
+    "놀아주기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あそぶ"
+          }
+        }
+      }
     },
     "누적 학습 단어 ›" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "累計学習単語 ›"
+          }
+        }
+      }
+    },
+    "다노가 기다려요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダノが待っています"
+          }
+        }
+      }
+    },
+    "다른 사진 고르기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別の写真を選ぶ"
+          }
+        }
+      }
     },
     "다시 시도" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        }
+      }
+    },
+    "다음" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次へ"
+          }
+        }
+      }
     },
     "단어" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語"
+          }
+        }
+      }
+    },
+    "단어 학습" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語学習"
+          }
+        }
+      }
+    },
+    "단어가 수정 되었습니다." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語を更新しました。"
+          }
+        }
+      }
+    },
+    "단어가 추가 되었습니다." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語を追加しました。"
+          }
+        }
+      }
+    },
+    "단어를 불러오지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語を読み込めませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語帳の状態を変更または読み込みできませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "단어장을 불러오지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語帳を読み込めませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "데이터 조회 실패" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データの読み込みに失敗しました"
+          }
+        }
+      }
+    },
+    "데이터 준비 실패" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データの準備に失敗しました"
+          }
+        }
+      }
+    },
+    "데이터를 불러오지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを読み込めませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "데이터를 준비하지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを準備できませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "동사" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動詞"
+          }
+        }
+      }
+    },
+    "뜻" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意味"
+          }
+        }
+      }
+    },
+    "레벨 %lld, %lld퍼센트" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "レベル%1$lld、%2$lldパーセント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "레벨 %1$lld, %2$lld퍼센트"
+          }
+        }
+      }
+    },
+    "레벨 %lld, 최고 레벨" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "レベル%lld、最高レベル"
+          }
+        }
+      }
+    },
+    "레벨업" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "レベルアップ"
+          }
+        }
+      }
+    },
+    "만족함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まんぞく"
+          }
+        }
+      }
+    },
+    "많이 맞힌 단어" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく正解した単語"
+          }
+        }
+      }
+    },
+    "많이 틀린 종류" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく間違えた種類"
+          }
+        }
+      }
+    },
+    "먼저 부활시켜 주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先に復活させてください"
+          }
+        }
+      }
+    },
+    "메일 전송 성공" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メールを送信しました"
+          }
+        }
+      }
+    },
+    "메일 전송 실패" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メールの送信に失敗しました"
+          }
+        }
+      }
+    },
+    "메일이 성공적으로 전송 되었습니다." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メールが正常に送信されました。"
+          }
+        }
+      }
+    },
+    "명사" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名詞"
+          }
+        }
+      }
+    },
+    "목마름" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "のどがかわいた"
+          }
+        }
+      }
+    },
+    "문의하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お問い合わせ"
+          }
+        }
+      }
+    },
+    "물주기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お水"
+          }
+        }
+      }
+    },
+    "미분류" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分類"
+          }
+        }
+      }
+    },
+    "밥주기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ごはん"
+          }
+        }
+      }
+    },
+    "배경 사진 영역" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "背景写真の範囲"
+          }
+        }
+      }
+    },
+    "배경 테마 변경하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "背景テーマを変更"
+          }
+        }
+      }
+    },
+    "배경 테마를 골라주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "背景テーマを選んでください"
+          }
+        }
+      }
     },
     "배경으로 쓸 사진을 골라주세요" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "背景にする写真を選んでください"
+          }
+        }
+      }
+    },
+    "배고픔" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おなかがすいた"
+          }
+        }
+      }
+    },
+    "부사" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副詞"
+          }
+        }
+      }
+    },
+    "부활" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "復活"
+          }
+        }
+      }
     },
     "분석 기간" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分析期間"
+          }
+        }
+      }
+    },
+    "불쾌함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ふゆかい"
+          }
+        }
+      }
+    },
+    "비즈니스" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ビジネス"
+          }
+        }
+      }
+    },
+    "사진첩에서 사진 고르기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写真ライブラリから選ぶ"
+          }
+        }
+      }
+    },
+    "삭제하지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除できませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "상쾌함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "さわやか"
+          }
+        }
+      }
+    },
+    "상태를 불러오지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "状態を読み込めませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "새싹이" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ふたば"
+          }
+        }
+      }
+    },
+    "선택 영역 아래로" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択範囲を下へ"
+          }
+        }
+      }
+    },
+    "선택 영역 오른쪽으로" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択範囲を右へ"
+          }
+        }
+      }
+    },
+    "선택 영역 왼쪽으로" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択範囲を左へ"
+          }
+        }
+      }
+    },
+    "선택 영역 위로" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択範囲を上へ"
+          }
+        }
+      }
+    },
+    "선택한 기간에 학습 기록이 없어요. 다른 기간을 선택해 보세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した期間に学習記録がありません。別の期間を選んでみてください。"
+          }
+        }
+      }
+    },
+    "선택한 기간에 학습한 단어가 없어요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した期間に学習した単語はありません。"
+          }
+        }
+      }
+    },
+    "선택한 주제로 학습을 시작해요. 나중에 언제든 바꿀 수 있어요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選んだテーマで学習を始めます。あとからいつでも変更できます。"
+          }
+        }
+      }
+    },
+    "설정" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定"
+          }
+        }
+      }
+    },
+    "세상을 떠났어요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天国へ旅立ちました"
+          }
+        }
+      }
+    },
+    "수정" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        }
+      }
+    },
+    "수정하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更する"
+          }
+        }
+      }
+    },
+    "슬픔" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "かなしい"
+          }
+        }
+      }
     },
     "시작" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開始"
+          }
+        }
+      }
+    },
+    "시작하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はじめる"
+          }
+        }
+      }
+    },
+    "심심함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "たいくつ"
+          }
+        }
+      }
+    },
+    "아직 건강해요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ元気です"
+          }
+        }
+      }
+    },
+    "아직 학습한 단어가 없어요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ学習した単語はありません。"
+          }
+        }
+      }
     },
     "알림" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お知らせ"
+          }
+        }
+      }
+    },
+    "알림 설정을 변경하지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知設定を変更できませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "앱 문의하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリへのお問い合わせ"
+          }
+        }
+      }
+    },
+    "앱 버전" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリのバージョン"
+          }
+        }
+      }
+    },
+    "앱 정보" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ情報"
+          }
+        }
+      }
+    },
+    "앱스토어 리뷰" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Storeでレビュー"
+          }
+        }
+      }
+    },
+    "어제 학습을 쉬었어요. 단어장을 열어볼까요?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "昨日は学習をお休みしました。単語帳を開いてみませんか？"
+          }
+        }
+      }
+    },
+    "여행" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行"
+          }
+        }
+      }
+    },
+    "오늘의 단어 학습" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日の単語学習"
+          }
+        }
+      }
+    },
+    "오답" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不正解"
+          }
+        }
+      }
     },
     "오답 분류" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不正解の分類"
+          }
+        }
+      }
+    },
+    "완료" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        }
+      }
+    },
+    "완료한 회차가 아직 없어요.\n회차별 기록은 리포트 기능 도입 이후 모든 답변을 저장한 퀴즈부터 표시돼요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ完了した回がありません。\n回ごとの記録は、レポート機能の導入後にすべての解答を保存したクイズから表示されます。"
+          }
+        }
+      }
+    },
+    "우울함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゆううつ"
+          }
+        }
+      }
+    },
+    "이름" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前"
+          }
+        }
+      }
+    },
+    "이름은 %lld자까지 지을 수 있어요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前は%lld文字までです"
+          }
+        }
+      }
+    },
+    "이름을 지어주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前をつけてください"
+          }
+        }
+      }
+    },
+    "이미 충분해요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう十分です"
+          }
+        }
+      }
+    },
+    "이미지 테마로 지정" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像テーマに設定"
+          }
+        }
+      }
+    },
+    "이미지를 검색해주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を検索してください"
+          }
+        }
+      }
+    },
+    "이번 달" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今月"
+          }
+        }
+      }
+    },
+    "이번 달 학습 단어" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今月の学習単語"
+          }
+        }
+      }
+    },
+    "일반" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
+        }
+      }
+    },
+    "일상" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日常"
+          }
+        }
+      }
+    },
+    "잠깐 시간 내서 단어 몇 개만 외워볼까요?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "少しだけ時間をとって、単語をいくつか覚えてみませんか？"
+          }
+        }
+      }
+    },
+    "잠시 후 다시 시도해 주세요. 저장된 학습 기록은 그대로 남아 있어요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しばらくしてからもう一度お試しください。保存された学習記録はそのまま残っています。"
+          }
+        }
+      }
+    },
+    "잠시 후 다시 시도해주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しばらくしてからもう一度お試しください"
+          }
+        }
+      }
+    },
+    "잠시후 다시 시도해주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しばらくしてからもう一度お試しください"
+          }
+        }
+      }
+    },
+    "재시도" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        }
+      }
+    },
+    "저장" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        }
+      }
+    },
+    "저장 실패" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存に失敗しました"
+          }
+        }
+      }
     },
     "저장 안 됨" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未保存"
+          }
+        }
+      }
     },
     "저장됨" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存済み"
+          }
+        }
+      }
+    },
+    "저장하지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存できませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "전체" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        }
+      }
     },
     "전체 %lld회 · 오답률 %@" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全%1$lld回 · 不正解率 %2$@"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -108,10 +1560,33 @@
       }
     },
     "전체 보기" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて見る"
+          }
+        }
+      }
+    },
+    "정답" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解"
+          }
+        }
+      }
     },
     "정답 %lld / %lld문제, %@" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解 %1$lld / %2$lld問、%3$@"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -122,6 +1597,12 @@
     },
     "정답 %lld / %lld회" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解 %1$lld / %2$lld回"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -132,6 +1613,12 @@
     },
     "정답 %lld회, 오답 %lld회" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解 %1$lld回、不正解 %2$lld回"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -141,13 +1628,33 @@
       }
     },
     "정답 횟수순 · 단어를 누르면 상세 내용을 볼 수 있어요." : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解回数順 · 単語をタップすると詳細を確認できます。"
+          }
+        }
+      }
     },
     "정답률" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率"
+          }
+        }
+      }
     },
     "정답률 %@ · 전체 %lld회 풀이" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率 %1$@ · 全%2$lld回解答"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -156,35 +1663,555 @@
         }
       }
     },
+    "정말로 학습을 중단하시겠습니까?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本当に学習を中断しますか？"
+          }
+        }
+      }
+    },
+    "종료" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
+          }
+        }
+      }
+    },
+    "주제" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマ"
+          }
+        }
+      }
+    },
+    "주제별 학습 비중" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマ別の学習割合"
+          }
+        }
+      }
+    },
+    "준비중" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "準備中"
+          }
+        }
+      }
+    },
+    "준비중인 알" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "準備中の卵"
+          }
+        }
+      }
+    },
+    "즐거움" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽しさ"
+          }
+        }
+      }
+    },
+    "지우기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除する"
+          }
+        }
+      }
+    },
+    "지원 및 피드백" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サポートとフィードバック"
+          }
+        }
+      }
+    },
+    "지원하지 않는 이미지 형식이에요. 다른 사진을 선택해주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対応していない画像形式です。別の写真を選んでください"
+          }
+        }
+      }
+    },
+    "첫 학습을 기다리고 있어요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初の学習を待っています"
+          }
+        }
+      }
+    },
+    "청결" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清潔さ"
+          }
+        }
+      }
+    },
+    "청소하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おそうじ"
+          }
+        }
+      }
+    },
+    "체력" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体力"
+          }
+        }
+      }
+    },
     "총 정답률" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "総正答率"
+          }
+        }
+      }
+    },
+    "최근 7일" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近7日"
+          }
+        }
+      }
+    },
+    "최근 7일 학습 단어" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近7日の学習単語"
+          }
+        }
+      }
+    },
+    "최소 4개 이상의 단어가 필요합니다." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4個以上の単語が必要です。"
+          }
+        }
+      }
+    },
+    "축소" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縮小"
+          }
+        }
+      }
+    },
+    "취소" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        }
+      }
+    },
+    "퀴즈에서 답변을 저장하면 학습량과 정답률을 확인할 수 있어요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クイズで解答を保存すると、学習量と正答率を確認できます。"
+          }
+        }
+      }
+    },
+    "틀린 문제 다시 풀기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "間違えた問題を解き直す"
+          }
+        }
+      }
+    },
+    "포만감" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "満腹度"
+          }
+        }
+      }
+    },
+    "품사" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "品詞"
+          }
+        }
+      }
+    },
+    "학습 결과를 저장하지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習結果を保存できませんでした。もう一度お試しください。"
+          }
+        }
+      }
     },
     "학습 기록을 불러오고 있어요." : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習記録を読み込んでいます。"
+          }
+        }
+      }
+    },
+    "학습 끝내기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習を終える"
+          }
+        }
+      }
     },
     "학습 단어 %lld개" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習単語 %lld個"
+          }
+        }
+      }
+    },
+    "학습 단어의 품사" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習単語の品詞"
+          }
+        }
+      }
     },
     "학습 리포트" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習レポート"
+          }
+        }
+      }
     },
     "학습 리포트 닫기" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習レポートを閉じる"
+          }
+        }
+      }
+    },
+    "학습 안 함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未学習"
+          }
+        }
+      }
+    },
+    "학습 알림" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習リマインダー"
+          }
+        }
+      }
+    },
+    "학습 완료!" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習完了！"
+          }
+        }
+      }
+    },
+    "학습 정보를 확인할 수 없어 결과를 저장할 수 없어요. 학습을 종료합니다." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習情報を確認できないため、結果を保存できません。学習を終了します。"
+          }
+        }
+      }
+    },
+    "학습 중단" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習を中断"
+          }
+        }
+      }
+    },
+    "학습을 시작하지 못했어요. 다시 시도해주세요." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習を開始できませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "학습중" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習中"
+          }
+        }
+      }
+    },
+    "학습하기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習する"
+          }
+        }
+      }
     },
     "학습한 단어" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習した単語"
+          }
+        }
+      }
+    },
+    "학습한 단어 수" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習した単語数"
+          }
+        }
+      }
+    },
+    "학습할 단어가 없습니다." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習する単語がありません。"
+          }
+        }
+      }
+    },
+    "학습할 단어를\n생성 및 추가해 주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習する単語を\n作成・追加してください"
+          }
+        }
+      }
+    },
+    "학습함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習済み"
+          }
+        }
+      }
+    },
+    "함께할 알을 골라주세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一緒に過ごす卵を選んでください"
+          }
+        }
+      }
     },
     "항목" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "項目"
+          }
+        }
+      }
+    },
+    "행복함" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しあわせ"
+          }
+        }
+      }
+    },
+    "형용사" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "形容詞"
+          }
+        }
+      }
+    },
+    "확대" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡大"
+          }
+        }
+      }
+    },
+    "확대하거나 선택 영역을 이동해 배경 구도를 조절하세요" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡大したり選択範囲を移動したりして、背景の構図を調整してください"
+          }
+        }
+      }
     },
     "확인" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
     },
     "회차" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回"
+          }
+        }
+      }
+    },
+    "회차별 정답률" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回ごとの正答率"
+          }
+        }
+      }
+    },
+    "획득 경험치" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "獲得経験値"
+          }
+        }
+      }
     },
     "횟수" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回数"
+          }
+        }
+      }
     }
   },
   "version" : "1.2"

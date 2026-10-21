@@ -10,13 +10,13 @@ enum PetCareStat: String, CaseIterable {
     var title: String {
         switch self {
         case .satiety:
-            return "포만감"
+            return String(localized: "포만감")
         case .hydration:
-            return "갈증"
+            return String(localized: "갈증")
         case .fun:
-            return "즐거움"
+            return String(localized: "즐거움")
         case .cleanliness:
-            return "청결"
+            return String(localized: "청결")
         }
     }
 

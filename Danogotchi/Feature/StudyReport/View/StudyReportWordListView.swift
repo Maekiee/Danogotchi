@@ -9,12 +9,14 @@ struct StudyReportWordListView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: AppSpacing.space16) {
                 StudyReportHeading(
-                    title: "\(list.period.title) 학습 단어",
-                    subtitle: "\(StudyReportStyle.range(list.start, list.end, calendar: list.calendar)) · 중복 제외 \(list.words.count)개"
+                    title: String(localized: "\(list.period.title) 학습 단어"),
+                    subtitle: String(
+                        localized: "\(StudyReportStyle.range(list.start, list.end, calendar: list.calendar)) · 중복 제외 \(list.words.count)개"
+                    )
                 )
                 Text("정답 횟수순 · 단어를 누르면 상세 내용을 볼 수 있어요.")
                     .font(StudyReportStyle.font(AppFont.footnote, relativeTo: .footnote)).foregroundStyle(.secondary)
-                if list.words.isEmpty { StudyReportSelection(text: "아직 학습한 단어가 없어요.") }
+                if list.words.isEmpty { StudyReportSelection(text: String(localized: "아직 학습한 단어가 없어요.")) }
                 ForEach(list.words) { word in
                     Button { onSelect(word) } label: {
                         StudyReportWordCard(word: word)

@@ -49,16 +49,16 @@ final class PhotoCropScrollView: UIScrollView, UIScrollViewDelegate {
         clipsToBounds = true
         addSubview(imageView)
         isAccessibilityElement = true
-        accessibilityLabel = "배경 사진 영역"
-        accessibilityHint = "확대하거나 선택 영역을 이동해 배경 구도를 조절하세요"
+        accessibilityLabel = String(localized: "배경 사진 영역")
+        accessibilityHint = String(localized: "확대하거나 선택 영역을 이동해 배경 구도를 조절하세요")
         accessibilityTraits = [.image, .adjustable]
         accessibilityCustomActions = [
-            UIAccessibilityCustomAction(name: "확대", target: self, selector: #selector(zoomIn)),
-            UIAccessibilityCustomAction(name: "축소", target: self, selector: #selector(zoomOut)),
-            UIAccessibilityCustomAction(name: "선택 영역 왼쪽으로", target: self, selector: #selector(moveLeft)),
-            UIAccessibilityCustomAction(name: "선택 영역 오른쪽으로", target: self, selector: #selector(moveRight)),
-            UIAccessibilityCustomAction(name: "선택 영역 위로", target: self, selector: #selector(moveUp)),
-            UIAccessibilityCustomAction(name: "선택 영역 아래로", target: self, selector: #selector(moveDown))
+            UIAccessibilityCustomAction(name: String(localized: "확대"), target: self, selector: #selector(zoomIn)),
+            UIAccessibilityCustomAction(name: String(localized: "축소"), target: self, selector: #selector(zoomOut)),
+            UIAccessibilityCustomAction(name: String(localized: "선택 영역 왼쪽으로"), target: self, selector: #selector(moveLeft)),
+            UIAccessibilityCustomAction(name: String(localized: "선택 영역 오른쪽으로"), target: self, selector: #selector(moveRight)),
+            UIAccessibilityCustomAction(name: String(localized: "선택 영역 위로"), target: self, selector: #selector(moveUp)),
+            UIAccessibilityCustomAction(name: String(localized: "선택 영역 아래로"), target: self, selector: #selector(moveDown))
         ]
     }
 
@@ -129,7 +129,7 @@ final class PhotoCropScrollView: UIScrollView, UIScrollViewDelegate {
                           height: visible.height / imageView.bounds.height)
         guard cropRect != rect else { return }
         cropRect = rect
-        accessibilityValue = String(format: "%.2f배", zoomScale / fillZoomScale)
+        accessibilityValue = String(format: String(localized: "%.2f배"), zoomScale / fillZoomScale)
         onCropChanged?(rect)
     }
 

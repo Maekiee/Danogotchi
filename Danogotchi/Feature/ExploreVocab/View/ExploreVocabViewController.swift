@@ -65,7 +65,7 @@ final class ExploreVocabViewController: BaseViewController {
     }()
     let startLearningButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "학습하기"
+        config.title = String(localized: "학습하기")
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium, scale: .default)
         config.image = UIImage(systemName: "graduationcap", withConfiguration: symbolConfig)
         config.imagePadding = AppSpacing.space4
@@ -241,7 +241,7 @@ extension ExploreVocabViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         showLibraryVCButton.rx.tap

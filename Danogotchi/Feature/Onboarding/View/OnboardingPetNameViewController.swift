@@ -18,12 +18,12 @@ final class OnboardingPetNameViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "이름을 지어주세요"
+        label.text = String(localized: "이름을 지어주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
         return label
     }()
-    private let nameTextField = RoundedTextField(placeholder: "이름")
+    private let nameTextField = RoundedTextField(placeholder: String(localized: "이름"))
     private let errorLabel: UILabel = {
         let label = UILabel()
         label.font = AppFont.footnote
@@ -31,7 +31,7 @@ final class OnboardingPetNameViewController: BaseViewController {
         label.numberOfLines = 0
         return label
     }()
-    private let doneButton = PrimaryFillButton(title: "완료")
+    private let doneButton = PrimaryFillButton(title: String(localized: "완료"))
 
     init(viewModel: OnboardingPetNameViewModel) {
         self.viewModel = viewModel
@@ -115,7 +115,7 @@ extension OnboardingPetNameViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
     }
 }

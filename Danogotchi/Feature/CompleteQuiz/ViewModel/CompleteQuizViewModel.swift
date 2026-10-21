@@ -51,11 +51,11 @@ final class CompleteQuizViewModel: BaseViewModel {
         // 만점 보너스는 따로 줄을 만들지 않고 요약 문구로 알린다
         let summaryText = Driver.just(
             experience.perfectBonus > 0
-            ? "\(result.total)개 전부 정답! 보너스 +\(experience.perfectBonus)"
-            : "\(result.total)개를 학습했어요"
+            ? String(localized: "\(result.total)개 전부 정답! 보너스 +\(experience.perfectBonus)")
+            : String(localized: "\(result.total)개를 학습했어요")
         )
-        let correctCountText = Driver.just("\(result.correct)개")
-        let incorrectCountText = Driver.just("\(incorrectCount)개")
+        let correctCountText = Driver.just(String(localized: "\(result.correct)개"))
+        let incorrectCountText = Driver.just(String(localized: "\(incorrectCount)개"))
         let experienceText = Driver.just("+\(experience.total) EXP")
         
         let secondaryButton = determineSecondaryButton()
@@ -85,7 +85,7 @@ final class CompleteQuizViewModel: BaseViewModel {
             correctCountText: correctCountText,
             incorrectCountText: incorrectCountText,
             experienceText: experienceText,
-            primaryButtonTitle: Driver.just("계속 학습하기"),
+            primaryButtonTitle: Driver.just(String(localized: "계속 학습하기")),
             secondaryButtonTitle: Driver.just(secondaryButton.title),
             primaryAction: primaryActionRelay.asSignal(),
             secondaryAction: secondaryActionRelay.asSignal(),
@@ -97,9 +97,9 @@ final class CompleteQuizViewModel: BaseViewModel {
     // 주 버튼은 항상 계속 학습하기, 보조 버튼만 오답 유무에 따라 변경
     private func determineSecondaryButton() -> (title: String, action: ActionType) {
         if result.incorrectWords.isEmpty {
-            return (title: "학습 끝내기", action: .finish)
+            return (title: String(localized: "학습 끝내기"), action: .finish)
         } else {
-            return (title: "틀린 문제 다시 풀기", action: .retryIncorrect(words: result.incorrectWords))
+            return (title: String(localized: "틀린 문제 다시 풀기"), action: .retryIncorrect(words: result.incorrectWords))
         }
     }
 }

@@ -66,7 +66,7 @@ final class VocabBookDetailViewController: BaseViewController {
         return button
     }()
     private let startLearningButton = UIBarButtonItem(
-        title: "학습하기", style: .plain, target: nil, action: nil
+        title: String(localized: "학습하기"), style: .plain, target: nil, action: nil
     )
 
     override func viewDidLoad() {
@@ -127,7 +127,7 @@ extension VocabBookDetailViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         output.vocabList
@@ -142,7 +142,7 @@ extension VocabBookDetailViewController {
 
         output.isActiveBook
             .drive(with: self) { owner, isActive in
-                owner.startLearningButton.title = isActive ? "학습중" : "학습하기"
+                owner.startLearningButton.title = isActive ? String(localized: "학습중") : String(localized: "학습하기")
                 owner.startLearningButton.isEnabled = !isActive
             }.disposed(by: disposeBag)
 
@@ -240,7 +240,7 @@ extension VocabBookDetailViewController {
     /// 나의 단어장에만 안내를 띄운다 — 추천 단어장은 단어를 직접 추가할 수 없다.
     private func updateEmptyView(isEmpty: Bool) {
         if isEmpty && viewModel.topic == .myBook {
-            collectionView.setView(title: "학습할 단어를\n생성 및 추가해 주세요")
+            collectionView.setView(title: String(localized: "학습할 단어를\n생성 및 추가해 주세요"))
         } else {
             collectionView.restore()
         }

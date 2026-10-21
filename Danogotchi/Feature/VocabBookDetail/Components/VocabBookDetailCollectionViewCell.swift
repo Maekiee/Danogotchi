@@ -166,7 +166,7 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         }
 
         if let learningCount = item.cardChipText {
-            learningCountLabel.text = " · \(learningCount)번 학습"
+            learningCountLabel.text = String(localized: " · \(learningCount)번 학습")
         } else {
             learningCountLabel.text = nil
         }

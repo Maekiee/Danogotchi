@@ -28,14 +28,14 @@ final class OnboardingInterestViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "관심 있는 주제를 골라주세요"
+        label.text = String(localized: "관심 있는 주제를 골라주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
         return label
     }()
     private let descriptionLabel: UILabel = {
         let label = UILabel()
-        label.text = "선택한 주제로 학습을 시작해요. 나중에 언제든 바꿀 수 있어요."
+        label.text = String(localized: "선택한 주제로 학습을 시작해요. 나중에 언제든 바꿀 수 있어요.")
         label.font = AppFont.footnote
         label.textColor = AppColor.textSecondary
         label.numberOfLines = 0
@@ -51,7 +51,7 @@ final class OnboardingInterestViewController: BaseViewController {
         view.backgroundColor = AppColor.background
         return view
     }()
-    private let nextButton = PrimaryFillButton(title: "다음")
+    private let nextButton = PrimaryFillButton(title: String(localized: "다음"))
 
     init(viewModel: OnboardingInterestViewModel) {
         self.viewModel = viewModel
@@ -121,7 +121,7 @@ extension OnboardingInterestViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         output.interestItems

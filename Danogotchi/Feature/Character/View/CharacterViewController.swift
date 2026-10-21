@@ -73,8 +73,8 @@ final class CharacterViewController: BaseViewController {
     private lazy var careButtons = PetCareStat.allCases.map { stat in
         (stat: stat, button: PrimaryFillButton(title: stat.actionTitle))
     }
-    private let levelUpButton = PrimaryFillButton(title: "레벨업")
-    private let reviveButton = PrimaryFillButton(title: "부활")
+    private let levelUpButton = PrimaryFillButton(title: String(localized: "레벨업"))
+    private let reviveButton = PrimaryFillButton(title: String(localized: "부활"))
     private let debugLevelDownButton = PrimaryFillButton(title: "Lv -1")
     private let debugLevelUpButton = PrimaryFillButton(title: "Lv +1")
     private let debugLevelSpacer = UIView()
@@ -170,7 +170,7 @@ final class CharacterViewController: BaseViewController {
         weatherBackgroundView.render(.clear)
 
         heartBarView.isAccessibilityElement = true
-        heartBarView.accessibilityLabel = "체력"
+        heartBarView.accessibilityLabel = String(localized: "체력")
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
@@ -213,7 +213,7 @@ extension CharacterViewController {
         }
 
         container.isAccessibilityElement = true
-        container.accessibilityLabel = "경험치"
+        container.accessibilityLabel = String(localized: "경험치")
         return container
     }
 
@@ -306,8 +306,8 @@ extension CharacterViewController {
             .bind(with: self) { owner, _ in
                 AlertPresenter.showAlert(
                     on: owner,
-                    title: "부활",
-                    message: "경험치가 일부 차감돼요. 부활할까요?"
+                    title: String(localized: "부활"),
+                    message: String(localized: "경험치가 일부 차감돼요. 부활할까요?")
                 ) {
                     owner.reviveConfirmed.accept(())
                 }
@@ -330,18 +330,18 @@ extension CharacterViewController {
         )
 
         nameLabel.text = pet.name
-        moodLabel.text = pet.isDead ? "세상을 떠났어요" : info.mood.title
+        moodLabel.text = pet.isDead ? String(localized: "세상을 떠났어요") : info.mood.title
 
         heartBarView.setHearts(info.hearts)
         heartBarView.accessibilityValue =
-            "\(Int(PetStatePolicy.maxHP)) 중 \(Int(pet.hp))"
+            String(localized: "\(Int(PetStatePolicy.maxHP)) 중 \(Int(pet.hp))")
 
         levelLabel.text = "Lv. \(pet.level)"
         experiencePercentLabel.text = "\(Int(info.progress * 100))%"
         experienceGaugeView.setProgress(Float(info.progress), animated: true)
         experienceGaugeView.superview?.accessibilityValue = info.isMaxLevel
-            ? "레벨 \(pet.level), 최고 레벨"
-            : "레벨 \(pet.level), \(Int(info.progress * 100))퍼센트"
+            ? String(localized: "레벨 \(pet.level), 최고 레벨")
+            : String(localized: "레벨 \(pet.level), \(Int(info.progress * 100))퍼센트")
 
         zip(careRowViews, PetCareStat.allCases).forEach { row, stat in
             row.update(value: pet[keyPath: stat.keyPath])
@@ -366,6 +366,6 @@ extension CharacterViewController {
         guard !dangerStats.isEmpty else { return }
 
         let names = dangerStats.map { $0.title }.joined(separator: "·")
-        dangerLabel.text = "\(names)이(가) 위험해요. 체력이 줄고 있어요."
+        dangerLabel.text = String(localized: "\(names)이(가) 위험해요. 체력이 줄고 있어요.")
     }
 }

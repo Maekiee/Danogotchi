@@ -34,7 +34,7 @@ final class LibraryViewModel: BaseViewModel {
             do {
                 bookItems.accept(try owner.fetchVocabBooksUseCase.execute())
             } catch {
-                alertMessage.accept("단어장을 불러오지 못했어요. 다시 시도해주세요.")
+                alertMessage.accept(String(localized: "단어장을 불러오지 못했어요. 다시 시도해주세요."))
             }
         }
         .disposed(by: disposeBag)

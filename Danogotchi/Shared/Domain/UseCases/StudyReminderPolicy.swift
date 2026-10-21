@@ -52,8 +52,8 @@ enum StudyReminderPolicy {
         return dailyHours.map { hour in
             Reminder(
                 id: Identifier.daily(hour: hour),
-                title: "오늘의 단어 학습",
-                body: "잠깐 시간 내서 단어 몇 개만 외워볼까요?",
+                title: String(localized: "오늘의 단어 학습"),
+                body: String(localized: "잠깐 시간 내서 단어 몇 개만 외워볼까요?"),
                 dateComponents: DateComponents(hour: hour, minute: 0),
                 repeats: true
             )
@@ -64,8 +64,8 @@ enum StudyReminderPolicy {
     private static func inactivity(at fireDate: Date, calendar: Calendar) -> Reminder {
         return Reminder(
             id: Identifier.inactivity,
-            title: "다노가 기다려요",
-            body: "어제 학습을 쉬었어요. 단어장을 열어볼까요?",
+            title: String(localized: "다노가 기다려요"),
+            body: String(localized: "어제 학습을 쉬었어요. 단어장을 열어볼까요?"),
             dateComponents: calendar.dateComponents(
                 [.year, .month, .day, .hour, .minute],
                 from: fireDate

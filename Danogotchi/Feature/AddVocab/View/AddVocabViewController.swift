@@ -24,11 +24,11 @@ final class AddVocabViewController: BaseViewController {
     }
 
     // MARK: - UI 프로퍼티
-    private let wordTextField = RoundedTextField(placeholder: "단어")
-    private let meaningTextField = RoundedTextField(placeholder: "뜻")
+    private let wordTextField = RoundedTextField(placeholder: String(localized: "단어"))
+    private let meaningTextField = RoundedTextField(placeholder: String(localized: "뜻"))
     private let partOfSpeechSegmentedControl = AddVocabViewController.makePartOfSpeechSegmentedControl()
     private lazy var saveButton = PrimaryFillButton(
-        title: viewModel.isEditing ? "수정" : "저장"
+        title: viewModel.isEditing ? String(localized: "수정") : String(localized: "저장")
     )
 
     override func viewDidLoad() {
@@ -125,7 +125,7 @@ extension AddVocabViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         output.isValidSave
@@ -137,7 +137,7 @@ extension AddVocabViewController {
                 owner.wordTextField.text = ""
                 owner.meaningTextField.text = ""
                 owner.partOfSpeechSegmentedControl.selectedSegmentIndex = 0
-                owner.showToast("단어가 추가 되었습니다.")
+                owner.showToast(String(localized: "단어가 추가 되었습니다."))
             }.disposed(by: disposeBag)
 
         output.editCompleted

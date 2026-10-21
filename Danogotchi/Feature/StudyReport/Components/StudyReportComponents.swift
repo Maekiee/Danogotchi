@@ -7,27 +7,27 @@ import UIKit
 extension StudyReportPeriod {
     var title: String {
         switch self {
-        case .week: return "최근 7일"
-        case .month: return "이번 달"
-        case .all: return "전체"
+        case .week: return String(localized: "최근 7일")
+        case .month: return String(localized: "이번 달")
+        case .all: return String(localized: "전체")
         }
     }
 }
 
 extension StudyReportCategoryKind {
-    var title: String { self == .topic ? "주제" : "품사" }
+    var title: String { self == .topic ? String(localized: "주제") : String(localized: "품사") }
 
     func title(for id: String?) -> String {
         switch identifier(id) {
-        case "travel": return "여행"
-        case "business": return "비즈니스"
-        case "emotion": return "감정"
-        case "life": return "일상"
-        case "noun": return "명사"
-        case "verb": return "동사"
-        case "adj": return "형용사"
-        case "adv": return "부사"
-        default: return "미분류"
+        case "travel": return String(localized: "여행")
+        case "business": return String(localized: "비즈니스")
+        case "emotion": return String(localized: "감정")
+        case "life": return String(localized: "일상")
+        case "noun": return String(localized: "명사")
+        case "verb": return String(localized: "동사")
+        case "adj": return String(localized: "형용사")
+        case "adv": return String(localized: "부사")
+        default: return String(localized: "미분류")
         }
     }
 }
@@ -44,7 +44,7 @@ enum StudyReportStyle {
 
     static func date(_ date: Date, calendar: Calendar, format: String = "M.d") -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "ko")
         formatter.calendar = calendar
         formatter.timeZone = calendar.timeZone
         formatter.dateFormat = format
@@ -269,9 +269,10 @@ struct StudyReportCategoryBars: View {
                     .foregroundStyle(.secondary)
             }
             if let group = categories.first(where: { $0.id == selected }), !showsMistakes || group.total > 0 {
+                let title = kind.title(for: group.id)
                 StudyReportSelection(text: showsMistakes
-                    ? "\(kind.title(for: group.id)) · 오답 \(group.wrong) / 풀이 \(group.total)회 · \(StudyReportStyle.percent(group.wrong, group.total))"
-                    : "\(kind.title(for: group.id)) · \(group.total)회 풀이 · 전체의 \(StudyReportStyle.percent(group.total, total))")
+                    ? String(localized: "\(title) · 오답 \(group.wrong) / 풀이 \(group.total)회 · \(StudyReportStyle.percent(group.wrong, group.total))")
+                    : String(localized: "\(title) · \(group.total)회 풀이 · 전체의 \(StudyReportStyle.percent(group.total, total))"))
             }
             // else { StudyReportSelection(text: "\(kind.title)를 누르면 \(showsMistakes ? "오답 내역" : "풀이 비중")을 확인할 수 있어요.") }
         }
@@ -299,7 +300,9 @@ struct StudyReportActivityChart: View {
                         BarMark(x: .value("날짜", index), y: .value("고유 단어", day.count), width: .fixed(24))
                             .foregroundStyle(Color(AppColor.primary).opacity(selected == day.date ? 1 : 0.45))
                             .cornerRadius(4)
-                            .accessibilityLabel(StudyReportStyle.date(day.date, calendar: report.calendar, format: "yyyy년 M월 d일"))
+                            .accessibilityLabel(StudyReportStyle.date(
+                                day.date, calendar: report.calendar, format: String(localized: "yyyy년 M월 d일")
+                            ))
                             .accessibilityValue("학습 단어 \(day.count)개")
                     }
                     .chartXScale(domain: -0.5...Double(max(1, report.activity.count)) - 0.5)
@@ -322,7 +325,8 @@ struct StudyReportActivityChart: View {
             }
             .frame(height: 190)
             if let day = report.activity.first(where: { $0.date == selected }) {
-                StudyReportSelection(text: "\(StudyReportStyle.date(day.date, calendar: report.calendar, format: report.period == .all ? "yyyy년 M월" : "M월 d일")) · 학습한 단어 \(day.count)개")
+                let format = report.period == .all ? String(localized: "yyyy년 M월") : String(localized: "M월 d일")
+                StudyReportSelection(text: String(localized: "\(StudyReportStyle.date(day.date, calendar: report.calendar, format: format)) · 학습한 단어 \(day.count)개"))
             }
             // else { StudyReportSelection(text: "막대를 누르면 학습한 단어 수를 확인할 수 있어요.") }
             // Text("같은 단어를 여러 \(report.period == .all ? "달" : "날") 학습할 수 있어 막대의 합과 기간 전체 단어 수는 달라요.")
@@ -338,7 +342,7 @@ struct StudyReportSessionChart: View {
 
     var body: some View {
         if report.sessions.isEmpty {
-            StudyReportSelection(text: "완료한 회차가 아직 없어요.\n회차별 기록은 리포트 기능 도입 이후 모든 답변을 저장한 퀴즈부터 표시돼요.")
+            StudyReportSelection(text: String(localized: "완료한 회차가 아직 없어요.\n회차별 기록은 리포트 기능 도입 이후 모든 답변을 저장한 퀴즈부터 표시돼요."))
         } else {
             Chart(Array(report.sessions.enumerated()), id: \.element.id) { index, session in
                 if report.sessions.count > 1 {
@@ -348,7 +352,9 @@ struct StudyReportSessionChart: View {
                 PointMark(x: .value("회차", index), y: .value("정답률", session.accuracy * 100))
                     .foregroundStyle(Color(AppColor.primary))
                     .symbolSize(selected == index ? 90 : 40)
-                    .accessibilityLabel(StudyReportStyle.date(session.completedAt, calendar: report.calendar, format: "M월 d일 HH:mm"))
+                    .accessibilityLabel(StudyReportStyle.date(
+                        session.completedAt, calendar: report.calendar, format: String(localized: "M월 d일 HH:mm")
+                    ))
                     .accessibilityValue("정답 \(session.correct) / \(session.total)문제, \(StudyReportStyle.percent(session.correct, session.total))")
             }
             .chartYScale(domain: 0...100)
@@ -373,7 +379,7 @@ struct StudyReportSessionChart: View {
             .accessibilityIdentifier("studyReport.sessionChart")
             if let selected, report.sessions.indices.contains(selected) {
                 let session = report.sessions[selected]
-                StudyReportSelection(text: "\(StudyReportStyle.date(session.completedAt, calendar: report.calendar, format: "M.d HH:mm")) · 정답 \(session.correct) / \(session.total)문제 · \(StudyReportStyle.percent(session.correct, session.total))")
+                StudyReportSelection(text: String(localized: "\(StudyReportStyle.date(session.completedAt, calendar: report.calendar, format: "M.d HH:mm")) · 정답 \(session.correct) / \(session.total)문제 · \(StudyReportStyle.percent(session.correct, session.total))"))
             }
         }
     }
@@ -388,7 +394,7 @@ struct StudyReportPartsChart: View {
 
     var body: some View {
         if report.words.isEmpty {
-            StudyReportSelection(text: "선택한 기간에 학습한 단어가 없어요.")
+            StudyReportSelection(text: String(localized: "선택한 기간에 학습한 단어가 없어요."))
         } else {
             let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 16)) : AnyLayout(HStackLayout(spacing: 16))
             layout {
@@ -437,7 +443,7 @@ struct StudyReportPartsChart: View {
                 onSelect(report.parts.last(where: { $0.total > 0 })?.id)
             }
             if let part = report.parts.first(where: { $0.id == selected }) {
-                StudyReportSelection(text: "\(StudyReportCategoryKind.partOfSpeech.title(for: part.id)) · \(part.total) / \(report.words.count)개 · \(StudyReportStyle.percent(part.total, report.words.count))")
+                StudyReportSelection(text: String(localized: "\(StudyReportCategoryKind.partOfSpeech.title(for: part.id)) · \(part.total) / \(report.words.count)개 · \(StudyReportStyle.percent(part.total, report.words.count))"))
             }
             // else { StudyReportSelection(text: "품사를 누르면 비율을 확인할 수 있어요.") }
         }

@@ -48,7 +48,7 @@ final class OnboardingInterestViewModel: BaseViewModel {
                     try owner.setActiveBookUseCase.execute(topic: topic)
                     didFinish.accept(())
                 } catch {
-                    alertMessage.accept("저장하지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "저장하지 못했어요. 다시 시도해주세요."))
                 }
             }
             .disposed(by: disposeBag)

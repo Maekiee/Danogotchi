@@ -34,9 +34,9 @@ final class QuizResultCard: UIView {
     private let verticalDivider = QuizResultCard.makeDivider()
     private let experienceDivider = QuizResultCard.makeDivider()
 
-    private let correctItem = CountItem(caption: "정답", dotColor: AppColor.appGreen)
-    private let incorrectItem = CountItem(caption: "오답", dotColor: AppColor.appRed)
-    private let experienceItem = CountItem(caption: "획득 경험치", dotColor: AppColor.butter)
+    private let correctItem = CountItem(caption: String(localized: "정답"), dotColor: AppColor.appGreen)
+    private let incorrectItem = CountItem(caption: String(localized: "오답"), dotColor: AppColor.appRed)
+    private let experienceItem = CountItem(caption: String(localized: "획득 경험치"), dotColor: AppColor.butter)
 
     // MARK: - Public Properties
     var scoreText: String? {

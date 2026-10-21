@@ -7,8 +7,8 @@ final class OnboardingPetNameViewModel: BaseViewModel {
     private let createPetUseCase: CreatePetUseCase
     private let petType: PetType
 
-    private static let tooLongMessage = "이름은 \(PetNamePolicy.maxLength)자까지 지을 수 있어요"
-    private static let saveFailureMessage = "잠시 후 다시 시도해주세요"
+    private static let tooLongMessage = String(localized: "이름은 \(PetNamePolicy.maxLength)자까지 지을 수 있어요")
+    private static let saveFailureMessage = String(localized: "잠시 후 다시 시도해주세요")
 
     init(createPetUseCase: CreatePetUseCase, petType: PetType) {
         self.createPetUseCase = createPetUseCase

@@ -37,7 +37,7 @@ final class CompleteQuizViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "학습 완료!"
+        label.text = String(localized: "학습 완료!")
         label.textColor = AppColor.textPrimary
         label.font = AppFont.display
         label.textAlignment = .center
@@ -47,7 +47,7 @@ final class CompleteQuizViewController: BaseViewController {
     private let resultCard = QuizResultCard()
     private let primaryButton = CompleteActionButton(style: .primary, title: "")
     private let secondaryButton = CompleteActionButton(style: .secondary, title: "")
-    private let endLearningButton = CompleteActionButton(style: .text, title: "학습 끝내기")
+    private let endLearningButton = CompleteActionButton(style: .text, title: String(localized: "학습 끝내기"))
 
     private lazy var buttonStackView: UIStackView = {
         let stack = UIStackView()

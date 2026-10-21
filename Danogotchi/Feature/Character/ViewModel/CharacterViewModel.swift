@@ -57,7 +57,7 @@ final class CharacterViewModel: BaseViewModel {
                 do {
                     state.accept(try owner.fetchPetStateUseCase.execute())
                 } catch {
-                    toastMessage.accept("상태를 불러오지 못했어요. 다시 시도해주세요.")
+                    toastMessage.accept(String(localized: "상태를 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }.disposed(by: disposeBag)
 
@@ -112,7 +112,7 @@ final class CharacterViewModel: BaseViewModel {
         toast: PublishRelay<String>
     ) {
         guard case .success(let result) = outcome else {
-            toast.accept("저장하지 못했어요. 다시 시도해주세요.")
+            toast.accept(String(localized: "저장하지 못했어요. 다시 시도해주세요."))
             return
         }
         guard let result else { return }
@@ -126,13 +126,13 @@ final class CharacterViewModel: BaseViewModel {
     private static func message(for rejection: PetActionRejection) -> String {
         switch rejection {
         case .alreadyFull:
-            return "이미 충분해요"
+            return String(localized: "이미 충분해요")
         case .dead:
-            return "먼저 부활시켜 주세요"
+            return String(localized: "먼저 부활시켜 주세요")
         case .notEnoughExperience:
-            return "경험치가 부족해요"
+            return String(localized: "경험치가 부족해요")
         case .alive:
-            return "아직 건강해요"
+            return String(localized: "아직 건강해요")
         }
     }
 }

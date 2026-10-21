@@ -79,9 +79,9 @@ extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
         } catch {
             AlertPresenter.showNotificationAlert(
                 on: navigationController,
-                title: "데이터 조회 실패",
-                message: "데이터를 불러오지 못했어요. 다시 시도해주세요.",
-                confirmTitle: "재시도"
+                title: String(localized: "데이터 조회 실패"),
+                message: String(localized: "데이터를 불러오지 못했어요. 다시 시도해주세요."),
+                confirmTitle: String(localized: "재시도")
             ) { [weak self] in self?.didSelectTheme() }
         }
     }

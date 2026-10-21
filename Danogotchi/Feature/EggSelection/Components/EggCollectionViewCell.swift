@@ -53,12 +53,12 @@ final class EggCollectionViewCell: UICollectionViewCell {
 
         if let type = item.petType {
             spriteView.renderStill(sheetName: type.sheetName(level: 0), clip: .idle, frameIndex: 1)
-            accessibilityLabel = "\(type.title) 알"
+            accessibilityLabel = String(localized: "\(type.title) 알")
             accessibilityTraits = item.isSelected ? [.staticText, .selected] : .staticText
         } else {
-            titleLabel.text = "준비중"
+            titleLabel.text = String(localized: "준비중")
             titleLabel.textColor = AppColor.gray60
-            accessibilityLabel = "준비중인 알"
+            accessibilityLabel = String(localized: "준비중인 알")
             accessibilityTraits = [.staticText, .notEnabled]
         }
 

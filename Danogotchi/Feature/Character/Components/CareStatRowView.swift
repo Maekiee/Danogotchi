@@ -78,6 +78,6 @@ final class CareStatRowView: UIView {
         valueLabel.text = "\(displayValue)"
         // 위험은 색과 문구 양쪽으로 알린다
         valueLabel.textColor = isDanger ? AppColor.error : AppColor.textSecondary
-        accessibilityValue = isDanger ? "\(displayValue)퍼센트, 위험" : "\(displayValue)퍼센트"
+        accessibilityValue = isDanger ? String(localized: "\(displayValue)퍼센트, 위험") : String(localized: "\(displayValue)퍼센트")
     }
 }

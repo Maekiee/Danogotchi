@@ -80,7 +80,7 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
             } catch {
                 AlertPresenter.showNotificationAlert(
                     on: navigationController.presentedViewController ?? navigationController,
-                    title: "알림", message: "학습을 시작하지 못했어요. 다시 시도해주세요."
+                    title: String(localized: "알림"), message: String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요.")
                 )
             }
 
@@ -103,8 +103,8 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
     private func showInterruptAlert() {
         AlertPresenter.showAlert(
             on: navigationController,
-            title: "학습 중단",
-            message: "정말로 학습을 중단하시겠습니까?",
+            title: String(localized: "학습 중단"),
+            message: String(localized: "정말로 학습을 중단하시겠습니까?"),
             confirmAction: { [weak self] in
                 DispatchQueue.main.async {
                     // dismiss 이후 화면 닫힘

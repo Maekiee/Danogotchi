@@ -4,7 +4,7 @@ import RxSwift
 import RxCocoa
 
 final class SearchThemeViewModel: BaseViewModel {
-    private static let networkErrorMessage = "잠시후 다시 시도해주세요"
+    private static let networkErrorMessage = String(localized: "잠시후 다시 시도해주세요")
 
     private let disposeBag = DisposeBag()
     private let searchThemeUseCase: SearchThemeUseCase

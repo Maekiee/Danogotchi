@@ -6,7 +6,7 @@ enum PetType: String, CaseIterable {
     var title: String {
         switch self {
         case .sprout:
-            return "새싹이"
+            return String(localized: "새싹이")
         }
     }
     

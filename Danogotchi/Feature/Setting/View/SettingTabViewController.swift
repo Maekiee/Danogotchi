@@ -34,7 +34,7 @@ final class SettingTabViewController: BaseViewController {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "설정"
+        label.text = String(localized: "설정")
         label.font = AppFont.display
         label.textColor = AppColor.textPrimary
         return label
@@ -189,7 +189,7 @@ extension SettingTabViewController {
 
         output.alertMessage
             .emit(with: self) { owner, message in
-                AlertPresenter.showNotificationAlert(on: owner, title: "알림", message: message)
+                AlertPresenter.showNotificationAlert(on: owner, title: String(localized: "알림"), message: message)
             }.disposed(by: disposeBag)
 
         navigationItem.rightBarButtonItem?.rx.tap

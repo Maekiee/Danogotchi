@@ -15,20 +15,20 @@ enum AlertPresenter {
         )
         
         if let editAction = editAction {
-            let edit = UIAlertAction(title: "수정하기", style: .default) { _ in
+            let edit = UIAlertAction(title: String(localized: "수정하기"), style: .default) { _ in
                 editAction()
             }
             alert.addAction(edit)
         }
         
         if let deleteAction = deleteAction {
-            let delete = UIAlertAction(title: "지우기", style: .destructive) { _ in
+            let delete = UIAlertAction(title: String(localized: "지우기"), style: .destructive) { _ in
                 deleteAction()
             }
             alert.addAction(delete)
         }
         
-        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        let cancel = UIAlertAction(title: String(localized: "취소"), style: .cancel)
         alert.addAction(cancel)
         
         viewController.present(alert, animated: true)
@@ -38,8 +38,8 @@ enum AlertPresenter {
         on viewController: UIViewController,
         title: String,
         message: String,
-        confirmTitle: String = "확인",
-        cancelTitle: String = "취소",
+        confirmTitle: String = String(localized: "확인"),
+        cancelTitle: String = String(localized: "취소"),
         confirmAction: (() -> Void)?
     ) {
         let alert = UIAlertController(
@@ -64,7 +64,7 @@ enum AlertPresenter {
         on viewController: UIViewController,
         title: String,
         message: String,
-        confirmTitle: String = "확인",
+        confirmTitle: String = String(localized: "확인"),
         handler: (() -> Void)? = nil
     ) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)

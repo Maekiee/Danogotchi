@@ -28,7 +28,7 @@ final class EggSelectionViewController: BaseViewController {
     // MARK: - UI 프로퍼티
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "함께할 알을 골라주세요"
+        label.text = String(localized: "함께할 알을 골라주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
         return label
@@ -43,7 +43,7 @@ final class EggSelectionViewController: BaseViewController {
         view.backgroundColor = AppColor.background
         return view
     }()
-    private let nextButton = PrimaryFillButton(title: "다음")
+    private let nextButton = PrimaryFillButton(title: String(localized: "다음"))
 
     init(viewModel: EggSelectionViewModel) {
         self.viewModel = viewModel

@@ -33,7 +33,7 @@ final class QuizViewController: BaseViewController {
     }()
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "단어 학습"
+        label.text = String(localized: "단어 학습")
         label.textColor = AppColor.textPrimary
         label.font = AppFont.font(.bold, size: 17)
         label.textAlignment = .center
@@ -133,16 +133,16 @@ extension QuizViewController {
         onRetry: @escaping () -> Void
     ) {
         let alert = UIAlertController(
-            title: "저장 실패",
+            title: String(localized: "저장 실패"),
             message: failure == .retryable
-                ? "학습 결과를 저장하지 못했어요. 다시 시도해주세요."
-                : "학습 정보를 확인할 수 없어 결과를 저장할 수 없어요. 학습을 종료합니다.",
+                ? String(localized: "학습 결과를 저장하지 못했어요. 다시 시도해주세요.")
+                : String(localized: "학습 정보를 확인할 수 없어 결과를 저장할 수 없어요. 학습을 종료합니다."),
             preferredStyle: .alert
         )
         if failure == .retryable {
-            alert.addAction(UIAlertAction(title: "재시도", style: .default) { _ in onRetry() })
+            alert.addAction(UIAlertAction(title: String(localized: "재시도"), style: .default) { _ in onRetry() })
         }
-        alert.addAction(UIAlertAction(title: "종료", style: .cancel) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: String(localized: "종료"), style: .cancel) { [weak self] _ in
             self?.viewModel.endSession()
             self?.delegate?.quizDidAbortAfterSaveFailure()
         })

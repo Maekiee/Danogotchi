@@ -57,7 +57,7 @@ final class ExploreVocabViewModel: BaseViewModel {
                     // 나의 단어장을 학습중이면 저장할 곳이 없다
                     showsSaveButton.accept(content.bookType != .myBook)
                 } catch {
-                    alertMessageRelay.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
+                    alertMessageRelay.accept(String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }.disposed(by: disposeBag)
 
@@ -67,7 +67,7 @@ final class ExploreVocabViewModel: BaseViewModel {
                 do {
                     isSaved = try owner.toggleSaveVocabUseCase.execute(vocab: item.word)
                 } catch {
-                    alertMessageRelay.accept("저장하지 못했어요. 다시 시도해주세요.")
+                    alertMessageRelay.accept(String(localized: "저장하지 못했어요. 다시 시도해주세요."))
                     return
                 }
                 let updatedList = allWordItems.value.map { info -> VocabDisplayInfo in
@@ -89,12 +89,12 @@ final class ExploreVocabViewModel: BaseViewModel {
                     case .success(let quizData):
                         startQuizRelay.accept(quizData)
                     case .noWords:
-                        alertMessageRelay.accept("학습할 단어가 없습니다.")
+                        alertMessageRelay.accept(String(localized: "학습할 단어가 없습니다."))
                     case .notEnoughWords:
-                        alertMessageRelay.accept("최소 4개 이상의 단어가 필요합니다.")
+                        alertMessageRelay.accept(String(localized: "최소 4개 이상의 단어가 필요합니다."))
                     }
                 } catch {
-                    alertMessageRelay.accept("학습을 시작하지 못했어요. 다시 시도해주세요.")
+                    alertMessageRelay.accept(String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요."))
                 }
             }.disposed(by: disposeBag)
 

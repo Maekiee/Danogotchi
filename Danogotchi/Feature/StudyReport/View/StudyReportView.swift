@@ -41,7 +41,9 @@ struct StudyReportView: View {
                                 columns: Array(repeating: GridItem(.flexible()), count: dynamicTypeSize.isAccessibilitySize ? 4 : 7)
                             ) {
                                 ForEach(report.recentDays) { day in
-                                    let date = StudyReportStyle.date(day.date, calendar: report.calendar, format: "M월 d일")
+                                    let date = StudyReportStyle.date(
+                                        day.date, calendar: report.calendar, format: String(localized: "M월 d일")
+                                    )
                                     VStack(spacing: AppSpacing.space8) {
                                         Text(StudyReportStyle.date(day.date, calendar: report.calendar, format: "E"))
                                         Image(systemName: day.hasStudied ? "checkmark.circle.fill" : "minus.circle")
@@ -49,7 +51,9 @@ struct StudyReportView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .accessibilityElement(children: .ignore)
-                                    .accessibilityLabel("\(date), \(day.hasStudied ? "학습함" : "학습 안 함")")
+                                    .accessibilityLabel(
+                                        "\(date), \(day.hasStudied ? String(localized: "학습함") : String(localized: "학습 안 함"))"
+                                    )
                                 }
                             }
                             .font(StudyReportStyle.font(AppFont.label, relativeTo: .subheadline))
@@ -58,7 +62,10 @@ struct StudyReportView: View {
                     let periodLayout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12))
                         : AnyLayout(HStackLayout(spacing: 12))
                     periodLayout {
-                        ForEach([("최근 7일 학습 단어", report.weekWordCount), ("이번 달 학습 단어", report.monthWordCount)], id: \.0) { item in
+                        ForEach([
+                            (String(localized: "최근 7일 학습 단어"), report.weekWordCount),
+                            (String(localized: "이번 달 학습 단어"), report.monthWordCount)
+                        ], id: \.0) { item in
                             StudyReportCard {
                                 VStack(alignment: .leading, spacing: AppSpacing.space8) {
                                     Text(item.0).font(StudyReportStyle.font(AppFont.label, relativeTo: .subheadline))
@@ -93,8 +100,8 @@ struct StudyReportView: View {
                     StudyReportCard {
                         Image(systemName: "exclamationmark.circle").font(.largeTitle)
                         StudyReportHeading(
-                            title: "기록을 불러오지 못했어요",
-                            subtitle: "잠시 후 다시 시도해 주세요. 저장된 학습 기록은 그대로 남아 있어요."
+                            title: String(localized: "기록을 불러오지 못했어요"),
+                            subtitle: String(localized: "잠시 후 다시 시도해 주세요. 저장된 학습 기록은 그대로 남아 있어요.")
                         )
                         Button("다시 시도") { store.send(.refresh) }
                             .buttonStyle(.borderedProminent).tint(Color(AppColor.primary))
@@ -106,44 +113,44 @@ struct StudyReportView: View {
                             StudyReportCard {
                                 Image(systemName: "book.closed").font(.largeTitle).foregroundStyle(Color(AppColor.primary))
                                 StudyReportHeading(
-                                    title: "첫 학습을 기다리고 있어요",
-                                    subtitle: "퀴즈에서 답변을 저장하면 학습량과 정답률을 확인할 수 있어요."
+                                    title: String(localized: "첫 학습을 기다리고 있어요"),
+                                    subtitle: String(localized: "퀴즈에서 답변을 저장하면 학습량과 정답률을 확인할 수 있어요.")
                                 )
                             }
                         } else {
                             if report.periodAnswerCount == 0 {
-                                StudyReportSelection(text: "선택한 기간에 학습 기록이 없어요. 다른 기간을 선택해 보세요.")
+                                StudyReportSelection(text: String(localized: "선택한 기간에 학습 기록이 없어요. 다른 기간을 선택해 보세요."))
                             }
 
                             StudyReportCard {
-                                StudyReportHeading(title: "학습한 단어 수")
+                                StudyReportHeading(title: String(localized: "학습한 단어 수"))
                                 StudyReportActivityChart(report: report, selected: Binding(
                                     get: { store.selectedActivity }, set: { store.send(.activitySelected($0)) }
                                 ))
                             }
 
                             StudyReportCard {
-                                StudyReportHeading(title: "회차별 정답률")
+                                StudyReportHeading(title: String(localized: "회차별 정답률"))
                                 StudyReportSessionChart(report: report, selected: Binding(
                                     get: { store.selectedSession }, set: { store.send(.sessionSelected($0)) }
                                 ))
                             }
 
                             StudyReportCard {
-                                StudyReportHeading(title: "주제별 학습 비중")
+                                StudyReportHeading(title: String(localized: "주제별 학습 비중"))
                                 StudyReportCategoryBars(categories: report.topics, kind: .topic, selected: store.selectedTopic) {
                                     store.send(.topicSelected($0))
                                 }
                             }
 
                             StudyReportCard {
-                                StudyReportHeading(title: "학습 단어의 품사")
+                                StudyReportHeading(title: String(localized: "학습 단어의 품사"))
                                 StudyReportPartsChart(report: report, selected: store.selectedPart) { store.send(.partSelected($0)) }
                                     .id(report.period)
                             }
 
                             StudyReportCard {
-                                StudyReportHeading(title: "많이 틀린 종류")
+                                StudyReportHeading(title: String(localized: "많이 틀린 종류"))
                                 // subtitle: "오답 횟수 기준"
                                 Picker(
                                     "오답 분류",
@@ -160,14 +167,14 @@ struct StudyReportView: View {
 
                             StudyReportCard {
                                 HStack(alignment: .top) {
-                                    StudyReportHeading(title: "많이 맞힌 단어")
+                                    StudyReportHeading(title: String(localized: "많이 맞힌 단어"))
                                     Spacer()
                                     Button("전체 보기") { store.send(.wordsTapped(store.period)) }
                                         .font(StudyReportStyle.font(AppFont.label, relativeTo: .subheadline))
                                         .frame(minHeight: 44)
                                 }
                                 if report.words.isEmpty {
-                                    StudyReportSelection(text: "선택한 기간에 학습한 단어가 없어요.")
+                                    StudyReportSelection(text: String(localized: "선택한 기간에 학습한 단어가 없어요."))
                                 }
                                 ForEach(Array(report.words.prefix(5).enumerated()), id: \.element.id) { index, word in
                                     Button { store.send(.wordTapped(word.id)) } label: {

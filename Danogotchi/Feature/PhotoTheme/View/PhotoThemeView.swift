@@ -92,7 +92,7 @@ private extension PhotoThemeView {
         VStack(spacing: AppSpacing.space12) {
             PhotosPicker(selection: $store.pickedItem, matching: .images) {
                 capsuleLabel(
-                    store.previewImage == nil ? "사진첩에서 사진 고르기" : "다른 사진 고르기",
+                    store.previewImage == nil ? String(localized: "사진첩에서 사진 고르기") : String(localized: "다른 사진 고르기"),
                     foreground: AppColor.white,
                     background: AppColor.black.withAlphaComponent(0.55)
                 )
@@ -104,7 +104,7 @@ private extension PhotoThemeView {
             } label: {
                 // PrimaryFillButton과 같은 스펙 — 비활성 색까지 맞춘다
                 capsuleLabel(
-                    "이미지 테마로 지정",
+                    String(localized: "이미지 테마로 지정"),
                     foreground: store.canConfirm ? AppColor.white : AppColor.gray45,
                     background: store.canConfirm ? AppColor.black : AppColor.gray30
                 )

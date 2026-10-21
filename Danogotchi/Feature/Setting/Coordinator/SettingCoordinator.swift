@@ -54,8 +54,8 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
         guard MFMailComposeViewController.canSendMail() else {
             AlertPresenter.showNotificationAlert(
                 on: navigationController,
-                title: "메일 전송 실패",
-                message: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요."
+                title: String(localized: "메일 전송 실패"),
+                message: String(localized: "기기에 메일 계정이 설정되어 있지 않습니다. 아이폰 '설정' 앱에서 메일 계정을 추가해주세요.")
             )
             return
         }
@@ -63,7 +63,7 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
         let mailComposer = MFMailComposeViewController()
         mailComposer.mailComposeDelegate = self
         mailComposer.setToRecipients([Self.inquiryRecipient])
-        mailComposer.setSubject("앱 문의하기")
+        mailComposer.setSubject(String(localized: "앱 문의하기"))
         mailComposer.setMessageBody(mailBody, isHTML: false)
         navigationController.present(mailComposer, animated: true)
     }
@@ -130,8 +130,8 @@ extension SettingCoordinator: MFMailComposeViewControllerDelegate {
             case .sent:
                 AlertPresenter.showNotificationAlert(
                     on: self.navigationController,
-                    title: "메일 전송 성공",
-                    message: "메일이 성공적으로 전송 되었습니다."
+                    title: String(localized: "메일 전송 성공"),
+                    message: String(localized: "메일이 성공적으로 전송 되었습니다.")
                 )
             case .saved:
                 AppLogger.ui.debug("메일 임시저장")

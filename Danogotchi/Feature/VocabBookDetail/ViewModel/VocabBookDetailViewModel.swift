@@ -50,7 +50,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                 do {
                     vocabList.accept(try owner.fetchVocabsUseCase.execute(topic: owner.topic))
                 } catch {
-                    alertMessage.accept("단어를 불러오지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }
             .disposed(by: disposeBag)
@@ -61,7 +61,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                 do {
                     isSaved = try owner.toggleSaveVocabUseCase.execute(vocab: item.word)
                 } catch {
-                    alertMessage.accept("저장하지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "저장하지 못했어요. 다시 시도해주세요."))
                     return
                 }
                 let updatedList = vocabList.value.map { info -> VocabDisplayInfo in
@@ -83,7 +83,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                     try owner.deleteVocabUseCase.execute(vocab: vocab)
                     vocabList.accept(vocabList.value.filter { $0.word.id != vocab.id })
                 } catch {
-                    alertMessage.accept("삭제하지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "삭제하지 못했어요. 다시 시도해주세요."))
                 }
             }
             .disposed(by: disposeBag)
@@ -95,7 +95,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                     try owner.setActiveBookUseCase.execute(topic: owner.topic)
                     isActiveBook.accept(true)
                 } catch {
-                    alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }
             .disposed(by: disposeBag)
@@ -105,7 +105,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                 do {
                     isActiveBook.accept(try owner.isActiveBookUseCase.execute(topic: owner.topic))
                 } catch {
-                    alertMessage.accept("단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요.")
+                    alertMessage.accept(String(localized: "단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }
             .disposed(by: disposeBag)

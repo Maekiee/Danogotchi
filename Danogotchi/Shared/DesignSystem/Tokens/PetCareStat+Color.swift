@@ -18,13 +18,13 @@ extension PetCareStat {
     var actionTitle: String {
         switch self {
         case .satiety:
-            return "밥주기"
+            return String(localized: "밥주기")
         case .hydration:
-            return "물주기"
+            return String(localized: "물주기")
         case .fun:
-            return "놀아주기"
+            return String(localized: "놀아주기")
         case .cleanliness:
-            return "청소하기"
+            return String(localized: "청소하기")
         }
     }
 }

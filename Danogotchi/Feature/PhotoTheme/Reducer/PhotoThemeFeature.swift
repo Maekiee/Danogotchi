@@ -7,8 +7,8 @@ import UIKit
 
 @Reducer
 struct PhotoThemeFeature {
-    private static let retryMessage = "잠시후 다시 시도해주세요"
-    private static let unsupportedMessage = "지원하지 않는 이미지 형식이에요. 다른 사진을 선택해주세요"
+    private static let retryMessage = String(localized: "잠시후 다시 시도해주세요")
+    private static let unsupportedMessage = String(localized: "지원하지 않는 이미지 형식이에요. 다른 사진을 선택해주세요")
 
     @ObservableState
     struct State: Equatable {
