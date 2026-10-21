@@ -3,16 +3,21 @@ import CoreData
 
 /// 최초 실행 시 토픽별 단어장 + 추천 단어를 CoreData에 시드
 enum DatabaseSeeder {
-    static func seedIfNeeded(context: NSManagedObjectContext) throws {
+    static func seedIfNeeded(
+        context: NSManagedObjectContext,
+        language: String? = Bundle.main.preferredLocalizations.first
+    ) throws {
         let request = VocabBookEntity.fetchRequest()
         guard try context.count(for: request) == 0 else { return } // 멱등: 책이 하나라도 있으면 스킵
 
+        // 첫 실행 시 앱 언어로 뜻 선택, 이후 언어를 바꿔도 저장된 뜻은 유지
+        let isJapanese = language == "ja"
         let seeds: [(topic: BookTopic, level: VocabLevel?, words: [(String, String, PartOfSpeech)])] = [
             (.myBook, nil, []),
-            (.travel, .a1, MockTravelWords.data),
-            (.business, .a1, MockBusinessWords.data),
-            (.emotion, .a1, MockEmotionWords.data),
-            (.life, .a1, MockLifeWords.data),
+            (.travel, .a1, isJapanese ? MockTravelWordsJa.data : MockTravelWords.data),
+            (.business, .a1, isJapanese ? MockBusinessWordsJa.data : MockBusinessWords.data),
+            (.emotion, .a1, isJapanese ? MockEmotionWordsJa.data : MockEmotionWords.data),
+            (.life, .a1, isJapanese ? MockLifeWordsJa.data : MockLifeWords.data),
         ]
 
         let base = Date()

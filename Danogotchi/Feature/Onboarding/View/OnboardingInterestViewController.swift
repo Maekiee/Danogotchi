@@ -31,6 +31,7 @@ final class OnboardingInterestViewController: BaseViewController {
         label.text = String(localized: "관심 있는 주제를 골라주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
+        label.numberOfLines = 0
         return label
     }()
     private let descriptionLabel: UILabel = {

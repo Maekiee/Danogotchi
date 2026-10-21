@@ -21,6 +21,7 @@ final class OnboardingPetNameViewController: BaseViewController {
         label.text = String(localized: "이름을 지어주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
+        label.numberOfLines = 0
         return label
     }()
     private let nameTextField = RoundedTextField(placeholder: String(localized: "이름"))

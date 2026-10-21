@@ -38,6 +38,7 @@ final class SearchThemeViewController: BaseViewController {
         label.text = String(localized: "배경 테마를 골라주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
+        label.numberOfLines = 0
         return label
     }()
     // 온보딩은 네비게이션 바가 숨겨져 있어 타이틀 옆에 사진 진입 버튼을 둔다

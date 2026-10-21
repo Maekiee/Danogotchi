@@ -31,6 +31,7 @@ final class EggSelectionViewController: BaseViewController {
         label.text = String(localized: "함께할 알을 골라주세요")
         label.font = AppFont.font(.semibold, size: 28)
         label.textColor = AppColor.textPrimary
+        label.numberOfLines = 0
         return label
     }()
     private lazy var collectionView: UICollectionView = {
