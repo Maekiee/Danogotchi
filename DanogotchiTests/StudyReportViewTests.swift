@@ -23,13 +23,22 @@ final class StudyReportViewTests: XCTestCase {
         XCTAssertTrue(try matchesPixel(image, x: 270, color: AppColor.appRed))
     }
 
-    func test_answerBarRareOutcomesDoNotExaggerateTheirShare() throws {
+    /// 비율이 극단적이어도 숫자 라벨이 들어갈 최소 폭(초록 70pt, 빨강 52pt)만 확보하고 그 이상 과장하지 않는다
+    func test_answerBarRareOutcomesKeepOnlyLabelMinimumWidth() throws {
         let almostCorrect = try renderBar(total: 1000, wrong: 1)
         let almostWrong = try renderBar(total: 1000, wrong: 999)
-        XCTAssertTrue(try matchesPixel(almostCorrect, x: 275, color: AppColor.appGreen),
-                      "오답 0.1%인데 막대의 86% 지점이 빨간색으로 표시됨")
-        XCTAssertTrue(try matchesPixel(almostWrong, x: 40, color: AppColor.appRed),
-                      "정답 0.1%인데 막대의 12.5% 지점까지 초록색으로 표시됨")
+
+        // 오답 0.1%: 빨강은 최소 52pt(268~320)까지만 차지한다
+        XCTAssertTrue(try matchesPixel(almostCorrect, x: 263, color: AppColor.appGreen),
+                      "오답 0.1%인데 빨간 구간이 최소 폭 52pt보다 넓게 표시됨")
+        XCTAssertTrue(try matchesPixel(almostCorrect, x: 273, color: AppColor.appRed),
+                      "오답 0.1%인데 빨간 구간이 최소 폭 52pt를 확보하지 못함")
+
+        // 정답 0.1%: 초록은 최소 70pt(0~70)까지만 차지한다
+        XCTAssertTrue(try matchesPixel(almostWrong, x: 65, color: AppColor.appGreen),
+                      "정답 0.1%인데 초록 구간이 최소 폭 70pt를 확보하지 못함")
+        XCTAssertTrue(try matchesPixel(almostWrong, x: 75, color: AppColor.appRed),
+                      "정답 0.1%인데 초록 구간이 최소 폭 70pt보다 넓게 표시됨")
     }
 
     private func renderBar(total: Int, wrong: Int) throws -> UIImage {
