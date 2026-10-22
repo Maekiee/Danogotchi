@@ -8,14 +8,15 @@ final class ControlledSavePhotoThemeUseCase: SavePhotoThemeUseCase {
     private(set) var crops: [CGRect] = []
     private var pending: PassthroughSubject<Void, Error>?
 
-    func execute(imageData: Data, crop: PhotoThemeCrop) -> AnyPublisher<Void, Error> {
+    func execute(imageData: Data, crop: PhotoThemeCrop) async throws {
         datas.append(imageData)
         crops.append(crop.rect)
         XCTAssertNil(pending, "A pending save must not be replaced by another confirm")
         // 완료된 subject는 재사용할 수 없어 호출마다 새로 만든다 — 재시도 테스트가 필요로 한다
         let subject = PassthroughSubject<Void, Error>()
         pending = subject
-        return subject.eraseToAnyPublisher()
+        // complete(_:)가 올 때까지 기다린다 — 이펙트가 취소되면 구독만 끊긴다
+        for try await _ in subject.values { return }
     }
 
     func complete(_ result: Result<Void, Error>) {

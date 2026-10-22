@@ -255,7 +255,10 @@ final class ThemeImagePersistenceTests: XCTestCase {
         defer { fixture.cleanup() }
         try FileManager.default.removeItem(at: fixture.previousFile)
         let restored = expectation(description: "restored file")
-        let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
+        let useCase = DefaultObserveThemeUseCase(
+            themeImageRepository: fixture.repository,
+            onRestoreFailed: { XCTFail("successful recovery must not report a failure: \($0)") }
+        )
         let images = useCase.execute()
         let observation = Task {
             for await file in images {
@@ -284,7 +287,16 @@ final class ThemeImagePersistenceTests: XCTestCase {
         defer { fixture.cleanup() }
         try FileManager.default.removeItem(at: fixture.previousFile)
         let saved = expectation(description: "observation stays active after failed recovery")
-        let useCase = DefaultObserveThemeUseCase(themeImageRepository: fixture.repository)
+        // 두 포맷이 모두 실패해야 한 번만 보고된다 — 포맷별 중간 실패는 UseCase 밖으로 나오지 않는다
+        let reported = expectation(description: "failed recovery is reported once")
+        var reportedErrors: [Error] = []
+        let useCase = DefaultObserveThemeUseCase(
+            themeImageRepository: fixture.repository,
+            onRestoreFailed: { error in
+                reportedErrors.append(error)
+                reported.fulfill()
+            }
+        )
         let images = useCase.execute()
         let observation = Task {
             for await file in images {
@@ -294,7 +306,9 @@ final class ThemeImagePersistenceTests: XCTestCase {
             }
         }
         defer { observation.cancel() }
-        await fulfillment(of: [attempts], timeout: 2)
+        await fulfillment(of: [attempts, reported], timeout: 2)
+        XCTAssertEqual(reportedErrors.count, 1)
+        XCTAssertEqual((reportedErrors.first as? URLError)?.code, .notConnectedToInternet)
         XCTAssertEqual(fixture.userInfo.currentThemeImageFileName, "previous.png")
         XCTAssertEqual(fixture.userInfo.currentThemeUrl, "https://images.example.test/previous?ixid=test")
         XCTAssertNil(fixture.repository.storedImageFileURL())

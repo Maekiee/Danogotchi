@@ -1,4 +1,3 @@
-import Combine
 import ComposableArchitecture
 import PhotosUI
 import SwiftUI
@@ -130,9 +129,7 @@ private extension PhotoThemeView {
 // MARK: - Preview
 #if DEBUG
 private struct PreviewSavePhotoThemeUseCase: SavePhotoThemeUseCase {
-    func execute(imageData: Data, crop: PhotoThemeCrop) -> AnyPublisher<Void, Error> {
-        return Just(()).setFailureType(to: Error.self).eraseToAnyPublisher()
-    }
+    func execute(imageData: Data, crop: PhotoThemeCrop) async throws {}
 }
 
 #Preview("PhotoThemeView") {

@@ -1,4 +1,3 @@
-import Combine
 import ComposableArchitecture
 import OSLog
 import PhotosUI
@@ -108,11 +107,12 @@ struct PhotoThemeFeature {
                 guard state.canConfirm, let imageData = state.imageData, let crop = state.crop else { return .none }
                 state.isSaving = true
 
-                // UseCase가 메인 전달을 보장하므로 스케줄러를 갈아타지 않는다
-                return .publisher {
-                    savePhotoThemeUseCase.execute(imageData: imageData, crop: crop)
-                        .map { _ in Action.saveResponse(.success(())) }
-                        .catch { Just(Action.saveResponse(.failure($0))) }
+                // 저장은 메인 밖에서 돌고, send가 결과를 메인 액터로 올린다
+                return .run { send in
+                    try await savePhotoThemeUseCase.execute(imageData: imageData, crop: crop)
+                    await send(.saveResponse(.success(())))
+                } catch: { error, send in
+                    await send(.saveResponse(.failure(error)))
                 }
 
             case .saveResponse(.success):

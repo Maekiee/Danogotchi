@@ -162,7 +162,12 @@ extension AppDIContainer {
     }
 
     func makeObserveThemeUseCase() -> ObserveThemeUseCase {
-        return DefaultObserveThemeUseCase(themeImageRepository: makeThemeImageRepository())
+        return DefaultObserveThemeUseCase(
+            themeImageRepository: makeThemeImageRepository(),
+            onRestoreFailed: { error in
+                AppLogger.network.error("테마 이미지 복구 실패: \(String(describing: error), privacy: .public)")
+            }
+        )
     }
 
     func makeSavePhotoThemeUseCase() -> SavePhotoThemeUseCase {
