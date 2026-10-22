@@ -9,15 +9,18 @@ final class SearchThemeViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let searchThemeUseCase: SearchThemeUseCase
     private let saveThemeUseCase: SaveThemeUseCase
+    private let reportError: (Error) -> Void
     private var searchTask: Task<Void, Never>?
     private var saveTask: Task<Void, Never>?
 
     init(
         searchThemeUseCase: SearchThemeUseCase,
-        saveThemeUseCase: SaveThemeUseCase
+        saveThemeUseCase: SaveThemeUseCase,
+        reportError: @escaping (Error) -> Void
     ) {
         self.searchThemeUseCase = searchThemeUseCase
         self.saveThemeUseCase = saveThemeUseCase
+        self.reportError = reportError
     }
 
     deinit {
@@ -71,6 +74,7 @@ final class SearchThemeViewModel: BaseViewModel {
             }
 
             let useCase = owner.searchThemeUseCase
+            let reportError = owner.reportError
             // owner를 캡처하지 않아 요청 중에도 ViewModel이 해제될 수 있다.
             owner.searchTask = Task { @MainActor in
                 defer {
@@ -91,7 +95,7 @@ final class SearchThemeViewModel: BaseViewModel {
                     guard !Task.isCancelled, !(error is CancellationError) else { return }
                     isEmptyResult.accept(false)
                     AppLogger.network.error("테마 조회 실패(page=\(page)): \(String(describing: error), privacy: .public)")
-                    CrashReporter.record(error)
+                    reportError(error)
                     alertMessageRelay.accept(Self.networkErrorMessage)
                 }
             }
@@ -140,6 +144,7 @@ final class SearchThemeViewModel: BaseViewModel {
                 // 저장 중 표시를 동기로 켜 중복 저장을 막는다
                 isSaving.accept(true)
                 let useCase = owner.saveThemeUseCase
+                let reportError = owner.reportError
                 // owner를 캡처하지 않아 저장 중에도 ViewModel이 해제될 수 있다.
                 owner.saveTask = Task { @MainActor in
                     do {
@@ -151,7 +156,7 @@ final class SearchThemeViewModel: BaseViewModel {
                         guard !Task.isCancelled else { return }
                         isSaving.accept(false)
                         AppLogger.network.error("테마 이미지 저장 실패: \(String(describing: error), privacy: .public)")
-                        CrashReporter.record(error)
+                        reportError(error)
                         alertMessageRelay.accept(Self.networkErrorMessage)
                     }
                 }

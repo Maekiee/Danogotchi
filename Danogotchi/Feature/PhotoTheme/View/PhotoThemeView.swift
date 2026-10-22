@@ -135,7 +135,7 @@ private struct PreviewSavePhotoThemeUseCase: SavePhotoThemeUseCase {
 #Preview("PhotoThemeView") {
     PhotoThemeView(
         store: Store(initialState: PhotoThemeFeature.State()) {
-            PhotoThemeFeature(savePhotoThemeUseCase: PreviewSavePhotoThemeUseCase(), onThemeSaved: {})
+            PhotoThemeFeature(savePhotoThemeUseCase: PreviewSavePhotoThemeUseCase(), reportError: { _ in }, onThemeSaved: {})
         }
     )
 }

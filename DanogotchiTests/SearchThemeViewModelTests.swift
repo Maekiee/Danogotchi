@@ -46,6 +46,7 @@ final class SearchThemeViewModelTests: XCTestCase {
         XCTAssertFalse(screen.isEmpty)
         XCTAssertTrue(screen.ids.isEmpty)
         XCTAssertEqual(screen.alerts, ["잠시후 다시 시도해주세요"])
+        XCTAssertEqual(screen.reportedErrors.count, 1, "네트워크 실패는 한 번 보고한다")
 
         let recovered = expectation(description: "recovered results")
         screen.onImages = { if $0 == ["recovered"] { recovered.fulfill() } }
@@ -81,6 +82,7 @@ final class SearchThemeViewModelTests: XCTestCase {
         await fulfillment(of: [stale], timeout: 0.1)
         XCTAssertEqual(screen.ids, ["latest"])
         XCTAssertTrue(screen.alerts.isEmpty)
+        XCTAssertTrue(screen.reportedErrors.isEmpty, "취소는 보고하지 않는다")
         let callCount = await repository.calls.count
         XCTAssertEqual(callCount, 3)
     }
@@ -234,6 +236,7 @@ private final class SearchThemeTestScreen {
     var ids: [String] = []
     var isEmpty = false
     var alerts: [String] = []
+    var reportedErrors: [Error] = []
     var onImages: (([String]) -> Void)?
     var onEmpty: ((Bool) -> Void)?
     var onAlert: (() -> Void)?
@@ -241,7 +244,8 @@ private final class SearchThemeTestScreen {
     init(repository: SearchThemeRepository) {
         let viewModel = SearchThemeViewModel(
             searchThemeUseCase: DefaultSearchThemeUseCase(repository: repository),
-            saveThemeUseCase: UnusedSaveThemeUseCase()
+            saveThemeUseCase: UnusedSaveThemeUseCase(),
+            reportError: { [weak self] in self?.reportedErrors.append($0) }
         )
         self.viewModel = viewModel
         let output = viewModel.transform(input: .init(

@@ -73,9 +73,9 @@ final class MainDIContainer {
             fetch: { period, now, calendar in
                 try await useCase.execute(period: period, now: now, calendar: calendar)
             },
-            reportError: { error in
+            reportError: { [reportError = dependencies.reportError] error in
                 AppLogger.database.error("학습 리포트 조회 실패: \(String(describing: error), privacy: .public)")
-                CrashReporter.record(error)
+                reportError(error)
             },
             onClose: onClose,
             onNavigate: onNavigate

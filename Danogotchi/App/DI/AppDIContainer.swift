@@ -13,6 +13,8 @@ struct AppDependencies {
     /// activeBookChanged 스트림 보유
     let vocabBookRepository: VocabBookRepository
     let petRepository: PetRepository
+    /// 표현 계층의 실패 보고. Crashlytics 호출은 조립부에만 둔다
+    let reportError: @Sendable (Error) -> Void
 }
 
 // MARK: - 여러 기능이 함께 쓰는 조립 — 중복을 막기 위해 한 곳에만 둔다
@@ -80,7 +82,8 @@ extension AppDependencies {
             searchThemeUseCase: DefaultSearchThemeUseCase(
                 repository: DefaultSearchThemeRepository(apiClient: apiClient)
             ),
-            saveThemeUseCase: DefaultSaveThemeUseCase(themeImageRepository: makeThemeImageRepository())
+            saveThemeUseCase: DefaultSaveThemeUseCase(themeImageRepository: makeThemeImageRepository()),
+            reportError: reportError
         )
     }
 
@@ -90,6 +93,7 @@ extension AppDependencies {
     ) -> PhotoThemeFeature {
         return PhotoThemeFeature(
             savePhotoThemeUseCase: DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository()),
+            reportError: reportError,
             onThemeSaved: onThemeSaved,
             onClose: onClose
         )
@@ -109,7 +113,8 @@ final class AppDIContainer {
             themeImageStorage: ImageFileStorage(directoryName: "ThemeImage"),
             userSettingsRepository: DefaultUserSettingsRepository(),
             vocabBookRepository: DefaultVocabBookRepository(context: coreDataStack.viewContext),
-            petRepository: DefaultPetRepository(context: coreDataStack.viewContext)
+            petRepository: DefaultPetRepository(context: coreDataStack.viewContext),
+            reportError: { CrashReporter.record($0) }
         )
     }
 

@@ -56,6 +56,7 @@ final class SearchThemeSavingTests: XCTestCase {
         XCTAssertEqual(screen.savingStates, [false, true, false])
         XCTAssertEqual(screen.savedCount, 0)
         XCTAssertEqual(screen.alerts, ["잠시후 다시 시도해주세요"])
+        XCTAssertEqual(screen.reporter.errors.count, 1, "저장 실패는 한 번 보고한다")
         XCTAssertEqual(screen.selection.value, rawURL)
         XCTAssertFalse(screen.submitHidden)
 
@@ -68,12 +69,16 @@ final class SearchThemeSavingTests: XCTestCase {
         XCTAssertEqual(screen.savingStates, [false, true, false, true, false])
         XCTAssertEqual(screen.savedCount, 1)
         XCTAssertEqual(screen.alerts.count, 1)
+        XCTAssertEqual(screen.reporter.errors.count, 1)
     }
 
     func test_closingScreenDuringSaveDoesNotReportLateFailure() async throws {
         let save = ControlledSaveThemeUseCase()
+        let reported = expectation(description: "a save cancelled by closing the screen must not be reported")
+        reported.isInverted = true
         var viewModel: SearchThemeViewModel? = SearchThemeViewModel(
-            searchThemeUseCase: UnusedSearchThemeUseCase(), saveThemeUseCase: save
+            searchThemeUseCase: UnusedSearchThemeUseCase(), saveThemeUseCase: save,
+            reportError: { _ in reported.fulfill() }
         )
         let selection = BehaviorRelay<String?>(value: rawURL)
         let submit = PublishRelay<Void>()
@@ -82,8 +87,6 @@ final class SearchThemeSavingTests: XCTestCase {
             selectedTheme: selection.asObservable(), submitTapped: submit.asObservable()
         ))
         let bag = DisposeBag()
-        let reported = expectation(description: "a save cancelled by closing the screen must not be reported")
-        reported.isInverted = true
         output.alertMessage.emit(onNext: { _ in reported.fulfill() }).disposed(by: bag)
         output.themeSaved.emit(onNext: { reported.fulfill() }).disposed(by: bag)
         let started = expectation(description: "save started")
@@ -124,6 +127,7 @@ final class SearchThemeSavingTests: XCTestCase {
         let selection = BehaviorRelay<String?>(value: nil)
         let submit = PublishRelay<Void>()
         let save = ControlledSaveThemeUseCase()
+        let reporter = ErrorRecorder()
         let viewModel: SearchThemeViewModel
         private let disposeBag = DisposeBag()
         var savingStates: [Bool] = []
@@ -133,7 +137,11 @@ final class SearchThemeSavingTests: XCTestCase {
         var onSavingState: ((Bool) -> Void)?
 
         init() {
-            viewModel = SearchThemeViewModel(searchThemeUseCase: UnusedSearchThemeUseCase(), saveThemeUseCase: save)
+            viewModel = SearchThemeViewModel(
+                searchThemeUseCase: UnusedSearchThemeUseCase(),
+                saveThemeUseCase: save,
+                reportError: { [reporter] in reporter.record($0) }
+            )
             let output = viewModel.transform(input: .init(
                 viewWillAppear: .never(), searchText: .never(), loadNextPage: .never(), textEndTrigger: .never(),
                 selectedTheme: selection.asObservable(), submitTapped: submit.asObservable()
@@ -184,4 +192,10 @@ private struct UnusedSearchThemeUseCase: SearchThemeUseCase {
         XCTFail("Saving a selected theme must not start a search")
         throw URLError(.unsupportedURL)
     }
+}
+
+/// viewModel이 let이라 init 안에서 self를 캡처할 수 없어 별도 객체에 기록한다
+private final class ErrorRecorder {
+    private(set) var errors: [Error] = []
+    func record(_ error: Error) { errors.append(error) }
 }

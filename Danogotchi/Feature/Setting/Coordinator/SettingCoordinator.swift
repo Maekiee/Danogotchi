@@ -139,7 +139,7 @@ extension SettingCoordinator: MFMailComposeViewControllerDelegate {
                 AppLogger.ui.debug("메일 작성 취소")
             case .failed:
                 AppLogger.ui.error("메일 전송 실패: \(String(describing: error), privacy: .public)")
-                if let error { CrashReporter.record(error) }
+                if let error { container.reportError(error) }
             @unknown default:
                 AppLogger.ui.debug("알 수 없는 메일 결과")
             }

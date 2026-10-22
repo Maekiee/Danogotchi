@@ -7,6 +7,9 @@ final class SettingDIContainer {
         self.dependencies = dependencies
     }
 
+    /// 문의 메일 전송 실패 보고용
+    var reportError: @Sendable (Error) -> Void { dependencies.reportError }
+
     func makeSettingTabViewModel() -> SettingTabViewModel {
         return SettingTabViewModel(
             appEnv: DefaultAppEnvProvider(),
