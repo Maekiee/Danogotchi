@@ -12,19 +12,19 @@ final class DefaultThemeImageRepository {
 
     private let apiClient: ApiClient
     private let storage: ImageFileStorage
-    private let userInfo: UserInfoProtocol
+    private let userSettings: UserSettingsRepository
     /// 내려받기·합성 기준 화면 픽셀 크기
     private let targetPixelSize: CGSize
 
     init(
         apiClient: ApiClient,
         storage: ImageFileStorage,
-        userInfo: UserInfoProtocol,
+        userSettings: UserSettingsRepository,
         targetPixelSize: CGSize
     ) {
         self.apiClient = apiClient
         self.storage = storage
-        self.userInfo = userInfo
+        self.userSettings = userSettings
         self.targetPixelSize = targetPixelSize
     }
 }
@@ -32,7 +32,7 @@ final class DefaultThemeImageRepository {
 extension DefaultThemeImageRepository: ThemeImageRepository {
     var storedImageChanged: AsyncStream<URL?> {
         // 파일명 구독을 먼저 등록하고, Task는 파일 URL로 바꿔 전달만 한다
-        let fileNames = userInfo.themeImageFileNameChanges
+        let fileNames = userSettings.themeImageFileNameChanges
         let (stream, continuation) = AsyncStream.makeStream(of: URL?.self, bufferingPolicy: .bufferingNewest(1))
         let task = Task { [storage] in
             for await fileName in fileNames {
@@ -45,11 +45,11 @@ extension DefaultThemeImageRepository: ThemeImageRepository {
     }
 
     var lastSelectedRawUrl: String? {
-        return userInfo.currentThemeUrl
+        return userSettings.currentThemeUrl
     }
 
     func storedImageFileURL() -> URL? {
-        guard let fileName = userInfo.currentThemeImageFileName else { return nil }
+        guard let fileName = userSettings.currentThemeImageFileName else { return nil }
         return storage.existingFileURL(fileName: fileName)
     }
 
@@ -70,8 +70,8 @@ private extension DefaultThemeImageRepository {
         let fileName = UUID().uuidString + "." + fileExtension
         try storage.save(data, fileName: fileName)
 
-        userInfo.currentThemeImageFileName = fileName
-        userInfo.currentThemeUrl = rawUrl
+        userSettings.currentThemeImageFileName = fileName
+        userSettings.currentThemeUrl = rawUrl
 
         // 마지막에 정리한다. 여기서 실패하거나 직전에 앱이 죽어도 다음 저장 때 함께 치워진다.
         storage.removeAllExcept(fileName: fileName)
@@ -88,9 +88,9 @@ private extension DefaultThemeImageRepository {
         let fileName = UUID().uuidString + "." + fileExtension
         try storage.save(data, fileName: fileName)
 
-        userInfo.currentThemeImageFileName = fileName
+        userSettings.currentThemeImageFileName = fileName
         // 로컬 사진은 다시 내려받을 원본이 없다 — 복구 대상에서 제외한다
-        userInfo.currentThemeUrl = nil
+        userSettings.currentThemeUrl = nil
 
         storage.removeAllExcept(fileName: fileName)
     }

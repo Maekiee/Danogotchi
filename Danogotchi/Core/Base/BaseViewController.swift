@@ -1,13 +1,9 @@
 import UIKit
 import OSLog
 import Toast
-import RxSwift
-import RxCocoa
 
- 
+
 class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresentable {
-    private let disposeBag = DisposeBag()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColor.background
@@ -21,14 +17,6 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
     func configHierarchy() { }
     func configLayout() { }
     func configView() { }
-    
-    private func setupToastObserver() {
-        ToastManager.shared.toastObservable
-            .observe(on: MainScheduler.instance)
-            .bind(with: self) { owner, toast in
-                owner.showToast(toast.message, duration: toast.duration)
-            }.disposed(by: disposeBag)
-    }
 }
 
 extension ToastPresentable where Self: UIViewController {

@@ -10,17 +10,17 @@ final class OnboardingCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     weak var delegate: OnboardingCoordinatorDelegate?
-    private let container: AppDIContainer
+    private let container: OnboardingDIContainer
 
     init(navigationController: UINavigationController,
-         container: AppDIContainer) {
+         container: OnboardingDIContainer) {
         self.navigationController = navigationController
         self.container = container
     }
 
     func start() {
         // 테마까지 끝냈는데 펫이 없는 상태(테마 직후 강제 종료)면 관심사·테마를 반복하지 않는다
-        if container.userInfoManager.hasSelectedTheme {
+        if container.makeOnboardingProgressUseCase().hasSelectedTheme {
             showEggSelection(asRoot: true)
         } else {
             showInterestSelection()
@@ -71,7 +71,8 @@ extension OnboardingCoordinator: OnboardingInterestViewControllerDelegate {
 extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
     func didSelectTheme() {
         do {
-            if try container.makeIsPetCreatedUseCase().execute() {
+            // 테마는 방금 저장됐으므로 완료 여부는 펫 존재로 결정된다
+            if try container.makeOnboardingProgressUseCase().isComplete() {
                 delegate?.onboardingDidComplete()
             } else {
                 showEggSelection()

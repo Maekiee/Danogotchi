@@ -2,17 +2,19 @@ import CoreData
 import OSLog
 
 final class CoreDataStack {
-    static let shared = CoreDataStack()
-    
-    let container: NSPersistentContainer
+    private let container: NSPersistentContainer
     private var isPrepared = false
-    
+
     var viewContext: NSManagedObjectContext { container.viewContext }
-    
-    private init() {
+
+    init() {
         container = NSPersistentContainer(name: "Model")
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+    }
+
+    func newBackgroundContext() -> NSManagedObjectContext {
+        return container.newBackgroundContext()
     }
 
     func prepareStore() throws {
@@ -32,10 +34,6 @@ final class CoreDataStack {
         }
         try StudyReportMigration.backfillIfNeeded(context: viewContext)
         isPrepared = true
-    }
-    
-    func saveContext() throws {
-        try viewContext.saveOrRollback()
     }
 }
 

@@ -9,6 +9,7 @@ final class ExploreVocabViewModel: BaseViewModel {
     private let startQuizUseCase: StartQuizUseCase
     private let toggleSaveVocabUseCase: ToggleSaveVocabUseCase
     private let observeThemeUseCase: ObserveThemeUseCase
+    private let speechSynthesizer: SpeechSynthesizing
 
     /// 표시 순서를 고정하는 셔플 결과. 같은 단어 구성이면 재조회해도 이 순서를 재사용한다.
     private var shuffledOrder: [UUID] = []
@@ -17,18 +18,22 @@ final class ExploreVocabViewModel: BaseViewModel {
         fetchVocabsUseCase: FetchVocabsUseCase,
         startQuizUseCase: StartQuizUseCase,
         toggleSaveVocabUseCase: ToggleSaveVocabUseCase,
-        observeThemeUseCase: ObserveThemeUseCase
+        observeThemeUseCase: ObserveThemeUseCase,
+        speechSynthesizer: SpeechSynthesizing
     ) {
         self.fetchVocabsUseCase = fetchVocabsUseCase
         self.startQuizUseCase = startQuizUseCase
         self.toggleSaveVocabUseCase = toggleSaveVocabUseCase
         self.observeThemeUseCase = observeThemeUseCase
+        self.speechSynthesizer = speechSynthesizer
     }
 
     struct Input {
         let viewWillAppear: Observable<Void>
         let startLearningTapped: Observable<Void>
         let saveVocabTrigger: Observable<VocabDisplayInfo>
+        /// 발음할 단어
+        let speakTapped: Observable<String>
     }
 
     struct Output {
@@ -37,6 +42,8 @@ final class ExploreVocabViewModel: BaseViewModel {
         let startQuiz: Signal<QuizData>
         let alertMessage: Signal<String>
         let themeImageFileURL: Driver<URL?>
+        /// 발음 중인 단어. 없으면 nil
+        let speakingText: Driver<String?>
     }
 
     func transform(input: Input) -> Output {
@@ -98,15 +105,27 @@ final class ExploreVocabViewModel: BaseViewModel {
                 }
             }.disposed(by: disposeBag)
 
+        input.speakTapped.bind(with: self) { $0.speechSynthesizer.speak($1) }.disposed(by: disposeBag)
+
         return Output(
             wordItems: allWordItems.asDriver(),
             showsSaveButton: showsSaveButton.asDriver(),
             startQuiz: startQuizRelay.asSignal(),
             alertMessage: alertMessageRelay.asSignal(),
-            // nil도 그대로 흘린다 — 저장된 이미지가 사라진 상태가 화면에 반영돼야 한다
-            themeImageFileURL: Observable.onMain { [observeThemeUseCase] in observeThemeUseCase.execute() }
-                .asDriver(onErrorDriveWith: .empty())
+            themeImageFileURL: themeImageFileURL,
+            speakingText: speakingText
         )
+    }
+
+    /// nil도 그대로 흘린다 — 저장된 이미지가 사라진 상태가 화면에 반영돼야 한다
+    private var themeImageFileURL: Driver<URL?> {
+        Observable.onMain { [observeThemeUseCase] in observeThemeUseCase.execute() }
+            .asDriver(onErrorDriveWith: .empty())
+    }
+
+    private var speakingText: Driver<String?> {
+        Observable.onMain { [speechSynthesizer] in speechSynthesizer.speakingText }
+            .asDriver(onErrorDriveWith: .empty())
     }
 
     /// 단어장 앞쪽 단어만 반복 노출되지 않도록 무작위로 섞는다.

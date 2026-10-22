@@ -4,7 +4,7 @@ import Foundation
 
 /// UI 테스트 전용 — 실행 인자로 첫 설치 상태를 만든다
 enum UITestingSupport {
-    /// CoreDataStack·UserInfoManager가 만들어지기 전에 호출해야 한다
+    /// AppDIContainer가 만들어지기 전에 호출해야 한다
     static func resetIfRequested() {
         guard ProcessInfo.processInfo.arguments.contains("-uiTestingReset") else { return }
         if let domain = Bundle.main.bundleIdentifier {
@@ -26,12 +26,7 @@ enum UITestingSupport {
     static func seedMainFlowIfRequested(container: AppDIContainer) {
         guard ProcessInfo.processInfo.arguments.contains("-uiTestingMainFlow") else { return }
         do {
-            try container.coreDataStack.prepareStore()
-            try DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
-            try container.makeSetActiveBookUseCase().execute(topic: .travel)
-            _ = try container.makeCreatePetUseCase().execute(type: .sprout, name: "테스트")
-            // 없는 파일명만 지정 — 원본 URL이 없어 복구 다운로드가 일어나지 않는다
-            container.userInfoManager.currentThemeImageFileName = "ui-test-theme.png"
+            try container.seedMainFlowForUITesting()
         } catch {
             assertionFailure("UI 테스트 시드 실패: \(error)")
         }

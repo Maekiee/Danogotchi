@@ -7,11 +7,11 @@ protocol LibraryCoordinatorDelegate: AnyObject {
 final class LibraryCoordinator:NSObject, Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let appDIContainer: AppDIContainer
+    private let container: LibraryDIContainer
     weak var delegate: LibraryCoordinatorDelegate?
-    
-    init(container: AppDIContainer, navigationController: UINavigationController) {
-        self.appDIContainer = container
+
+    init(container: LibraryDIContainer, navigationController: UINavigationController) {
+        self.container = container
         self.navigationController = navigationController
         super.init()
     }
@@ -19,7 +19,7 @@ final class LibraryCoordinator:NSObject, Coordinator {
 
 extension LibraryCoordinator {
     func start() {
-        let vm = appDIContainer.makeLibraryViewModel()
+        let vm = container.makeLibraryViewModel()
         let vc = LibraryViewController(viewModel: vm)
         vc.delegate = self
         navigationController.setViewControllers([vc], animated: false)
@@ -36,7 +36,7 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
     }
 
     func libraryDidTapMore(topic: BookTopic) {
-        let vm = appDIContainer.makeVocabDetailViewModel(topic: topic)
+        let vm = container.makeVocabDetailViewModel(topic: topic)
         let vc = VocabBookDetailViewController(viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
@@ -50,14 +50,14 @@ extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
     }
     
     func myBookDetailDidTapEditVocab(_ vocab: Vocab) {
-        let vm = appDIContainer.makeAddVocabViewModel(editingVocab: vocab)
+        let vm = container.makeAddVocabViewModel(editingVocab: vocab)
         let vc = AddVocabViewController(viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)
     }
 
     func floatingButtonDidTap() {
-        let vm = appDIContainer.makeAddVocabViewModel()
+        let vm = container.makeAddVocabViewModel()
         let vc = AddVocabViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)
     }

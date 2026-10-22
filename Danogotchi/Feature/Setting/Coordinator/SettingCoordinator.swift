@@ -16,10 +16,10 @@ final class SettingCoordinator: NSObject, Coordinator {
     
     private static let inquiryRecipient = "pdwssf@gmail.com"
 
-    private let container: AppDIContainer
-    
+    private let container: SettingDIContainer
+
     init(
-        container: AppDIContainer,
+        container: SettingDIContainer,
         navigationController: UINavigationController
     ) {
         self.container = container

@@ -1,177 +1,87 @@
 import UIKit
 import OSLog
 
-final class AppDIContainer {
-    let userInfoManager: UserInfoProtocol
-    let ttsManager: TTSManager
+/// 앱 스코프 공유 인스턴스. 기능 컨테이너가 받는 유일한 입력이다.
+/// 규칙: 변경 스트림 같은 상태를 가진 리포지토리는 여기서 1개만 공유하고, 무상태 리포지토리는 호출마다 만든다.
+struct AppDependencies {
     let coreDataStack: CoreDataStack
-    let apiClient:ApiClient
+    let apiClient: ApiClient
+    let speechSynthesizer: SpeechSynthesizing
+    let themeImageStorage: ImageFileStorage
+    /// 테마 파일명 변경 스트림 보유
+    let userSettingsRepository: UserSettingsRepository
+    /// activeBookChanged 스트림 보유
     let vocabBookRepository: VocabBookRepository
     let petRepository: PetRepository
-    let themeImageStorage: ImageFileStorage
-
-    init() {
-        userInfoManager = UserInfoManager.shared
-        ttsManager = TTSManager.shared
-        coreDataStack = CoreDataStack.shared
-        apiClient = DefaultApiClient()
-        themeImageStorage = ImageFileStorage(directoryName: "ThemeImage")
-        vocabBookRepository = DefaultVocabBookRepository(context: coreDataStack.viewContext)
-        petRepository = DefaultPetRepository(context: coreDataStack.viewContext)
-    }
 }
 
-// MARK: - Explore / CreateWord
-extension AppDIContainer {
-    
-    func makeExploreVocabViewModel() -> ExploreVocabViewModel {
-        return ExploreVocabViewModel(
-            fetchVocabsUseCase: makeFetchVocabsUseCase(),
-            startQuizUseCase: makeStartQuizUseCase(),
-            toggleSaveVocabUseCase: makeToggleSaveVocabUseCase(),
-            observeThemeUseCase: makeObserveThemeUseCase()
-        )
-    }
-    
-    func makeAddVocabViewModel(editingVocab: Vocab? = nil) -> AddVocabViewModel {
-        return AddVocabViewModel(
-            addVocabUseCase: makeAddVocabUseCase(),
-            updateVocabUseCase: makeUpdateVocabUseCase(),
-            editingVocab: editingVocab
-        )
+// MARK: - 여러 기능이 함께 쓰는 조립 — 중복을 막기 위해 한 곳에만 둔다
+extension AppDependencies {
+    func makeVocabRepository() -> VocabRepository {
+        return DefaultVocabRepository(context: coreDataStack.viewContext)
     }
 
-    func makeAddVocabUseCase() -> AddVocabUseCase {
-        return DefaultAddVocabUseCase(vocabBookRepository: vocabBookRepository)
-    }
-
-    func makeUpdateVocabUseCase() -> UpdateVocabUseCase {
-        let vocabRepository = makeVocabRepository()
-        return DefaultUpdateVocabUseCase(vocabRepository: vocabRepository)
-    }
-}
-
-// MARK: - Library
-extension AppDIContainer {
-    func makeLibraryViewModel() -> LibraryViewModel {
-        return LibraryViewModel(fetchVocabBooksUseCase: makeFetchVocabBooksUseCase())
-    }
-
-    func makeVocabDetailViewModel(topic: BookTopic) -> VocabBookDetailViewModel {
-        return VocabBookDetailViewModel(
-            topic: topic,
-            fetchVocabsUseCase: makeFetchVocabsUseCase(),
-            toggleSaveVocabUseCase: makeToggleSaveVocabUseCase(),
-            deleteVocabUseCase: makeDeleteVocabUseCase(),
-            setActiveBookUseCase: makeSetActiveBookUseCase(),
-            isActiveBookUseCase: makeIsActiveBookUseCase()
-        )
-    }
-
-    func makeFetchVocabsUseCase() -> FetchVocabsUseCase {
-        let learningHistoryRepository = makeVocabLearningHistoryRepository()
-        return DefaultFetchVocabsUseCase(
-            vocabBookRepository: vocabBookRepository,
-            learningHistoryRepository: learningHistoryRepository
-        )
-    }
-
-    func makeToggleSaveVocabUseCase() -> ToggleSaveVocabUseCase {
-        let vocabRepository = makeVocabRepository()
-        return DefaultToggleSaveVocabUseCase(
-            vocabBookRepository: vocabBookRepository,
-            vocabRepository: vocabRepository
-        )
-    }
-
-    func makeDeleteVocabUseCase() -> DeleteVocabUseCase {
-        return DefaultDeleteVocabUseCase(vocabRepository: makeVocabRepository())
-    }
-
-    func makeSetActiveBookUseCase() -> SetActiveBookUseCase {
-        return DefaultSetActiveBookUseCase(vocabBookRepository: vocabBookRepository)
-    }
-
-    func makeIsActiveBookUseCase() -> IsActiveBookUseCase {
-        return DefaultIsActiveBookUseCase(vocabBookRepository: vocabBookRepository)
-    }
-
-    func makeFetchVocabBooksUseCase() -> FetchVocabBooksUseCase {
-        return DefaultFetchVocabBooksUseCase(vocabBookRepository: vocabBookRepository)
-    }
-}
-
-// MARK: - Quiz
-extension AppDIContainer {
-    func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
-        return QuizViewModel(
-            earnExperienceUseCase: makeEarnExperienceUseCase(),
-            studyReminderUseCase: makeStudyReminderUseCase(),
-            quizData: quizData
-        )
-    }
-
-    func makeEarnExperienceUseCase() -> EarnExperienceUseCase {
-        return DefaultEarnExperienceUseCase(
-            learningHistoryRepository: makeVocabLearningHistoryRepository(),
-            petRepository: petRepository
-        )
-    }
-    
-    func makeCompleteQuizViewModel(result: QuizResult) -> CompleteQuizViewModel {
-        return CompleteQuizViewModel(result: result)
-    }
-
-    func makeStartQuizUseCase() -> StartQuizUseCase {
-        return DefaultStartQuizUseCase(
-            vocabBookRepository: vocabBookRepository,
-            learningHistoryRepository: makeVocabLearningHistoryRepository()
-        )
-    }
-}
-
-// MARK: - Setting Tab
-extension AppDIContainer {
-    func makeSearchThemeRepository() -> SearchThemeRepository {
-        return DefaultSearchThemeRepository(apiClient: apiClient)
-    }
-
-    func makeSearchThemeUseCase() -> SearchThemeUseCase {
-        return DefaultSearchThemeUseCase(repository: makeSearchThemeRepository())
-    }
-    
-    func makeSearchThemeViewModel() -> SearchThemeViewModel {
-        return SearchThemeViewModel(
-            searchThemeUseCase: makeSearchThemeUseCase(),
-            saveThemeUseCase: makeSaveThemeUseCase()
-        )
+    func makeLearningHistoryRepository() -> LearningHistoryRepository {
+        return DefaultLearningHistoryRepository(context: coreDataStack.viewContext)
     }
 
     func makeThemeImageRepository() -> ThemeImageRepository {
         return DefaultThemeImageRepository(
             apiClient: apiClient,
             storage: themeImageStorage,
-            userInfo: userInfoManager,
+            userSettings: userSettingsRepository,
             // UIScreen은 메인 스레드 전용이라 조립 시점에 읽어 주입
             targetPixelSize: UIScreen.main.nativeBounds.size
         )
     }
 
-    func makeSaveThemeUseCase() -> SaveThemeUseCase {
-        return DefaultSaveThemeUseCase(themeImageRepository: makeThemeImageRepository())
-    }
-
-    func makeObserveThemeUseCase() -> ObserveThemeUseCase {
-        return DefaultObserveThemeUseCase(
-            themeImageRepository: makeThemeImageRepository(),
-            onRestoreFailed: { error in
-                AppLogger.network.error("테마 이미지 복구 실패: \(String(describing: error), privacy: .public)")
-            }
+    func makeStudyReminderUseCase() -> StudyReminderUseCase {
+        return DefaultStudyReminderUseCase(
+            userSettings: userSettingsRepository,
+            learningHistoryRepository: makeLearningHistoryRepository(),
+            scheduler: LocalNotificationScheduler()
         )
     }
 
-    func makeSavePhotoThemeUseCase() -> SavePhotoThemeUseCase {
-        return DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository())
+    func makeOnboardingProgressUseCase() -> OnboardingProgressUseCase {
+        return DefaultOnboardingProgressUseCase(
+            userSettings: userSettingsRepository,
+            petRepository: petRepository
+        )
+    }
+
+    func makeStartQuizUseCase() -> StartQuizUseCase {
+        return DefaultStartQuizUseCase(
+            vocabBookRepository: vocabBookRepository,
+            learningHistoryRepository: makeLearningHistoryRepository()
+        )
+    }
+
+    func makeSetActiveBookUseCase() -> SetActiveBookUseCase {
+        return DefaultSetActiveBookUseCase(vocabBookRepository: vocabBookRepository)
+    }
+
+    func makeFetchVocabsUseCase() -> FetchVocabsUseCase {
+        return DefaultFetchVocabsUseCase(
+            vocabBookRepository: vocabBookRepository,
+            learningHistoryRepository: makeLearningHistoryRepository()
+        )
+    }
+
+    func makeToggleSaveVocabUseCase() -> ToggleSaveVocabUseCase {
+        return DefaultToggleSaveVocabUseCase(
+            vocabBookRepository: vocabBookRepository,
+            vocabRepository: makeVocabRepository()
+        )
+    }
+
+    func makeSearchThemeViewModel() -> SearchThemeViewModel {
+        return SearchThemeViewModel(
+            searchThemeUseCase: DefaultSearchThemeUseCase(
+                repository: DefaultSearchThemeRepository(apiClient: apiClient)
+            ),
+            saveThemeUseCase: DefaultSaveThemeUseCase(themeImageRepository: makeThemeImageRepository())
+        )
     }
 
     func makePhotoThemeFeature(
@@ -179,163 +89,60 @@ extension AppDIContainer {
         onClose: @escaping @MainActor @Sendable () -> Void = {}
     ) -> PhotoThemeFeature {
         return PhotoThemeFeature(
-            savePhotoThemeUseCase: makeSavePhotoThemeUseCase(),
+            savePhotoThemeUseCase: DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository()),
             onThemeSaved: onThemeSaved,
             onClose: onClose
         )
     }
 }
 
-// MARK: - Weather
-extension AppDIContainer {
-    func makeWeatherRepository() -> WeatherRepository {
-        return DefaultWeatherRepository(apiClient: apiClient)
-    }
+/// Composition Root. 앱 스코프 인스턴스를 여기서만 생성하고, 기능별 컨테이너를 만들어 넘긴다.
+final class AppDIContainer {
+    private let dependencies: AppDependencies
 
-    func makeLocationProvider() -> LocationProviding {
-        return DeviceLocationProvider()
-    }
-
-    func makeFetchCurrentWeatherUseCase() -> FetchCurrentWeatherUseCase {
-        return DefaultFetchCurrentWeatherUseCase(
-            locationProvider: makeLocationProvider(),
-            weatherRepository: makeWeatherRepository()
-        )
-    }
-}
-
-// MARK: - Onboarding
-extension AppDIContainer {
-    func makeOnboardingInterestViewModel() -> OnboardingInterestViewModel {
-        return OnboardingInterestViewModel(setActiveBookUseCase: makeSetActiveBookUseCase())
-    }
-
-    func makeOnboardingPetNameViewModel(petType: PetType) -> OnboardingPetNameViewModel {
-        return OnboardingPetNameViewModel(
-            createPetUseCase: makeCreatePetUseCase(),
-            petType: petType
+    init() {
+        let coreDataStack = CoreDataStack()
+        dependencies = AppDependencies(
+            coreDataStack: coreDataStack,
+            apiClient: DefaultApiClient(),
+            speechSynthesizer: SystemSpeechSynthesizer(),
+            themeImageStorage: ImageFileStorage(directoryName: "ThemeImage"),
+            userSettingsRepository: DefaultUserSettingsRepository(),
+            vocabBookRepository: DefaultVocabBookRepository(context: coreDataStack.viewContext),
+            petRepository: DefaultPetRepository(context: coreDataStack.viewContext)
         )
     }
 
-    /// 온보딩 재진입 분기(AppFlowCoordinator·OnboardingCoordinator)에서만 쓴다.
-    func makeIsPetCreatedUseCase() -> IsPetCreatedUseCase {
-        return DefaultIsPetCreatedUseCase(petRepository: petRepository)
-    }
-}
-
-// MARK: - EggSelection
-extension AppDIContainer {
-    func makeEggSelectionViewModel() -> EggSelectionViewModel {
-        return EggSelectionViewModel()
-    }
-}
-
-
-extension AppDIContainer {
-    func makeAppEnvProvider() -> AppEnvProvider {
-        return DefaultAppEnvProvider()
-    }
-    
-    func makeSettingTabViewModel() -> SettingTabViewModel {
-        let envProvider = makeAppEnvProvider()
-        return SettingTabViewModel(
-            appEnv: envProvider,
-            studyReminderUseCase: makeStudyReminderUseCase()
-        )
-    }
-
-}
-
-// MARK: - Notification
-extension AppDIContainer {
-    func makeLocalNotificationScheduler() -> LocalNotificationScheduling {
-        return LocalNotificationScheduler()
+    func makeDatabasePreparer() -> DatabasePreparing {
+        return CoreDataPreparer(stack: dependencies.coreDataStack)
     }
 
     func makeStudyReminderUseCase() -> StudyReminderUseCase {
-        return DefaultStudyReminderUseCase(
-            userInfo: userInfoManager,
-            learningHistoryRepository: makeVocabLearningHistoryRepository(),
-            scheduler: makeLocalNotificationScheduler()
-        )
+        return dependencies.makeStudyReminderUseCase()
+    }
+
+    func makeOnboardingProgressUseCase() -> OnboardingProgressUseCase {
+        return dependencies.makeOnboardingProgressUseCase()
+    }
+
+    func makeOnboardingDIContainer() -> OnboardingDIContainer {
+        return OnboardingDIContainer(dependencies: dependencies)
+    }
+
+    func makeMainDIContainer() -> MainDIContainer {
+        return MainDIContainer(dependencies: dependencies)
     }
 }
 
+#if DEBUG
 extension AppDIContainer {
-    func makeVocabRepository() -> VocabRepository {
-        return DefaultVocabRepository(context: coreDataStack.viewContext)
-    }
-
-    func makeVocabLearningHistoryRepository() -> LearningHistoryRepository {
-        return DefaultLearningHistoryRepository(context: coreDataStack.viewContext)
-    }
-}
-
-// MARK: - Character
-extension AppDIContainer {
-    func makeCharacterViewModel() -> CharacterViewModel {
-        return CharacterViewModel(
-            fetchPetStateUseCase: makeFetchPetStateUseCase(),
-            carePetUseCase: makeCarePetUseCase(),
-            levelUpPetUseCase: makeLevelUpPetUseCase(),
-            adjustPetLevelUseCase: makeAdjustPetLevelUseCase(),
-            revivePetUseCase: makeRevivePetUseCase(),
-            fetchCurrentWeatherUseCase: makeFetchCurrentWeatherUseCase()
-        )
-    }
-
-    func makeFetchPetStateUseCase() -> FetchPetStateUseCase {
-        return DefaultFetchPetStateUseCase(petRepository: petRepository)
-    }
-
-    func makeCarePetUseCase() -> CarePetUseCase {
-        return DefaultCarePetUseCase(petRepository: petRepository)
-    }
-
-    func makeLevelUpPetUseCase() -> LevelUpPetUseCase {
-        return DefaultLevelUpPetUseCase(petRepository: petRepository)
-    }
-
-    /// dev 빌드 테스트 버튼용 — 요구 경험치를 건너뛴다
-    func makeAdjustPetLevelUseCase() -> AdjustPetLevelUseCase {
-        return DefaultAdjustPetLevelUseCase(petRepository: petRepository)
-    }
-
-    func makeRevivePetUseCase() -> RevivePetUseCase {
-        return DefaultRevivePetUseCase(petRepository: petRepository)
-    }
-
-    func makeCreatePetUseCase() -> CreatePetUseCase {
-        return DefaultCreatePetUseCase(petRepository: petRepository)
+    /// UI 테스트 전용 — 온보딩을 건너뛰고 여행 단어장을 학습 중인 메인 화면 상태를 만든다
+    func seedMainFlowForUITesting() throws {
+        try makeDatabasePreparer().prepareIfNeeded()
+        try dependencies.makeSetActiveBookUseCase().execute(topic: .travel)
+        _ = try DefaultCreatePetUseCase(petRepository: dependencies.petRepository).execute(type: .sprout, name: "테스트")
+        // 없는 파일명만 지정 — 원본 URL이 없어 복구 다운로드가 일어나지 않는다
+        dependencies.userSettingsRepository.currentThemeImageFileName = "ui-test-theme.png"
     }
 }
-
-// MARK: - StudyReport
-extension AppDIContainer {
-    func makeStudyReportFeature(
-        onClose: @escaping @MainActor @Sendable () -> Void,
-        onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
-    ) -> StudyReportFeature {
-        #if DEBUG
-        if let feature = UITestingSupport.makeStudyReportFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
-            return feature
-        }
-        #endif
-        let repository = DefaultLearningHistoryRepository(
-            context: coreDataStack.viewContext,
-            reportContext: coreDataStack.container.newBackgroundContext()
-        )
-        let useCase: FetchStudyReportUseCase = DefaultFetchStudyReportUseCase(repository: repository)
-        return StudyReportFeature(
-            fetch: { period, now, calendar in
-                try await useCase.execute(period: period, now: now, calendar: calendar)
-            },
-            reportError: { error in
-                AppLogger.database.error("학습 리포트 조회 실패: \(String(describing: error), privacy: .public)")
-                CrashReporter.record(error)
-            },
-            onClose: onClose,
-            onNavigate: onNavigate
-        )
-    }
-}
+#endif

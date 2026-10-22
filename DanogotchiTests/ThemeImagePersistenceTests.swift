@@ -14,9 +14,7 @@ private final class TemporaryImageFileManager: FileManager, @unchecked Sendable 
     }
 }
 
-final class TestUserInfo: UserInfoProtocol {
-    var username: String?
-    var userId: String?
+final class TestUserSettings: UserSettingsRepository {
     var currentThemeUrl: String?
     var isStudyReminderEnabled = true
     /// 파일명이 바뀐 직후, 구독자에게 알리기 전에 호출된다 — 저장 순서를 검사할 때 쓴다
@@ -506,7 +504,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let root: URL
         let fileManager: TemporaryImageFileManager
         let api: ImageApiStub
-        let userInfo = TestUserInfo()
+        let userInfo = TestUserSettings()
         let repository: DefaultThemeImageRepository
         let previousFile: URL
         let previousData = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8)).pngData { context in
@@ -525,7 +523,7 @@ final class ThemeImagePersistenceTests: XCTestCase {
             repository = DefaultThemeImageRepository(
                 apiClient: api,
                 storage: storage,
-                userInfo: userInfo,
+                userSettings: userInfo,
                 targetPixelSize: UIScreen.main.nativeBounds.size
             )
         }

@@ -107,6 +107,9 @@ final class ExploreVocabViewController: BaseViewController {
 
     private let deleteWordTrigger = PublishRelay<Vocab>()
     private let saveVocabRelay = PublishRelay<VocabDisplayInfo>()
+    private let speakTappedRelay = PublishRelay<String>()
+    /// 셀이 재사용될 때마다 다시 구독하므로 최신 값을 보관한다
+    private let speakingTextRelay = BehaviorRelay<String?>(value: nil)
     private var showsSaveButton = false
 
     override func viewDidLoad() {
@@ -214,15 +217,20 @@ extension ExploreVocabViewController {
                 _ in
             },
             startLearningTapped: startLearningButton.rx.tap.asObservable(),
-            saveVocabTrigger: saveVocabRelay.asObservable()
+            saveVocabTrigger: saveVocabRelay.asObservable(),
+            speakTapped: speakTappedRelay.asObservable()
         )
 
         let output = viewModel.transform(input: input)
-        
+
         output.themeImageFileURL
             .drive(with: self) { owner, fileURL in
                 owner.updateBackgroundImage(with: fileURL)
             }
+            .disposed(by: disposeBag)
+
+        output.speakingText
+            .drive(speakingTextRelay)
             .disposed(by: disposeBag)
 
         // 셀 구성 시점에 저장 버튼 노출 여부가 최신이어야 하므로 목록과 같이 반영한다
@@ -293,9 +301,10 @@ extension ExploreVocabViewController {
                 showsSaveButton: self.showsSaveButton
             )
 
-            cell.onTouchTopIcon.bind(with: self) { owner, _ in
-                TTSManager.shared.speak(item.cardTitle)
-            }.disposed(by: cell.disposeBag)
+            cell.onTouchTopIcon
+                .map { item.cardTitle }
+                .bind(to: self.speakTappedRelay)
+                .disposed(by: cell.disposeBag)
 
             cell.onSaveVocab
                 .map { item }
@@ -303,8 +312,7 @@ extension ExploreVocabViewController {
                 .disposed(by: cell.disposeBag)
 
             // 발음 중인 단어의 카드만 아이콘 색을 바꾼다
-            TTSManager.shared.currentSpeakingText
-                .observe(on: MainScheduler.instance)
+            self.speakingTextRelay
                 .map { $0 == item.cardTitle }
                 .distinctUntilChanged()
                 .bind(with: cell) { cell, isSpeaking in

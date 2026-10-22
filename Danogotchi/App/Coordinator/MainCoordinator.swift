@@ -5,10 +5,10 @@ import UIKit
 final class MainCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
-    private let container: AppDIContainer
-    
+    private let container: MainDIContainer
+
     init(
-        container: AppDIContainer,
+        container: MainDIContainer,
         navigationController: UINavigationController
     ) {
         self.container = container
@@ -28,7 +28,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         let nav = UINavigationController()
         nav.modalPresentationStyle = .fullScreen
         let libraryCoordinator = LibraryCoordinator(
-            container: container,
+            container: container.makeLibraryDIContainer(),
             navigationController: nav
         )
         libraryCoordinator.delegate = self
@@ -41,7 +41,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         let nav = UINavigationController()
         nav.modalPresentationStyle = .fullScreen
         let settingCoordinator = SettingCoordinator(
-            container: container,
+            container: container.makeSettingDIContainer(),
             navigationController: nav
         )
         settingCoordinator.delegate = self
@@ -95,7 +95,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         nav.setNavigationBarHidden(true, animated: false)
         nav.modalPresentationStyle = .fullScreen
         let quizCoordinator = QuizCoordinator(
-            container: container,
+            container: container.makeQuizDIContainer(),
             navigationController: nav,
             quizData: quizData
         )
