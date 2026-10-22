@@ -7,6 +7,9 @@ final class OnboardingDIContainer {
         self.dependencies = dependencies
     }
 
+    /// 사진 테마 미리보기 비율 — 저장 비율과 같은 출처
+    var screenAspectRatio: CGFloat { dependencies.screenPixelSize.width / dependencies.screenPixelSize.height }
+
     func makeOnboardingProgressUseCase() -> OnboardingProgressUseCase {
         return dependencies.makeOnboardingProgressUseCase()
     }

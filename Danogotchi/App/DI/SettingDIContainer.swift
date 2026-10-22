@@ -10,6 +10,9 @@ final class SettingDIContainer {
     /// 문의 메일 전송 실패 보고용
     var reportError: @Sendable (Error) -> Void { dependencies.reportError }
 
+    /// 사진 테마 미리보기 비율 — 저장 비율과 같은 출처
+    var screenAspectRatio: CGFloat { dependencies.screenPixelSize.width / dependencies.screenPixelSize.height }
+
     func makeSettingTabViewModel() -> SettingTabViewModel {
         return SettingTabViewModel(
             appEnv: DefaultAppEnvProvider(),

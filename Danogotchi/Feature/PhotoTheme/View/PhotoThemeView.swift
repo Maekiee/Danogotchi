@@ -5,6 +5,8 @@ import SwiftUI
 struct PhotoThemeView: View {
     @Bindable
     var store: StoreOf<PhotoThemeFeature>
+    /// 미리보기 프레임 비율. 저장 비율과 다르면 사진이 늘어나므로 조립부가 같은 값을 넘긴다
+    let targetAspectRatio: CGFloat
 
     var body: some View {
         ZStack {
@@ -65,10 +67,6 @@ struct PhotoThemeView: View {
 }
 
 private extension PhotoThemeView {
-    var targetAspectRatio: CGFloat {
-        UIScreen.main.nativeBounds.width / UIScreen.main.nativeBounds.height
-    }
-
     var isAlertPresented: Binding<Bool> {
         Binding(
             get: { store.alertMessage != nil },
@@ -135,8 +133,14 @@ private struct PreviewSavePhotoThemeUseCase: SavePhotoThemeUseCase {
 #Preview("PhotoThemeView") {
     PhotoThemeView(
         store: Store(initialState: PhotoThemeFeature.State()) {
-            PhotoThemeFeature(savePhotoThemeUseCase: PreviewSavePhotoThemeUseCase(), reportError: { _ in }, onThemeSaved: {})
-        }
+            PhotoThemeFeature(
+                savePhotoThemeUseCase: PreviewSavePhotoThemeUseCase(),
+                reportError: { _ in },
+                previewPixelSize: 2556,
+                onThemeSaved: {}
+            )
+        },
+        targetAspectRatio: 1179 / 2556
     )
 }
 #endif

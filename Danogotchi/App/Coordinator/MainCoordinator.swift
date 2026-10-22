@@ -17,7 +17,10 @@ final class MainCoordinator: Coordinator {
     
     func start() {
         let exploreVocabVm = container.makeExploreVocabViewModel()
-        let exploreVocabVc = ExploreVocabViewController(viewModel: exploreVocabVm)
+        let exploreVocabVc = ExploreVocabViewController(
+            viewModel: exploreVocabVm,
+            backgroundMaxPixelSize: container.backgroundMaxPixelSize
+        )
         exploreVocabVc.delegate = self
         navigationController.setViewControllers([exploreVocabVc], animated: false)
     }

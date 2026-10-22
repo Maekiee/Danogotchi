@@ -172,7 +172,12 @@ final class PhotoThemeFeatureTests: XCTestCase {
 
     func test_cropNotifiesOnlyWhenConfirmAvailabilityChanges() throws {
         let store = Store(initialState: PhotoThemeFeature.State()) {
-            PhotoThemeFeature(savePhotoThemeUseCase: ControlledSavePhotoThemeUseCase(), reportError: { _ in }, onThemeSaved: {})
+            PhotoThemeFeature(
+                savePhotoThemeUseCase: ControlledSavePhotoThemeUseCase(),
+                reportError: { _ in },
+                previewPixelSize: 2556,
+                onThemeSaved: {}
+            )
         }
         let (data, image) = try solidImage(color: .blue)
         store.send(.imageLoaded(data: data, image: image))
@@ -222,6 +227,7 @@ final class PhotoThemeFeatureTests: XCTestCase {
                 PhotoThemeFeature(
                     savePhotoThemeUseCase: save,
                     reportError: { error in reportedErrors.withValue { $0.append(error) } },
+                    previewPixelSize: 2556,
                     onThemeSaved: { savedCount.withValue { $0 += 1 } },
                     onClose: { closedCount.withValue { $0 += 1 } }
                 )

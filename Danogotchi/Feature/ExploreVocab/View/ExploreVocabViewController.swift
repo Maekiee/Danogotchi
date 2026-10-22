@@ -39,9 +39,12 @@ final class ExploreVocabViewController: BaseViewController {
 
     private var currentThemeImageFileURL: URL?
     private var themeDecodeTask: Task<Void, Never>?
+    /// 배경 디코딩 상한(화면 세로 픽셀). 조립부가 넘긴다
+    private let backgroundMaxPixelSize: Int
 
-    init(viewModel: ExploreVocabViewModel) {
+    init(viewModel: ExploreVocabViewModel, backgroundMaxPixelSize: Int) {
         self.viewModel = viewModel
+        self.backgroundMaxPixelSize = backgroundMaxPixelSize
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -193,7 +196,7 @@ extension ExploreVocabViewController {
         }
 
         // 디코딩은 백그라운드에서 끝낸다 — 메인 스레드에서 하면 첫 렌더링 때 프레임이 끊긴다
-        let maxPixelSize = Int(UIScreen.main.nativeBounds.height)
+        let maxPixelSize = backgroundMaxPixelSize
         themeDecodeTask = Task { @MainActor [weak self] in
             let image = await Task.detached(priority: .userInitiated) {
                 ImageDecoder.decode(fileURL: fileURL, maxPixelSize: maxPixelSize)

@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class AppDIContainerTests: XCTestCase {
     func test_everyFeatureContainerBuildsItsScreens() {
-        let app = AppDIContainer()
+        let app = AppDIContainer(screenPixelSize: CGSize(width: 1179, height: 2556))
 
         _ = app.makeDatabasePreparer()
         _ = app.makeStudyReminderUseCase()

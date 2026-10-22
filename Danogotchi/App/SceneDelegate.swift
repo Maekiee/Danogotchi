@@ -13,7 +13,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         #if DEBUG
         UITestingSupport.resetIfRequested()
         #endif
-        let container = AppDIContainer()
+        let container = AppDIContainer(screenPixelSize: scene.screen.nativeBounds.size)
         let window = UIWindow(windowScene: scene)
         self.window = window
         #if DEBUG

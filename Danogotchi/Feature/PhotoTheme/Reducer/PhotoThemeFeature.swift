@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import OSLog
 import PhotosUI
-import SwiftUI
+import SwiftUI  // PhotosPickerItem은 PhotosUI의 SwiftUI 오버레이라 함께 import해야 보인다
 import UIKit
 
 @Reducer
@@ -42,11 +42,11 @@ struct PhotoThemeFeature {
 
     let savePhotoThemeUseCase: SavePhotoThemeUseCase
     let reportError: @Sendable (Error) -> Void
+    /// 미리보기 디코딩 상한(화면 세로 픽셀). 조립부가 저장 크기와 같은 출처에서 넘긴다
+    let previewPixelSize: Int
     /// 저장이 끝났다는 "사실"만 위로 올린다 — 어디로 갈지는 Coordinator가 정한다
     let onThemeSaved: @MainActor @Sendable () -> Void
     var onClose: @MainActor @Sendable () -> Void = {}
-    /// UIScreen은 메인 스레드 전용이라 로딩 중이 아니라 생성 시점에 읽어둔다
-    let previewPixelSize = Int(UIScreen.main.nativeBounds.height)
 
     var body: some ReducerOf<Self> {
         BindingReducer()

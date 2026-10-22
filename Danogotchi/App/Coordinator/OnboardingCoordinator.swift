@@ -100,7 +100,7 @@ extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
             }
         )
         let store = Store(initialState: PhotoThemeFeature.State(showsCloseButton: true)) { feature }
-        let vc = UIHostingController(rootView: PhotoThemeView(store: store))
+        let vc = UIHostingController(rootView: PhotoThemeView(store: store, targetAspectRatio: container.screenAspectRatio))
 
         // 온보딩은 네비게이션 바를 숨기므로 자체 바와 닫기 버튼을 가진 모달로 띄운다
         let photoNavigationController = UINavigationController(rootViewController: vc)

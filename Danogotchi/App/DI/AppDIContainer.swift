@@ -1,9 +1,11 @@
-import UIKit
+import Foundation
 import OSLog
 
 /// 앱 스코프 공유 인스턴스. 기능 컨테이너가 받는 유일한 입력이다.
 /// 규칙: 변경 스트림 같은 상태를 가진 리포지토리는 여기서 1개만 공유하고, 무상태 리포지토리는 호출마다 만든다.
 struct AppDependencies {
+    /// 연결된 화면의 픽셀 크기. 테마 저장·미리보기·배경 디코딩이 같은 값을 쓴다
+    let screenPixelSize: CGSize
     let coreDataStack: CoreDataStack
     let apiClient: ApiClient
     let speechSynthesizer: SpeechSynthesizing
@@ -32,8 +34,7 @@ extension AppDependencies {
             apiClient: apiClient,
             storage: themeImageStorage,
             userSettings: userSettingsRepository,
-            // UIScreen은 메인 스레드 전용이라 조립 시점에 읽어 주입
-            targetPixelSize: UIScreen.main.nativeBounds.size
+            targetPixelSize: screenPixelSize
         )
     }
 
@@ -94,6 +95,7 @@ extension AppDependencies {
         return PhotoThemeFeature(
             savePhotoThemeUseCase: DefaultSavePhotoThemeUseCase(themeImageRepository: makeThemeImageRepository()),
             reportError: reportError,
+            previewPixelSize: Int(screenPixelSize.height),
             onThemeSaved: onThemeSaved,
             onClose: onClose
         )
@@ -104,9 +106,11 @@ extension AppDependencies {
 final class AppDIContainer {
     private let dependencies: AppDependencies
 
-    init() {
+    /// screenPixelSize는 SceneDelegate가 연결된 UIWindowScene.screen에서 읽어 넘긴다
+    init(screenPixelSize: CGSize) {
         let coreDataStack = CoreDataStack()
         dependencies = AppDependencies(
+            screenPixelSize: screenPixelSize,
             coreDataStack: coreDataStack,
             apiClient: DefaultApiClient(),
             speechSynthesizer: SystemSpeechSynthesizer(),

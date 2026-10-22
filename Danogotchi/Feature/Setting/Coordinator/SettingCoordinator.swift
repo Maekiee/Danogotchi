@@ -105,7 +105,7 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
         }
 
         let store = Store(initialState: PhotoThemeFeature.State()) { feature }
-        let vc = UIHostingController(rootView: PhotoThemeView(store: store))
+        let vc = UIHostingController(rootView: PhotoThemeView(store: store, targetAspectRatio: container.screenAspectRatio))
         navigationController.pushViewController(vc, animated: true)
 
         // 전환 애니메이션 종료 후 사진첩 자동 표시 — 전환 중 present 충돌 방지

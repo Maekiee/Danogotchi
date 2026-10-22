@@ -9,7 +9,8 @@ final class PhotoThemeCoordinatorTests: XCTestCase {
     func test_settingMyPhotoPushesPhotoThemeScreen() {
         let navigationController = UINavigationController(rootViewController: UIViewController())
         let coordinator = SettingCoordinator(
-            container: AppDIContainer().makeMainDIContainer().makeSettingDIContainer(),
+            container: AppDIContainer(screenPixelSize: CGSize(width: 1179, height: 2556))
+                .makeMainDIContainer().makeSettingDIContainer(),
             navigationController: navigationController
         )
 

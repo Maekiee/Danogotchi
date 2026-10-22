@@ -8,6 +8,9 @@ final class MainDIContainer {
         self.dependencies = dependencies
     }
 
+    /// 탐색 배경 디코딩 상한 — 화면 세로 픽셀 이상은 필요 없다
+    var backgroundMaxPixelSize: Int { Int(dependencies.screenPixelSize.height) }
+
     // MARK: - 자식 기능 컨테이너
     func makeLibraryDIContainer() -> LibraryDIContainer {
         return LibraryDIContainer(dependencies: dependencies)
