@@ -53,7 +53,6 @@ final class CharacterViewController: BaseViewController {
         let label = UILabel()
         label.font = AppFont.bodyEmphasis
         label.textColor = AppColor.textPrimary
-        label.accessibilityIdentifier = "character.level"
         return label
     }()
     private let experiencePercentLabel: UILabel = {
@@ -224,6 +223,8 @@ extension CharacterViewController {
 
         container.isAccessibilityElement = true
         container.accessibilityLabel = String(localized: "경험치")
+        // 레벨·진행률은 컨테이너의 accessibilityValue로 읽는다 — 안쪽 라벨은 접근성 트리에 노출되지 않는다
+        container.accessibilityIdentifier = "character.experience"
         return container
     }
 
