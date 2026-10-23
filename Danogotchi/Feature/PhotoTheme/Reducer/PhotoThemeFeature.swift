@@ -1,8 +1,7 @@
-import Combine
 import ComposableArchitecture
 import OSLog
 import PhotosUI
-import SwiftUI
+import SwiftUI  // PhotosPickerItem은 PhotosUI의 SwiftUI 오버레이라 함께 import해야 보인다
 import UIKit
 
 @Reducer
@@ -42,11 +41,12 @@ struct PhotoThemeFeature {
     enum CancelID { case load }
 
     let savePhotoThemeUseCase: SavePhotoThemeUseCase
+    let reportError: @Sendable (Error) -> Void
+    /// 미리보기 디코딩 상한(화면 세로 픽셀). 조립부가 저장 크기와 같은 출처에서 넘긴다
+    let previewPixelSize: Int
     /// 저장이 끝났다는 "사실"만 위로 올린다 — 어디로 갈지는 Coordinator가 정한다
     let onThemeSaved: @MainActor @Sendable () -> Void
     var onClose: @MainActor @Sendable () -> Void = {}
-    /// UIScreen은 메인 스레드 전용이라 로딩 중이 아니라 생성 시점에 읽어둔다
-    let previewPixelSize = Int(UIScreen.main.nativeBounds.height)
 
     var body: some ReducerOf<Self> {
         BindingReducer()
@@ -82,7 +82,7 @@ struct PhotoThemeFeature {
                 guard let image else {
                     state.imageData = nil
                     state.previewImage = nil
-                    Self.fail(&state, with: PhotoThemeError.unsupportedFormat)
+                    fail(&state, with: PhotoThemeError.unsupportedFormat)
                     return .none
                 }
 
@@ -93,7 +93,7 @@ struct PhotoThemeFeature {
             // 전송 실패(iCloud 원본 다운로드 등)만 여기로 온다 — 포맷 문제는 imageLoaded가 처리한다
             case let .imageLoadFailed(error):
                 state.isLoading = false
-                Self.fail(&state, with: error)
+                fail(&state, with: error)
                 return .none
 
             // 늦게 도착한 이전 이미지의 레이아웃 결과 제외 — 저장할 수 없는 영역은 선택을 비운다
@@ -108,11 +108,12 @@ struct PhotoThemeFeature {
                 guard state.canConfirm, let imageData = state.imageData, let crop = state.crop else { return .none }
                 state.isSaving = true
 
-                // UseCase가 메인 전달을 보장하므로 스케줄러를 갈아타지 않는다
-                return .publisher {
-                    savePhotoThemeUseCase.execute(imageData: imageData, crop: crop)
-                        .map { _ in Action.saveResponse(.success(())) }
-                        .catch { Just(Action.saveResponse(.failure($0))) }
+                // 저장은 메인 밖에서 돌고, send가 결과를 메인 액터로 올린다
+                return .run { send in
+                    try await savePhotoThemeUseCase.execute(imageData: imageData, crop: crop)
+                    await send(.saveResponse(.success(())))
+                } catch: { error, send in
+                    await send(.saveResponse(.failure(error)))
                 }
 
             case .saveResponse(.success):
@@ -122,7 +123,7 @@ struct PhotoThemeFeature {
             // 실패해도 선택은 남겨 같은 사진으로 바로 다시 시도할 수 있게 한다
             case let .saveResponse(.failure(error)):
                 state.isSaving = false
-                Self.fail(&state, with: error)
+                fail(&state, with: error)
                 return .none
 
             case .closeButtonTapped:
@@ -131,10 +132,10 @@ struct PhotoThemeFeature {
         }
     }
 
-    private static func fail(_ state: inout State, with error: Error) {
+    private func fail(_ state: inout State, with error: Error) {
         AppLogger.ui.error("사진첩 테마 처리 실패: \(String(describing: error), privacy: .public)")
-        CrashReporter.record(error)
-        state.alertMessage = message(for: error)
+        reportError(error)
+        state.alertMessage = Self.message(for: error)
     }
 
     private static func message(for error: Error) -> String {

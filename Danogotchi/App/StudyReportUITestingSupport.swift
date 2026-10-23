@@ -21,7 +21,7 @@ extension UITestingSupport {
     static func startStudyReportIfRequested(window: UIWindow, container: AppDIContainer) -> MainCoordinator? {
         guard studyReportScenario != nil else { return nil }
         let navigation = UINavigationController(rootViewController: UIViewController())
-        let coordinator = MainCoordinator(container: container, navigationController: navigation)
+        let coordinator = MainCoordinator(container: container.makeMainDIContainer(), navigationController: navigation)
         window.rootViewController = navigation
         window.makeKeyAndVisible()
         DispatchQueue.main.async { coordinator.exploreVocabDidTapStudyReport() }

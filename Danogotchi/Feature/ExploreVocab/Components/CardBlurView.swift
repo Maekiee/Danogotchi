@@ -57,6 +57,9 @@ struct CardBlurView: View {
                                     .opacity(isSpeaking ? 1 : 0)
                             )
                     }
+                    .accessibilityIdentifier("explore.speak")
+                    .accessibilityLabel("\(title) 발음")
+                    .accessibilityValue(isSpeaking ? "발음 중" : "대기")
                 }
 
                 Spacer()

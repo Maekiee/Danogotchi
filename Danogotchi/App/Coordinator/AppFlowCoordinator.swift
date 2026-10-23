@@ -19,8 +19,7 @@ final class AppFlowCoordinator: Coordinator {
 extension AppFlowCoordinator {
     func start() {
         do {
-            try container.coreDataStack.prepareStore()
-            try DatabaseSeeder.seedIfNeeded(context: container.coreDataStack.viewContext)
+            try container.makeDatabasePreparer().prepareIfNeeded()
 
             // 알림 재예약은 부가 기능이다 — 실패해도 앱 진입을 막지 않는다.
             do {
@@ -29,9 +28,7 @@ extension AppFlowCoordinator {
                 AppLogger.push.error("학습 알림 재예약 실패: \(String(describing: error), privacy: .public)")
             }
 
-            let isOnboardingComplete = try container.userInfoManager.hasSelectedTheme
-                && container.makeIsPetCreatedUseCase().execute()
-            if isOnboardingComplete {
+            if try container.makeOnboardingProgressUseCase().isComplete() {
                 startMainFlow()
             } else {
                 startOnBoardingFlow()
@@ -63,7 +60,7 @@ extension AppFlowCoordinator {
         let nav = UINavigationController()
         nav.isNavigationBarHidden = true
         let mainCoordinator = MainCoordinator(
-            container: container,
+            container: container.makeMainDIContainer(),
             navigationController: nav
         )
         addChild(mainCoordinator)
@@ -76,7 +73,7 @@ extension AppFlowCoordinator {
         nav.isNavigationBarHidden = true
         let onboardingCoordinator = OnboardingCoordinator(
             navigationController: nav,
-            container: container
+            container: container.makeOnboardingDIContainer()
         )
         onboardingCoordinator.delegate = self
         addChild(onboardingCoordinator)

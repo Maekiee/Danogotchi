@@ -288,16 +288,30 @@ final class PetPersistenceTests: XCTestCase {
         XCTAssertEqual(petCount(), 1)
     }
 
-    // MARK: - IsPetCreatedUseCase
+    // MARK: - OnboardingProgressUseCase
 
-    func test_펫_존재_여부는_생성_전후로_바뀐다() throws {
-        let useCase = DefaultIsPetCreatedUseCase(petRepository: repository)
+    func test_온보딩_완료는_테마와_펫이_모두_있어야_한다() throws {
+        let userSettings = TestUserSettings()
+        let useCase = DefaultOnboardingProgressUseCase(userSettings: userSettings, petRepository: repository)
 
-        XCTAssertFalse(try useCase.execute())
+        XCTAssertFalse(useCase.hasSelectedTheme)
+        XCTAssertFalse(try useCase.isComplete())
 
         _ = try repository.createPet(makePet())
+        XCTAssertFalse(try useCase.isComplete(), "펫만 있고 테마가 없으면 미완료")
 
-        XCTAssertTrue(try useCase.execute())
+        userSettings.currentThemeImageFileName = "theme.heic"
+        XCTAssertTrue(useCase.hasSelectedTheme)
+        XCTAssertTrue(try useCase.isComplete())
+    }
+
+    func test_테마_선택은_원본_URL만_있어도_인정된다() throws {
+        let userSettings = TestUserSettings()
+        userSettings.currentThemeUrl = "https://images.example.test/previous"
+        let useCase = DefaultOnboardingProgressUseCase(userSettings: userSettings, petRepository: repository)
+
+        XCTAssertTrue(useCase.hasSelectedTheme)
+        XCTAssertFalse(try useCase.isComplete(), "테마만 있고 펫이 없으면 미완료")
     }
 
     // MARK: - EarnExperienceUseCase

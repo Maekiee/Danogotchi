@@ -112,6 +112,7 @@ final class PhotoThemeFeatureTests: XCTestCase {
         await fixture.store.receive(\.saveResponse) { $0.isSaving = false }
         await fixture.store.finish()
         XCTAssertEqual(fixture.savedCount.value, 1)
+        XCTAssertTrue(fixture.reportedErrors.value.isEmpty, "성공은 보고하지 않는다")
     }
 
     func test_failureKeepsSelectionAndAllowsRetry() async throws {
@@ -128,6 +129,7 @@ final class PhotoThemeFeatureTests: XCTestCase {
             $0.alertMessage = "잠시후 다시 시도해주세요"
         }
         XCTAssertEqual(fixture.savedCount.value, 0)
+        XCTAssertEqual(fixture.reportedErrors.value.count, 1, "저장 실패는 한 번 보고한다")
         XCTAssertTrue(fixture.store.state.canConfirm, "실패해도 선택이 남아 같은 사진으로 다시 시도할 수 있다")
 
         await fixture.store.send(.confirmTapped) { $0.isSaving = true }
@@ -149,6 +151,8 @@ final class PhotoThemeFeatureTests: XCTestCase {
             $0.alertMessage = "지원하지 않는 이미지 형식이에요. 다른 사진을 선택해주세요"
         }
         XCTAssertFalse(fixture.store.state.canConfirm)
+        XCTAssertEqual(fixture.reportedErrors.value.count, 1)
+        XCTAssertEqual(fixture.reportedErrors.value.first as? PhotoThemeError, .unsupportedFormat)
 
         await fixture.store.send(.confirmTapped)
         XCTAssertTrue(fixture.save.datas.isEmpty)
@@ -163,11 +167,17 @@ final class PhotoThemeFeatureTests: XCTestCase {
             $0.isLoading = false
             $0.alertMessage = "잠시후 다시 시도해주세요"
         }
+        XCTAssertEqual(fixture.reportedErrors.value.count, 1)
     }
 
     func test_cropNotifiesOnlyWhenConfirmAvailabilityChanges() throws {
         let store = Store(initialState: PhotoThemeFeature.State()) {
-            PhotoThemeFeature(savePhotoThemeUseCase: ControlledSavePhotoThemeUseCase(), onThemeSaved: {})
+            PhotoThemeFeature(
+                savePhotoThemeUseCase: ControlledSavePhotoThemeUseCase(),
+                reportError: { _ in },
+                previewPixelSize: 2556,
+                onThemeSaved: {}
+            )
         }
         let (data, image) = try solidImage(color: .blue)
         store.send(.imageLoaded(data: data, image: image))
@@ -209,12 +219,15 @@ final class PhotoThemeFeatureTests: XCTestCase {
         let save = ControlledSavePhotoThemeUseCase()
         let savedCount = LockIsolated(0)
         let closedCount = LockIsolated(0)
+        let reportedErrors = LockIsolated<[Error]>([])
         let store: TestStoreOf<PhotoThemeFeature>
 
         init(initialState: PhotoThemeFeature.State = PhotoThemeFeature.State()) {
-            store = TestStore(initialState: initialState) { [save, savedCount, closedCount] in
+            store = TestStore(initialState: initialState) { [save, savedCount, closedCount, reportedErrors] in
                 PhotoThemeFeature(
                     savePhotoThemeUseCase: save,
+                    reportError: { error in reportedErrors.withValue { $0.append(error) } },
+                    previewPixelSize: 2556,
                     onThemeSaved: { savedCount.withValue { $0 += 1 } },
                     onClose: { closedCount.withValue { $0 += 1 } }
                 )

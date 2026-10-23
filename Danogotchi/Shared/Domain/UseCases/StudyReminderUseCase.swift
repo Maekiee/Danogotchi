@@ -10,38 +10,38 @@ protocol StudyReminderUseCase {
 }
 
 final class DefaultStudyReminderUseCase: StudyReminderUseCase {
-    private let userInfo: UserInfoProtocol
+    private let userSettings: UserSettingsRepository
     private let learningHistoryRepository: LearningHistoryRepository
     private let scheduler: LocalNotificationScheduling
 
     init(
-        userInfo: UserInfoProtocol,
+        userSettings: UserSettingsRepository,
         learningHistoryRepository: LearningHistoryRepository,
         scheduler: LocalNotificationScheduling
     ) {
-        self.userInfo = userInfo
+        self.userSettings = userSettings
         self.learningHistoryRepository = learningHistoryRepository
         self.scheduler = scheduler
     }
 
     var isEnabled: Bool {
-        return userInfo.isStudyReminderEnabled
+        return userSettings.isStudyReminderEnabled
     }
 
     func setEnabled(_ isEnabled: Bool) throws {
         let lastStudiedAt = isEnabled ? try learningHistoryRepository.fetchAllHistory().last?.createAt : nil
-        userInfo.isStudyReminderEnabled = isEnabled
+        userSettings.isStudyReminderEnabled = isEnabled
         schedule(lastStudiedAt: lastStudiedAt)
     }
 
     func refresh() throws {
-        let lastStudiedAt = userInfo.isStudyReminderEnabled ? try learningHistoryRepository.fetchAllHistory().last?.createAt : nil
+        let lastStudiedAt = userSettings.isStudyReminderEnabled ? try learningHistoryRepository.fetchAllHistory().last?.createAt : nil
         schedule(lastStudiedAt: lastStudiedAt)
     }
 
     private func schedule(lastStudiedAt: Date?) {
         scheduler.cancel(ids: StudyReminderPolicy.allIdentifiers)
-        guard userInfo.isStudyReminderEnabled else { return }
+        guard userSettings.isStudyReminderEnabled else { return }
         StudyReminderPolicy
             .reminders(lastStudiedAt: lastStudiedAt, now: Date())
             .forEach { scheduler.schedule($0) }

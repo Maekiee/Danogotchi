@@ -16,10 +16,10 @@ final class SettingCoordinator: NSObject, Coordinator {
     
     private static let inquiryRecipient = "pdwssf@gmail.com"
 
-    private let container: AppDIContainer
-    
+    private let container: SettingDIContainer
+
     init(
-        container: AppDIContainer,
+        container: SettingDIContainer,
         navigationController: UINavigationController
     ) {
         self.container = container
@@ -105,7 +105,7 @@ extension SettingCoordinator: SearchThemeViewControllerDelegate {
         }
 
         let store = Store(initialState: PhotoThemeFeature.State()) { feature }
-        let vc = UIHostingController(rootView: PhotoThemeView(store: store))
+        let vc = UIHostingController(rootView: PhotoThemeView(store: store, targetAspectRatio: container.screenAspectRatio))
         navigationController.pushViewController(vc, animated: true)
 
         // 전환 애니메이션 종료 후 사진첩 자동 표시 — 전환 중 present 충돌 방지
@@ -139,7 +139,7 @@ extension SettingCoordinator: MFMailComposeViewControllerDelegate {
                 AppLogger.ui.debug("메일 작성 취소")
             case .failed:
                 AppLogger.ui.error("메일 전송 실패: \(String(describing: error), privacy: .public)")
-                if let error { CrashReporter.record(error) }
+                if let error { container.reportError(error) }
             @unknown default:
                 AppLogger.ui.debug("알 수 없는 메일 결과")
             }
