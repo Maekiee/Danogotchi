@@ -29,6 +29,7 @@ final class QuizViewController: BaseViewController {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "xmark"), for: .normal)
         button.tintColor = .black
+        button.accessibilityIdentifier = "quiz.close"
         return button
     }()
     private let titleLabel: UILabel = {
@@ -37,6 +38,7 @@ final class QuizViewController: BaseViewController {
         label.textColor = AppColor.textPrimary
         label.font = AppFont.font(.bold, size: 17)
         label.textAlignment = .center
+        label.accessibilityIdentifier = "quiz.progressTitle"
         return label
     }()
     private let currentQuestionLabel: UILabel = {
@@ -53,7 +55,11 @@ final class QuizViewController: BaseViewController {
         return label
     }()
     private let quizQuestionCard = QuisQuestionCard()
-    private let choiceButtons = (0..<4).map { _ in ChoiceButton() }
+    private let choiceButtons = (0..<4).map { index in
+        let button = ChoiceButton()
+        button.accessibilityIdentifier = "quiz.choice.\(index)"
+        return button
+    }
     private lazy var choiceStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical

@@ -66,6 +66,7 @@ final class CareStatRowView: UIView {
         // 게이지 색만으로는 상태가 전달되지 않는다 — 한 줄을 통째로 읽어준다
         isAccessibilityElement = true
         accessibilityLabel = stat.title
+        accessibilityIdentifier = "character.stat.\(stat.rawValue)"
     }
 
     func update(value: Double) {

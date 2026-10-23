@@ -152,6 +152,12 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         saveVocabButton.configuration?.image = UIImage(
             systemName: isSaved ? "bookmark.fill" : "bookmark"
         )
+        // explore.save와 같은 규칙 — 단어별 식별자와 저장 상태를 접근성으로 노출한다
+        accessibilityIdentifier = "bookDetail.cell.\(item.cardTitle)"
+        moreIconButton.accessibilityIdentifier = "bookDetail.more.\(item.cardTitle)"
+        saveVocabButton.accessibilityIdentifier = "bookDetail.save.\(item.cardTitle)"
+        saveVocabButton.accessibilityLabel = String(localized: "\(item.cardTitle) 저장")
+        saveVocabButton.accessibilityValue = isSaved ? String(localized: "저장됨") : String(localized: "저장 안 됨")
 
         titleLabel.text = item.cardTitle
         subtitleLabel.text = item.cardSubtitle

@@ -48,6 +48,7 @@ final class EggCollectionViewCell: UICollectionViewCell {
     }
 
     func binding(with item: EggItem) {
+        accessibilityIdentifier = "egg.cell.\(item.index)"
         spriteView.isHidden = item.isComingSoon
         titleLabel.isHidden = !item.isComingSoon
 

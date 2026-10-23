@@ -31,5 +31,15 @@ enum UITestingSupport {
             assertionFailure("UI 테스트 시드 실패: \(error)")
         }
     }
+
+    /// 테마만 고른 상태(펫 없음)를 만든다 — 온보딩이 알 선택 화면부터 이어진다
+    static func seedThemeSelectedIfRequested(container: AppDIContainer) {
+        guard ProcessInfo.processInfo.arguments.contains("-uiTestingThemeSelected") else { return }
+        do {
+            try container.seedThemeSelectedForUITesting()
+        } catch {
+            assertionFailure("UI 테스트 시드 실패: \(error)")
+        }
+    }
 }
 #endif

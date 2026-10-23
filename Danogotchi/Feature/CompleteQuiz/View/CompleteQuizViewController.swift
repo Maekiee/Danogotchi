@@ -41,6 +41,7 @@ final class CompleteQuizViewController: BaseViewController {
         label.textColor = AppColor.textPrimary
         label.font = AppFont.display
         label.textAlignment = .center
+        label.accessibilityIdentifier = "completeQuiz.title"
         return label
     }()
 
@@ -105,6 +106,9 @@ final class CompleteQuizViewController: BaseViewController {
 
     override func configView() {
         view.backgroundColor = AppColor.background
+        primaryButton.accessibilityIdentifier = "completeQuiz.primary"
+        secondaryButton.accessibilityIdentifier = "completeQuiz.secondary"
+        endLearningButton.accessibilityIdentifier = "completeQuiz.endLearning"
     }
 }
 

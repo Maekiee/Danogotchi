@@ -88,6 +88,9 @@ final class OnboardingPetNameViewController: BaseViewController {
 
     override func configView() {
         doneButton.isEnabled = false
+        nameTextField.accessibilityIdentifier = "petName.field"
+        errorLabel.accessibilityIdentifier = "petName.error"
+        doneButton.accessibilityIdentifier = "petName.done"
     }
 }
 
