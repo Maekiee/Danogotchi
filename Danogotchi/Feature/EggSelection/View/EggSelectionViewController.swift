@@ -94,6 +94,7 @@ final class EggSelectionViewController: BaseViewController {
 
     override func configView() {
         nextButton.isEnabled = false
+        nextButton.accessibilityIdentifier = "egg.next"
     }
 }
 

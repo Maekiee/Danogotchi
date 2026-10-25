@@ -111,6 +111,8 @@ final class VocabBookDetailViewController: BaseViewController {
         collectionView.contentInset.bottom = isMyBook ? 48 + AppSpacing.space24 : 0
         collectionView.verticalScrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         navigationItem.rightBarButtonItem = startLearningButton
+        startLearningButton.accessibilityIdentifier = "bookDetail.startLearning"
+        addVocabButton.accessibilityIdentifier = "bookDetail.add"
     }
 }
 

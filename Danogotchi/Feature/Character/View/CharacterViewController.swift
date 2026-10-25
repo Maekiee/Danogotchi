@@ -36,6 +36,7 @@ final class CharacterViewController: BaseViewController {
         label.font = AppFont.title1
         label.textColor = AppColor.textPrimary
         label.textAlignment = .center
+        label.accessibilityIdentifier = "character.name"
         return label
     }()
     private let moodLabel: UILabel = {
@@ -44,6 +45,7 @@ final class CharacterViewController: BaseViewController {
         label.textColor = AppColor.textSecondary
         label.textAlignment = .left
         label.numberOfLines = 0
+        label.accessibilityIdentifier = "character.mood"
         return label
     }()
     private let heartBarView = HeartBarView()
@@ -71,7 +73,9 @@ final class CharacterViewController: BaseViewController {
         return label
     }()
     private lazy var careButtons = PetCareStat.allCases.map { stat in
-        (stat: stat, button: PrimaryFillButton(title: stat.actionTitle))
+        let button = PrimaryFillButton(title: stat.actionTitle)
+        button.accessibilityIdentifier = "character.care.\(stat.rawValue)"
+        return (stat: stat, button: button)
     }
     private let levelUpButton = PrimaryFillButton(title: String(localized: "레벨업"))
     private let reviveButton = PrimaryFillButton(title: String(localized: "부활"))
@@ -171,10 +175,15 @@ final class CharacterViewController: BaseViewController {
 
         heartBarView.isAccessibilityElement = true
         heartBarView.accessibilityLabel = String(localized: "체력")
+        levelUpButton.accessibilityIdentifier = "character.levelUp"
+        reviveButton.accessibilityIdentifier = "character.revive"
+        debugLevelDownButton.accessibilityIdentifier = "character.levelMinus"
+        debugLevelUpButton.accessibilityIdentifier = "character.levelPlus"
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
+        navigationItem.leftBarButtonItem?.accessibilityIdentifier = "character.close"
 
 //        #if DEBUG
 //        // 임시 — 캐릭터 영역이 실제로 차지하는 박스 확인용. 날씨 배경 배치를 정하면 지운다.
@@ -214,6 +223,8 @@ extension CharacterViewController {
 
         container.isAccessibilityElement = true
         container.accessibilityLabel = String(localized: "경험치")
+        // 레벨·진행률은 컨테이너의 accessibilityValue로 읽는다 — 안쪽 라벨은 접근성 트리에 노출되지 않는다
+        container.accessibilityIdentifier = "character.experience"
         return container
     }
 

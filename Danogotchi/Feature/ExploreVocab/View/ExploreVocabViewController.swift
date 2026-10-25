@@ -58,9 +58,21 @@ final class ExploreVocabViewController: BaseViewController {
         view.contentMode = .scaleAspectFill
         return view
     }()
-    private let settingTabButton = CircularIconButton(systemName: "gearshape")
-    private let studyReportButton = CircularIconButton(systemName: "chart.line.uptrend.xyaxis")
-    private let openCharacterButton = CircularIconButton(assetNamed: "character-icon")
+    private let settingTabButton: CircularIconButton = {
+        let button = CircularIconButton(systemName: "gearshape")
+        button.accessibilityIdentifier = "explore.setting"
+        return button
+    }()
+    private let studyReportButton: CircularIconButton = {
+        let button = CircularIconButton(systemName: "chart.line.uptrend.xyaxis")
+        button.accessibilityIdentifier = "explore.studyReport"
+        return button
+    }()
+    private let openCharacterButton: CircularIconButton = {
+        let button = CircularIconButton(assetNamed: "character-icon")
+        button.accessibilityIdentifier = "explore.character"
+        return button
+    }()
     private let showLibraryVCButton: CircularIconButton = {
         let button = CircularIconButton(systemName: "square.grid.2x2")
         button.accessibilityIdentifier = "explore.library"
@@ -93,6 +105,7 @@ final class ExploreVocabViewController: BaseViewController {
                 outgoing.font = AppFont.label
                 return outgoing
             }
+        button.accessibilityIdentifier = "explore.startLearning"
         return button
     }()
     private let collectionView: UICollectionView = {

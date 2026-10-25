@@ -97,8 +97,10 @@ final class SettingTabViewController: BaseViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "setting.close"
+        reminderSwitch.accessibilityIdentifier = "setting.reminderSwitch"
     }
-    
+
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
@@ -147,6 +149,7 @@ extension SettingTabViewController {
             
             cell.backgroundConfiguration = backgroundConfig
             cell.contentConfiguration = contentConfiguration
+            cell.accessibilityIdentifier = "setting.menu.\(setting.action.rawValue)"
         }
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<CustomHeaderView>(

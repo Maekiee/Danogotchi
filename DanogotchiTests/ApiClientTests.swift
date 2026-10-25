@@ -2,7 +2,8 @@ import Foundation
 import XCTest
 @testable import Danogotchi
 
-private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
+/// host별 핸들러로 응답을 꾸민다 — RemoteImageLoaderTests도 함께 쓴다
+final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     typealias Handler = (URLRequest) throws -> (Int, Data)
     private static let lock = NSLock()
     private static var handlers: [String: Handler] = [:]

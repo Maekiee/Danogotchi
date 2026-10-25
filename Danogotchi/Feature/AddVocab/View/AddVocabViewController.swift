@@ -78,6 +78,10 @@ final class AddVocabViewController: BaseViewController {
     override func configView() {
         view.backgroundColor = AppColor.background
         navigationItem.title = viewModel.isEditing ? "Edit a word" : "Add a word"
+        wordTextField.accessibilityIdentifier = "addVocab.word"
+        meaningTextField.accessibilityIdentifier = "addVocab.meaning"
+        partOfSpeechSegmentedControl.accessibilityIdentifier = "addVocab.partOfSpeech"
+        saveButton.accessibilityIdentifier = "addVocab.save"
 
         // bind()보다 먼저 채워야 rx.text / rx.selectedSegmentIndex의 초기 방출에 값이 실린다.
         if let form = viewModel.initialForm {

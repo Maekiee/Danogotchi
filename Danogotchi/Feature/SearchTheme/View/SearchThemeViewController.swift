@@ -47,6 +47,7 @@ final class SearchThemeViewController: BaseViewController {
         button.setImage(UIImage(systemName: "photo.on.rectangle"), for: .normal)
         button.tintColor = AppColor.textPrimary
         button.accessibilityLabel = String(localized: "내 사진으로 지정")
+        button.accessibilityIdentifier = "searchTheme.myPhoto"
         return button
     }()
     private let textField = RoundedTextField(placeholder: String(localized: "이미지를 검색해주세요"))
@@ -148,6 +149,8 @@ final class SearchThemeViewController: BaseViewController {
     }
 
     override func configView() {
+        textField.accessibilityIdentifier = "searchTheme.searchField"
+        submitButton.accessibilityIdentifier = "searchTheme.submit"
         // 온보딩은 타이틀 옆 버튼, 설정은 네비게이션 바 버튼으로 사진 화면 진입
         myPhotoButton.isHidden = entryMode != .onboarding
         guard entryMode == .settings else { return }
@@ -155,6 +158,7 @@ final class SearchThemeViewController: BaseViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: nil, action: nil
         )
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "searchTheme.myPhoto"
     }
 }
 

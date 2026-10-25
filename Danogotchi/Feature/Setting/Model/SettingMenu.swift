@@ -41,7 +41,7 @@ struct SettingMenu: Hashable {
         }
     }
     
-    enum Action {
+    enum Action: String {
         case studyReminder
         case searchTheme
         case inquiry

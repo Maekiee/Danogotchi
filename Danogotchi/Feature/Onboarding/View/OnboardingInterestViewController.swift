@@ -108,6 +108,7 @@ final class OnboardingInterestViewController: BaseViewController {
 
     override func configView() {
         nextButton.isEnabled = false
+        nextButton.accessibilityIdentifier = "interest.next"
     }
 }
 

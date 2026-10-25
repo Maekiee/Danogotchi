@@ -147,9 +147,14 @@ final class AppDIContainer {
 extension AppDIContainer {
     /// UI 테스트 전용 — 온보딩을 건너뛰고 여행 단어장을 학습 중인 메인 화면 상태를 만든다
     func seedMainFlowForUITesting() throws {
+        try seedThemeSelectedForUITesting()
+        _ = try DefaultCreatePetUseCase(petRepository: dependencies.petRepository).execute(type: .sprout, name: "테스트")
+    }
+
+    /// UI 테스트 전용 — 관심사·테마까지만 고른 상태. 펫이 없어 온보딩이 알 선택부터 이어진다
+    func seedThemeSelectedForUITesting() throws {
         try makeDatabasePreparer().prepareIfNeeded()
         try dependencies.makeSetActiveBookUseCase().execute(topic: .travel)
-        _ = try DefaultCreatePetUseCase(petRepository: dependencies.petRepository).execute(type: .sprout, name: "테스트")
         // 없는 파일명만 지정 — 원본 URL이 없어 복구 다운로드가 일어나지 않는다
         dependencies.userSettingsRepository.currentThemeImageFileName = "ui-test-theme.png"
     }

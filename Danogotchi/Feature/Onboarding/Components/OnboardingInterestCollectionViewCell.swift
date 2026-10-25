@@ -62,6 +62,7 @@ final class OnboardingInterestCollectionViewCell: UICollectionViewCell {
     }
 
     func binding(with item: OnboardingInterestItem) {
+        accessibilityIdentifier = "interest.cell.\(item.topic.rawValue)"
         icon.image = UIImage(named: item.topic.icon)?
             .withRenderingMode(.alwaysTemplate)
         titleLabel.text = item.topic.title
