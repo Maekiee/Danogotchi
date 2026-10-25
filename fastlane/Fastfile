@@ -15,7 +15,9 @@ platform :ios do
       project: PROJECT,
       scheme: SCHEME,
       only_testing: ["DanogotchiTests"],   # UI 테스트 제외
-      xcargs: SKIP_VALIDATION,
+      parallel_testing: false,             # CI 러너에서 시뮬레이터 클론 멈춤 방지
+      # 멈춘 테스트는 1분 뒤 실패 처리
+      xcargs: "#{SKIP_VALIDATION} -test-timeouts-enabled YES -default-test-execution-time-allowance 60",
       clean: true
       # device: "iPhone 17"  # 특정 시뮬레이터를 쓰고 싶을 때만 지정
     )
