@@ -36,3 +36,6 @@ jobs:
 
       - name: Build & test
         run: bundle exec fastlane test
+        env:
+          # SPM 패키지가 많아 showBuildSettings가 느림
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
