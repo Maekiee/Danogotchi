@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# 같은 브랜치에서 새 실행이 시작되면 이전 실행은 취소
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+
+      # 로컬에서 쓰는 Xcode 버전과 맞추기
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26.6"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true   # Gemfile.lock 기준으로 설치 + 캐시
+
+      # gitignore된 Secrets.xcconfig·Firebase plist 복원
+      - name: Restore secrets
+        env:
+          APP_SECRETS: ${{ secrets.APP_SECRETS }}
+        run: echo "$APP_SECRETS" | base64 --decode | tar xzf - -C Danogotchi/App
+
+      - name: Build & test
+        run: bundle exec fastlane test

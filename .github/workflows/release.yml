@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+# 배포는 취소하지 않고 순서대로 대기
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # 이전 태그·main 히스토리가 필요함
+
+      - name: Verify tag commit is on main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::태그가 찍힌 커밋이 main에 없습니다. main에 병합된 커밋에 태그를 찍어주세요."
+            exit 1
+          fi
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26.6"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      # gitignore된 Secrets.xcconfig·Firebase plist 복원
+      - name: Restore secrets
+        env:
+          APP_SECRETS: ${{ secrets.APP_SECRETS }}
+        run: echo "$APP_SECRETS" | base64 --decode | tar xzf - -C Danogotchi/App
+
+      - name: Deploy to TestFlight
+        run: bundle exec fastlane release
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
