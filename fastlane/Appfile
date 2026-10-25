@@ -1,0 +1,2 @@
+app_identifier("com.maekie.Danogotchi")   # 앱 Bundle ID
+team_id("HVS8D6M24R")                     # Apple Developer Team ID (developer.apple.com > Membership)

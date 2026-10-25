@@ -1,0 +1,8 @@
+# 인증서·프로비저닝 프로파일을 암호화해 보관할 "비공개" 저장소
+git_url("https://github.com/Maekiee/ios-certificates.git")
+storage_mode("git")
+
+type("appstore")
+
+# 앱 확장(위젯 등)이 있다면 Bundle ID를 모두 나열
+app_identifier(["com.maekie.Danogotchi"])
