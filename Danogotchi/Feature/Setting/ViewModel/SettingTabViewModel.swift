@@ -6,23 +6,31 @@ final class SettingTabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let appEnv: AppEnvProvider
     private let studyReminderUseCase: StudyReminderUseCase
+    private let appearanceModeUseCase: AppearanceModeUseCase
     
     typealias SettingSection = (category: SettingMenu.Category, items: [SettingMenu])
     
-    init(appEnv: AppEnvProvider, studyReminderUseCase: StudyReminderUseCase) {
+    init(
+        appEnv: AppEnvProvider,
+        studyReminderUseCase: StudyReminderUseCase,
+        appearanceModeUseCase: AppearanceModeUseCase
+    ) {
         self.appEnv = appEnv
         self.studyReminderUseCase = studyReminderUseCase
+        self.appearanceModeUseCase = appearanceModeUseCase
     }
     
     struct Input {
         let itemSelected: Observable<SettingMenu>
         let reminderToggled: Observable<Bool>
+        let appearanceSelected: Observable<AppearanceMode>
     }
     
     struct Output {
         let sections: Driver<[SettingSection]>
         let appVersion: Driver<String>
         let isReminderOn: Driver<Bool>
+        let appearanceMode: Driver<AppearanceMode>
         let action: Signal<SettingMenu.Action>
         let mailBody: Signal<String>
         let alertMessage: Signal<String>
@@ -36,6 +44,7 @@ final class SettingTabViewModel: BaseViewModel {
         )
         let appVersion = Driver.just(appEnv.appVersionDisplay)
         let isReminderOn = BehaviorRelay(value: studyReminderUseCase.isEnabled)
+        let appearanceMode = BehaviorRelay(value: appearanceModeUseCase.current)
         let alertMessage = PublishRelay<String>()
         let actionRelay = PublishRelay<SettingMenu.Action>()
         let mailBodyRelay = PublishRelay<String>()
@@ -56,6 +65,13 @@ final class SettingTabViewModel: BaseViewModel {
             }
             .disposed(by: disposeBag)
 
+        input.appearanceSelected
+            .bind(with: self) { owner, mode in
+                owner.appearanceModeUseCase.set(mode)
+                appearanceMode.accept(owner.appearanceModeUseCase.current)
+            }
+            .disposed(by: disposeBag)
+
         input.itemSelected
             .filter { $0.action == .inquiry }
             .compactMap { [weak self] _ in self?.makeMailBody() }
@@ -66,6 +82,7 @@ final class SettingTabViewModel: BaseViewModel {
             sections: sections,
             appVersion: appVersion,
             isReminderOn: isReminderOn.asDriver(),
+            appearanceMode: appearanceMode.asDriver(),
             action: actionRelay.asSignal(),
             mailBody: mailBodyRelay.asSignal(),
             alertMessage: alertMessage.asSignal()

@@ -16,14 +16,14 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textPrimary
+        label.textColor = AppColor.black
         label.font = AppFont.title1
         label.numberOfLines = 2
         return label
     }()
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textPrimary
+        label.textColor = AppColor.black
         label.font = AppFont.footnote
         return label
     }()
@@ -50,23 +50,23 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         label.textAlignment = .center
         label.contentInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
         label.layer.cornerRadius = 12
-        label.layer.borderColor = AppColor.textPrimary.cgColor
+        label.layer.borderColor = AppColor.black.cgColor
         label.layer.borderWidth = AppBorder.regular
-        label.textColor = AppColor.textPrimary
+        label.textColor = AppColor.black
         label.font = AppFont.label
         label.text = ""
         return label
     }()
     private let learningCountLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColor.textPrimary
+        label.textColor = AppColor.black
         label.font = AppFont.footnote
         return label
     }()
     private let correctRateLabel: UILabel = {
         let label = UILabel()
         label.font = AppFont.largeDisplay
-        label.textColor = AppColor.textPrimary
+        label.textColor = AppColor.black
         return label
     }()
     

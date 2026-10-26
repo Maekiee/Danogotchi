@@ -22,7 +22,7 @@ final class ChoiceButton: UIButton {
     func apply(_ style: Style) {
         switch style {
         case .idle:
-            backgroundColor = AppColor.appWhite
+            backgroundColor = AppColor.surface
             setTitleColor(AppColor.textPrimary, for: .normal)
         case .correct:
             backgroundColor = AppColor.appGreen
@@ -35,9 +35,6 @@ final class ChoiceButton: UIButton {
 
     private func configure() {
         titleLabel?.font = AppFont.title2
-        layer.cornerRadius = AppRadius.radius20
-
-        layer.borderWidth = AppBorder.regular
-        layer.borderColor = UIColor.black.cgColor
+        applyBorder(width: AppBorder.regular, color: AppColor.outline, radius: AppRadius.radius20)
     }
 }

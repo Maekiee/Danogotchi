@@ -100,6 +100,8 @@ struct TransparentBlurView: UIViewRepresentable {
     var removeAllFilters: Bool = false
     func makeUIView(context: Context) -> UIVisualEffectView {
         let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+        // 모드가 바뀌면 시스템이 모드별 필터를 다시 붙여 투명도가 달라진다 — 사진 위 오버레이라 라이트로 고정
+        view.overrideUserInterfaceStyle = .light
         return view
     }
     

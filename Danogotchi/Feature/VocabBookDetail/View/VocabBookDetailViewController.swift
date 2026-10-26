@@ -57,8 +57,8 @@ final class VocabBookDetailViewController: BaseViewController {
             )
         config.image = UIImage(systemName: "plus")
 
-        config.baseForegroundColor = AppColor.appWhite
-        config.baseBackgroundColor = AppColor.black
+        config.baseForegroundColor = AppColor.onInverse
+        config.baseBackgroundColor = AppColor.inverse
         config.cornerStyle = .capsule
         config.contentInsets = .zero
         button.configuration = config

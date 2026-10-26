@@ -18,6 +18,9 @@ final class AppFlowCoordinator: Coordinator {
 
 extension AppFlowCoordinator {
     func start() {
+        // 첫 화면이 보이기 전에 건다 — DB 준비가 실패해 재시도 화면이 떠도 저장된 모드로 보인다
+        container.makeAppearanceModeUseCase().applySaved()
+
         do {
             try container.makeDatabasePreparer().prepareIfNeeded()
 

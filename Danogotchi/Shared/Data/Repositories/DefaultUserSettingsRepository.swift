@@ -5,6 +5,7 @@ final class DefaultUserSettingsRepository: UserSettingsRepository {
         static let themeUrl = "themeUrl"
         static let themeImageFileName = "themeImageFileName"
         static let studyReminder = "studyReminderEnabled"
+        static let appearanceMode = "appearanceMode"
     }
 
     private let defaults: UserDefaults
@@ -36,5 +37,11 @@ final class DefaultUserSettingsRepository: UserSettingsRepository {
     var isStudyReminderEnabled: Bool {
         get { defaults.object(forKey: Keys.studyReminder) as? Bool ?? true }
         set { defaults.set(newValue, forKey: Keys.studyReminder) }
+    }
+
+    // 키가 없는 첫 실행은 0(.system)으로 읽혀 시스템 설정을 따른다
+    var appearanceMode: AppearanceMode {
+        get { AppearanceMode(rawValue: defaults.integer(forKey: Keys.appearanceMode)) ?? .system }
+        set { defaults.set(newValue.rawValue, forKey: Keys.appearanceMode) }
     }
 }

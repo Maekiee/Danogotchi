@@ -97,18 +97,18 @@ extension AddVocabViewController {
     private static func makePartOfSpeechSegmentedControl() -> UISegmentedControl {
         let control = UISegmentedControl(items: PartOfSpeech.allCases.map { $0.title })
         control.selectedSegmentIndex = 0 // 기본값: allCases의 첫 값
-        control.backgroundColor = AppColor.white
-        control.selectedSegmentTintColor = AppColor.black
+        control.backgroundColor = AppColor.card
+        control.selectedSegmentTintColor = AppColor.inverse
         control.layer.cornerRadius = AppRadius.radius20
         control.layer.borderWidth = AppBorder.thin
         control.layer.borderColor = AppColor.gray30.cgColor
         control.clipsToBounds = true
         control.setTitleTextAttributes(
-            [.font: AppFont.label, .foregroundColor: AppColor.black],
+            [.font: AppFont.label, .foregroundColor: AppColor.textPrimary],
             for: .normal
         )
         control.setTitleTextAttributes(
-            [.font: AppFont.label, .foregroundColor: AppColor.white],
+            [.font: AppFont.label, .foregroundColor: AppColor.onInverse],
             for: .selected
         )
 

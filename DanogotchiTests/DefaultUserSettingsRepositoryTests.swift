@@ -21,6 +21,7 @@ final class DefaultUserSettingsRepositoryTests: XCTestCase {
         XCTAssertNil(repository.currentThemeImageFileName)
         XCTAssertFalse(repository.hasSelectedTheme)
         XCTAssertTrue(repository.isStudyReminderEnabled, "키가 없는 첫 실행은 알림이 켜진 것으로 본다")
+        XCTAssertEqual(repository.appearanceMode, .system, "키가 없는 첫 실행은 시스템 설정을 따른다")
     }
 
     func test_valuesPersistAcrossInstancesUnderStableKeys() throws {
@@ -29,16 +30,19 @@ final class DefaultUserSettingsRepositoryTests: XCTestCase {
         writer.currentThemeUrl = "https://images.example.test/a"
         writer.currentThemeImageFileName = "a.heic"
         writer.isStudyReminderEnabled = false
+        writer.appearanceMode = .dark
 
         // 기존 사용자 데이터와 호환되려면 키 문자열이 바뀌면 안 된다
         XCTAssertEqual(defaults.string(forKey: "themeUrl"), "https://images.example.test/a")
         XCTAssertEqual(defaults.string(forKey: "themeImageFileName"), "a.heic")
         XCTAssertEqual(defaults.object(forKey: "studyReminderEnabled") as? Bool, false)
+        XCTAssertEqual(defaults.integer(forKey: "appearanceMode"), AppearanceMode.dark.rawValue)
 
         let reader = DefaultUserSettingsRepository(defaults: defaults)
         XCTAssertEqual(reader.currentThemeUrl, "https://images.example.test/a")
         XCTAssertEqual(reader.currentThemeImageFileName, "a.heic")
         XCTAssertFalse(reader.isStudyReminderEnabled)
+        XCTAssertEqual(reader.appearanceMode, .dark)
         XCTAssertTrue(reader.hasSelectedTheme)
     }
 

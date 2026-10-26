@@ -7,6 +7,7 @@ protocol UserSettingsRepository: AnyObject {
     /// 로컬에 저장된 배경 이미지 파일명. 앱 컨테이너 경로는 재설치·복원 시 바뀌므로 파일명만 보관한다.
     var currentThemeImageFileName: String? { get set }
     var isStudyReminderEnabled: Bool { get set }
+    var appearanceMode: AppearanceMode { get set }
     /// 구독 즉시 현재 파일명을 보내고, 바뀔 때마다 새 파일명을 보낸다.
     var themeImageFileNameChanges: AsyncStream<String?> { get }
 }

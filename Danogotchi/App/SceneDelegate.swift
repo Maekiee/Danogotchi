@@ -13,12 +13,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         #if DEBUG
         UITestingSupport.resetIfRequested()
         #endif
-        let container = AppDIContainer(screenPixelSize: scene.screen.nativeBounds.size)
         let window = UIWindow(windowScene: scene)
+        let container = AppDIContainer(screenPixelSize: scene.screen.nativeBounds.size, window: window)
         self.window = window
         #if DEBUG
         UITestingSupport.seedMainFlowIfRequested(container: container)
         UITestingSupport.seedThemeSelectedIfRequested(container: container)
+        UITestingSupport.seedSolidThemeIfRequested(container: container)
         if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window, container: container) {
             studyReportTestCoordinator = coordinator
             return

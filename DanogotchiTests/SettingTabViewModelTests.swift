@@ -37,6 +37,19 @@ final class SettingTabViewModelTests: XCTestCase {
         XCTAssertEqual(screen.isReminderOn, true)
     }
 
+    func test_appearanceModeStartsFromUseCaseAndPersistsSelection() {
+        let screen = SettingTestScreen(appearanceMode: .light)
+        XCTAssertEqual(screen.appearanceMode, .light)
+
+        screen.selectAppearance.accept(.dark)
+        XCTAssertEqual(screen.appearanceMode, .dark)
+        XCTAssertEqual(screen.appearance.setCalls, [.dark])
+
+        screen.selectAppearance.accept(.system)
+        XCTAssertEqual(screen.appearanceMode, .system)
+        XCTAssertEqual(screen.appearance.current, .system)
+    }
+
     func test_selectingMenuEmitsActionAndOnlyInquiryBuildsMailBody() throws {
         let screen = SettingTestScreen()
         let inquiry = try XCTUnwrap(SettingMenu.Category.support.list.first { $0.action == .inquiry })
@@ -77,27 +90,54 @@ private final class ControlledReminderUseCase: StudyReminderUseCase {
     func refresh() throws {}
 }
 
+private final class ControlledAppearanceModeUseCase: AppearanceModeUseCase {
+    private(set) var current: AppearanceMode
+    private(set) var setCalls: [AppearanceMode] = []
+
+    init(current: AppearanceMode) { self.current = current }
+
+    func set(_ mode: AppearanceMode) {
+        setCalls.append(mode)
+        current = mode
+    }
+
+    func applySaved() {}
+}
+
 @MainActor
 private final class SettingTestScreen {
     let reminder: ControlledReminderUseCase
+    let appearance: ControlledAppearanceModeUseCase
     let select = PublishRelay<SettingMenu>()
     let toggle = PublishRelay<Bool>()
+    let selectAppearance = PublishRelay<AppearanceMode>()
     private(set) var sections: [SettingTabViewModel.SettingSection] = []
     private(set) var appVersion = ""
     private(set) var isReminderOn: Bool?
+    private(set) var appearanceMode: AppearanceMode?
     private(set) var actions: [SettingMenu.Action] = []
     private(set) var mailBodies: [String] = []
     private(set) var alerts: [String] = []
     private let viewModel: SettingTabViewModel
     private let bag = DisposeBag()
 
-    init(reminderEnabled: Bool = true) {
+    init(reminderEnabled: Bool = true, appearanceMode: AppearanceMode = .system) {
         reminder = ControlledReminderUseCase(isEnabled: reminderEnabled)
-        viewModel = SettingTabViewModel(appEnv: TestAppEnvProvider(), studyReminderUseCase: reminder)
-        let output = viewModel.transform(input: .init(itemSelected: select.asObservable(), reminderToggled: toggle.asObservable()))
+        appearance = ControlledAppearanceModeUseCase(current: appearanceMode)
+        viewModel = SettingTabViewModel(
+            appEnv: TestAppEnvProvider(),
+            studyReminderUseCase: reminder,
+            appearanceModeUseCase: appearance
+        )
+        let output = viewModel.transform(input: .init(
+            itemSelected: select.asObservable(),
+            reminderToggled: toggle.asObservable(),
+            appearanceSelected: selectAppearance.asObservable()
+        ))
         output.sections.drive(onNext: { [weak self] in self?.sections = $0 }).disposed(by: bag)
         output.appVersion.drive(onNext: { [weak self] in self?.appVersion = $0 }).disposed(by: bag)
         output.isReminderOn.drive(onNext: { [weak self] in self?.isReminderOn = $0 }).disposed(by: bag)
+        output.appearanceMode.drive(onNext: { [weak self] in self?.appearanceMode = $0 }).disposed(by: bag)
         output.action.emit(onNext: { [weak self] in self?.actions.append($0) }).disposed(by: bag)
         output.mailBody.emit(onNext: { [weak self] in self?.mailBodies.append($0) }).disposed(by: bag)
         output.alertMessage.emit(onNext: { [weak self] in self?.alerts.append($0) }).disposed(by: bag)

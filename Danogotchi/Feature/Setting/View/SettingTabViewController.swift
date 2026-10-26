@@ -31,6 +31,7 @@ final class SettingTabViewController: BaseViewController {
     
     /// 셀이 아니라 VC가 인스턴스 하나를 보유한다 — 셀 재사용 때 같은 스위치가 재부착되므로 바인딩을 한 번만 걸면 된다
     private let reminderSwitch = UISwitch()
+    private let appearanceControl = UISegmentedControl(items: AppearanceMode.allCases.compactMap(\.icon))
 
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -42,7 +43,7 @@ final class SettingTabViewController: BaseViewController {
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.backgroundColor = AppColor.appWhite
+        view.backgroundColor = AppColor.groupedBackground
         view.alwaysBounceVertical = false
         view.bounces = true
         return view
@@ -92,19 +93,20 @@ final class SettingTabViewController: BaseViewController {
     
     override func configView() {
         // 네비게이션 바 영역(safeArea 위)까지 리스트 배경과 같은 톤으로 맞춘다
-        view.backgroundColor = AppColor.appWhite
+        view.backgroundColor = AppColor.groupedBackground
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil
         )
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "setting.close"
         reminderSwitch.accessibilityIdentifier = "setting.reminderSwitch"
+        appearanceControl.accessibilityIdentifier = "setting.appearanceControl"
     }
 
     private func createLayout() -> UICollectionViewLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
-        configuration.backgroundColor = AppColor.appWhite
+        configuration.backgroundColor = AppColor.groupedBackground
         
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         
@@ -116,7 +118,7 @@ final class SettingTabViewController: BaseViewController {
     }
 }
 
-//MARK: DiffableDataSource
+// MARK: DiffableDataSource
 extension SettingTabViewController {
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SettingMenu>
@@ -141,6 +143,15 @@ extension SettingTabViewController {
                     .customView(configuration: .init(
                         customView: reminderSwitch,
                         placement: .trailing()
+                    ))
+                ]
+            case .appearanceMode:
+                cell.accessories = [
+                    .customView(configuration: .init(
+                        customView: appearanceControl,
+                        placement: .trailing(),
+                        // 기본값(.standard)은 스위치 폭만 잡아 세그먼트가 행 밖으로 밀려난다
+                        reservedLayoutWidth: .actual
                     ))
                 ]
             default:
@@ -186,7 +197,9 @@ extension SettingTabViewController {
             itemSelected: collectionView.rx.itemSelected.compactMap { [weak self] indexPath in
                 self?.dataSource.itemIdentifier(for: indexPath)
             },
-            reminderToggled: reminderSwitch.rx.isOn.changed.asObservable()
+            reminderToggled: reminderSwitch.rx.isOn.changed.asObservable(),
+            appearanceSelected: appearanceControl.rx.selectedSegmentIndex.changed
+                .map { AppearanceMode.allCases[$0] }
         )
         let output = viewModel.transform(input: input)
 
@@ -211,6 +224,11 @@ extension SettingTabViewController {
                 owner.reminderSwitch.isOn = isOn
             }.disposed(by: disposeBag)
 
+        output.appearanceMode
+            .drive(with: self) { owner, mode in
+                owner.appearanceControl.selectedSegmentIndex = AppearanceMode.allCases.firstIndex(of: mode) ?? 0
+            }.disposed(by: disposeBag)
+
         output.sections
             .drive(with: self) { owner, sections in
                 sections.forEach { section in
@@ -227,8 +245,8 @@ extension SettingTabViewController {
         output.action
             .emit(with: self) { owner, action in
                 switch action {
-                case .studyReminder:
-                    // 스위치가 상태를 바꾸므로 행 탭은 선택 해제만 한다
+                case .studyReminder, .appearanceMode:
+                    // 스위치·세그먼트가 상태를 바꾸므로 행 탭은 선택 해제만 한다
                     owner.collectionView.indexPathsForSelectedItems?.forEach {
                         owner.collectionView.deselectItem(at: $0, animated: true)
                     }

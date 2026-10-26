@@ -1,5 +1,6 @@
 import Foundation
 import OSLog
+import UIKit
 
 /// 앱 스코프 공유 인스턴스. 기능 컨테이너가 받는 유일한 입력이다.
 /// 규칙: 변경 스트림 같은 상태를 가진 리포지토리는 여기서 1개만 공유하고, 무상태 리포지토리는 호출마다 만든다.
@@ -15,6 +16,8 @@ struct AppDependencies {
     /// activeBookChanged 스트림 보유
     let vocabBookRepository: VocabBookRepository
     let petRepository: PetRepository
+    /// 앱 창을 붙잡고 있어 1개만 공유
+    let appearanceApplier: AppearanceApplying
     /// 표현 계층의 실패 보고. Crashlytics 호출은 조립부에만 둔다
     let reportError: @Sendable (Error) -> Void
 }
@@ -44,6 +47,10 @@ extension AppDependencies {
             learningHistoryRepository: makeLearningHistoryRepository(),
             scheduler: LocalNotificationScheduler()
         )
+    }
+
+    func makeAppearanceModeUseCase() -> AppearanceModeUseCase {
+        return DefaultAppearanceModeUseCase(userSettings: userSettingsRepository, applier: appearanceApplier)
     }
 
     func makeOnboardingProgressUseCase() -> OnboardingProgressUseCase {
@@ -107,7 +114,8 @@ final class AppDIContainer {
     private let dependencies: AppDependencies
 
     /// screenPixelSize는 SceneDelegate가 연결된 UIWindowScene.screen에서 읽어 넘긴다
-    init(screenPixelSize: CGSize) {
+    /// window는 화면 모드를 걸 앱 창이다
+    init(screenPixelSize: CGSize, window: UIWindow) {
         let coreDataStack = CoreDataStack()
         dependencies = AppDependencies(
             screenPixelSize: screenPixelSize,
@@ -118,6 +126,7 @@ final class AppDIContainer {
             userSettingsRepository: DefaultUserSettingsRepository(),
             vocabBookRepository: DefaultVocabBookRepository(context: coreDataStack.viewContext),
             petRepository: DefaultPetRepository(context: coreDataStack.viewContext),
+            appearanceApplier: WindowAppearanceApplier(window: window),
             reportError: { CrashReporter.record($0) }
         )
     }
@@ -132,6 +141,10 @@ final class AppDIContainer {
 
     func makeOnboardingProgressUseCase() -> OnboardingProgressUseCase {
         return dependencies.makeOnboardingProgressUseCase()
+    }
+
+    func makeAppearanceModeUseCase() -> AppearanceModeUseCase {
+        return dependencies.makeAppearanceModeUseCase()
     }
 
     func makeOnboardingDIContainer() -> OnboardingDIContainer {
@@ -157,6 +170,13 @@ extension AppDIContainer {
         try dependencies.makeSetActiveBookUseCase().execute(topic: .travel)
         // 없는 파일명만 지정 — 원본 URL이 없어 복구 다운로드가 일어나지 않는다
         dependencies.userSettingsRepository.currentThemeImageFileName = "ui-test-theme.png"
+    }
+
+    /// UI 테스트 전용 — 주어진 이미지를 실제 테마 파일로 저장하고 배경으로 지정한다
+    func seedThemeImageForUITesting(_ data: Data) throws {
+        let fileName = "ui-test-solid-theme.png"
+        try dependencies.themeImageStorage.save(data, fileName: fileName)
+        dependencies.userSettingsRepository.currentThemeImageFileName = fileName
     }
 }
 #endif

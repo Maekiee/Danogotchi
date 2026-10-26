@@ -70,7 +70,7 @@ final class OnboardingInterestCollectionViewCell: UICollectionViewCell {
     }
 
     private func setSelected(_ selected: Bool, topic: BookTopic) {
-        contentView.backgroundColor = selected ? topic.color : AppColor.white
+        contentView.backgroundColor = selected ? topic.color : AppColor.card
         contentView.layer.borderColor = selected
             ? AppColor.textPrimary.cgColor
             : AppColor.gray30.cgColor
