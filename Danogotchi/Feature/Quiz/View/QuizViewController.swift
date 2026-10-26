@@ -28,7 +28,7 @@ final class QuizViewController: BaseViewController {
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "xmark"), for: .normal)
-        button.tintColor = .black
+        button.tintColor = AppColor.textPrimary
         button.accessibilityIdentifier = "quiz.close"
         return button
     }()

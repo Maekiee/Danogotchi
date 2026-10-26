@@ -7,7 +7,7 @@ import XCTest
 final class AppFlowCoordinatorTests: XCTestCase {
     func test_onboardingCompletionReplacesOnboardingWithMainFlow() {
         let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
-        let container = AppDIContainer(screenPixelSize: CGSize(width: 1179, height: 2556))
+        let container = AppDIContainer(screenPixelSize: CGSize(width: 1179, height: 2556), window: window)
         let coordinator = AppFlowCoordinator(window: window, container: container)
         let onboarding = OnboardingCoordinator(navigationController: UINavigationController(),
                                                container: container.makeOnboardingDIContainer())

@@ -47,4 +47,32 @@ final class SettingUITests: XCTestCase {
         close.tap()
         XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
     }
+
+    /// 화면 모드 세그먼트가 행 안에 다 보이고, 고른 모드가 다시 열어도 남는다
+    func test_appearanceSegmentFitsInRowAndKeepsSelection() {
+        let app = XCUIApplication.launchMainFlow()
+        app.buttons["explore.setting"].tap()
+        let close = app.buttons["setting.close"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+
+        let row = app.element("setting.menu.appearanceMode")
+        let control = app.segmentedControls["setting.appearanceControl"]
+        XCTAssertTrue(control.waitForExistence(timeout: 3))
+        // 오른쪽 끝이 행 밖으로 나가면 마지막 세그먼트가 가려진다
+        XCTAssertLessThanOrEqual(control.frame.maxX, row.frame.maxX)
+        for label in ["시스템", "라이트", "다크"] {
+            XCTAssertTrue(control.buttons[label].isHittable, label)
+        }
+        XCTAssertTrue(control.buttons["시스템"].isSelected, "첫 실행은 시스템 설정을 따른다")
+
+        control.buttons["다크"].tap()
+        XCTAssertTrue(control.buttons["다크"].isSelected)
+
+        // 닫고 다시 들어와도 다크가 남는다
+        close.tap()
+        XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
+        app.buttons["explore.setting"].tap()
+        XCTAssertTrue(control.waitForExistence(timeout: 5))
+        XCTAssertTrue(control.buttons["다크"].isSelected)
+    }
 }

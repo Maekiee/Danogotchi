@@ -7,10 +7,8 @@ final class QuizResultCard: UIView {
     // MARK: - UI 프로퍼티
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = AppColor.appWhite
-        view.layer.cornerRadius = 30
-        view.layer.borderWidth = AppBorder.regular
-        view.layer.borderColor = UIColor.black.cgColor
+        view.backgroundColor = AppColor.surface
+        view.applyBorder(width: AppBorder.regular, color: AppColor.outline, radius: 30)
         return view
     }()
 
@@ -166,7 +164,7 @@ final class QuizResultCard: UIView {
 
     private static func makeDivider() -> UIView {
         let view = UIView()
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.12)
+        view.backgroundColor = AppColor.outline.withAlphaComponent(0.12)
         return view
     }
 }

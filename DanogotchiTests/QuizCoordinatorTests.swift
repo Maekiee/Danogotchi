@@ -22,12 +22,12 @@ final class QuizCoordinatorTests: XCTestCase {
         let words = makeQuizWords(4)
         let navigation = UINavigationController()
         let delegate = SpyDelegate()
-        let container = AppDIContainer(screenPixelSize: CGSize(width: 1179, height: 2556))
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
+        let container = AppDIContainer(screenPixelSize: CGSize(width: 1179, height: 2556), window: window)
             .makeMainDIContainer().makeQuizDIContainer()
         let coordinator = QuizCoordinator(container: container, navigationController: navigation,
                                           quizData: QuizData(words: words, allWord: words))
         coordinator.delegate = delegate
-        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
         window.rootViewController = navigation
         window.makeKeyAndVisible()
         coordinator.start()

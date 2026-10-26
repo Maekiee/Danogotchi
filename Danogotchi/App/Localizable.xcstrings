@@ -580,6 +580,16 @@
         }
       }
     },
+    "다크" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダーク"
+          }
+        }
+      }
+    },
     "단어" : {
       "localizations" : {
         "ja" : {
@@ -709,6 +719,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "意味"
+          }
+        }
+      }
+    },
+    "라이트" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライト"
           }
         }
       }
@@ -1148,6 +1168,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "かなしい"
+          }
+        }
+      }
+    },
+    "시스템" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム"
           }
         }
       }
@@ -2148,6 +2178,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "形容詞"
+          }
+        }
+      }
+    },
+    "화면 모드" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画面モード"
           }
         }
       }

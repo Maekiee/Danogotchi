@@ -6,8 +6,8 @@ final class PrimaryFillButton: UIButton {
         var config = UIButton.Configuration.filled()
         config.title = title
         config.titleAlignment = .center
-        config.baseBackgroundColor = AppColor.black
-        config.baseForegroundColor = AppColor.white
+        config.baseBackgroundColor = AppColor.inverse
+        config.baseForegroundColor = AppColor.onInverse
         config.background.cornerRadius = AppRadius.radius20
         self.configuration = config
 
@@ -21,8 +21,8 @@ final class PrimaryFillButton: UIButton {
         self.configurationUpdateHandler = { button in
             // 버튼 활성화 상태 여부
             let isEnabled = button.state != .disabled
-            button.configuration?.baseBackgroundColor = isEnabled ? AppColor.black : AppColor.gray30
-            button.configuration?.baseForegroundColor = isEnabled ? AppColor.white : AppColor.gray45
+            button.configuration?.baseBackgroundColor = isEnabled ? AppColor.inverse : AppColor.gray30
+            button.configuration?.baseForegroundColor = isEnabled ? AppColor.onInverse : AppColor.gray45
         }
     }
 

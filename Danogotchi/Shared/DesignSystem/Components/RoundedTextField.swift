@@ -5,14 +5,14 @@ final class RoundedTextField: UITextField {
         super.init(frame: .zero)
 
         borderStyle = .none
-        backgroundColor = AppColor.white
+        backgroundColor = AppColor.card
         layer.cornerRadius = AppRadius.radius20
         layer.borderWidth = AppBorder.thin
         layer.borderColor = AppColor.gray30.cgColor
         clipsToBounds = true
         font = AppFont.title2
 
-        textColor = AppColor.black
+        textColor = AppColor.textPrimary
         attributedPlaceholder = NSAttributedString(
             string: placeholder,
             attributes: [

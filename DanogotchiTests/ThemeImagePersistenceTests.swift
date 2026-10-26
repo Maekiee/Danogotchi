@@ -17,6 +17,7 @@ private final class TemporaryImageFileManager: FileManager, @unchecked Sendable 
 final class TestUserSettings: UserSettingsRepository {
     var currentThemeUrl: String?
     var isStudyReminderEnabled = true
+    var appearanceMode: AppearanceMode = .system
     /// 파일명이 바뀐 직후, 구독자에게 알리기 전에 호출된다 — 저장 순서를 검사할 때 쓴다
     var willPublishFileName: ((String?) -> Void)?
     private let fileNames = AsyncBroadcaster<String?>()

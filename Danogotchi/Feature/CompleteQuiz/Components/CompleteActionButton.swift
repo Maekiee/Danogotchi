@@ -22,12 +22,12 @@ final class CompleteActionButton: UIButton {
         switch style {
         case .primary:
             titleLabel?.font = AppFont.bodyEmphasis
-            backgroundColor = AppColor.black
-            setTitleColor(.white, for: .normal)
+            backgroundColor = AppColor.inverse
+            setTitleColor(AppColor.onInverse, for: .normal)
             applyOutline()
         case .secondary:
             titleLabel?.font = AppFont.bodyEmphasis
-            backgroundColor = AppColor.appWhite
+            backgroundColor = AppColor.surface
             setTitleColor(AppColor.textPrimary, for: .normal)
             applyOutline()
         case .text:
@@ -37,9 +37,6 @@ final class CompleteActionButton: UIButton {
     }
 
     private func applyOutline() {
-        layer.cornerRadius = AppRadius.radius20
-
-        layer.borderWidth = AppBorder.regular
-        layer.borderColor = UIColor.black.cgColor
+        applyBorder(width: AppBorder.regular, color: AppColor.outline, radius: AppRadius.radius20)
     }
 }

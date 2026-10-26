@@ -7,9 +7,8 @@ final class CustomProgressView: UIView {
     
     private let trackView: UIView = {
         let view = UIView()
-        view.backgroundColor = AppColor.appWhite
-        view.layer.borderColor = UIColor.black.cgColor
-        view.layer.borderWidth = AppBorder.thin
+        view.backgroundColor = AppColor.surface
+        view.applyBorder(width: AppBorder.thin, color: AppColor.outline)
         return view
     }()
     private let progressFillView = UIView()
@@ -19,7 +18,7 @@ final class CustomProgressView: UIView {
     private var currentProgress: Float = 0.0
 
     /// 채움 색은 호출부가 정한다 — 돌봄 수치 4개를 색으로 구분하기 위해서다.
-    init(fillColor: UIColor = AppColor.black) {
+    init(fillColor: UIColor = AppColor.inverse) {
         super.init(frame: .zero)
         progressFillView.backgroundColor = fillColor
         setupLayout()
