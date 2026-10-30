@@ -46,59 +46,69 @@
 
 ## 주요 기능
 
-### 1. 테마 설정
-* Unsplash 사진 검색으로 배경 테마 설정
-* PhotoPicker를 사용해 사진첩에서 나의 사진 테마 지정기능
+### 시작하기 (Onboarding)
 
-### 2. 단어장
+* 관심 있는 주제(여행·비즈니스·감정·일상)를 골라 처음 공부할 단어장 정하기
+* 마음에 드는 배경 사진 고르기
+* 알을 골라 나만의 캐릭터를 만들고 이름 짓기
 
-* Core Data 기반 커스텀 단어 CRUD
-* 추천 단어장의 단어를 `sourceWordId`로 Core Data에 저장
-  — 원본을 복사해 나의 단어장에 넣고, 복사본에 원본 id를 남겨 원본–사본을 연결
-* 학습중 단어장 전환 (앱 전체에 항상 1개)
+### 단어 공부 (Explore)
 
-### 3. 단어 탐색
+* 쇼츠처럼 위아래로 넘기며 단어 카드 보기
+* 버튼 한 번으로 영어 발음 듣기
+* 단어마다 몇 번 공부했는지, 얼마나 맞혔는지 확인
 
-* 쇼츠·릴스 형태의 세로 무한 스크롤
-* Core Data 기반 단어별 학습 히스토리를 조회해 학습 횟수와 정답률 표시
-*  SwiftUI로 포팅한 단어 카드 UI
-* TTS 발음 재생
+### 퀴즈 (Quiz)
 
-### 4. 4지선다 퀴즈
+* 4개의 보기 중 알맞은 뜻 고르기
+* 덜 공부한 단어가 더 자주 나와서 골고루 복습
+* 지금 몇 번째 문제인지 표시하고, 정답인지 바로 알려주기
 
-* P2C(Power of Two Choices) 알고리즘으로 학습중 단어장에서 출제 단어 선정
-* 전수 정렬 없이 O(n) 선정, 매번 다른 문제 구성 유지
-* 진행률 표시 및 정답/오답 즉시 피드백
+### 학습 결과 (Result)
 
-### 5. 학습 결과
+* 맞힌 문제·틀린 문제 수와 얻은 경험치 확인
+* 모두 맞히면 보너스 경험치
+* 틀린 문제만 다시 풀기 / 이어서 공부하기
 
-* 정답/오답 수와 획득 경험치 요약
-* 전 문제 정답 시 보너스 경험치
-* 틀린 문제만 다시 풀기 / 이어서 학습하기
+### 단어장 (Library)
 
-### 6. 캐릭터 육성
+* 여행·비즈니스·감정·일상 추천 단어장 제공
+* 나만의 단어를 추가·수정·삭제
+* 추천 단어장의 단어를 내 단어장에 담기
+* 지금 공부할 단어장을 골라 퀴즈와 단어 공부에 사용
 
-* 포만감, 갈증, 즐거움, 청결 4수치 돌보기 기능
-* 돌봄 수치 기반 기분 9종 표시
-* 체력(HP) 관리, 사망 및 부활
-* 학습 경험치로 수동 레벨업 (최고 Lv.7)
-* 앱 종료 중 흐른 시간을 재실행 시 일괄 정산
-* 스프라이트 시트 기반 픽셀 아트 애니메이션
+### 캐릭터 키우기 (Character)
 
-### 7. 날씨 연동 배경
+* 포만감·갈증·즐거움·청결 4가지 상태 돌보기
+* 돌봄 상태에 따라 9가지 기분 표현
+* 오래 돌보지 않으면 체력이 줄어 쓰러지고, 다시 살릴 수 있음
+* 공부로 얻은 경험치로 레벨업 (최대 Lv.7)
+* 앱을 꺼둔 동안 흐른 시간도 다시 켜면 반영
+* 움직이는 픽셀 아트 캐릭터
 
-* 현재 위치(CoreLocation)로 OpenWeatherMap 현재 날씨를 조회
-* 날씨 상태 코드를 `WeatherType` 7종(뇌우·가랑비·비·눈·안개 등 대기 현상·맑음·구름)으로 환산
-* 캐릭터와 같은 스프라이트 시트 방식으로, 날씨에 해당하는 행만 골라 배경을 애니메이션
-* 위치 거부·네트워크 실패 시 기본 배경(맑음)을 유지하고 화면을 막지 않음
-* 화면 진입과 앱 복귀 때 갱신하며, 진행 중 요청이 있으면 중복 호출하지 않음
+### 배경 꾸미기 (Theme)
 
-### 8. 학습 리포트
+* 키워드로 사진을 검색해 배경으로 설정
+* 내 사진첩 사진을 원하는 구도로 잘라 배경으로 설정
+* 지금 있는 곳의 날씨(맑음·구름·비·눈·천둥·안개 등)에 맞춰 움직이는 배경
+* 위치 권한이 없거나 인터넷이 끊겨도 기본 배경으로 계속 사용
 
-* 누적 학습 단어 · 정답률 · 연속 학습일 요약
-* Swift Chart를 이용해 막대, 선, 원형, 그래프 생성
-* 최근 7일 / 이번 달 / 전체 기간별 차트 분석
-  — 학습량, 회차별 정답률, 품사 비중, 주제별 비중, 오답 유형
+### 학습 리포트 (Report)
+
+* 지금까지 공부한 단어 수·정답률·연속 학습일을 한눈에 보기
+* 최근 7일 / 이번 달 / 전체 기간별 그래프
+* 공부량, 정답률 변화, 품사·주제별 비율, 자주 틀리는 유형 분석
+
+### 설정 (Setting)
+
+* 아침·저녁 학습 알림, 하루 공부를 쉬면 알려주기
+* 화면 모드 선택: 시스템·라이트·다크 (v2.3.0)
+* 배경 테마 바꾸기, 문의하기, 앱스토어 리뷰
+
+### 다국어 (Language)
+
+* 한국어·일본어 지원 (v2.3.0)
+* 일본어로 처음 실행하면 추천 단어의 뜻도 일본어로 제공 (v2.3.0)
 
 ---
 
@@ -112,7 +122,7 @@
 
 ```
 Danogotchi/
-├── App/           앱 진입점 · AppDIContainer · Coordinator 계층
+├── App/           앱 진입점 · AppDIContainer + 기능별 DIContainer · Coordinator 계층
 ├── Core/          BaseViewController · CoreDataStack · 네트워크 · AppLogger
 ├── Shared/
 │   ├── Domain/    Entity · Repository 프로토콜 · UseCase · Policy
@@ -247,6 +257,7 @@ stateDiagram-v2
 | AVFoundation | 단어 발음 TTS |
 | UserNotifications | 학습 알림 예약 |
 | MessageUI · SafariServices | 문의 메일 · 웹 페이지 열기 |
+| String Catalog | 한국어·일본어 현지화 (`Localizable.xcstrings`) |
 
 ### 모니터링 · 푸시
 
@@ -256,59 +267,33 @@ stateDiagram-v2
 | Firebase Cloud Messaging | 원격 푸시 알림 |
 | OSLog (`AppLogger`) | 카테고리별 로그 |
 
-### 테스트 · 빌드
+### 테스트 · 빌드 · 배포
 
 | 기술 | 용도 |
 |---|---|
 | XCTest | 단위 테스트 |
-| XCUITest | 사진 테마·학습 리포트 UI 테스트 |
+| XCUITest | 온보딩·퀴즈·캐릭터·단어장·설정·사진 테마·학습 리포트 UI 테스트 |
 | TCA `TestStore` | Reducer 상태 변화 검증 |
 | Swift Package Manager | 의존성 관리 |
 | xcconfig | 개발·운영 스킴 분리 |
+| SwiftLint | 빌드 시 코드 규칙 검사 (SPM 빌드 플러그인) |
+| GitHub Actions | PR 단위 테스트 · 태그 push 배포 자동화 |
+| fastlane | 테스트 실행 · `match` 인증서 관리 · TestFlight 업로드 |
 
-## 핵심 아키텍처 패턴
+## 주요 아키텍처 결정 사항
 
-### Clean Architecture
-  - App / Core / Shared / Feature 4계층 분리, 의존 방향은 `Feature → Shared → Core` 단방향이며 Feature 간 화면 연결은 Coordinator에서 수행
-
-### MVVM-C (Input/Output)
-- 모든 ViewModel이 `BaseViewModel` 프로토콜의 `transform(input:) -> Output`을 구현해 입력과 출력을 한 함수에 고정
-
-### RxSwift 단방향 바인딩
-- Input은 `Observable`, Output은 `Driver`/`Signal`로 노출해 UI 스레드와 에러 처리를 타입으로 강제
-
-### TCA (SwiftUI 화면)
-- 신규 SwiftUI 화면(`PhotoThemeFeature` · `StudyReportFeature`) TCA 적용, 기존 UIKit 화면은 MVVM-C 유지 (화면 단위 점진 도입)
-- Coordinator가 `Store` 생성 후 `UIHostingController`로 감싸 기존 네비게이션에 연결
-- Reducer는 화면 전환 없이 `onClose` · `onNavigate` 등 클로저로 이벤트만 전달, 목적지는 Coordinator가 결정
-- 의존성은 `AppDIContainer`에서 생성자 주입, `@Dependency`는 `uuid`만 사용
-- `.cancellable(id:cancelInFlight:)`로 이전 요청 취소, 요청 ID로 늦은 응답 무시
-- `TestStore`로 상태 변화 검증
-
-### Coordinator 패턴 
-- 모든 화면 전환을 `Coordinator`가 담당(`AppFlowCoordinator` → `MainCoordinator` / `OnboardingCoordinator` → Feature별 Coordinator), VC 직접 push 금지, VC ↔ Coordinator는 delegate로 통신
-
-### UseCase 레이어
-- 비즈니스 규칙을 `AddVocabUseCase`, `StartQuizUseCase`, `CarePetUseCase`, `EarnExperienceUseCase` 등으로 분리하고, 정책은 `PetStatePolicy` · `PetLevelPolicy` · `ExperiencePolicy`에 상수까지 모아 테스트 가능하게 유지
-- Repository 접근이 필요한 ViewModel은 UseCase 프로토콜을 경유하며, UI 상태 로직과 상태 없는 Domain Policy에는 형식적인 UseCase를 만들지 않음
-
-### Repository 패턴 + DIP
-- `Shared/Domain/Interfaces`의 프로토콜과 `Shared/Data/Repositories`의 구현을 분리해 Domain이 CoreData·네트워크를 모르게 구성
-
-### 의존성 주입
-- `AppDIContainer`가 팩토리 메서드로 UseCase·ViewModel을 조립하고 조립은 App 계층에서만 수행. 단일 인스턴스가 필요한 Repository(활성 단어장 신호, 펫 1마리 불변식)는 컨테이너가 `lazy`로 보유
-
-### Router 패턴 
-- `UnsplashApiRouter` · `WeatherApiRouter`가 `Endpoint`를 구현하고, `DefaultApiClient`가 URLSession과 async/await로 요청을 실행
-
-### 디자인 시스템 토큰화
-- `AppColor` · `AppFont` · `AppSpacing` · `AppRadius` 토큰과 공용 컴포넌트를 `Shared/DesignSystem`에 모아 UIKit·SwiftUI 양쪽에서 공유
-
-### 데이터 플로우 
-- View → ViewModel → UseCase → Repository → CoreData 동기 저장 성공 → 변경 신호(Relay) 방출 → 구독 측 재조회. 저장 실패는 롤백 후 화면에 전달하며, 성공한 작업만 UI 갱신과 화면 전환으로 연결
-
-### 테스트: 
-- 정책·UseCase·ViewModel·Reducer·영속화·네트워크·이미지 처리 테스트 250개 (`PetStatePolicyTests`, `VocabUseCaseTests`, `PetPersistenceTests` 등)
+1. **Clean Architecture + MVVM-C**: Domain이 UI·저장소를 모르게 분리하고, 화면 전환은 Coordinator가 전담
+2. **Input/Output 단일 진입점**: 모든 ViewModel이 `transform(input:) -> Output`을 구현, Output은 `Driver`·`Signal`로 노출해 메인 스레드 보장
+3. **화면 단위 TCA 점진 도입**: 신규 SwiftUI 화면만 TCA로 만들고 기존 UIKit 화면은 MVVM-C 유지, 이동 목적지는 Coordinator가 결정
+4. **Rx ↔ async 경계를 ViewModel에 고정**: Domain·Data는 RxSwift 없이 `throws`·`async`·`AsyncStream`만 노출
+5. **Core Data 쓰기는 동기 `throws` 유지**: 저장 성공 이후에만 변경 신호를 방출하는 불변식 보장, 실패는 롤백 후 화면에 전달
+6. **UseCase는 저장소 접근이 있을 때만**: 상태 없는 규칙은 `PetStatePolicy` 같은 Policy로 분리해 형식적인 UseCase 지양
+7. **싱글턴 제거 + 기능별 DI 컨테이너 (v2.3.0)**: 상태를 가진 리포지토리만 앱 스코프로 공유, Coordinator는 자기 기능 컨테이너만 수신
+8. **타이머 없는 경과 시간 정산**: 백그라운드 작업 없이 화면 진입·앱 복귀 시점에 마지막 정산 이후 시간을 한 번에 계산
+9. **외부 이미지 라이브러리 제거**: 내려받는 크기·포맷·디코딩 시점을 직접 제어해 전송량과 메모리 절감
+10. **새 파일 저장 후 이전 파일 정리**: 다운로드·저장이 실패해도 기존 배경 보존
+11. **시간·랜덤 값 주입**: `now`·`Calendar`·`RandomNumberGenerator`를 매개변수로 받아 테스트 결과 고정
+12. **태그 기반 CI/CD (v2.3.0)**: PR마다 단위 테스트, `v*.*.*` 태그 push로 TestFlight 자동 배포
 
 ## 데이터 흐름
 
@@ -355,106 +340,532 @@ flowchart LR
     K --> L[화면 갱신]
 ```
 
-## 주요 기술
+## 핵심 구현
 
-### RxSwift / RxCocoa
-* ViewModel은 `Input` / `Output` 구조체와 `transform(input:)` 단일 진입점을 갖습니다.
-* 외부에는 `Driver` · `Signal`로 노출해 메인 스레드 실행을 보장합니다.
+### 1. P2C 토너먼트 퀴즈 출제
 
-### Swift Concurrency
+덜 공부한 단어를 우선 출제하면서도 매번 다른 문제 세트를 만드는 선택 알고리즘입니다.
 
-* 원격 I/O 경로만 `async`/`await`로 씁니다 — `DefaultApiClient`(URLSession) → `DefaultWeatherRepository` · `DefaultSearchThemeRepository` · `DefaultThemeImageRepository` → `FetchCurrentWeatherUseCase` · `SearchThemeUseCase`. `ApiClient`와 `Endpoint`는 `Sendable`입니다.
-* Core Data 쓰기 경로는 동기 `throws`를 유지합니다. "저장 성공 이후에만 변경 신호를 방출한다"는 불변식이 동기 저장에 기대고 있어, 바꿀 이유가 없는 곳을 바꾸지 않았습니다.
-* 학습 리포트 조회만 예외로 `async` — background context에서 집계해 메인 스레드 비차단
-* **Rx ↔ async 경계를 ViewModel에 고정**했습니다. Domain과 Data 계층은 RxSwift를 import하지 않고 동기 `throws` · `async throws` · `AsyncStream`만 노출합니다. ViewModel이 `AsyncStream`을 `asObservable()`로 받아 `observe(on: MainScheduler.instance)`로 메인에 옮기고, `async` 저장은 `Task`로 실행해 `deinit`에서 취소합니다.
-* 변경 신호는 `AsyncBroadcaster`가 구독마다 새 `AsyncStream`을 만들어 여러 화면에 함께 전달합니다. 현재 값이 필요한 배경 테마는 구독 즉시 현재 파일명을 먼저 보냅니다.
-* **델리게이트 → async**: `DeviceLocationProvider`가 `withCheckedThrowingContinuation`으로 `CLLocationManager` 1회 조회를 `async` 함수로 바꿉니다. 이중 resume과 동시 요청을 막고(`LocationError.requestInProgress`), `@MainActor final class` + `nonisolated override init()`으로 DI 조립부는 메인 격리 밖에 둡니다. 델리게이트 채택은 `@preconcurrency`입니다.
-* **취소를 기능으로 씁니다.** 테마 검색은 `searchTask`를 새 검색과 `deinit`에서 취소하고 `Task.isCancelled` · `CancellationError`를 걸러 낡은 응답이 화면을 덮지 않게 합니다. 이미지 포맷 폴백 루프는 `Task.checkCancellation()`으로 다음 포맷 시도를 멈추고, 셀 썸네일은 `prepareForReuse`에서 취소합니다.
-* 메인 스레드에서 내보내는 작업은 이미지 디코딩 하나입니다 — `Task.detached(priority: .userInitiated)`로 돌리고 결과 적용만 `@MainActor`에서 합니다.
-* 현재 Swift 5 언어 모드입니다. 싱글턴 `CoreDataStack.viewContext`가 DI로 흐르는 구조라 strict concurrency를 켜려면 격리 설계가 먼저 필요해, 앱 코드에는 `actor`를 도입하지 않았습니다. 테스트에서는 `actor` 더블(`ControlledSearchRepository` 등)로 응답 순서를 결정적으로 만듭니다.
+```swift
+static func selectByTournament<G: RandomNumberGenerator>(
+    from vocabs: [Vocab],
+    stats: [UUID: LearningStats],
+    limit: Int,
+    using generator: inout G
+) -> [Vocab] {
+    var candidates = vocabs
+    var selected: [Vocab] = []
 
-### Coordinator
-* `AppFlowCoordinator` → `MainCoordinator` / `OnboardingCoordinator` → 화면별 Coordinator 계층입니다.
-* 온보딩 완료 여부에 따른 첫 화면 분기도 여기서 결정합니다.
+    while selected.count < limit, candidates.count >= 2 {
+        // 서로 다른 두 후보 인덱스를 뽑는다
+        let firstIndex = Int.random(in: 0..<candidates.count, using: &generator)
+        var secondIndex = Int.random(in: 0..<(candidates.count - 1), using: &generator)
+        if secondIndex >= firstIndex { secondIndex += 1 }
 
-### CoreData
-* 엔티티 5종(`VocabEntity` · `VocabBookEntity` · `LearningHistoryEntity` · `QuizSessionEntity` · `PetEntity`)을 사용합니다.
-* **ModelV2 마이그레이션** — 퀴즈 회차·답변 스냅샷 추가
-  * 마이그레이션 전 중복 ID 사전 검사, 실패 시 기존 데이터 보존
-  * 기존 학습 기록에 스냅샷 백필, 실패 시 롤백 후 다음 실행에서 재시도
-* 답변 저장 시 회차 ID + 문제 번호로 중복 저장 방지
-* `Mapper`의 `toDomain()`과 필요한 모델의 `apply(_:)`가 엔티티와 도메인 모델을 변환해 도메인 코드가 `NSManagedObject`를 모릅니다.
-* 네트워크 DTO는 `toEntity()`로 Domain Model에 변환하며, 읽기 전용 흐름에 사용하지 않는 `toDTO()`는 만들지 않습니다.
+        // 이력 없는 신규 단어는 학습횟수 0으로 취급되어 항상 우선 채택된다
+        let firstTotal = stats[candidates[firstIndex].id]?.total ?? 0
+        let secondTotal = stats[candidates[secondIndex].id]?.total ?? 0
 
-### 배경 테마 이미지 — Kingfisher 제거 후 직접 구현
+        let winnerIndex: Int
+        if firstTotal != secondTotal {
+            winnerIndex = firstTotal < secondTotal ? firstIndex : secondIndex
+        } else {
+            winnerIndex = Bool.random(using: &generator) ? firstIndex : secondIndex
+        }
+        selected.append(candidates.remove(at: winnerIndex))
+    }
 
-* **Before** — Kingfisher가 다운로드·디코딩·캐싱을 모두 맡았습니다. 원본 해상도를 그대로 받아 디코딩했고, 내려받는 크기·저장 포맷·디코딩 시점을 제어할 지점이 없었습니다.
-* **After** — `URLSession`(`ApiClient.data(from:)`) · `ImageIO` · `ImageFileStorage`로 단계를 나눠 직접 구현하고 외부 이미지 라이브러리 의존성을 제거했습니다.
+    // 학습횟수가 낮은 단어가 앞쪽에 몰리는 채택 순서 편향을 제거한다
+    return selected.shuffled(using: &generator)
+}
+```
 
-**내려받기 — 크기는 서버에서 맞춥니다**
+**핵심 포인트**
 
-* Unsplash 이미지 CDN에 `w`·`h`를 `UIScreen.main.nativeBounds` 픽셀로, `fit=crop&crop=center&q=85`로 요청합니다. 기기가 `scaleAspectFill`로 하던 센터 크롭을 서버가 미리 해주므로 전송량과 디코딩 메모리가 같이 줄고 업스케일이 없습니다.
-* 포맷은 HEIC → WebP 순으로 시도합니다. CDN은 `fm`을 못 알아들어도 200에 다른 포맷을 주기 때문에 **상태 코드로는 판정할 수 없습니다.** `ImageDecoder.validate(_:)`가 `CGImageSourceGetType`으로 실제 바이트의 타입을 읽고 64px 썸네일까지 뽑아 디코딩 가능함을 확인한 뒤, 저장 확장자를 그 결과에서 가져옵니다.
+* 랜덤 후보 2개 중 학습 횟수가 적은 단어 채택 (Power of Two Choices)
+* 전수 정렬 없이 출제 수(20개)만큼만 뽑아 O(n) 선정
+* 단어가 20개 이하면 전체를 섞어 출제, 오답 보기는 항상 단어장 전체에서 구성
+* `RandomNumberGenerator`를 주입받아 테스트에서 결과 고정
 
-**저장 — 로컬 파일로 보관합니다**
+### 2. 캐릭터 상태 구간 정산
 
-* `ImageFileStorage`가 `Library/Application Support/ThemeImage/`에 `UUID + 실제 확장자` 이름으로 `.atomic` 쓰기 후 `isExcludedFromBackup`을 세웁니다. URL이 내려가거나 오프라인이어도 배경이 유지됩니다.
-* UserDefaults에는 절대 경로가 아니라 **파일명만** 둡니다. 재설치·복원으로 컨테이너 경로가 바뀌어도 파일을 다시 찾습니다.
-* 순서가 불변식입니다 — 새 파일을 커밋한 **뒤** `removeAllExcept(fileName:)`로 이전 파일을 정리합니다. 다운로드가 실패해도 기존 배경을 잃지 않고, 중간에 앱이 죽어도 남은 파일은 다음 저장 때 함께 치워집니다.
-* 파일이 사라졌으면 `ObserveThemeUseCase`가 저장해둔 원본 URL로 다시 받아 스스로 복구합니다.
+타이머 없이 마지막 정산 시각과의 차이만으로 앱을 꺼둔 시간까지 정산합니다.
 
-**표시 — ImageIO 다운샘플 디코딩**
+```swift
+/// 모든 액션이 가장 먼저 부르는 정산 진입점
+static func settle(_ pet: Pet, now: Date) -> Pet {
+    var settled = pet
+    settled.stateUpdatedAt = now
 
-* `ImageDecoder.decode(fileURL:maxPixelSize:)`가 `CGImageSourceCreateThumbnailAtIndex`로 **화면 높이 픽셀까지만** 디코딩합니다. 전체 비트맵을 메모리에 펼치지 않습니다.
-* 디코딩은 `Task.detached(priority: .userInitiated)`에서 끝내고 메인에서는 크로스 디졸브만 합니다. 같은 파일이면 건너뛰고, 새 이미지가 오면 직전 디코딩을 취소합니다.
-* 확장자가 아니라 내용으로 포맷을 판별하므로 HEIC·WebP·JPEG 어느 것이 저장돼 있든 같은 경로로 동작합니다.
+    let elapsedHours = now.timeIntervalSince(pet.stateUpdatedAt) / 3600
+    // 기기 시각을 미래로 옮겼다 원복한 경우 타임스탬프만 재동기화
+    guard elapsedHours > 0 else { return settled }
 
-**테마 검색 그리드**
+    // 사망 후에는 자동 회복하지 않는다
+    if !pet.isDead {
+        settled.hp = settledHP(pet, elapsedHours: elapsedHours)
+    }
+    for stat in PetCareStat.allCases {
+        settled[keyPath: stat.keyPath] = decayed(pet, stat, elapsedHours)
+    }
+    return settled
+}
 
-* 썸네일(`urls.small`)은 `RemoteImageLoader`가 `URLSession` + `NSCache`로 메모리에만 올립니다. 디스크에 쓰지 않고, 셀 재사용 시 `prepareForReuse`에서 요청을 취소하며, 캐시에 있으면 동기로 꺼내 빈 칸이 깜빡이지 않게 합니다.
+/// 각 수치가 임계값을 통과한 시각으로 구간을 쪼개 회복·정지·감소를 시간순으로 적용
+private static func settledHP(_ pet: Pet, elapsedHours: Double) -> Double {
+    var hp = pet.hp
+    let points = boundaries(pet, elapsedHours: elapsedHours)
 
-### 내 사진 테마 — PhotosUI + 크롭 합성 직접 구현
+    for (start, end) in zip(points, points.dropFirst()) {
+        // 구간 안에서는 어떤 수치도 임계값을 넘지 않으므로 중간값으로 변화율 결정
+        let rate = hpChangePerHour(pet, at: (start + end) / 2)
+        hp = min(maxHP, max(0, hp + rate * (end - start)))
+        if hp <= 0 { return 0 }
+    }
+    return hp
+}
+```
 
-* `PhotosPicker`로 원본 로드, 미리보기는 ImageIO로 화면 크기까지만 다운샘플
-* `UIScrollView` 기반 크롭 뷰(`UIViewRepresentable`)로 확대·이동
-* 선택 영역을 0...1 정규화 좌표(`PhotoThemeCrop`)로 관리해 화면과 저장 결과 일치
-* `ThemeImageRenderer`로 화면 픽셀 크기에 맞춰 합성, 원본이 작으면 업스케일 없이 축소
-* HEIC → JPEG 순 인코딩, 기존 `ImageFileStorage` 저장 경로 재사용
+**핵심 포인트**
 
-### 학습 리포트 — Swift Charts + 스냅샷 집계
+* 화면 진입·앱 복귀·돌보기 시점에만 호출, 백그라운드 타이머 없음
+* 수치가 임계값(65·20)을 지나는 시각으로 구간을 나눠, 회복 구간이 감소로 뒤집히지 않게 계산
+* 구간마다 체력 상·하한을 적용해 상한에 막힌 회복분이 피해를 상쇄하지 않음
+* 밸런스 상수는 `PetStatePolicy` 한 파일에 모음
+* 전체 흐름은 [캐릭터 상태 정산](#캐릭터-상태-정산) 다이어그램 참고
 
-* 답변마다 회차 ID·문제 번호·단어 스냅샷 저장
-* `sourceWordId` 기준 집계로 같은 추천 단어 중복 카운트 방지
-* 집계 로직은 `now`·`Calendar`를 주입받는 순수 함수로 분리
+### 3. 배경 테마 이미지 파이프라인 — Kingfisher 제거 후 직접 구현
+
+다운로드·검증·저장·디코딩 단계를 직접 나눠 크기·포맷·메모리를 제어합니다.
+
+```
+Unsplash CDN            w·h = 화면 픽셀, fit=crop, fm=heic → 실패 시 webp
+      │
+      ▼
+ImageDecoder.validate   실제 바이트로 포맷 판별 + 64px 디코딩 확인
+      │
+      ▼
+ImageFileStorage.save   UUID.확장자 · .atomic 쓰기 · 백업 제외
+      │
+      ▼
+UserDefaults            파일명만 저장 → removeAllExcept로 이전 파일 정리
+      │
+      ▼
+ImageDecoder.decode     화면 높이 픽셀까지만 다운샘플 (Task.detached)
+```
+
+```swift
+/// 순서가 중요하다. 먼저 지우면 다운로드가 실패했을 때 기존 배경까지 잃는다.
+func performReplace(rawUrl: String) async throws {
+    let (data, fileExtension) = try await fetchImageData(rawUrl: rawUrl)
+
+    let fileName = UUID().uuidString + "." + fileExtension
+    try storage.save(data, fileName: fileName)
+
+    userSettings.currentThemeImageFileName = fileName
+    userSettings.currentThemeUrl = rawUrl
+
+    // 마지막에 정리한다. 여기서 실패하거나 직전에 앱이 죽어도 다음 저장 때 함께 치워진다.
+    storage.removeAllExcept(fileName: fileName)
+}
+
+/// HEIC로 먼저 받고, 실패하면 WebP로 한 번 더 시도한다.
+func fetchImageData(rawUrl: String) async throws -> (Data, String) {
+    var lastError: Error = NetworkError.invalidURL
+
+    for format in Format.allCases {
+        // 취소됐으면 다음 포맷을 시도하지 않는다
+        try Task.checkCancellation()
+
+        guard let url = makeImageURL(rawUrl: rawUrl, format: format) else {
+            lastError = NetworkError.invalidURL
+            continue
+        }
+
+        do {
+            let data = try await apiClient.data(from: url)
+
+            // 상태코드로는 판정할 수 없다 — CDN은 fm 값을 못 알아들어도 200에 다른 포맷을 준다
+            guard let fileExtension = ImageDecoder.validate(data) else {
+                throw NetworkError.transport(URLError(.cannotDecodeContentData))
+            }
+            return (data, fileExtension)
+        } catch {
+            lastError = error
+        }
+    }
+
+    throw lastError
+}
+```
+
+**핵심 포인트**
+
+* **Before**: Kingfisher가 원본 해상도를 받아 디코딩, 크기·포맷·디코딩 시점을 제어할 지점이 없음
+* **After**: `URLSession` · `ImageIO` · `ImageFileStorage`로 직접 구현, 외부 이미지 라이브러리 의존성 제거
+* 서버에서 화면 크기로 센터 크롭해 받아 전송량·디코딩 메모리 감소, 업스케일 없음
+* UserDefaults에는 파일명만 저장해 재설치·복원으로 경로가 바뀌어도 탐색, 파일이 사라지면 원본 URL로 재다운로드
+* 내 사진 테마도 같은 저장 경로 재사용 — 0...1 정규화 크롭 좌표(`PhotoThemeCrop`)로 미리보기와 결과 일치, `ThemeImageRenderer`가 화면 픽셀 크기로 합성
+* 검색 그리드 썸네일은 `RemoteImageLoader`(URLSession + NSCache) 메모리 캐시, 셀 재사용 시 요청 취소
+
+### 4. AsyncBroadcaster — 하나의 변경을 여러 화면에 전달
+
+구독마다 새 `AsyncStream`을 만들어 같은 변경 신호를 모든 화면에 보냅니다.
+
+```swift
+/// 구독마다 새 AsyncStream을 만들어 같은 값을 모두에게 보낸다
+final class AsyncBroadcaster<Element: Sendable>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuations: [UUID: AsyncStream<Element>.Continuation] = [:]
+
+    /// current가 있으면 구독 즉시 현재 값을 먼저 보낸다
+    func stream(current: (() -> Element)? = nil) -> AsyncStream<Element> {
+        let (stream, continuation) = AsyncStream.makeStream(of: Element.self, bufferingPolicy: .bufferingNewest(1))
+        let id = UUID()
+        continuation.onTermination = { [weak self] _ in
+            guard let self else { return }
+            self.lock.withLock { _ = self.continuations.removeValue(forKey: id) }
+        }
+        lock.withLock {
+            if let current { continuation.yield(current()) }
+            continuations[id] = continuation
+        }
+        return stream
+    }
+
+    func send(_ value: Element) {
+        lock.withLock { continuations.values.forEach { $0.yield(value) } }
+    }
+}
+```
+
+**핵심 포인트**
+
+* `AsyncStream` 하나를 여러 곳에서 순회하면 값이 나뉘므로, 구독마다 continuation을 따로 생성
+* `bufferingNewest(1)` — 변경 신호·최신 값 용도라 마지막 값 하나만 유지
+* `current`로 구독 즉시 현재 값 전달 (배경 테마 파일명)
+* 구독이 끝나면 `onTermination`에서 자동 해제
+* ViewModel이 `asObservable()`로 받아 `MainScheduler`에서 바인딩 — Domain·Data는 RxSwift를 모름
+
+### 5. 델리게이트 → async 변환 (CLLocationManager)
+
+델리게이트 기반 위치 조회를 `withCheckedThrowingContinuation`으로 한 번의 `async` 호출로 바꿉니다.
+
+```swift
+@MainActor
+final class DeviceLocationProvider: NSObject, LocationProviding {
+    private var continuation: CheckedContinuation<Coordinate, Error>?
+
+    func currentCoordinate() async throws -> Coordinate {
+        guard continuation == nil else { throw LocationError.requestInProgress }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+            requestLocationIfAuthorized(makeManagerIfNeeded())
+        }
+    }
+
+    private func resume(with result: Result<Coordinate, Error>) {
+        guard let continuation else { return }
+        self.continuation = nil
+        continuation.resume(with: result)
+    }
+}
+
+extension DeviceLocationProvider: @preconcurrency CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        resume(with: .success(
+            Coordinate(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        ))
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        resume(with: .failure(error))
+    }
+}
+```
+
+```mermaid
+sequenceDiagram
+    participant UC as FetchCurrentWeatherUseCase
+    participant P as DeviceLocationProvider
+    participant M as CLLocationManager
+
+    UC->>P: await currentCoordinate()
+    P->>P: continuation 보관
+    P->>M: 권한 확인 · requestLocation()
+    M-->>P: didUpdateLocations / didFailWithError
+    P->>P: continuation 1회 resume 후 nil
+    P-->>UC: Coordinate 또는 에러
+```
+
+**핵심 포인트**
+
+* 진행 중인 요청이 있으면 `requestInProgress`로 거절해 continuation 덮어쓰기 방지
+* `resume` 직후 `nil`로 비워 이중 resume 차단
+* 권한이 미결정이면 권한 요청 후 `locationManagerDidChangeAuthorization`에서 이어서 조회
+* `nonisolated override init()`으로 DI 조립부는 메인 격리 밖에 둠
+
+### 6. 학습 리포트 — 늦게 도착한 응답 무시
+
+기간을 빠르게 바꿔도 마지막 요청 결과만 화면에 반영합니다.
+
+```swift
+private func load(_ state: inout State) -> Effect<Action> {
+    let id = uuid()
+    let period = state.period
+    let date = now()
+    let calendar = calendar()
+    state.loadStatus = .loading(id)
+    return .run { send in
+        do {
+            let report = try await fetch(period, date, calendar)
+            try Task.checkCancellation()
+            await send(.loaded(id, report))
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled else { return }
+            reportError(error)
+            await send(.loadFailed(id))
+        }
+    }
+    .cancellable(id: CancelID.load, cancelInFlight: true)
+}
+
+// Reducer
+case let .loaded(id, report):
+    guard state.loadStatus == .loading(id) else { return .none }
+```
+
+**핵심 포인트**
+
+* `.cancellable(id:cancelInFlight: true)`로 새 요청 시작 시 이전 요청 취소
+* 요청마다 ID를 발급하고, 현재 상태의 ID와 다른 응답은 무시
+* 집계는 background context에서 수행해 메인 스레드 비차단
+* 답변마다 회차 ID·문제 번호·단어 스냅샷 저장, `sourceWordId` 기준 집계로 같은 추천 단어 중복 카운트 방지
 * Swift Charts(`BarMark` · `LineMark` · `SectorMark`) + 차트 선택 인터랙션
 
-### DiffableDataSource
-* 단어 카드·단어장·테마 목록에 사용합니다.
-* 테마 검색 화면은 높이가 제각각인 사진을 위해 워터폴 레이아웃(`WaterFallLayout`)을 직접 구현했습니다.
+### 7. Core Data ModelV2 마이그레이션
 
-### SwiftUI 부분 도입
-* 단어 카드 블러 레이어, 사진 테마·학습 리포트 화면을 SwiftUI로 구현.
-* `UIHostingController`로 UIKit 네비게이션에 연결.
+퀴즈 회차·답변 스냅샷을 추가하면서 기존 학습 기록을 잃지 않도록 단계적으로 옮깁니다.
 
-### 디자인 시스템
-* 색·폰트·여백·모서리 반경을 토큰(`AppColor` · `AppFont` · `AppSpacing` · `AppRadius` · `AppBorder`)으로 고정했습니다.
-* 화면 코드에 색상값과 폰트 크기를 직접 쓰지 않습니다.
+```swift
+static func backfillIfNeeded(context: NSManagedObjectContext) throws {
+    try context.performAndWait {
+        guard let coordinator = context.persistentStoreCoordinator,
+              let store = coordinator.persistentStores.first else {
+            throw StudyReportDataError.invalidRecord
+        }
+        let version = coordinator.metadata(for: store)[backfillVersionKey] as? Int ?? 0
+        guard version < backfillVersion else { return }
 
-### OSLog
-* `AppLogger` 5개 카테고리로 분류합니다.
-* subsystem이 번들 ID라 개발용과 운영용 로그가 Console에서 자동으로 분리됩니다.
+        try backfill(context: context)
+        let previousMetadata = coordinator.metadata(for: store)
+        var metadata = previousMetadata
+        metadata[backfillVersionKey] = backfillVersion
+        coordinator.setMetadata(metadata, for: store)
+        do {
+            // 레코드 변경이 없어도 완료 메타데이터 저장
+            try context.save()
+        } catch {
+            context.rollback()
+            coordinator.setMetadata(previousMetadata, for: store)
+            throw error
+        }
+    }
+}
+```
 
-### XCTest
-* 정책·UseCase·ViewModel·Reducer·영속화·네트워크·이미지 처리 테스트 **250개**를 운영합니다.
-* 사진 테마·학습 리포트 화면 흐름은 XCUITest **8개**로 검증합니다.
+**핵심 포인트**
 
-### 빌드 설정
-* `xcconfig`로 개발용·운영용 스킴을 분리했습니다.
-* 번들 ID, 앱 이름, 스킴에 따라 자동으로 바뀝니다.
+* 마이그레이션 전 읽기 전용으로 기존 저장소를 열어 중복 ID 사전 검사, 실패 시 기존 데이터 보존
+* 기존 학습 기록에 스냅샷 백필, 완료 여부는 저장소 메타데이터 버전으로 관리
+* 백필 저장 실패 시 롤백 후 메타데이터 원복 → 다음 실행에서 재시도
+* 답변 저장 시 회차 ID + 문제 번호로 중복 저장 방지
 
-### 테스트
+### 8. 싱글턴 제거 + 기능별 DI 컨테이너 (v2.3.0)
 
-#### 테스트 가능한 구조 설계
+전역 싱글턴을 없애고, 앱 스코프 인스턴스와 기능별 조립을 분리했습니다.
+
+```swift
+/// 앱 스코프 공유 인스턴스. 기능 컨테이너가 받는 유일한 입력이다.
+/// 규칙: 변경 스트림 같은 상태를 가진 리포지토리는 여기서 1개만 공유하고, 무상태 리포지토리는 호출마다 만든다.
+struct AppDependencies {
+    let screenPixelSize: CGSize
+    let coreDataStack: CoreDataStack
+    let apiClient: ApiClient
+    let speechSynthesizer: SpeechSynthesizing
+    /// 테마 파일명 변경 스트림 보유
+    let userSettingsRepository: UserSettingsRepository
+    /// activeBookChanged 스트림 보유
+    let vocabBookRepository: VocabBookRepository
+    let petRepository: PetRepository
+    /// 표현 계층의 실패 보고. Crashlytics 호출은 조립부에만 둔다
+    let reportError: @Sendable (Error) -> Void
+    // ...
+}
+
+/// quizData는 재시작마다 바뀌므로 컨테이너 스코프가 아니라 팩토리 인자로 받는다
+final class QuizDIContainer {
+    private let dependencies: AppDependencies
+
+    func makeQuizViewModel(quizData: QuizData) -> QuizViewModel {
+        return QuizViewModel(
+            earnExperienceUseCase: DefaultEarnExperienceUseCase(
+                learningHistoryRepository: dependencies.makeLearningHistoryRepository(),
+                petRepository: dependencies.petRepository
+            ),
+            studyReminderUseCase: dependencies.makeStudyReminderUseCase(),
+            quizData: quizData
+        )
+    }
+}
+```
+
+```
+AppDIContainer ── AppDependencies (앱 스코프 공유)
+   ├─ OnboardingDIContainer → OnboardingCoordinator
+   ├─ MainDIContainer       → MainCoordinator
+   ├─ LibraryDIContainer    → LibraryCoordinator
+   ├─ QuizDIContainer       → QuizCoordinator
+   └─ SettingDIContainer    → SettingCoordinator
+```
+
+**핵심 포인트**
+
+* `CoreDataStack.shared` · `TTSManager` · `UserInfoManager` 싱글턴을 `DatabasePreparing` · `SpeechSynthesizing` · `UserSettingsRepository` 프로토콜 뒤로 이동
+* `AppDIContainer`는 `AppDependencies`와 기능 컨테이너 팩토리만 보유, Coordinator는 자기 기능 컨테이너만 수신
+* 상태(스트림)를 가진 리포지토리는 1개 공유, 무상태 리포지토리는 호출마다 생성으로 규칙 통일
+* 화면 크기(`screenPixelSize`)와 에러 보고(`reportError`)도 주입해 `UIScreen.main`·Crashlytics 직접 호출 제거
+* `AppDIContainerTests`로 조립 결과 검증
+
+### 9. 화면 모드 — 시스템·라이트·다크 (v2.3.0)
+
+앱 창 단위로 모드를 적용해 모든 화면과 모달이 함께 바뀝니다.
+
+```swift
+final class DefaultAppearanceModeUseCase: AppearanceModeUseCase {
+    private let userSettings: UserSettingsRepository
+    private let applier: AppearanceApplying
+
+    var current: AppearanceMode {
+        return userSettings.appearanceMode
+    }
+
+    func set(_ mode: AppearanceMode) {
+        userSettings.appearanceMode = mode
+        applier.apply(mode)
+    }
+
+    func applySaved() {
+        applier.apply(userSettings.appearanceMode)
+    }
+}
+
+/// 앱 창에 모드를 건다 — 창 아래 화면·모달이 모두 따라간다
+final class WindowAppearanceApplier: AppearanceApplying {
+    private weak var window: UIWindow?
+
+    func apply(_ mode: AppearanceMode) {
+        window?.overrideUserInterfaceStyle = mode.userInterfaceStyle
+    }
+}
+```
+
+**핵심 포인트**
+
+* `UIWindow.overrideUserInterfaceStyle` 한 곳에 적용해 화면별 처리 없이 전체 전환
+* UseCase는 `AppearanceApplying` 프로토콜에만 의존 → UIKit 없이 단위 테스트
+* 앱 시작 시 `applySaved()`로 저장된 모드 복원, 첫 실행은 시스템 설정을 따름
+* `AppColor`에 라이트·다크 동적 색 토큰(`surface` · `outline` · `inverse` 등) 추가, 컴포넌트는 의미 토큰만 사용
+
+### 10. 일본어 지원 (v2.3.0)
+
+UI 문구와 함께 추천 단어의 뜻도 앱 언어에 맞춰 제공합니다.
+
+```swift
+static func seedIfNeeded(
+    context: NSManagedObjectContext,
+    language: String? = Bundle.main.preferredLocalizations.first
+) throws {
+    let request = VocabBookEntity.fetchRequest()
+    guard try context.count(for: request) == 0 else { return } // 멱등: 책이 하나라도 있으면 스킵
+
+    // 첫 실행 시 앱 언어로 뜻 선택, 이후 언어를 바꿔도 저장된 뜻은 유지
+    let isJapanese = language == "ja"
+    let seeds: [(topic: BookTopic, level: VocabLevel?, words: [(String, String, PartOfSpeech)])] = [
+        (.myBook, nil, []),
+        (.travel, .a1, isJapanese ? MockTravelWordsJa.data : MockTravelWords.data),
+        (.business, .a1, isJapanese ? MockBusinessWordsJa.data : MockBusinessWords.data),
+        (.emotion, .a1, isJapanese ? MockEmotionWordsJa.data : MockEmotionWords.data),
+        (.life, .a1, isJapanese ? MockLifeWordsJa.data : MockLifeWords.data),
+    ]
+    // ...
+}
+```
+
+**핵심 포인트**
+
+* String Catalog(`Localizable.xcstrings`)로 한국어·일본어 UI 문구 관리, 일본어 앱 이름·폰트 대응
+* 첫 실행 언어로 추천 단어 뜻을 시드하고, 이후 언어를 바꿔도 저장된 뜻은 유지
+* 언어를 매개변수로 받아 `DatabaseSeederTests`에서 언어별 시드 검증
+* 길어진 일본어 문구에 맞춰 온보딩·테마 화면 레이아웃 대응
+
+### 11. CI/CD 파이프라인 (v2.3.0)
+
+GitHub Actions + fastlane으로 PR 테스트와 TestFlight 배포를 자동화했습니다.
+
+```
+Pull Request / main push
+  └─ ci.yml → fastlane test
+       ├─ Secrets 복원 (GitHub Secrets → Secrets.xcconfig · Firebase plist)
+       └─ 단위 테스트 (병렬 실행 끔 · 테스트당 60초 제한)
+
+v*.*.* 태그 push (예: v2.3.0+1)
+  └─ release.yml → fastlane release
+       ├─ 태그 커밋이 main에 있는지 검증
+       ├─ 태그에서 버전 파싱 (v2.3.0+1 → 2.3.0)
+       ├─ 빌드 번호 = 같은 버전의 TestFlight 최신 빌드 + 1
+       ├─ match로 인증서·프로파일 내려받기 (읽기 전용)
+       ├─ Release 빌드 (버전·빌드 번호는 xcargs로만 덮어씀)
+       ├─ 이전 태그 이후 커밋을 What to Test에 기록
+       └─ TestFlight 업로드
+```
+
+```ruby
+# 1) 태그에서 버전 파싱: v2.3.0+1 → 2.3.0
+tag = ENV["GITHUB_REF_NAME"].to_s
+parsed = tag.match(/\Av(\d+\.\d+\.\d+)(\+\d+)?\z/)
+UI.user_error!("태그 형식이 올바르지 않습니다: '#{tag}' (예: v2.3.0+1)") unless parsed
+version = parsed[1]
+
+# 2) 빌드 번호: 같은 버전의 TestFlight 최신 빌드 + 1
+build_number = latest_testflight_build_number(
+  version: version,
+  initial_build_number: 0
+).to_i + 1
+```
+
+**핵심 포인트**
+
+* PR·main push마다 단위 테스트 실행, 같은 브랜치의 이전 실행은 자동 취소
+* 프로젝트 파일 수정 없이 태그만으로 버전·빌드 번호 결정
+* 배포는 취소 없이 순서대로 대기 (`cancel-in-progress: false`)
+* 비밀 값은 GitHub Secrets로만 주입, 저장소에 커밋하지 않음
+* SwiftLint는 SPM 빌드 플러그인으로 빌드 시 실행, `force_cast` · `force_try` · `force_unwrapping`은 error
+
+## 테스트
+
+* 정책·UseCase·ViewModel·Coordinator·Reducer·DI 조립·영속화·네트워크·이미지 처리 단위 테스트 **347개**
+* 온보딩·단어 탐색·퀴즈·캐릭터·단어장·설정·사진 테마·학습 리포트 흐름 XCUITest **26개**
+* PR마다 GitHub Actions에서 단위 테스트 자동 실행
+
+### 테스트 가능한 구조 설계
 
 - Repository·UseCase·`ApiClient`·`LocationProviding`을 **프로토콜로 추상화**하고 **생성자 주입**으로 연결해, 테스트에서 Controlled·Recording 더블로 대체합니다.
 - 비즈니스 규칙을 `PetStatePolicy`·`StudyReminderPolicy` 등 정책과 UseCase로 분리해 **UI 없이 로직만 단독으로 검증**합니다. ViewModel은 `transform(input:)`의 Output을, 학습 리포트 Reducer는 TCA `TestStore`로 상태 변화를 검증합니다.
@@ -466,7 +877,7 @@ flowchart LR
   - Core Data: 인메모리 저장소, 저장 실패를 일으키는 `FailingSaveContext`
   - 파일: 임시 디렉터리 `FileManager`
 
-#### 테스트 적용 범위
+### 테스트 적용 범위
 
 - 모든 코드를 테스트하기보다, **로직이 복잡하거나 사이드 이펙트의 영향 범위가 큰 부분**에 유닛 테스트를 집중했습니다.
   - 상태 전이: 펫 체력 감소·돌보기·사망·부활, 레벨·경험치 정책
@@ -474,15 +885,17 @@ flowchart LR
   - 이미지 처리: 크롭 영역 좌표 변환, EXIF 방향 8종, 검은 여백 합성, 업스케일 방지
   - 저장·동기화: 저장 실패 시 롤백·재시도, SQLite 재개방, Core Data 마이그레이션·백필 실패 후 재시도, 테마 이미지 교체 실패 시 기존 파일 보존
   - 비동기 흐름: 검색 응답 순서 보장·이전 요청 취소·페이지 재시도
+  - 화면 연결 (v2.3.0): ViewModel Output, Coordinator 화면 전환, DI 조립, 화면 모드 저장·적용
 - 단순한 UI 코드나 변경 영향이 작은 코드는 테스트 비용 대비 효과를 고려해 제외했습니다.
 
-#### 테스트 원칙
+### 테스트 원칙
 
 - **일관성 있는 결과**: 시각·타임존을 고정한 입력으로 같은 결과를 보장하고, 비동기 응답 순서는 `actor` 더블로 직접 제어합니다.
 - **독립성**: 테스트마다 새 인메모리 저장소와 임시 디렉터리를 만들어 실행 순서에 영향받지 않게 했습니다.
 - **사이드 이펙트 격리**: 경험치 적립·알림 예약·테마 저장 같은 외부 상태 변경은 Recording·Controlled 더블로 대체해, 호출 여부와 전달된 값을 검증합니다.
 
-#### 테스트 환경
+### 테스트 환경
 
-- 프레임워크: XCTest, TCA `TestStore`
-- 테스트 대상: Policy, UseCase, ViewModel, Reducer, Repository, ApiClient, 이미지 디코딩·렌더링
+- 프레임워크: XCTest, XCUITest, TCA `TestStore`
+- 테스트 대상: Policy, UseCase, ViewModel, Coordinator, Reducer, Repository, ApiClient, 이미지 디코딩·렌더링
+- CI: GitHub Actions + fastlane (`fastlane test`)
