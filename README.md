@@ -9,7 +9,9 @@
 **최소 지원 버전**: iOS 17.0<br>
 **다운로드**: [![App Store](https://img.shields.io/badge/App%20Store-다운로드-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/kr/app/%EB%8B%A8%EC%96%B4%EA%B3%A0%EC%B9%98/id6753820016)<br>
 
-## 주요 화면
+<br>
+
+# 주요 화면
 
 | 관심사 선택 | 배경 테마 선택 | 알 선택 |
 |:---:|:---:|:---:|
@@ -44,7 +46,9 @@
   </tbody>
 </table>
 
-## 주요 기능
+<br>
+
+# 주요 기능
 
 ### 온보딩 (Onboarding)
 
@@ -120,7 +124,9 @@
 
 ---
 
-## 아키텍처
+<br>
+
+# 아키텍처
 
 ### Clean Architecture + MVVM-C
 
@@ -207,88 +213,29 @@ stateDiagram-v2
 * 요청마다 ID를 발급해 늦게 도착한 이전 응답 무시
 * 앱 복귀·날짜 변경 시 `refresh`로 재조회
 
-## 기술 스택
+<br>
 
-### 핵심 프레임워크
+# 기술 스택
 
-| 기술 | 용도 |
-|---|---|
-| Swift 5 · iOS 17.0+ | 개발 언어 · 최소 지원 버전 |
-| UIKit | 기존 화면 구성 |
-| SwiftUI | 단어 카드 블러, 사진 테마·학습 리포트 화면 |
-| RxSwift / RxCocoa 6 | MVVM-C 화면의 Input/Output 바인딩 |
-| TCA 1.26 | SwiftUI 화면의 상태 관리 (`@Reducer` · `Store`) |
-| Combine | 사진 테마 저장 UseCase ↔ TCA Effect 연결 |
-| Swift Concurrency | 네트워크·리포트 조회 비동기 처리 |
+| 분류 | 기술 스택 |
+|:---:|:---|
+| **Language** | ![Swift](https://img.shields.io/badge/Swift-F05138?style=flat-square&logo=swift&logoColor=white) |
+| **UI Framework** | ![UIKit](https://img.shields.io/badge/UIKit-0D96F6?style=flat-square&logo=apple&logoColor=white) ![SwiftUI](https://img.shields.io/badge/SwiftUI-0D96F6?style=flat-square&logo=apple&logoColor=white) |
+| **Architecture** | ![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-555555?style=flat-square) ![MVVM-C](https://img.shields.io/badge/MVVM--C-3A6FD8?style=flat-square) ![Coordinator](https://img.shields.io/badge/Coordinator-6E7681?style=flat-square) ![TCA](https://img.shields.io/badge/TCA-7952B3?style=flat-square) |
+| **Reactive · Concurrency** | ![RxSwift](https://img.shields.io/badge/RxSwift-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![RxCocoa](https://img.shields.io/badge/RxCocoa-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![Combine](https://img.shields.io/badge/Combine-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Swift Concurrency](https://img.shields.io/badge/Swift%20Concurrency-F05138?style=flat-square&logo=swift&logoColor=white) |
+| **Database** | ![Core Data](https://img.shields.io/badge/Core%20Data-0D96F6?style=flat-square&logo=apple&logoColor=white) ![UserDefaults](https://img.shields.io/badge/UserDefaults-0D96F6?style=flat-square&logo=apple&logoColor=white) ![FileManager](https://img.shields.io/badge/FileManager-0D96F6?style=flat-square&logo=apple&logoColor=white) |
+| **Networking** | ![URLSession](https://img.shields.io/badge/URLSession-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Unsplash API](https://img.shields.io/badge/Unsplash%20API-000000?style=flat-square&logo=unsplash&logoColor=white) ![OpenWeatherMap API](https://img.shields.io/badge/OpenWeatherMap%20API-EB6E4B?style=flat-square) |
+| **Image · Media** | ![ImageIO](https://img.shields.io/badge/ImageIO-0D96F6?style=flat-square&logo=apple&logoColor=white) ![PhotosUI](https://img.shields.io/badge/PhotosUI-0D96F6?style=flat-square&logo=apple&logoColor=white) ![AVFoundation](https://img.shields.io/badge/AVFoundation-0D96F6?style=flat-square&logo=apple&logoColor=white) |
+| **Layout · UI** | ![SnapKit](https://img.shields.io/badge/SnapKit-5A3FD9?style=flat-square) ![DiffableDataSource](https://img.shields.io/badge/DiffableDataSource-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Swift Charts](https://img.shields.io/badge/Swift%20Charts-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Toast-Swift](https://img.shields.io/badge/Toast--Swift-6E7681?style=flat-square) ![IQKeyboardManager](https://img.shields.io/badge/IQKeyboardManager-6E7681?style=flat-square) |
+| **Apple Frameworks** | ![CoreLocation](https://img.shields.io/badge/CoreLocation-0D96F6?style=flat-square&logo=apple&logoColor=white) ![UserNotifications](https://img.shields.io/badge/UserNotifications-0D96F6?style=flat-square&logo=apple&logoColor=white) ![MessageUI](https://img.shields.io/badge/MessageUI-0D96F6?style=flat-square&logo=apple&logoColor=white) ![SafariServices](https://img.shields.io/badge/SafariServices-0D96F6?style=flat-square&logo=apple&logoColor=white) |
+| **Localization** | ![String Catalog](https://img.shields.io/badge/String%20Catalog-0D96F6?style=flat-square&logo=apple&logoColor=white) |
+| **Push · Monitoring** | ![Firebase Cloud Messaging](https://img.shields.io/badge/Firebase%20Cloud%20Messaging-FFCA28?style=flat-square&logo=firebase&logoColor=black) ![Firebase Crashlytics](https://img.shields.io/badge/Firebase%20Crashlytics-FFCA28?style=flat-square&logo=firebase&logoColor=black) ![OSLog](https://img.shields.io/badge/OSLog-0D96F6?style=flat-square&logo=apple&logoColor=white) |
+| **Test** | ![XCTest](https://img.shields.io/badge/XCTest-147EFB?style=flat-square&logo=xcode&logoColor=white) ![XCUITest](https://img.shields.io/badge/XCUITest-147EFB?style=flat-square&logo=xcode&logoColor=white) ![TCA TestStore](https://img.shields.io/badge/TCA%20TestStore-7952B3?style=flat-square) |
+| **CI/CD · Tooling** | ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) ![fastlane](https://img.shields.io/badge/fastlane-00F200?style=flat-square&logo=fastlane&logoColor=black) ![SwiftLint](https://img.shields.io/badge/SwiftLint-6E7681?style=flat-square) ![Swift Package Manager](https://img.shields.io/badge/Swift%20Package%20Manager-F05138?style=flat-square&logo=swift&logoColor=white) ![xcconfig](https://img.shields.io/badge/xcconfig-147EFB?style=flat-square&logo=xcode&logoColor=white) |
 
-### UI
+<br>
 
-| 기술 | 용도 |
-|---|---|
-| SnapKit | 코드 기반 오토레이아웃 |
-| DiffableDataSource | 단어 카드·단어장·테마 목록 |
-| Swift Charts | 학습 리포트 차트 |
-| PhotosUI | 사진첩 사진 선택 (`PhotosPicker`) |
-| Toast-Swift | 토스트 메시지 |
-| IQKeyboardManager | 키보드 가림 처리 |
-
-### 네트워킹
-
-| 기술 | 용도 |
-|---|---|
-| URLSession + async/await | API 요청 (`DefaultApiClient`) |
-| Router 패턴 (`Endpoint`) | API 요청 정의 |
-| Unsplash API | 배경 테마 사진 검색 |
-| OpenWeatherMap API | 현재 날씨 조회 |
-
-### 데이터 저장
-
-| 기술 | 용도 |
-|---|---|
-| Core Data | 단어·단어장·학습 기록·퀴즈 회차·펫 저장 |
-| UserDefaults | 사용자 설정·테마 파일명 |
-| FileManager | 배경 테마 이미지 로컬 파일 저장 |
-
-### 이미지 처리
-
-| 기술 | 용도 |
-|---|---|
-| ImageIO | 포맷 판별·다운샘플 디코딩 |
-| UIGraphicsImageRenderer | 사진 테마 크롭 합성 |
-| NSCache | 테마 검색 썸네일 메모리 캐시 |
-
-### 시스템 연동
-
-| 기술 | 용도 |
-|---|---|
-| CoreLocation | 날씨 조회용 현재 위치 |
-| AVFoundation | 단어 발음 TTS |
-| UserNotifications | 학습 알림 예약 |
-| MessageUI · SafariServices | 문의 메일 · 웹 페이지 열기 |
-| String Catalog | 한국어·일본어 현지화 (`Localizable.xcstrings`) |
-
-### 모니터링 · 푸시
-
-| 기술 | 용도 |
-|---|---|
-| Firebase Crashlytics | 크래시·비정상 오류 수집 |
-| Firebase Cloud Messaging | 원격 푸시 알림 |
-| OSLog (`AppLogger`) | 카테고리별 로그 |
-
-### 테스트 · 빌드 · 배포
-
-| 기술 | 용도 |
-|---|---|
-| XCTest | 단위 테스트 |
-| XCUITest | 온보딩·퀴즈·캐릭터·단어장·설정·사진 테마·학습 리포트 UI 테스트 |
-| TCA `TestStore` | Reducer 상태 변화 검증 |
-| Swift Package Manager | 의존성 관리 |
-| xcconfig | 개발·운영 스킴 분리 |
-| SwiftLint | 빌드 시 코드 규칙 검사 (SPM 빌드 플러그인) |
-| GitHub Actions | PR 단위 테스트 · 태그 push 배포 자동화 |
-| fastlane | 테스트 실행 · `match` 인증서 관리 · TestFlight 업로드 |
-
-## 주요 아키텍처 결정 사항
+# 주요 아키텍처 결정 사항
 
 1. **Clean Architecture + MVVM-C**: Domain이 UI·저장소를 모르게 분리하고, 화면 전환은 Coordinator가 전담
 2. **Input/Output 단일 진입점**: 모든 ViewModel이 `transform(input:) -> Output`을 구현, Output은 `Driver`·`Signal`로 노출해 메인 스레드 보장
@@ -303,7 +250,9 @@ stateDiagram-v2
 11. **시간·랜덤 값 주입**: `now`·`Calendar`·`RandomNumberGenerator`를 매개변수로 받아 테스트 결과 고정
 12. **태그 기반 CI/CD (v2.3.0)**: PR마다 단위 테스트, `v*.*.*` 태그 push로 TestFlight 자동 배포
 
-## 데이터 흐름
+<br>
+
+# 데이터 흐름
 
 ### 퀴즈 정답 → 경험치 적립
 
@@ -348,7 +297,9 @@ flowchart LR
     K --> L[화면 갱신]
 ```
 
-## 핵심 구현
+<br>
+
+# 핵심 구현
 
 ### 1. P2C 토너먼트 퀴즈 출제
 
@@ -828,7 +779,9 @@ static func seedIfNeeded(
 
 ![GitHub Actions + fastlane CI/CD 파이프라인](.github/images/ios-cicd-pipeline.png)
 
-## 테스트
+<br>
+
+# 테스트
 
 * 정책·UseCase·ViewModel·Coordinator·Reducer·DI 조립·영속화·네트워크·이미지 처리 단위 테스트 **347개**
 * 온보딩·단어 탐색·퀴즈·캐릭터·단어장·설정·사진 테마·학습 리포트 흐름 XCUITest **26개**
