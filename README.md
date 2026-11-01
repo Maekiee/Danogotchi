@@ -13,38 +13,17 @@
 
 # 주요 화면
 
-| 관심사 선택 | 배경 테마 선택 | 알 선택 |
-|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/cd975405-940f-4be7-83d5-fd3ebacd9b9c" width="260" alt="관심사 선택 온보딩 화면"> | <img src="https://github.com/user-attachments/assets/33212c73-f934-4c6f-b846-2b8775a741db" width="260" alt="배경 테마 선택 화면"> | <img src="https://github.com/user-attachments/assets/cc5aaf06-fcb3-4c61-95e5-70535c9cfe4a"  width="260" alt="알 선택 화면"> |
+| 관심사 선택 | 배경 테마 선택 | 알 선택 | 캐릭터 |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/cd975405-940f-4be7-83d5-fd3ebacd9b9c" width="200" alt="관심사 선택 온보딩 화면"> | <img src="https://github.com/user-attachments/assets/33212c73-f934-4c6f-b846-2b8775a741db" width="200" alt="배경 테마 선택 화면"> | <img src="https://github.com/user-attachments/assets/cc5aaf06-fcb3-4c61-95e5-70535c9cfe4a" width="200" alt="알 선택 화면"> | <img src="https://github.com/user-attachments/assets/b499d18b-52af-4c46-bb27-679fea5628e8" width="200" alt="캐릭터 관리 화면"> |
 
+| 단어 탐색 | 4지선다 퀴즈 | 학습 결과 | 학습 리포트 |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="200" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="200" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="200" alt="학습 결과 화면"> | <img src="https://github.com/user-attachments/assets/7124b35c-408f-43e0-af8a-c0f70e7b174e" width="200" alt="학습 리포트 화면"> |
 
-| 단어 탐색 | 4지선다 퀴즈 | 학습 결과 |
-|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="260" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="260" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="260" alt="학습 결과 화면"> |
-
-
-| 추천 단어장 | 단어 추가 | 단어장 상세 |
-|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="260" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="260" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/48a52402-3975-4a06-b7cb-db45dd116685" width="260" alt="단어장 상세 화면"> |
-
-<table>
-  <thead>
-    <tr>
-      <th align="center">캐릭터 화면</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center">
-        <img
-          src="https://github.com/user-attachments/assets/b499d18b-52af-4c46-bb27-679fea5628e8"
-          width="260"
-          alt="캐릭터 관리 화면"
-        >
-      </td>
-    </tr>
-  </tbody>
-</table>
+| 추천 단어장 | 단어 추가 | 단어장 상세 | 설정 |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="200" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="200" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/48a52402-3975-4a06-b7cb-db45dd116685" width="200" alt="단어장 상세 화면"> | <img src="https://github.com/user-attachments/assets/c49ba84a-53ad-45d5-a3b0-c61d6ee875a5" width="200" alt="설정 화면"> |
 
 <br>
 
