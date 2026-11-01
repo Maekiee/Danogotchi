@@ -235,20 +235,43 @@ stateDiagram-v2
 
 <br>
 
-# 주요 아키텍처 결정 사항
+# 아키텍처 결정 사항
 
-1. **Clean Architecture + MVVM-C**: Domain이 UI·저장소를 모르게 분리하고, 화면 전환은 Coordinator가 전담
-2. **Input/Output 단일 진입점**: 모든 ViewModel이 `transform(input:) -> Output`을 구현, Output은 `Driver`·`Signal`로 노출해 메인 스레드 보장
-3. **화면 단위 TCA 점진 도입**: 신규 SwiftUI 화면만 TCA로 만들고 기존 UIKit 화면은 MVVM-C 유지, 이동 목적지는 Coordinator가 결정
-4. **Rx ↔ async 경계를 ViewModel에 고정**: Domain·Data는 RxSwift 없이 `throws`·`async`·`AsyncStream`만 노출
-5. **Core Data 쓰기는 동기 `throws` 유지**: 저장 성공 이후에만 변경 신호를 방출하는 불변식 보장, 실패는 롤백 후 화면에 전달
-6. **UseCase는 저장소 접근이 있을 때만**: 상태 없는 규칙은 `PetStatePolicy` 같은 Policy로 분리해 형식적인 UseCase 지양
-7. **싱글턴 제거 + 기능별 DI 컨테이너 (v2.3.0)**: 상태를 가진 리포지토리만 앱 스코프로 공유, Coordinator는 자기 기능 컨테이너만 수신
-8. **타이머 없는 경과 시간 정산**: 백그라운드 작업 없이 화면 진입·앱 복귀 시점에 마지막 정산 이후 시간을 한 번에 계산
-9. **외부 이미지 라이브러리 제거**: 내려받는 크기·포맷·디코딩 시점을 직접 제어해 전송량과 메모리 절감
-10. **새 파일 저장 후 이전 파일 정리**: 다운로드·저장이 실패해도 기존 배경 보존
-11. **시간·랜덤 값 주입**: `now`·`Calendar`·`RandomNumberGenerator`를 매개변수로 받아 테스트 결과 고정
-12. **태그 기반 CI/CD (v2.3.0)**: PR마다 단위 테스트, `v*.*.*` 태그 push로 TestFlight 자동 배포
+### Clean Architecture + MVVM-C
+- Domain이 UI·저장소를 모르게 분리하고, 화면 전환은 Coordinator가 전담
+
+### Input/Output 단일 진입점
+- 모든 ViewModel이 `transform(input:) -> Output`을 구현, Output은 `Driver`·`Signal`로 노출해 메인 스레드 보장
+
+### 화면 단위 TCA 점진 도입
+- 신규 SwiftUI 화면만 TCA로 만들고 기존 UIKit 화면은 MVVM-C 유지, 이동 목적지는 Coordinator가 결정
+
+### Rx ↔ async 경계를 ViewModel에 고정
+- Domain·Data는 RxSwift 없이 `throws`·`async`·`AsyncStream`만 노출
+
+### Core Data 쓰기는 동기 `throws` 유지
+- 저장 성공 이후에만 변경 신호를 방출하는 불변식 보장, 실패는 롤백 후 화면에 전달
+
+### UseCase는 저장소 접근이 있을 때만
+- 상태 없는 규칙은 `PetStatePolicy` 같은 Policy로 분리해 형식적인 UseCase 지양
+
+### 싱글턴 제거 + 기능별 DI 컨테이너 (v2.3.0)
+- 상태를 가진 리포지토리만 앱 스코프로 공유, Coordinator는 자기 기능 컨테이너만 수신
+
+### 타이머 없는 경과 시간 정산
+- 백그라운드 작업 없이 화면 진입·앱 복귀 시점에 마지막 정산 이후 시간을 한 번에 계산
+
+### 외부 이미지 라이브러리 제거
+- 내려받는 크기·포맷·디코딩 시점을 직접 제어해 전송량과 메모리 절감
+
+### 새 파일 저장 후 이전 파일 정리
+- 다운로드·저장이 실패해도 기존 배경 보존
+
+### 시간·랜덤 값 주입
+- `now`·`Calendar`·`RandomNumberGenerator`를 매개변수로 받아 테스트 결과 고정
+
+### 태그 기반 CI/CD (v2.3.0)
+- PR마다 단위 테스트, `v*.*.*` 태그 push로 TestFlight 자동 배포
 
 <br>
 
