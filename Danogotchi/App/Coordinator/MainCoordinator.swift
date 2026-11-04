@@ -54,17 +54,19 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     }
     
     // 학습 리포트
-    func exploreVocabDidTapStudyReport() {
+    func didTapCalendarButton() {
         let nav = UINavigationController()
-        let feature = container.makeStudyReportFeature(
+        let feature = container.makeCalendarFeature(
             onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
             onNavigate: { [weak self, weak nav] destination in
                 guard let nav else { return }
                 self?.showStudyReport(destination, in: nav)
             }
         )
-        let store = Store(initialState: StudyReportFeature.State()) { feature }
-        let vc = UIHostingController(rootView: StudyReportView(store: store))
+        
+        let store = Store(initialState: CalendarFeature.State() ) { feature }
+        let vc = UIHostingController(rootView: CalendarView(store: store))
+        
         nav.setViewControllers([vc], animated: false)
         nav.modalPresentationStyle = .fullScreen
         navigationController.present(nav, animated: true)
@@ -72,6 +74,15 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
 
     private func showStudyReport(_ destination: StudyReportDestination, in nav: UINavigationController) {
         switch destination {
+        case .history:
+            let feature = container.makeStudyReportFeature(
+                onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
+                onNavigate: {[weak self, weak nav] destination in
+                    guard let nav else { return }
+                    self?.showStudyReport(destination, in: nav)
+                })
+            let store = Store(initialState: StudyReportFeature.State()) { feature }
+            nav.pushViewController(UIHostingController(rootView: StudyReportView(store: store)), animated: true)
         case let .words(list):
             let view = StudyReportWordListView(
                 list: list,

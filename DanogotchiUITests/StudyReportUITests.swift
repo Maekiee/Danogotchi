@@ -118,6 +118,9 @@ final class StudyReportUITests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
         app.launchEnvironment["STUDY_REPORT_UI_TEST"] = scenario
         app.launch()
+        // 진입 화면은 캘린더, 학습 기록은 push로 연다
+        XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
+        app.buttons["학습 기록"].tap()
         XCTAssertTrue(app.navigationBars["학습 리포트"].waitForExistence(timeout: 10))
         return app
     }

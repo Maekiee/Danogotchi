@@ -24,7 +24,7 @@ extension UITestingSupport {
         let coordinator = MainCoordinator(container: container.makeMainDIContainer(), navigationController: navigation)
         window.rootViewController = navigation
         window.makeKeyAndVisible()
-        DispatchQueue.main.async { coordinator.exploreVocabDidTapStudyReport() }
+        DispatchQueue.main.async { coordinator.didTapCalendarButton() }
         return coordinator
     }
 

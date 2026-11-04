@@ -84,4 +84,12 @@ final class MainDIContainer {
             onNavigate: onNavigate
         )
     }
+    
+    // MARK: 캘린더
+    func makeCalendarFeature(
+        onClose: @escaping @MainActor @Sendable () -> Void,
+        onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
+    ) -> CalendarFeature {
+        return CalendarFeature(onClose: onClose, onNavigate: onNavigate)
+    }
 }

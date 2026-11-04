@@ -4,11 +4,10 @@ import RxSwift
 import SnapKit
 import UIKit
 
-
 protocol ExploreVocabViewControllerDelegate: AnyObject {
     func exploreVocabDidTapLibrary()
     func exploreVocabDidTapSetting()
-    func exploreVocabDidTapStudyReport()
+    func didTapCalendarButton()
     func exploreVocabDidTapStartQuiz(quizData: QuizData)
     func didTapCharacter()
 }
@@ -16,7 +15,6 @@ protocol ExploreVocabViewControllerDelegate: AnyObject {
 final class ExploreVocabViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let viewModel: ExploreVocabViewModel
-    private var bookTitle = ""
     weak var delegate: ExploreVocabViewControllerDelegate?
 
     private enum Section {
@@ -42,7 +40,11 @@ final class ExploreVocabViewController: BaseViewController {
     /// 배경 디코딩 상한(화면 세로 픽셀). 조립부가 넘긴다
     private let backgroundMaxPixelSize: Int
 
-    init(viewModel: ExploreVocabViewModel, backgroundMaxPixelSize: Int) {
+    init(
+        viewModel: ExploreVocabViewModel,
+        backgroundMaxPixelSize: Int
+    )
+    {
         self.viewModel = viewModel
         self.backgroundMaxPixelSize = backgroundMaxPixelSize
         super.init(nibName: nil, bundle: nil)
@@ -63,8 +65,8 @@ final class ExploreVocabViewController: BaseViewController {
         button.accessibilityIdentifier = "explore.setting"
         return button
     }()
-    private let studyReportButton: CircularIconButton = {
-        let button = CircularIconButton(systemName: "chart.line.uptrend.xyaxis")
+    private let calendarButton: CircularIconButton = {
+        let button = CircularIconButton(systemName: "calendar")
         button.accessibilityIdentifier = "explore.studyReport"
         return button
     }()
@@ -121,7 +123,6 @@ final class ExploreVocabViewController: BaseViewController {
         return view
     }()
 
-    private let deleteWordTrigger = PublishRelay<Vocab>()
     private let saveVocabRelay = PublishRelay<VocabDisplayInfo>()
     private let speakTappedRelay = PublishRelay<String>()
     /// 셀이 재사용될 때마다 다시 구독하므로 최신 값을 보관한다
@@ -150,7 +151,7 @@ final class ExploreVocabViewController: BaseViewController {
             collectionView,
             showLibraryVCButton,
             settingTabButton,
-            studyReportButton,
+            calendarButton,
             startLearningButton,
             openCharacterButton,
             
@@ -188,7 +189,7 @@ final class ExploreVocabViewController: BaseViewController {
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space20)
         }
 
-        studyReportButton.snp.makeConstraints { make in
+        calendarButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(AppSpacing.space8)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
         }
@@ -278,9 +279,9 @@ extension ExploreVocabViewController {
                 owner.delegate?.exploreVocabDidTapSetting()
             }.disposed(by: disposeBag)
 
-        studyReportButton.rx.tap
+        calendarButton.rx.tap
             .bind(with: self) { owner, _ in
-                owner.delegate?.exploreVocabDidTapStudyReport()
+                owner.delegate?.didTapCalendarButton()
             }.disposed(by: disposeBag)
         
         openCharacterButton.rx.tap
@@ -305,7 +306,7 @@ extension ExploreVocabViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<
             MainWordCardCollectionViewCell, LoopItem
-        > { [weak self] cell, indexPath, loopItem in
+        > { [weak self] cell, _, loopItem in
             guard let self = self else { return }
             let item = loopItem.info
             cell.disposeBag = DisposeBag()
@@ -421,12 +422,8 @@ extension ExploreVocabViewController {
         )
 
         let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .none
-        
-        let config = UICollectionViewCompositionalLayoutConfiguration()
-        config.scrollDirection = .vertical
 
-        let layout = UICollectionViewCompositionalLayout(section: section, configuration: config)
+        let layout = UICollectionViewCompositionalLayout(section: section)
 
         return layout
     }

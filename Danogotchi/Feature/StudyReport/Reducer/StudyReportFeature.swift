@@ -10,6 +10,7 @@ struct StudyReportWordList: Equatable, Sendable {
 }
 
 enum StudyReportDestination: Equatable, Sendable {
+    case history
     case words(StudyReportWordList)
     case word(StudyReport.Word, StudyReportWordList)
 }

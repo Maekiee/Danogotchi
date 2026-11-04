@@ -25,6 +25,7 @@ final class AppDIContainerTests: XCTestCase {
         _ = main.makeExploreVocabViewModel()
         _ = main.makeCharacterViewModel()
         _ = main.makeStudyReportFeature(onClose: {}, onNavigate: { _ in })
+        _ = main.makeCalendarFeature(onClose: {}, onNavigate: { _ in })
 
         let library = main.makeLibraryDIContainer()
         _ = library.makeLibraryViewModel()

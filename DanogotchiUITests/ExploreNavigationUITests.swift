@@ -10,13 +10,34 @@ final class ExploreNavigationUITests: XCTestCase {
     func test_studyReportOpensFromExploreAndCloseReturns() {
         let app = XCUIApplication.launchMainFlow()
         app.buttons["explore.studyReport"].tap()
+        XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
+        app.buttons["학습 기록"].tap()
         XCTAssertTrue(app.navigationBars["학습 리포트"].waitForExistence(timeout: 10))
         // 학습 기록이 없는 첫 설치 상태
         XCTAssertTrue(app.staticTexts["첫 학습을 기다리고 있어요"].waitForExistence(timeout: 5))
 
+        // push된 화면의 ✕로 모달 전체가 닫힌다
         app.buttons["학습 리포트 닫기"].tap()
         XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.navigationBars["학습 리포트"].exists)
+        XCTAssertFalse(app.navigationBars["캘린더"].exists)
+    }
+
+    func test_historyBackReturnsToCalendarAndCalendarCloseReturns() {
+        let app = XCUIApplication.launchMainFlow()
+        app.buttons["explore.studyReport"].tap()
+        XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
+        app.buttons["학습 기록"].tap()
+        let history = app.navigationBars["학습 리포트"]
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+
+        // 시스템 뒤로가기는 모달을 닫지 않고 캘린더로 돌아간다
+        history.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(history.waitForDisappearance())
+        XCTAssertTrue(app.navigationBars["캘린더"].exists)
+
+        app.buttons["학습 리포트 닫기"].tap()
+        XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.navigationBars["캘린더"].exists)
     }
 
     func test_speakButtonOnVisibleCardIsTappable() throws {
