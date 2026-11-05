@@ -90,6 +90,24 @@ final class MainDIContainer {
         onClose: @escaping @MainActor @Sendable () -> Void,
         onNavigate: @escaping @MainActor @Sendable (StudyStatsDestination) -> Void
     ) -> CalendarFeature {
-        return CalendarFeature(onClose: onClose, onNavigate: onNavigate)
+        #if DEBUG
+        if let feature = UITestingSupport.makeCalendarFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
+            return feature
+        }
+        #endif
+        let repository = DefaultLearningHistoryRepository(
+            context: dependencies.coreDataStack.viewContext,
+            statsContext: dependencies.coreDataStack.newBackgroundContext()
+        )
+        let useCase: FetchCalendarUseCase = DefaultFetchCalendarUseCase(repository: repository)
+        return CalendarFeature(
+            fetch: { now, calendar in try await useCase.execute(now: now, calendar: calendar) },
+            reportError: { [reportError = dependencies.reportError] error in
+                AppLogger.database.error("캘린더 조회 실패: \(String(describing: error), privacy: .public)")
+                reportError(error)
+            },
+            onClose: onClose,
+            onNavigate: onNavigate
+        )
     }
 }
