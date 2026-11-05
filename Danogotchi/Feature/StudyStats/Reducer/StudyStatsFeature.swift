@@ -12,7 +12,7 @@ struct StudyStatsWordList: Equatable, Sendable {
 enum StudyStatsDestination: Equatable, Sendable {
     case stats
     case words(StudyStatsWordList)
-    case word(VocabStats, StudyStatsWordList)
+    case word(VocabStats, isDaily: Bool)
 }
 
 @Reducer
@@ -128,8 +128,7 @@ struct StudyStatsFeature {
             case let .wordTapped(id):
                 guard let stats = state.stats, state.loadStatus == .idle,
                       let word = stats.words.first(where: { $0.id == id }) else { return .none }
-                let list = wordList(stats, period: state.period)
-                return .run { _ in await onNavigate(.word(word, list)) }
+                return .run { _ in await onNavigate(.word(word, isDaily: false)) }
             case .closeButtonTapped:
                 // 로딩만 취소, 오류 상태는 유지
                 if state.isLoading { state.loadStatus = .idle }

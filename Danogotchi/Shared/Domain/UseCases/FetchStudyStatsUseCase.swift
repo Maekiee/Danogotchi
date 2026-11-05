@@ -22,8 +22,8 @@ final class DefaultFetchStudyStatsUseCase: FetchStudyStatsUseCase {
         let all = records.histories.filter { $0.createAt <= now }
         let start = period.start(now: now, calendar: calendar)
         let rows = all.filter { row in start.map { row.createAt >= $0 } ?? true }
-        let allWords = words(from: all)
-        let selectedWords = period == .all ? allWords : words(from: rows)
+        let allWords = all.vocabStats()
+        let selectedWords = period == .all ? allWords : rows.vocabStats()
         let days = Set(all.map { calendar.startOfDay(for: $0.createAt) })
         let firstDate = all.map(\.createAt).min() ?? now
         let periodStart = start ?? calendar.startOfDay(for: firstDate)
@@ -65,23 +65,6 @@ final class DefaultFetchStudyStatsUseCase: FetchStudyStatsUseCase {
             topics: categories(rows, kind: .topic), parts: parts,
             mistakesByPart: categories(rows, kind: .partOfSpeech)
         )
-    }
-
-    private static func words(from rows: [LearningHistory]) -> [VocabStats] {
-        let grouped = Dictionary(grouping: rows, by: \.statsWordId)
-        let words = grouped.compactMap { id, answers -> VocabStats? in
-            guard let latest = answers.max(by: {
-                $0.createAt == $1.createAt ? $0.id.uuidString < $1.id.uuidString : $0.createAt < $1.createAt
-            }) else { return nil }
-            return VocabStats(id: id, snapshot: latest, total: answers.count,
-                              correct: answers.filter(\.isCorrect).count)
-        }
-        return words.sorted {
-            if $0.correct != $1.correct { return $0.correct > $1.correct }
-            if $0.accuracy != $1.accuracy { return $0.accuracy > $1.accuracy }
-            if $0.snapshot.createAt != $1.snapshot.createAt { return $0.snapshot.createAt > $1.snapshot.createAt }
-            return $0.id.uuidString < $1.id.uuidString
-        }
     }
 
     private static func categories(_ rows: [LearningHistory], kind: StudyStatsCategoryKind) -> [StudyStats.Category] {

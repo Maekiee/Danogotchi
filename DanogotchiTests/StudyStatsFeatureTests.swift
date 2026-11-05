@@ -139,12 +139,12 @@ final class StudyStatsFeatureTests: XCTestCase {
         await store.finish()
         guard case let .words(all) = destinations.value[0],
               case let .words(week) = destinations.value[1],
-              case let .word(detail, scope) = destinations.value[2] else { return XCTFail("Expected routes") }
+              case let .word(detail, isDaily) = destinations.value[2] else { return XCTFail("Expected routes") }
         XCTAssertEqual(all.start, stats.allStart)
         XCTAssertEqual(all.words.first?.total, 2)
         XCTAssertEqual(week.period, .week)
         XCTAssertEqual(week.words.first?.total, 1)
-        XCTAssertEqual(scope, week)
+        XCTAssertFalse(isDaily)
         XCTAssertEqual(detail.id, word.id)
     }
 

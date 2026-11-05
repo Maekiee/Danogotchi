@@ -19,6 +19,7 @@ struct CalendarView: View {
                             Image(systemName: "chevron.right")
                         }
                     }.accessibilityLabel("학습 통계")
+                    .accessibilityIdentifier("calendar.stats")
                 }
             }
     }

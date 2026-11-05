@@ -120,7 +120,7 @@ final class StudyStatsUITests: XCTestCase {
         app.launch()
         // 진입 화면은 캘린더, 학습 통계는 push로 연다
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
-        app.buttons["학습 통계"].tap()
+        app.buttons["calendar.stats"].tap()
         XCTAssertTrue(app.navigationBars["학습 통계"].waitForExistence(timeout: 10))
         return app
     }

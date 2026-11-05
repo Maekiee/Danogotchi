@@ -11,7 +11,7 @@ final class ExploreNavigationUITests: XCTestCase {
         let app = XCUIApplication.launchMainFlow()
         app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
-        app.buttons["학습 통계"].tap()
+        app.buttons["calendar.stats"].tap()
         XCTAssertTrue(app.navigationBars["학습 통계"].waitForExistence(timeout: 10))
         // 학습 기록이 없는 첫 설치 상태
         XCTAssertTrue(app.staticTexts["첫 학습을 기다리고 있어요"].waitForExistence(timeout: 5))
@@ -26,7 +26,7 @@ final class ExploreNavigationUITests: XCTestCase {
         let app = XCUIApplication.launchMainFlow()
         app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
-        app.buttons["학습 통계"].tap()
+        app.buttons["calendar.stats"].tap()
         let stats = app.navigationBars["학습 통계"]
         XCTAssertTrue(stats.waitForExistence(timeout: 10))
 

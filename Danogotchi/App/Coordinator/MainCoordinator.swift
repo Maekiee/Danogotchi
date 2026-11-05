@@ -88,7 +88,7 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
                 list: list,
                 onSelect: { [weak self, weak nav] word in
                     guard let nav else { return }
-                    self?.showStudyStats(.word(word, list), in: nav)
+                    self?.showStudyStats(.word(word, isDaily: false), in: nav)
                 },
                 onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) }
             )
