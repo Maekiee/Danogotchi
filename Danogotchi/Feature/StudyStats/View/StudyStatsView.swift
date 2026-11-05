@@ -9,15 +9,15 @@ struct StudyStatsView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: AppSpacing.space16) {
-                if let stats = store.stats {
+                if let stats = store.stats, stats.totalAnswers > 0 {
                     StudyStatsCard {
                         let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20))
                             : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
                         layout {
-                            Button { store.send(.wordsTapped(.all)) } label: {
+                            Button { store.send(.wordsTapped) } label: {
                                 VStack(alignment: .leading, spacing: AppSpacing.space8) {
                                     Text("누적 학습 단어 ›").font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
-                                    Text("\(stats.allWords.count)개")
+                                    Text("\(stats.words.count)개")
                                         .font(StudyStatsStyle.font(AppFont.display, relativeTo: .largeTitle)).monospacedDigit()
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -33,57 +33,8 @@ struct StudyStatsView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityElement(children: .combine)
                         }
-                        Divider()
-                        VStack(alignment: .leading, spacing: AppSpacing.space12) {
-                            Text("\(stats.streak)일 연속 학습")
-                                .font(StudyStatsStyle.font(AppFont.headline, relativeTo: .headline))
-                            LazyVGrid(
-                                columns: Array(repeating: GridItem(.flexible()), count: dynamicTypeSize.isAccessibilitySize ? 4 : 7)
-                            ) {
-                                ForEach(stats.recentDays) { day in
-                                    let date = StudyStatsStyle.date(
-                                        day.date, calendar: stats.calendar, format: String(localized: "M월 d일")
-                                    )
-                                    VStack(spacing: AppSpacing.space8) {
-                                        Text(StudyStatsStyle.date(day.date, calendar: stats.calendar, format: "E"))
-                                        Image(systemName: day.hasStudied ? "checkmark.circle.fill" : "minus.circle")
-                                            .foregroundStyle(day.hasStudied ? Color(AppColor.primary) : Color(AppColor.gray45))
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .accessibilityElement(children: .ignore)
-                                    .accessibilityLabel(
-                                        "\(date), \(day.hasStudied ? String(localized: "학습함") : String(localized: "학습 안 함"))"
-                                    )
-                                }
-                            }
-                            .font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
-                        }
-                    }
-                    let periodLayout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 12))
-                        : AnyLayout(HStackLayout(spacing: 12))
-                    periodLayout {
-                        ForEach([
-                            (String(localized: "최근 7일 학습 단어"), stats.weekWordCount),
-                            (String(localized: "이번 달 학습 단어"), stats.monthWordCount)
-                        ], id: \.0) { item in
-                            StudyStatsCard {
-                                VStack(alignment: .leading, spacing: AppSpacing.space8) {
-                                    Text(item.0).font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
-                                    Text("\(item.1)개")
-                                        .font(StudyStatsStyle.font(AppFont.display, relativeTo: .largeTitle)).monospacedDigit()
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .accessibilityElement(children: .combine)
-                            }
-                        }
                     }
                 }
-
-                Picker("분석 기간", selection: Binding(get: { store.period }, set: { store.send(.periodChanged($0)) })) {
-                    ForEach(StudyStatsPeriod.allCases, id: \.self) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .accessibilityIdentifier("studyStats.period")
 
                 switch store.loadStatus {
                 // 첫 진입만 스켈레톤, 이후 로딩은 이전 통계 유지
@@ -118,81 +69,69 @@ struct StudyStatsView: View {
                                 )
                             }
                         } else {
-                            if stats.periodAnswerCount == 0 {
-                                StudyStatsSelection(text: String(localized: "선택한 기간에 학습 기록이 없어요. 다른 기간을 선택해 보세요."))
-                            }
-
                             StudyStatsCard {
-                                StudyStatsHeading(title: String(localized: "학습한 단어 수"))
-                                StudyStatsActivityChart(stats: stats, selected: Binding(
-                                    get: { store.selectedActivity }, set: { store.send(.activitySelected($0)) }
-                                ))
-                            }
-
-                            StudyStatsCard {
-                                StudyStatsHeading(title: String(localized: "회차별 정답률"))
-                                StudyStatsSessionChart(stats: stats, selected: Binding(
-                                    get: { store.selectedSession }, set: { store.send(.sessionSelected($0)) }
-                                ))
-                            }
-
-                            StudyStatsCard {
-                                StudyStatsHeading(title: String(localized: "주제별 학습 비중"))
-                                StudyStatsCategoryBars(categories: stats.topics, kind: .topic, selected: store.selectedTopic) {
+                                StudyStatsHeading(title: String(localized: "주제별 학습 비중"), subtitle: String(localized: "풀이 횟수 기준"))
+                                StudyStatsDonutChart(categories: stats.topics, kind: .topic, selected: store.selectedTopic) {
                                     store.send(.topicSelected($0))
                                 }
                             }
 
                             StudyStatsCard {
-                                StudyStatsHeading(title: String(localized: "학습 단어의 품사"))
-                                StudyStatsPartsChart(stats: stats, selected: store.selectedPart) { store.send(.partSelected($0)) }
-                                    .id(stats.period)
+                                StudyStatsHeading(title: String(localized: "학습 단어의 품사"), subtitle: String(localized: "고유 단어 기준"))
+                                StudyStatsDonutChart(categories: stats.parts, kind: .partOfSpeech, selected: store.selectedPart) {
+                                    store.send(.partSelected($0))
+                                }
                             }
 
                             StudyStatsCard {
-                                StudyStatsHeading(title: String(localized: "많이 틀린 종류"))
-                                // subtitle: "오답 횟수 기준"
+                                let threshold = store.mistakeThreshold
+                                let words = stats.mistakeWords.filter(threshold.contains)
+                                StudyStatsHeading(
+                                    title: String(localized: "많이 틀린 단어"),
+                                    subtitle: String(localized: "정답률 \(threshold.rawValue)% 이하 · \(words.count)개")
+                                )
                                 Picker(
-                                    "오답 분류",
-                                    selection: Binding(get: { store.mistakeKind }, set: { store.send(.mistakeKindChanged($0)) })
+                                    "정답률 기준",
+                                    selection: Binding(get: { store.mistakeThreshold }, set: { store.send(.mistakeThresholdChanged($0)) })
                                 ) {
-                                    ForEach(StudyStatsCategoryKind.allCases, id: \.self) { Text($0.title).tag($0) }
-                                }.pickerStyle(.segmented)
-                                    .accessibilityIdentifier("studyStats.mistakeKind")
-                                StudyStatsCategoryBars(
-                                    categories: store.mistakeKind == .topic ? stats.topics : stats.mistakesByPart,
-                                    kind: store.mistakeKind, showsMistakes: true, selected: store.selectedMistake
-                                ) { store.send(.mistakeSelected($0)) }
-                            }
-
-                            StudyStatsCard {
-                                HStack(alignment: .top) {
-                                    StudyStatsHeading(title: String(localized: "많이 맞힌 단어"))
-                                    Spacer()
-                                    Button("전체 보기") { store.send(.wordsTapped(store.period)) }
-                                        .font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
-                                        .frame(minHeight: 44)
+                                    ForEach(StudyStatsMistakeThreshold.allCases, id: \.self) { Text("\($0.rawValue)% 이하").tag($0) }
                                 }
-                                if stats.words.isEmpty {
-                                    StudyStatsSelection(text: String(localized: "선택한 기간에 학습한 단어가 없어요."))
-                                }
-                                ForEach(Array(stats.words.prefix(5).enumerated()), id: \.element.id) { index, word in
-                                    Button { store.send(.wordTapped(word.id)) } label: {
-                                        HStack(alignment: .top, spacing: AppSpacing.space12) {
-                                            Text("\(index + 1)").foregroundStyle(.secondary)
-                                            VStack(alignment: .leading, spacing: AppSpacing.space8) {
-                                                HStack { Text(word.snapshot.wordSnapshot).bold(); Spacer(); Text("\(word.correct)회") }
-                                                Text(word.snapshot.meaningSnapshot).foregroundStyle(.secondary)
-                                                StudyStatsHorizontalBar(value: word.correct, maximum: stats.words.first?.correct ?? 1)
-                                                Text("정답률 \(StudyStatsStyle.percent(word.correct, word.total)) · 전체 \(word.total)회 풀이")
+                                .pickerStyle(.segmented)
+                                .accessibilityIdentifier("studyStats.mistakeThreshold")
+                                if words.isEmpty {
+                                    StudyStatsSelection(text: String(localized: "정답률 \(threshold.rawValue)% 이하인 단어가 없어요"))
+                                } else {
+                                    LazyVStack(spacing: 0) {
+                                        ForEach(Array(words.enumerated()), id: \.element.id) { index, word in
+                                            if index > 0 { Divider() }
+                                            Button { store.send(.wordTapped(word.id)) } label: {
+                                                VStack(alignment: .leading, spacing: AppSpacing.space4) {
+                                                    HStack(alignment: .firstTextBaseline, spacing: AppSpacing.space8) {
+                                                        Text(word.snapshot.wordSnapshot)
+                                                            .font(StudyStatsStyle.font(AppFont.bodyEmphasis))
+                                                        Spacer(minLength: 0)
+                                                        Text("오답 \(word.total - word.correct)회")
+                                                            .font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
+                                                            .monospacedDigit()
+                                                    }
+                                                    Group {
+                                                        Text(word.snapshot.meaningSnapshot)
+                                                        let percent = StudyStatsStyle.percent(word.correct, word.total)
+                                                        Text("정답률 \(percent) · 전체 \(word.total)회 풀이").monospacedDigit()
+                                                    }
                                                     .font(StudyStatsStyle.font(AppFont.footnote, relativeTo: .footnote))
-                                                    .foregroundStyle(.secondary)
+                                                    .foregroundStyle(Color(AppColor.textSecondary))
+                                                }
+                                                .padding(.top, index == 0 ? 0 : AppSpacing.space12)
+                                                .padding(.bottom, index == words.count - 1 ? 0 : AppSpacing.space12)
+                                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                                                .contentShape(Rectangle())
                                             }
-                                        }.contentShape(Rectangle())
+                                            .buttonStyle(.plain)
+                                            .accessibilityElement(children: .combine)
+                                            .accessibilityIdentifier("studyStats.mistake.\(index + 1)")
+                                        }
                                     }
-                                    .buttonStyle(.plain)
-                                    .accessibilityIdentifier("studyStats.rank.\(index + 1)")
-                                    .accessibilityElement(children: .combine)
                                 }
                             }
                         }

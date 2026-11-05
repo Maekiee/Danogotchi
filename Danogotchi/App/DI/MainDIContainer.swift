@@ -73,8 +73,8 @@ final class MainDIContainer {
         )
         let useCase: FetchStudyStatsUseCase = DefaultFetchStudyStatsUseCase(repository: repository)
         return StudyStatsFeature(
-            fetch: { period, now, calendar in
-                try await useCase.execute(period: period, now: now, calendar: calendar)
+            fetch: { now, calendar in
+                try await useCase.execute(now: now, calendar: calendar)
             },
             reportError: { [reportError = dependencies.reportError] error in
                 AppLogger.database.error("학습 통계 조회 실패: \(String(describing: error), privacy: .public)")

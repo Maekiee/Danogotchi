@@ -41,37 +41,26 @@ extension UITestingSupport {
         let examples = [
             StudyStatsExample(word: "journey", meaning: "여행", topic: "travel", part: "noun", total: 342, correct: 267),
             StudyStatsExample(word: "efficient", meaning: "효율적인", topic: "business", part: "adj", total: 5, correct: 5),
-            StudyStatsExample(word: "prepare", meaning: "준비하다", topic: "life", part: "verb", total: 4, correct: 0),
+            StudyStatsExample(word: "prepare", meaning: "준비하다", topic: "life", part: "verb", total: 4, correct: 1),
             StudyStatsExample(word: "moment", meaning: "순간", topic: "unknown", part: "noun", total: 3, correct: 2),
             StudyStatsExample(word: "happily", meaning: "행복하게", topic: "unknown", part: "adv", total: 2, correct: 1)
         ]
-        // 회차 차트용: journey 첫 풀이(정답)·prepare 마지막 풀이(오답)를 각각 1문제 회차로 묶음
-        let sessions = [QuizSession(id: UUID(), startedAt: now, questionCount: 1),
-                        QuizSession(id: UUID(), startedAt: now, questionCount: 1)]
-        let sessionRows = ["journey": (index: 0, id: sessions[0].id), "prepare": (index: 3, id: sessions[1].id)]
         let histories = examples.flatMap { example in
             let wordID = UUID()
             return (0..<example.total).map { index in
-                var history = LearningHistory(
+                LearningHistory(
                     id: UUID(), vocabId: wordID, isCorrect: index < example.correct,
                     createAt: now.addingTimeInterval(-Double(example.total - index)),
                     wordSnapshot: example.word, meaningSnapshot: example.meaning,
                     topicSnapshot: example.topic, partOfSpeechSnapshot: example.part
                 )
-                if let row = sessionRows[example.word], row.index == index {
-                    history.sessionId = row.id
-                    history.questionIndex = 0
-                }
-                return history
             }
         }
-        let records = scenario == "empty"
-            ? StudyStatsRecords(histories: [], sessions: [])
-            : StudyStatsRecords(histories: histories, sessions: sessions)
+        let records = StudyStatsRecords(histories: scenario == "empty" ? [] : histories, sessions: [])
         return StudyStatsFeature(
-            fetch: { period, now, calendar in
+            fetch: { now, calendar in
                 if scenario == "error" { throw CocoaError(.fileReadUnknown) }
-                return try DefaultFetchStudyStatsUseCase.aggregate(records, period: period, now: now, calendar: calendar)
+                return DefaultFetchStudyStatsUseCase.aggregate(records, now: now, calendar: calendar)
             },
             reportError: { _ in }, onClose: onClose, onNavigate: onNavigate,
             now: { now }, calendar: { fixedCalendar }

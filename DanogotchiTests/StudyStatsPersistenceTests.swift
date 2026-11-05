@@ -120,9 +120,10 @@ final class StudyStatsPersistenceTests: XCTestCase {
         let earned = try useCase.record(makeQuizAnswer(word))
         context.failsSave = true
         XCTAssertThrowsError(try useCase.commit(earned: earned, correct: 1, total: 1))
+        // 집계는 회차를 쓰지 않으므로 저장소가 읽은 회차·답변으로 확인
         let records = try await history.fetchStatsRecords()
-        let stats = try DefaultFetchStudyStatsUseCase.aggregate(records, period: .all, now: Date(), calendar: statsCalendar())
-        XCTAssertEqual(stats.sessions.count, 1)
+        XCTAssertEqual(records.sessions.count, 1)
+        XCTAssertEqual(records.histories.count, 1)
         context.failsSave = false
         _ = try useCase.commit(earned: earned, correct: 1, total: 1)
         XCTAssertEqual(try history.fetchAllHistory().count, 1)

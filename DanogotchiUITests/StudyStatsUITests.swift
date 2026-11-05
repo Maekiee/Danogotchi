@@ -1,42 +1,44 @@
-import UIKit
 import XCTest
 
 @MainActor
 final class StudyStatsUITests: XCTestCase {
-    func test_mistakesHideEmptySummaryAndKeepCountsAndSelection() {
+    func test_mistakeThresholdFiltersRowsAndShowsEmptyGuidance() {
         let app = launchStats()
-        let travel = app.buttons["studyStats.mistakes.travel"]
-        scrollTo(travel, in: app)
-        XCTAssertTrue(travel.label.contains("전체 342회"))
-        XCTAssertTrue(travel.label.contains("22%"))
-        XCTAssertTrue(travel.label.contains("정답 267회, 오답 75회"))
+        let first = app.buttons["studyStats.mistake.1"]
+        scrollTo(first, in: app)
+        for text in ["prepare", "오답 3회", "준비하다", "정답률 25%", "전체 4회 풀이"] {
+            XCTAssertTrue(first.label.contains(text), "첫 행에서 \(text) 누락: \(first.label)")
+        }
+        // 오답 횟수가 같으면 정답률이 낮은 단어가 위
+        for (rank, word) in [(2, "happily"), (3, "moment")] {
+            let row = app.buttons["studyStats.mistake.\(rank)"]
+            scrollTo(row, in: app)
+            XCTAssertTrue(row.label.hasPrefix(word), "\(rank)번째 행: \(row.label)")
+        }
+        XCTAssertFalse(app.buttons["studyStats.mistake.4"].exists)
+        XCTAssertTrue(app.staticTexts["정답률 70% 이하 · 3개"].exists)
+        attachScreen(app, name: "mistakes-70")
 
-        let empty = app.buttons["studyStats.mistakes.emotion"]
-        scrollTo(empty, in: app)
-        XCTAssertFalse(empty.label.contains("전체 0회"))
-        XCTAssertFalse(empty.label.contains("오답률"))
-        XCTAssertFalse(empty.label.contains("0 정답"))
-        empty.tap()
-        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "감정 · 오답 0")).firstMatch.exists)
-        attachScreen(app, name: "mistakes-zero-and-counts")
-
-        let picker = app.segmentedControls["studyStats.mistakeKind"]
+        let picker = app.segmentedControls["studyStats.mistakeThreshold"]
         scrollBackTo(picker, in: app)
-        picker.buttons["품사"].tap()
-        XCTAssertTrue(app.buttons["studyStats.mistakes.noun"].waitForExistence(timeout: 5))
+        picker.buttons["40% 이하"].tap()
+        XCTAssertTrue(app.staticTexts["정답률 40% 이하 · 1개"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["studyStats.mistake.1"].label.hasPrefix("prepare"))
+        XCTAssertFalse(app.buttons["studyStats.mistake.2"].exists)
+
+        picker.buttons["20% 이하"].tap()
+        XCTAssertTrue(app.staticTexts["정답률 20% 이하인 단어가 없어요"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["정답률 20% 이하 · 0개"].exists)
+        XCTAssertFalse(app.buttons["studyStats.mistake.1"].exists)
+        attachScreen(app, name: "mistakes-20-empty")
     }
 
-    func test_ranksAndDetailSheetDismissal() {
+    func test_mistakeRowOpensDetailSheetWithLifetimeCounts() {
         let app = launchStats()
-        for rank in 1...5 {
-            let row = app.buttons["studyStats.rank.\(rank)"]
-            scrollTo(row, in: app)
-            XCTAssertNotNil(row.label.range(of: "^\(rank)\\b", options: .regularExpression))
-        }
-        let first = app.buttons["studyStats.rank.1"]
-        scrollBackTo(first, in: app)
+        let first = app.buttons["studyStats.mistake.1"]
+        scrollTo(first, in: app)
         first.tap()
-        assertDetail(in: app)
+        assertDetail(in: app, texts: ["prepare", "준비하다", "동사", "25%", "정답 1 / 4회"])
         attachScreen(app, name: "word-detail-sheet")
         dismissDetail(in: app)
         XCTAssertTrue(first.waitForExistence(timeout: 5))
@@ -46,6 +48,7 @@ final class StudyStatsUITests: XCTestCase {
         let app = launchStats()
         let allWords = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "누적 학습 단어")).firstMatch
         XCTAssertTrue(allWords.waitForExistence(timeout: 5))
+        XCTAssertTrue(allWords.label.contains("5개"))
         allWords.tap()
         XCTAssertTrue(app.navigationBars["학습한 단어"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["전체 학습 단어"].exists)
@@ -53,56 +56,41 @@ final class StudyStatsUITests: XCTestCase {
         let journey = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "journey")).firstMatch
         XCTAssertTrue(journey.exists)
         journey.tap()
-        assertDetail(in: app)
+        assertDetail(in: app, texts: ["journey", "여행", "명사", "78%", "정답 267 / 342회"])
         dismissDetail(in: app)
         XCTAssertTrue(app.navigationBars["학습한 단어"].waitForExistence(timeout: 5))
     }
 
-    func test_activityChartShowsBarForStudiedDay() {
+    func test_topicSelectionStaysAfterTouchEndsAndLegendSelects() {
         let app = launchStats()
         dismissNotificationPermissionIfNeeded()
-        let selection = app.staticTexts["9월 29일 · 학습한 단어 5개"]
-        scrollTo(selection, in: app)
-        let bar = chartMark("2026년 9월 29일", value: "학습 단어 5개", in: app)
-        XCTAssertTrue(bar.waitForExistence(timeout: 5))
-        attachScreen(app, name: "activity-chart")
-        // 접근성 frame은 막대 폭이 0이어도 잡히므로 실제 막대 색 픽셀로 판정
-        XCTAssertTrue(containsBarColor(bar.screenshot().image), "막대가 화면에 그려지지 않음: \(bar.frame)")
-    }
-
-    func test_activitySelectionStaysAfterTouchEnds() {
-        let app = launchStats()
-        dismissNotificationPermissionIfNeeded()
-        scrollTo(app.staticTexts["9월 29일 · 학습한 단어 5개"], in: app)
-        press(chartMark("2026년 9월 27일", value: "학습 단어 0개", in: app))
-        XCTAssertTrue(app.staticTexts["9월 27일 · 학습한 단어 0개"].waitForExistence(timeout: 3))
-        attachScreen(app, name: "activity-selection")
-    }
-
-    func test_sessionSelectionStaysAfterTouchEnds() {
-        let app = launchStats()
-        dismissNotificationPermissionIfNeeded()
-        scrollTo(app.staticTexts["9.29 11:59 · 정답 0 / 1문제 · 0%"], in: app)
-        // 선 차트의 점은 개별 접근성 요소가 없어 플롯 좌표로 누름 (회차 2개 중 첫 회차 = 왼쪽 1/4 지점)
-        press(app.otherElements["studyStats.sessionChart"].firstMatch, dx: 0.25)
-        XCTAssertTrue(app.staticTexts["9.29 11:54 · 정답 1 / 1문제 · 100%"].waitForExistence(timeout: 3))
-        attachScreen(app, name: "session-selection")
+        // 다음 카드 제목이 보이면 주제 카드 전체가 화면 안에 있음
+        scrollTo(app.staticTexts["학습 단어의 품사"], in: app)
+        press(chartMark("여행", value: "342회, 96%", in: app))
+        XCTAssertTrue(app.staticTexts["여행 · 342회 · 전체의 96%"].waitForExistence(timeout: 3))
+        let business = app.buttons["studyStats.topics.business"]
+        business.tap()
+        XCTAssertTrue(app.staticTexts["비즈니스 · 5회 · 전체의 1%"].waitForExistence(timeout: 3))
+        XCTAssertTrue(business.isSelected)
+        // 0회 주제도 범례에 남음
+        XCTAssertTrue(app.buttons["studyStats.topics.emotion"].label.contains("0회"))
+        attachScreen(app, name: "topic-selection")
     }
 
     func test_partSelectionStaysAfterTouchEnds() {
         let app = launchStats()
         dismissNotificationPermissionIfNeeded()
-        // 다음 카드 제목이 보이면 품사 카드 전체가 화면 안에 있음
-        scrollTo(app.staticTexts["많이 틀린 종류"], in: app)
+        scrollTo(app.staticTexts["많이 틀린 단어"], in: app)
         press(chartMark("명사", value: "2개, 40%", in: app))
-        XCTAssertTrue(app.staticTexts["명사 · 2 / 5개 · 40%"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["명사 · 2개 · 전체의 40%"].waitForExistence(timeout: 3))
         attachScreen(app, name: "part-selection")
     }
 
-    func test_emptyStatsKeepsEmptyGuidance() {
+    func test_emptyStatsShowsOnlyEmptyGuidance() {
         let app = launchStats(scenario: "empty")
         XCTAssertTrue(app.staticTexts["첫 학습을 기다리고 있어요"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["많이 틀린 종류"].exists)
+        XCTAssertFalse(app.staticTexts["많이 틀린 단어"].exists)
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "누적 학습 단어")).firstMatch.exists)
     }
 
     func test_failedStatsKeepsRetryControl() {
@@ -133,10 +121,10 @@ final class StudyStatsUITests: XCTestCase {
         XCTAssertTrue(element.isHittable)
     }
 
-    private func assertDetail(in app: XCUIApplication) {
+    private func assertDetail(in app: XCUIApplication, texts: [String]) {
         let card = app.descendants(matching: .any).matching(identifier: "studyStats.detailCard").firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 5))
-        for text in ["journey", "여행", "명사", "78%", "정답 267 / 342회"] {
+        for text in texts {
             XCTAssertTrue(card.label.contains(text), "단어 카드에서 \(text) 누락: \(card.label)")
         }
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "주제 ·")).firstMatch.exists)
@@ -172,22 +160,9 @@ final class StudyStatsUITests: XCTestCase {
     }
 
     // 짧은 탭은 스크롤 뷰 안 차트 선택 제스처로 인식되지 않아 길게 누른 뒤 뗌
-    private func press(_ element: XCUIElement, dx: CGFloat = 0.5) {
+    private func press(_ element: XCUIElement) {
         XCTAssertTrue(element.waitForExistence(timeout: 5))
-        element.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: 0.5)).press(forDuration: 0.5)
-    }
-
-    // 막대 색(ocean) 계열 픽셀 존재 여부 — 흰 카드·회색 축은 R과 B 차이가 거의 없음
-    private func containsBarColor(_ image: UIImage) -> Bool {
-        guard let cgImage = image.cgImage else { return false }
-        let width = cgImage.width, height = cgImage.height
-        var pixels = [UInt8](repeating: 0, count: width * height * 4)
-        pixels.withUnsafeMutableBytes { buffer in
-            CGContext(data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
-                      space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)?
-                .draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-        }
-        return stride(from: 0, to: pixels.count, by: 4).contains { Int(pixels[$0 + 2]) - Int(pixels[$0]) > 40 }
+        element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 0.5)
     }
 
     private func dismissDetail(in app: XCUIApplication) {
