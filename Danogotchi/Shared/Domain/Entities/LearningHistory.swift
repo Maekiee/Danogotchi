@@ -13,5 +13,5 @@ struct LearningHistory: Hashable, Sendable {
     var sessionId: UUID?
     var questionIndex: Int?
 
-    var reportWordId: UUID { sourceWordIdSnapshot ?? vocabId }
+    var statsWordId: UUID { sourceWordIdSnapshot ?? vocabId }
 }

@@ -1355,12 +1355,12 @@
         }
       }
     },
-    "완료한 회차가 아직 없어요.\n회차별 기록은 리포트 기능 도입 이후 모든 답변을 저장한 퀴즈부터 표시돼요." : {
+    "완료한 회차가 아직 없어요.\n회차별 기록은 통계 기능 도입 이후 모든 답변을 저장한 퀴즈부터 표시돼요." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "まだ完了した回がありません。\n回ごとの記録は、レポート機能の導入後にすべての解答を保存したクイズから表示されます。"
+            "value" : "まだ完了した回がありません。\n回ごとの記録は、統計機能の導入後にすべての解答を保存したクイズから表示されます。"
           }
         }
       }
@@ -1958,9 +1958,6 @@
         }
       }
     },
-    "학습 기록" : {
-
-    },
     "학습 기록을 불러오고 있어요." : {
       "localizations" : {
         "ja" : {
@@ -1997,26 +1994,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "学習単語の品詞"
-          }
-        }
-      }
-    },
-    "학습 리포트" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学習レポート"
-          }
-        }
-      }
-    },
-    "학습 리포트 닫기" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学習レポートを閉じる"
           }
         }
       }
@@ -2067,6 +2044,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "学習を中断"
+          }
+        }
+      }
+    },
+    "학습 통계" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習統計"
+          }
+        }
+      }
+    },
+    "학습 통계 닫기" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習統計を閉じる"
           }
         }
       }

@@ -2,16 +2,16 @@ import UIKit
 import XCTest
 
 @MainActor
-final class StudyReportUITests: XCTestCase {
+final class StudyStatsUITests: XCTestCase {
     func test_mistakesHideEmptySummaryAndKeepCountsAndSelection() {
-        let app = launchReport()
-        let travel = app.buttons["studyReport.mistakes.travel"]
+        let app = launchStats()
+        let travel = app.buttons["studyStats.mistakes.travel"]
         scrollTo(travel, in: app)
         XCTAssertTrue(travel.label.contains("전체 342회"))
         XCTAssertTrue(travel.label.contains("22%"))
         XCTAssertTrue(travel.label.contains("정답 267회, 오답 75회"))
 
-        let empty = app.buttons["studyReport.mistakes.emotion"]
+        let empty = app.buttons["studyStats.mistakes.emotion"]
         scrollTo(empty, in: app)
         XCTAssertFalse(empty.label.contains("전체 0회"))
         XCTAssertFalse(empty.label.contains("오답률"))
@@ -20,20 +20,20 @@ final class StudyReportUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "감정 · 오답 0")).firstMatch.exists)
         attachScreen(app, name: "mistakes-zero-and-counts")
 
-        let picker = app.segmentedControls["studyReport.mistakeKind"]
+        let picker = app.segmentedControls["studyStats.mistakeKind"]
         scrollBackTo(picker, in: app)
         picker.buttons["품사"].tap()
-        XCTAssertTrue(app.buttons["studyReport.mistakes.noun"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["studyStats.mistakes.noun"].waitForExistence(timeout: 5))
     }
 
     func test_ranksAndDetailSheetDismissal() {
-        let app = launchReport()
+        let app = launchStats()
         for rank in 1...5 {
-            let row = app.buttons["studyReport.rank.\(rank)"]
+            let row = app.buttons["studyStats.rank.\(rank)"]
             scrollTo(row, in: app)
             XCTAssertNotNil(row.label.range(of: "^\(rank)\\b", options: .regularExpression))
         }
-        let first = app.buttons["studyReport.rank.1"]
+        let first = app.buttons["studyStats.rank.1"]
         scrollBackTo(first, in: app)
         first.tap()
         assertDetail(in: app)
@@ -43,7 +43,7 @@ final class StudyReportUITests: XCTestCase {
     }
 
     func test_allWordsListKeepsSubtitleAndOpensSameDetailCard() {
-        let app = launchReport()
+        let app = launchStats()
         let allWords = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "누적 학습 단어")).firstMatch
         XCTAssertTrue(allWords.waitForExistence(timeout: 5))
         allWords.tap()
@@ -59,7 +59,7 @@ final class StudyReportUITests: XCTestCase {
     }
 
     func test_activityChartShowsBarForStudiedDay() {
-        let app = launchReport()
+        let app = launchStats()
         dismissNotificationPermissionIfNeeded()
         let selection = app.staticTexts["9월 29일 · 학습한 단어 5개"]
         scrollTo(selection, in: app)
@@ -71,7 +71,7 @@ final class StudyReportUITests: XCTestCase {
     }
 
     func test_activitySelectionStaysAfterTouchEnds() {
-        let app = launchReport()
+        let app = launchStats()
         dismissNotificationPermissionIfNeeded()
         scrollTo(app.staticTexts["9월 29일 · 학습한 단어 5개"], in: app)
         press(chartMark("2026년 9월 27일", value: "학습 단어 0개", in: app))
@@ -80,17 +80,17 @@ final class StudyReportUITests: XCTestCase {
     }
 
     func test_sessionSelectionStaysAfterTouchEnds() {
-        let app = launchReport()
+        let app = launchStats()
         dismissNotificationPermissionIfNeeded()
         scrollTo(app.staticTexts["9.29 11:59 · 정답 0 / 1문제 · 0%"], in: app)
         // 선 차트의 점은 개별 접근성 요소가 없어 플롯 좌표로 누름 (회차 2개 중 첫 회차 = 왼쪽 1/4 지점)
-        press(app.otherElements["studyReport.sessionChart"].firstMatch, dx: 0.25)
+        press(app.otherElements["studyStats.sessionChart"].firstMatch, dx: 0.25)
         XCTAssertTrue(app.staticTexts["9.29 11:54 · 정답 1 / 1문제 · 100%"].waitForExistence(timeout: 3))
         attachScreen(app, name: "session-selection")
     }
 
     func test_partSelectionStaysAfterTouchEnds() {
-        let app = launchReport()
+        let app = launchStats()
         dismissNotificationPermissionIfNeeded()
         // 다음 카드 제목이 보이면 품사 카드 전체가 화면 안에 있음
         scrollTo(app.staticTexts["많이 틀린 종류"], in: app)
@@ -99,29 +99,29 @@ final class StudyReportUITests: XCTestCase {
         attachScreen(app, name: "part-selection")
     }
 
-    func test_emptyReportKeepsEmptyGuidance() {
-        let app = launchReport(scenario: "empty")
+    func test_emptyStatsKeepsEmptyGuidance() {
+        let app = launchStats(scenario: "empty")
         XCTAssertTrue(app.staticTexts["첫 학습을 기다리고 있어요"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["많이 틀린 종류"].exists)
     }
 
-    func test_failedReportKeepsRetryControl() {
-        let app = launchReport(scenario: "error")
+    func test_failedStatsKeepsRetryControl() {
+        let app = launchStats(scenario: "error")
         XCTAssertTrue(app.buttons["다시 시도"].waitForExistence(timeout: 5))
         app.buttons["다시 시도"].tap()
         XCTAssertTrue(app.buttons["다시 시도"].waitForExistence(timeout: 5))
     }
 
-    private func launchReport(scenario: String = "normal") -> XCUIApplication {
+    private func launchStats(scenario: String = "normal") -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments = ["-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
-        app.launchEnvironment["STUDY_REPORT_UI_TEST"] = scenario
+        app.launchEnvironment["STUDY_STATS_UI_TEST"] = scenario
         app.launch()
-        // 진입 화면은 캘린더, 학습 기록은 push로 연다
+        // 진입 화면은 캘린더, 학습 통계는 push로 연다
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
-        app.buttons["학습 기록"].tap()
-        XCTAssertTrue(app.navigationBars["학습 리포트"].waitForExistence(timeout: 10))
+        app.buttons["학습 통계"].tap()
+        XCTAssertTrue(app.navigationBars["학습 통계"].waitForExistence(timeout: 10))
         return app
     }
 
@@ -134,7 +134,7 @@ final class StudyReportUITests: XCTestCase {
     }
 
     private func assertDetail(in app: XCUIApplication) {
-        let card = app.descendants(matching: .any).matching(identifier: "studyReport.detailCard").firstMatch
+        let card = app.descendants(matching: .any).matching(identifier: "studyStats.detailCard").firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 5))
         for text in ["journey", "여행", "명사", "78%", "정답 267 / 342회"] {
             XCTAssertTrue(card.label.contains(text), "단어 카드에서 \(text) 누락: \(card.label)")
@@ -191,7 +191,7 @@ final class StudyReportUITests: XCTestCase {
     }
 
     private func dismissDetail(in app: XCUIApplication) {
-        let sheet = app.scrollViews["studyReport.wordDetail"]
+        let sheet = app.scrollViews["studyStats.wordDetail"]
         sheet.swipeDown()
         let dismissed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: sheet)
         XCTAssertEqual(XCTWaiter.wait(for: [dismissed], timeout: 5), .completed)

@@ -1,6 +1,7 @@
 import CoreData
 
-enum StudyReportMigration {
+enum StudyStatsMigration {
+    // 이미 저장된 키라 이름 변경 대상 아님
     private static let backfillVersionKey = "com.maekie.Danogotchi.studyReportBackfillVersion"
     private static let backfillVersion = 1
 
@@ -12,7 +13,7 @@ enum StudyReportMigration {
         guard !destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: metadata) else { return }
         guard let sourceModel = NSManagedObjectModel.mergedModel(
             from: [Bundle(for: LearningHistoryEntity.self)], forStoreMetadata: metadata
-        ) else { throw StudyReportDataError.invalidRecord }
+        ) else { throw StudyStatsDataError.invalidRecord }
 
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: sourceModel)
         let store = try coordinator.addPersistentStore(
@@ -36,7 +37,7 @@ enum StudyReportMigration {
         var ids = Set<UUID>()
         for record in records {
             guard let id = record.value(forKey: "id") as? UUID, ids.insert(id).inserted else {
-                throw StudyReportDataError.invalidIdentifiers
+                throw StudyStatsDataError.invalidIdentifiers
             }
         }
     }
@@ -45,7 +46,7 @@ enum StudyReportMigration {
         try context.performAndWait {
             guard let coordinator = context.persistentStoreCoordinator,
                   let store = coordinator.persistentStores.first else {
-                throw StudyReportDataError.invalidRecord
+                throw StudyStatsDataError.invalidRecord
             }
             let version = coordinator.metadata(for: store)[backfillVersionKey] as? Int ?? 0
             guard version < backfillVersion else { return }
@@ -88,7 +89,7 @@ enum StudyReportMigration {
                     guard let word = history.vocab, let id = word.id,
                           let name = word.word, let meaning = word.meaning,
                           history.createAt != nil else {
-                        throw StudyReportDataError.invalidRecord
+                        throw StudyStatsDataError.invalidRecord
                     }
                     history.sourceWordIdSnapshot = word.sourceWordId
                     history.wordSnapshot = name

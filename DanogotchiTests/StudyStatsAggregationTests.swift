@@ -1,9 +1,9 @@
 import XCTest
 @testable import Danogotchi
 
-final class StudyReportAggregationTests: XCTestCase {
-    private let calendar = reportCalendar()
-    private let now = reportDate()
+final class StudyStatsAggregationTests: XCTestCase {
+    private let calendar = statsCalendar()
+    private let now = statsDate()
 
     func test_largeSyntheticHistoryAggregationPerformance() {
         let words = makeQuizWords(500)
@@ -13,9 +13,9 @@ final class StudyReportAggregationTests: XCTestCase {
         }
         measure {
             do {
-                let report = try aggregate(rows)
-                XCTAssertEqual(report.totalAnswers, 30_000)
-                XCTAssertEqual(report.allWords.count, 500)
+                let stats = try aggregate(rows)
+                XCTAssertEqual(stats.totalAnswers, 30_000)
+                XCTAssertEqual(stats.allWords.count, 500)
             } catch { XCTFail("\(error)") }
         }
     }
@@ -30,63 +30,63 @@ final class StudyReportAggregationTests: XCTestCase {
             makeQuizAnswer(words[2], isCorrect: false, createAt: now).history
         ]
         rows[4].partOfSpeechSnapshot = "verb"
-        let report = try aggregate(rows)
-        XCTAssertEqual(report.words.count, 3)
-        XCTAssertEqual(report.totalAnswers, 5)
-        XCTAssertEqual(report.accuracy, 0.6)
-        XCTAssertEqual(report.parts.first { $0.id == "noun" }?.total, 2)
-        XCTAssertEqual(report.parts.first { $0.id == "verb" }?.total, 1)
-        XCTAssertEqual(report.parts.reduce(0) { $0 + $1.total }, report.words.count)
+        let stats = try aggregate(rows)
+        XCTAssertEqual(stats.words.count, 3)
+        XCTAssertEqual(stats.totalAnswers, 5)
+        XCTAssertEqual(stats.accuracy, 0.6)
+        XCTAssertEqual(stats.parts.first { $0.id == "noun" }?.total, 2)
+        XCTAssertEqual(stats.parts.first { $0.id == "verb" }?.total, 1)
+        XCTAssertEqual(stats.parts.reduce(0) { $0 + $1.total }, stats.words.count)
     }
 
     func test_originalAndCopyShareIdentityButLatestSnapshotRepresentsWord() throws {
         let word = makeQuizWords(1)[0]
-        let original = makeQuizAnswer(word, createAt: reportDate(2026, 9, 25)).history
+        let original = makeQuizAnswer(word, createAt: statsDate(2026, 9, 25)).history
         var copy = LearningHistory(id: UUID(), vocabId: UUID(), isCorrect: false, createAt: now)
         copy.sourceWordIdSnapshot = word.id
         copy.wordSnapshot = "changed"
         copy.meaningSnapshot = "수정한 뜻"
         copy.partOfSpeechSnapshot = "verb"
-        let report = try aggregate([copy, original])
-        XCTAssertEqual(report.words.count, 1)
-        XCTAssertEqual(report.words.first?.snapshot.meaningSnapshot, "수정한 뜻")
-        XCTAssertEqual(report.words.first?.total, 2)
-        XCTAssertEqual(report.parts.first { $0.id == "verb" }?.total, 1)
-        XCTAssertEqual(report.activity.reduce(0) { $0 + $1.count }, 2)
-        XCTAssertEqual(report.weekWordCount, 1)
-        XCTAssertEqual(report.allStart, calendar.startOfDay(for: original.createAt))
+        let stats = try aggregate([copy, original])
+        XCTAssertEqual(stats.words.count, 1)
+        XCTAssertEqual(stats.words.first?.snapshot.meaningSnapshot, "수정한 뜻")
+        XCTAssertEqual(stats.words.first?.total, 2)
+        XCTAssertEqual(stats.parts.first { $0.id == "verb" }?.total, 1)
+        XCTAssertEqual(stats.activity.reduce(0) { $0 + $1.count }, 2)
+        XCTAssertEqual(stats.weekWordCount, 1)
+        XCTAssertEqual(stats.allStart, calendar.startOfDay(for: original.createAt))
         XCTAssertEqual([copy, original].statsByVocab().count, 2)
     }
 
     func test_lastSnapshotIsChosenWithinSelectedPeriodAndUnknownsRemainIncluded() throws {
         let word = makeQuizWords(1)[0]
-        var old = makeQuizAnswer(word, createAt: reportDate(2026, 8, 20)).history
+        var old = makeQuizAnswer(word, createAt: statsDate(2026, 8, 20)).history
         old.partOfSpeechSnapshot = "noun"
         var latest = makeQuizAnswer(word, createAt: now).history
         latest.partOfSpeechSnapshot = "new-part"
         latest.topicSnapshot = "myBook"
-        let report = try aggregate([latest, old])
-        XCTAssertEqual(report.words.count, 1)
-        XCTAssertEqual(report.words.first?.total, 1)
-        XCTAssertEqual(report.totalAnswers, 2)
-        XCTAssertEqual(report.parts.first { $0.id == "unknown" }?.total, 1)
-        XCTAssertEqual(report.topics.first { $0.id == "unknown" }?.total, 1)
+        let stats = try aggregate([latest, old])
+        XCTAssertEqual(stats.words.count, 1)
+        XCTAssertEqual(stats.words.first?.total, 1)
+        XCTAssertEqual(stats.totalAnswers, 2)
+        XCTAssertEqual(stats.parts.first { $0.id == "unknown" }?.total, 1)
+        XCTAssertEqual(stats.topics.first { $0.id == "unknown" }?.total, 1)
     }
 
     func test_completedSessionUsesAllAnswersBeforeFilteringByCompletionDate() throws {
         let word = makeQuizWords(1)[0]
-        let started = reportDate(2026, 9, 19, 23)
+        let started = statsDate(2026, 9, 19, 23)
         let session = QuizSession(id: UUID(), startedAt: started, questionCount: 2)
         let rows = [
             makeQuizAnswer(word, createAt: started, session: session, questionIndex: 0).history,
-            makeQuizAnswer(word, isCorrect: false, createAt: reportDate(2026, 9, 20, 1), session: session, questionIndex: 1).history
+            makeQuizAnswer(word, isCorrect: false, createAt: statsDate(2026, 9, 20, 1), session: session, questionIndex: 1).history
         ]
-        let report = try aggregate(rows, sessions: [session])
-        XCTAssertEqual(report.sessions.count, 1)
-        XCTAssertEqual(report.sessions.first?.total, 2)
-        XCTAssertEqual(report.sessions.first?.accuracy, 0.5)
-        XCTAssertEqual(report.periodAnswerCount, 1)
-        XCTAssertEqual(report.totalAnswers, 2)
+        let stats = try aggregate(rows, sessions: [session])
+        XCTAssertEqual(stats.sessions.count, 1)
+        XCTAssertEqual(stats.sessions.first?.total, 2)
+        XCTAssertEqual(stats.sessions.first?.accuracy, 0.5)
+        XCTAssertEqual(stats.periodAnswerCount, 1)
+        XCTAssertEqual(stats.totalAnswers, 2)
     }
 
     func test_sessionRequiresEveryValidIndexAndRejectsConflictingAnswers() throws {
@@ -101,7 +101,7 @@ final class StudyReportAggregationTests: XCTestCase {
         }
         second.questionIndex = 0
         XCTAssertThrowsError(try aggregate([first, second], sessions: [session])) {
-            XCTAssertEqual($0 as? StudyReportDataError, .conflictingAnswer)
+            XCTAssertEqual($0 as? StudyStatsDataError, .conflictingAnswer)
         }
         let empty = QuizSession(id: UUID(), startedAt: now, questionCount: 0)
         XCTAssertTrue(try aggregate([], sessions: [empty]).sessions.isEmpty)
@@ -120,17 +120,17 @@ final class StudyReportAggregationTests: XCTestCase {
                                            session: session, questionIndex: question).history)
             }
         }
-        let report = try aggregate(rows, sessions: sessions)
-        XCTAssertEqual(report.sessions.count, 10)
-        XCTAssertEqual(report.sessions.first?.id, sessions[2].id)
-        XCTAssertEqual(report.totalAnswers, 14)
-        XCTAssertEqual(report.totalCorrect, 12)
-        XCTAssertEqual(report.accuracy, 12.0 / 14.0)
+        let stats = try aggregate(rows, sessions: sessions)
+        XCTAssertEqual(stats.sessions.count, 10)
+        XCTAssertEqual(stats.sessions.first?.id, sessions[2].id)
+        XCTAssertEqual(stats.totalAnswers, 14)
+        XCTAssertEqual(stats.totalCorrect, 12)
+        XCTAssertEqual(stats.accuracy, 12.0 / 14.0)
     }
 
     func test_streakAllowsUnstudiedTodayAndResetsAfterMissingYesterday() throws {
         let word = makeQuizWords(1)[0]
-        var rows = [24, 25].map { makeQuizAnswer(word, createAt: reportDate(2026, 9, $0)).history }
+        var rows = [24, 25].map { makeQuizAnswer(word, createAt: statsDate(2026, 9, $0)).history }
         XCTAssertEqual(try aggregate(rows).streak, 2)
         rows.removeLast()
         XCTAssertEqual(try aggregate(rows).streak, 0)
@@ -141,29 +141,29 @@ final class StudyReportAggregationTests: XCTestCase {
     func test_calendarBoundariesLeapDayAndDSTHaveSevenBuckets() throws {
         let word = makeQuizWords(1)[0]
         for zone in ["Asia/Seoul", "America/Los_Angeles"] {
-            let calendar = reportCalendar(zone)
-            for date in [reportDate(2024, 3, 1, calendar: calendar), reportDate(2026, 3, 9, calendar: calendar),
-                         reportDate(2027, 1, 1, calendar: calendar)] {
-                let start = try XCTUnwrap(StudyReportPeriod.week.start(now: date, calendar: calendar))
+            let calendar = statsCalendar(zone)
+            for date in [statsDate(2024, 3, 1, calendar: calendar), statsDate(2026, 3, 9, calendar: calendar),
+                         statsDate(2027, 1, 1, calendar: calendar)] {
+                let start = try XCTUnwrap(StudyStatsPeriod.week.start(now: date, calendar: calendar))
                 let rows = [makeQuizAnswer(word, createAt: start).history,
                             makeQuizAnswer(word, createAt: start.addingTimeInterval(-1)).history,
                             makeQuizAnswer(word, createAt: date.addingTimeInterval(1)).history]
-                let report = try DefaultFetchStudyReportUseCase.aggregate(.init(histories: rows, sessions: []), period: .week, now: date, calendar: calendar)
-                XCTAssertEqual(report.activity.count, 7)
-                XCTAssertEqual(report.periodAnswerCount, 1)
-                XCTAssertEqual(report.totalAnswers, 2)
+                let stats = try DefaultFetchStudyStatsUseCase.aggregate(.init(histories: rows, sessions: []), period: .week, now: date, calendar: calendar)
+                XCTAssertEqual(stats.activity.count, 7)
+                XCTAssertEqual(stats.periodAnswerCount, 1)
+                XCTAssertEqual(stats.totalAnswers, 2)
             }
         }
     }
 
     func test_timezoneAndMonthSelectionUseQueryCalendar() throws {
         let word = makeQuizWords(1)[0]
-        let boundary = reportDate(2026, 10, 1, 0)
+        let boundary = statsDate(2026, 10, 1, 0)
         let rows = [makeQuizAnswer(word, createAt: boundary.addingTimeInterval(-1)).history]
-        let seoul = try DefaultFetchStudyReportUseCase.aggregate(.init(histories: rows, sessions: []), period: .month,
-                                                         now: boundary, calendar: reportCalendar())
-        let la = try DefaultFetchStudyReportUseCase.aggregate(.init(histories: rows, sessions: []), period: .month,
-                                                      now: boundary, calendar: reportCalendar("America/Los_Angeles"))
+        let seoul = try DefaultFetchStudyStatsUseCase.aggregate(.init(histories: rows, sessions: []), period: .month,
+                                                         now: boundary, calendar: statsCalendar())
+        let la = try DefaultFetchStudyStatsUseCase.aggregate(.init(histories: rows, sessions: []), period: .month,
+                                                      now: boundary, calendar: statsCalendar("America/Los_Angeles"))
         XCTAssertEqual(seoul.monthWordCount, 0)
         XCTAssertEqual(la.monthWordCount, 1)
         let all = try aggregate(rows, period: .all)
@@ -182,13 +182,13 @@ final class StudyReportAggregationTests: XCTestCase {
         XCTAssertEqual(legacy.words.map(\.id), ids)
         XCTAssertTrue(legacy.sessions.isEmpty)
         var old = rows[0]
-        old = LearningHistory(id: old.id, vocabId: old.vocabId, isCorrect: true, createAt: reportDate(2026, 7, 31))
+        old = LearningHistory(id: old.id, vocabId: old.vocabId, isCorrect: true, createAt: statsDate(2026, 7, 31))
         let monthly = try aggregate([old, rows[1]], period: .all)
         XCTAssertEqual(monthly.activity.map(\.count), [1, 0, 1])
     }
 
     private func aggregate(_ rows: [LearningHistory], sessions: [QuizSession] = [],
-                           period: StudyReportPeriod = .week) throws -> StudyReport {
-        try DefaultFetchStudyReportUseCase.aggregate(.init(histories: rows, sessions: sessions), period: period, now: now, calendar: calendar)
+                           period: StudyStatsPeriod = .week) throws -> StudyStats {
+        try DefaultFetchStudyStatsUseCase.aggregate(.init(histories: rows, sessions: sessions), period: period, now: now, calendar: calendar)
     }
 }

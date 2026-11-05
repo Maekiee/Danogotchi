@@ -24,7 +24,7 @@ struct QuizAnswer: Equatable, Sendable {
     }
 }
 
-enum StudyReportDataError: Error, Equatable, LocalizedError {
+enum StudyStatsDataError: Error, Equatable, LocalizedError {
     case invalidRecord
     case conflictingAnswer
     case conflictingSession

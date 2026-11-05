@@ -13,7 +13,7 @@ public class QuizSessionEntity: NSManagedObject {
 
     func toDomain() throws -> QuizSession {
         guard let id, let startedAt else {
-            throw StudyReportDataError.invalidRecord
+            throw StudyStatsDataError.invalidRecord
         }
         return QuizSession(id: id, startedAt: startedAt, questionCount: Int(questionCount))
     }

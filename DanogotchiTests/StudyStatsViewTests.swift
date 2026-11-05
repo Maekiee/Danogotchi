@@ -3,7 +3,7 @@ import XCTest
 @testable import Danogotchi
 
 @MainActor
-final class StudyReportViewTests: XCTestCase {
+final class StudyStatsViewTests: XCTestCase {
     func test_answerBarEmptyAndSingleOutcomeRenderAtCompactHeight() throws {
         let empty = try renderBar(total: 0, wrong: 0)
         let correct = try renderBar(total: 10, wrong: 0)
@@ -42,7 +42,7 @@ final class StudyReportViewTests: XCTestCase {
     }
 
     private func renderBar(total: Int, wrong: Int) throws -> UIImage {
-        let renderer = ImageRenderer(content: StudyReportAnswerBar(total: total, wrong: wrong)
+        let renderer = ImageRenderer(content: StudyStatsAnswerBar(total: total, wrong: wrong)
             .frame(width: 320)
             .environment(\.colorScheme, .light))
         renderer.scale = 1

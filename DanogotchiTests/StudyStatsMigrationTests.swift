@@ -3,7 +3,7 @@ import XCTest
 @testable import Danogotchi
 
 @MainActor
-final class StudyReportMigrationTests: XCTestCase {
+final class StudyStatsMigrationTests: XCTestCase {
     private let backfillVersionKey = "com.maekie.Danogotchi.studyReportBackfillVersion"
 
     func test_sqliteMigrationBackfillsSnapshotsAndKeepsLegacyIndicesNil() throws {
@@ -13,7 +13,7 @@ final class StudyReportMigrationTests: XCTestCase {
             let wordID = UUID()
             let copyID = UUID()
             let historyID = UUID()
-            let date = reportDate(2026, 8, 20)
+            let date = statsDate(2026, 8, 20)
             _ = insertWord(in: original.viewContext, id: wordID, topic: "travel")
             let copy = insertWord(in: original.viewContext, id: copyID, topic: "myBook")
             copy.setValue(wordID, forKey: "sourceWordId")
@@ -26,9 +26,9 @@ final class StudyReportMigrationTests: XCTestCase {
             try close(original)
 
             let currentModel = NSPersistentContainer(name: "Model").managedObjectModel
-            try StudyReportMigration.preflight(storeURL: url, destinationModel: currentModel)
+            try StudyStatsMigration.preflight(storeURL: url, destinationModel: currentModel)
             let migrated = try open(url)
-            try StudyReportMigration.backfillIfNeeded(context: migrated.viewContext)
+            try StudyStatsMigration.backfillIfNeeded(context: migrated.viewContext)
             let repository = DefaultLearningHistoryRepository(context: migrated.viewContext)
             let rows = try repository.fetchAllHistory()
             let row = try XCTUnwrap(rows.first)
@@ -47,7 +47,7 @@ final class StudyReportMigrationTests: XCTestCase {
             XCTAssertEqual(try DefaultVocabRepository(context: migrated.viewContext).readVocab(id: copyID)?.originalTopic, "travel")
 
             try DefaultVocabRepository(context: migrated.viewContext).updateVocab(id: copyID, word: "changed", meaning: "새 뜻", partOfSpeech: .verb)
-            try StudyReportMigration.backfill(context: migrated.viewContext)
+            try StudyStatsMigration.backfill(context: migrated.viewContext)
             XCTAssertEqual(try repository.fetchAllHistory(), rows)
             try DefaultVocabRepository(context: migrated.viewContext).deleteVocab(id: copyID)
             try close(migrated)
@@ -56,7 +56,7 @@ final class StudyReportMigrationTests: XCTestCase {
             defer { try? close(reopened) }
             XCTAssertEqual(try backfillVersion(in: reopened.viewContext), 1)
             reopened.viewContext.retainsRegisteredObjects = true
-            try StudyReportMigration.backfillIfNeeded(context: reopened.viewContext)
+            try StudyStatsMigration.backfillIfNeeded(context: reopened.viewContext)
             XCTAssertTrue(reopened.viewContext.registeredObjects.isEmpty)
             XCTAssertEqual(try DefaultLearningHistoryRepository(context: reopened.viewContext).fetchAllHistory(), rows)
         }
@@ -66,7 +66,7 @@ final class StudyReportMigrationTests: XCTestCase {
         try withStoreURL { url in
             let container = try open(url)
             XCTAssertFalse(container.viewContext.hasChanges)
-            try StudyReportMigration.backfillIfNeeded(context: container.viewContext)
+            try StudyStatsMigration.backfillIfNeeded(context: container.viewContext)
             try close(container)
 
             let reopened = try open(url)
@@ -85,13 +85,13 @@ final class StudyReportMigrationTests: XCTestCase {
             let history = try insertUnbackfilledHistory(in: context)
 
             context.failsSave = true
-            XCTAssertThrowsError(try StudyReportMigration.backfillIfNeeded(context: context))
+            XCTAssertThrowsError(try StudyStatsMigration.backfillIfNeeded(context: context))
             XCTAssertNil(try backfillVersion(in: context))
             XCTAssertNil(history.vocabId)
             XCTAssertFalse(context.hasChanges)
 
             context.failsSave = false
-            try StudyReportMigration.backfillIfNeeded(context: context)
+            try StudyStatsMigration.backfillIfNeeded(context: context)
             XCTAssertEqual(history.wordSnapshot, "journey")
             XCTAssertNotNil(history.vocabId)
             XCTAssertEqual(try backfillVersion(in: context), 1)
@@ -112,13 +112,13 @@ final class StudyReportMigrationTests: XCTestCase {
             try context.save()
 
             context.failsSave = true
-            XCTAssertThrowsError(try StudyReportMigration.backfillIfNeeded(context: context))
+            XCTAssertThrowsError(try StudyStatsMigration.backfillIfNeeded(context: context))
             XCTAssertEqual(try backfillVersion(in: context), 0)
             let persisted = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: NSSQLiteStoreType, at: url)
             XCTAssertEqual(persisted[backfillVersionKey] as? Int, 0)
 
             context.failsSave = false
-            try StudyReportMigration.backfillIfNeeded(context: context)
+            try StudyStatsMigration.backfillIfNeeded(context: context)
             XCTAssertEqual(try backfillVersion(in: context), 1)
             context.reset()
             try close(container)
@@ -135,7 +135,7 @@ final class StudyReportMigrationTests: XCTestCase {
         try withStoreURL { url in
             let container = try open(url)
             let history = try insertUnbackfilledHistory(in: container.viewContext)
-            try StudyReportMigration.backfill(context: container.viewContext)
+            try StudyStatsMigration.backfill(context: container.viewContext)
             let original = try history.toDomain()
             XCTAssertNil(try backfillVersion(in: container.viewContext))
             history.vocab?.word = "changed"
@@ -145,7 +145,7 @@ final class StudyReportMigrationTests: XCTestCase {
 
             let reopened = try open(url)
             defer { try? close(reopened) }
-            try StudyReportMigration.backfillIfNeeded(context: reopened.viewContext)
+            try StudyStatsMigration.backfillIfNeeded(context: reopened.viewContext)
             XCTAssertEqual(try DefaultLearningHistoryRepository(context: reopened.viewContext).fetchAllHistory(), [original])
             XCTAssertEqual(try backfillVersion(in: reopened.viewContext), 1)
         }
@@ -166,9 +166,9 @@ final class StudyReportMigrationTests: XCTestCase {
             }
             try old.viewContext.save()
             try close(old)
-            XCTAssertThrowsError(try StudyReportMigration.preflight(
+            XCTAssertThrowsError(try StudyStatsMigration.preflight(
                 storeURL: url, destinationModel: NSPersistentContainer(name: "Model").managedObjectModel
-            )) { XCTAssertEqual($0 as? StudyReportDataError, .invalidIdentifiers) }
+            )) { XCTAssertEqual($0 as? StudyStatsDataError, .invalidIdentifiers) }
             let reopened = try open(url, model: sourceModel)
             defer { try? close(reopened) }
             XCTAssertEqual(try reopened.viewContext.count(for: NSFetchRequest<NSFetchRequestResult>(entityName: "LearningHistoryEntity")), 2)
@@ -180,12 +180,12 @@ final class StudyReportMigrationTests: XCTestCase {
         let history = LearningHistoryEntity(context: context)
         history.createAt = Date()
         history.isCorrect = true
-        XCTAssertThrowsError(try StudyReportMigration.validateIdentifiers(entityName: "LearningHistoryEntity", context: context)) {
-            XCTAssertEqual($0 as? StudyReportDataError, .invalidIdentifiers)
+        XCTAssertThrowsError(try StudyStatsMigration.validateIdentifiers(entityName: "LearningHistoryEntity", context: context)) {
+            XCTAssertEqual($0 as? StudyStatsDataError, .invalidIdentifiers)
         }
         history.id = UUID()
         try context.save()
-        XCTAssertThrowsError(try StudyReportMigration.backfill(context: context))
+        XCTAssertThrowsError(try StudyStatsMigration.backfill(context: context))
         XCTAssertFalse(context.hasChanges)
         XCTAssertEqual(try context.count(for: LearningHistoryEntity.fetchRequest()), 1)
         XCTAssertNil(try context.fetch(LearningHistoryEntity.fetchRequest()).first?.vocabId)
@@ -229,15 +229,15 @@ final class StudyReportMigrationTests: XCTestCase {
         defer { try? close(container) }
         let context = container.viewContext
         let word = try DefaultVocabRepository(context: context).createVocab(vocab: "apple", meaning: "사과")
-        let repository = DefaultLearningHistoryRepository(context: context, reportContext: container.newBackgroundContext())
+        let repository = DefaultLearningHistoryRepository(context: context, statsContext: container.newBackgroundContext())
         try repository.addHistory(makeQuizAnswer(word))
-        let first = try await repository.fetchReportRecords()
+        let first = try await repository.fetchStatsRecords()
         XCTAssertEqual(first.histories.count, 1)
         XCTAssertEqual(first.sessions.count, 1)
         try DefaultVocabRepository(context: context).deleteVocab(id: word.id)
         context.delete(try XCTUnwrap(context.fetch(QuizSessionEntity.fetchRequest()).first))
         try context.saveOrRollback()
-        let second = try await repository.fetchReportRecords()
+        let second = try await repository.fetchStatsRecords()
         XCTAssertEqual(second.histories.first?.wordSnapshot, "apple")
         XCTAssertNil(second.histories.first?.sessionId)
         XCTAssertTrue(second.sessions.isEmpty)
@@ -260,7 +260,7 @@ final class StudyReportMigrationTests: XCTestCase {
         let word = insertWord(in: context, id: UUID(), topic: "travel")
         let history = LearningHistoryEntity(context: context)
         history.id = UUID()
-        history.createAt = reportDate()
+        history.createAt = statsDate()
         history.isCorrect = true
         history.setValue(word, forKey: "vocab")
         try context.save()

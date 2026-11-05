@@ -6,7 +6,7 @@ extension LearningHistoryEntity {
               let vocabId = vocabId,
               let createAt = createAt,
               let wordSnapshot, let meaningSnapshot else {
-            throw StudyReportDataError.invalidRecord
+            throw StudyStatsDataError.invalidRecord
         }
         
         return LearningHistory(

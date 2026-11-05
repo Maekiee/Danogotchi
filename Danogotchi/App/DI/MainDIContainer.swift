@@ -57,27 +57,27 @@ final class MainDIContainer {
         )
     }
 
-    // MARK: - StudyReport
-    func makeStudyReportFeature(
+    // MARK: - StudyStats
+    func makeStudyStatsFeature(
         onClose: @escaping @MainActor @Sendable () -> Void,
-        onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
-    ) -> StudyReportFeature {
+        onNavigate: @escaping @MainActor @Sendable (StudyStatsDestination) -> Void
+    ) -> StudyStatsFeature {
         #if DEBUG
-        if let feature = UITestingSupport.makeStudyReportFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
+        if let feature = UITestingSupport.makeStudyStatsFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
             return feature
         }
         #endif
         let repository = DefaultLearningHistoryRepository(
             context: dependencies.coreDataStack.viewContext,
-            reportContext: dependencies.coreDataStack.newBackgroundContext()
+            statsContext: dependencies.coreDataStack.newBackgroundContext()
         )
-        let useCase: FetchStudyReportUseCase = DefaultFetchStudyReportUseCase(repository: repository)
-        return StudyReportFeature(
+        let useCase: FetchStudyStatsUseCase = DefaultFetchStudyStatsUseCase(repository: repository)
+        return StudyStatsFeature(
             fetch: { period, now, calendar in
                 try await useCase.execute(period: period, now: now, calendar: calendar)
             },
             reportError: { [reportError = dependencies.reportError] error in
-                AppLogger.database.error("학습 리포트 조회 실패: \(String(describing: error), privacy: .public)")
+                AppLogger.database.error("학습 통계 조회 실패: \(String(describing: error), privacy: .public)")
                 reportError(error)
             },
             onClose: onClose,
@@ -88,7 +88,7 @@ final class MainDIContainer {
     // MARK: 캘린더
     func makeCalendarFeature(
         onClose: @escaping @MainActor @Sendable () -> Void,
-        onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
+        onNavigate: @escaping @MainActor @Sendable (StudyStatsDestination) -> Void
     ) -> CalendarFeature {
         return CalendarFeature(onClose: onClose, onNavigate: onNavigate)
     }

@@ -1,6 +1,6 @@
 import Foundation
 
-enum StudyReportPeriod: String, CaseIterable, Sendable {
+enum StudyStatsPeriod: String, CaseIterable, Sendable {
     case week, month, all
 
     func start(now: Date, calendar: Calendar) -> Date? {
@@ -12,7 +12,7 @@ enum StudyReportPeriod: String, CaseIterable, Sendable {
     }
 }
 
-enum StudyReportCategoryKind: String, CaseIterable, Sendable {
+enum StudyStatsCategoryKind: String, CaseIterable, Sendable {
     case topic, partOfSpeech
 
     var identifiers: [String] {
@@ -26,12 +26,12 @@ enum StudyReportCategoryKind: String, CaseIterable, Sendable {
     }
 }
 
-struct StudyReportRecords: Sendable {
+struct StudyStatsRecords: Sendable {
     let histories: [LearningHistory]
     let sessions: [QuizSession]
 }
 
-struct StudyReport: Equatable, Sendable {
+struct StudyStats: Equatable, Sendable {
     struct Word: Equatable, Sendable, Identifiable {
         let id: UUID
         var snapshot: LearningHistory
@@ -64,7 +64,7 @@ struct StudyReport: Equatable, Sendable {
         var wrong: Int = 0
     }
 
-    let period: StudyReportPeriod
+    let period: StudyStatsPeriod
     let now: Date
     let calendar: Calendar
     let periodStart: Date

@@ -2,11 +2,11 @@ import CoreData
 
 final class DefaultLearningHistoryRepository: LearningHistoryRepository {
     private let context: NSManagedObjectContext
-    private let reportContext: NSManagedObjectContext
+    private let statsContext: NSManagedObjectContext
 
-    init(context: NSManagedObjectContext, reportContext: NSManagedObjectContext? = nil) {
+    init(context: NSManagedObjectContext, statsContext: NSManagedObjectContext? = nil) {
         self.context = context
-        self.reportContext = reportContext ?? context
+        self.statsContext = statsContext ?? context
     }
 
     func addHistory(_ answer: QuizAnswer) throws {
@@ -20,14 +20,14 @@ final class DefaultLearningHistoryRepository: LearningHistoryRepository {
                       let index = value.questionIndex,
                       (0..<answer.session.questionCount).contains(index),
                       value.sessionId == answer.session.id else {
-                    throw StudyReportDataError.invalidRecord
+                    throw StudyStatsDataError.invalidRecord
                 }
                 let sessionRequest = QuizSessionEntity.fetchRequest()
                 sessionRequest.predicate = NSPredicate(format: "id == %@", answer.session.id as CVarArg)
                 let sessions = try context.fetch(sessionRequest)
-                guard sessions.count <= 1 else { throw StudyReportDataError.invalidIdentifiers }
+                guard sessions.count <= 1 else { throw StudyStatsDataError.invalidIdentifiers }
                 if let session = sessions.first, try session.toDomain() != answer.session {
-                    throw StudyReportDataError.conflictingSession
+                    throw StudyStatsDataError.conflictingSession
                 }
 
                 let request = LearningHistoryEntity.fetchRequest()
@@ -38,7 +38,7 @@ final class DefaultLearningHistoryRepository: LearningHistoryRepository {
                 let matches = try context.fetch(request)
                 if !matches.isEmpty {
                     guard matches.count == 1, try matches[0].toDomain() == value else {
-                        throw StudyReportDataError.conflictingAnswer
+                        throw StudyStatsDataError.conflictingAnswer
                     }
                     return
                 }
@@ -95,8 +95,8 @@ final class DefaultLearningHistoryRepository: LearningHistoryRepository {
         return Double(histories.filter(\.isCorrect).count) / Double(histories.count)
     }
 
-    func fetchReportRecords() async throws -> StudyReportRecords {
-        let context = reportContext
+    func fetchStatsRecords() async throws -> StudyStatsRecords {
+        let context = statsContext
         return try await context.perform {
             try Task.checkCancellation()
             // 전용 읽기 context의 두 조회를 같은 저장소 시점에 고정
@@ -106,7 +106,7 @@ final class DefaultLearningHistoryRepository: LearningHistoryRepository {
             }
             let histories = try context.fetch(Self.historyRequest()).map { try $0.toDomain() }
             let sessions = try context.fetch(QuizSessionEntity.fetchRequest()).map { try $0.toDomain() }
-            return StudyReportRecords(histories: histories, sessions: sessions)
+            return StudyStatsRecords(histories: histories, sessions: sessions)
         }
     }
 

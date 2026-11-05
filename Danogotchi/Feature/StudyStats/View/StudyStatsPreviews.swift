@@ -2,7 +2,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-private struct StudyReportPreview: View {
+private struct StudyStatsPreview: View {
     enum Scenario: String, CaseIterable {
         case normal = "학습 기록 있음"
         case empty = "학습 기록 없음"
@@ -17,28 +17,28 @@ private struct StudyReportPreview: View {
     var body: some View {
         let records = records
         NavigationStack {
-            StudyReportView(store: Store(initialState: state) {
-                StudyReportFeature(
+            StudyStatsView(store: Store(initialState: state) {
+                StudyStatsFeature(
                     fetch: { period, now, calendar in
-                        try DefaultFetchStudyReportUseCase.aggregate(records, period: period, now: now, calendar: calendar)
+                        try DefaultFetchStudyStatsUseCase.aggregate(records, period: period, now: now, calendar: calendar)
                     }, reportError: { _ in }, onClose: {}
                 )
             })
         }
     }
 
-    private var state: StudyReportFeature.State {
-        var state = StudyReportFeature.State()
-        state.report = try? DefaultFetchStudyReportUseCase.aggregate(records, period: .week, now: Date(), calendar: .current)
-        state.selectedActivity = state.report?.activity.last?.date
-        state.selectedSession = state.report?.sessions.indices.last
-        if scenario == .loading { state.report = nil; state.loadStatus = .loading(UUID()) }
+    private var state: StudyStatsFeature.State {
+        var state = StudyStatsFeature.State()
+        state.stats = try? DefaultFetchStudyStatsUseCase.aggregate(records, period: .week, now: Date(), calendar: .current)
+        state.selectedActivity = state.stats?.activity.last?.date
+        state.selectedSession = state.stats?.sessions.indices.last
+        if scenario == .loading { state.stats = nil; state.loadStatus = .loading(UUID()) }
         if scenario == .error { state.loadStatus = .failed }
         return state
     }
 
-    private var records: StudyReportRecords {
-        guard scenario != .empty else { return StudyReportRecords(histories: [], sessions: []) }
+    private var records: StudyStatsRecords {
+        guard scenario != .empty else { return StudyStatsRecords(histories: [], sessions: []) }
         let now = Date()
         func vocab(_ word: String, _ meaning: String, _ topic: BookTopic, _ part: PartOfSpeech) -> Vocab {
             Vocab(id: UUID(), word: word, meaning: meaning, bookType: topic,
@@ -65,18 +65,18 @@ private struct StudyReportPreview: View {
                 histories.append(history)
             }
         }
-        return StudyReportRecords(histories: histories, sessions: scenario == .legacy ? [] : sessions)
+        return StudyStatsRecords(histories: histories, sessions: scenario == .legacy ? [] : sessions)
     }
 }
 
-#Preview("학습 리포트") { StudyReportPreview(scenario: .normal) }
-#Preview("학습 기록 없음") { StudyReportPreview(scenario: .empty) }
-#Preview("불러오는 중") { StudyReportPreview(scenario: .loading) }
-#Preview("불러오기 실패") { StudyReportPreview(scenario: .error) }
-#Preview("이전 기록만 있음") { StudyReportPreview(scenario: .legacy) }
-#Preview("완료 회차 1개") { StudyReportPreview(scenario: .single) }
+#Preview("학습 통계") { StudyStatsPreview(scenario: .normal) }
+#Preview("학습 기록 없음") { StudyStatsPreview(scenario: .empty) }
+#Preview("불러오는 중") { StudyStatsPreview(scenario: .loading) }
+#Preview("불러오기 실패") { StudyStatsPreview(scenario: .error) }
+#Preview("이전 기록만 있음") { StudyStatsPreview(scenario: .legacy) }
+#Preview("완료 회차 1개") { StudyStatsPreview(scenario: .single) }
 #Preview("정답·오답 막대") {
-    StudyReportCategoryBars(
+    StudyStatsCategoryBars(
         categories: [.init(id: "travel", total: 342, wrong: 75), .init(id: "business")],
         kind: .topic, showsMistakes: true, selected: nil
     ) { _ in }
@@ -88,7 +88,7 @@ private struct StudyReportPreview: View {
         id: UUID(), vocabId: UUID(), isCorrect: true, createAt: date,
         wordSnapshot: "journey", meaningSnapshot: "여행", topicSnapshot: "travel", partOfSpeechSnapshot: "noun"
     )
-    let word = StudyReport.Word(id: snapshot.vocabId, snapshot: snapshot, total: 342, correct: 267)
-    StudyReportWordDetailView(word: word)
+    let word = StudyStats.Word(id: snapshot.vocabId, snapshot: snapshot, total: 342, correct: 267)
+    StudyStatsWordDetailView(word: word)
 }
 #endif

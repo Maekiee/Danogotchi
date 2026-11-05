@@ -22,7 +22,7 @@ final class CoreDataStack {
         if container.persistentStoreCoordinator.persistentStores.isEmpty {
             for description in container.persistentStoreDescriptions {
                 if let url = description.url, description.type == NSSQLiteStoreType {
-                    try StudyReportMigration.preflight(storeURL: url, destinationModel: container.managedObjectModel)
+                    try StudyStatsMigration.preflight(storeURL: url, destinationModel: container.managedObjectModel)
                 }
                 description.shouldAddStoreAsynchronously = false
                 description.shouldMigrateStoreAutomatically = true
@@ -32,7 +32,7 @@ final class CoreDataStack {
             container.loadPersistentStores { _, error in loadError = error }
             if let loadError { throw loadError }
         }
-        try StudyReportMigration.backfillIfNeeded(context: viewContext)
+        try StudyStatsMigration.backfillIfNeeded(context: viewContext)
         isPrepared = true
     }
 }

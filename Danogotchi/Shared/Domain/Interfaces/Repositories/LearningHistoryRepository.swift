@@ -5,5 +5,5 @@ protocol LearningHistoryRepository {
     func fetchAllHistory() throws -> [LearningHistory]
     func fetchHistory(vocabId: UUID) throws -> [LearningHistory]
     func accuracy(vocabId: UUID) throws -> Double?
-    func fetchReportRecords() async throws -> StudyReportRecords
+    func fetchStatsRecords() async throws -> StudyStatsRecords
 }

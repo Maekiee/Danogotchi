@@ -1,41 +1,41 @@
 import XCTest
 
-/// 탐색 화면의 진입 버튼들 — 학습 리포트 열기/닫기, 발음 버튼
+/// 탐색 화면의 진입 버튼들 — 학습 통계 열기/닫기, 발음 버튼
 @MainActor
 final class ExploreNavigationUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
     }
 
-    func test_studyReportOpensFromExploreAndCloseReturns() {
+    func test_studyStatsOpensFromExploreAndCloseReturns() {
         let app = XCUIApplication.launchMainFlow()
-        app.buttons["explore.studyReport"].tap()
+        app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
-        app.buttons["학습 기록"].tap()
-        XCTAssertTrue(app.navigationBars["학습 리포트"].waitForExistence(timeout: 10))
+        app.buttons["학습 통계"].tap()
+        XCTAssertTrue(app.navigationBars["학습 통계"].waitForExistence(timeout: 10))
         // 학습 기록이 없는 첫 설치 상태
         XCTAssertTrue(app.staticTexts["첫 학습을 기다리고 있어요"].waitForExistence(timeout: 5))
 
         // push된 화면의 ✕로 모달 전체가 닫힌다
-        app.buttons["학습 리포트 닫기"].tap()
+        app.buttons["학습 통계 닫기"].tap()
         XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.navigationBars["캘린더"].exists)
     }
 
-    func test_historyBackReturnsToCalendarAndCalendarCloseReturns() {
+    func test_statsBackReturnsToCalendarAndCalendarCloseReturns() {
         let app = XCUIApplication.launchMainFlow()
-        app.buttons["explore.studyReport"].tap()
+        app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
-        app.buttons["학습 기록"].tap()
-        let history = app.navigationBars["학습 리포트"]
-        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        app.buttons["학습 통계"].tap()
+        let stats = app.navigationBars["학습 통계"]
+        XCTAssertTrue(stats.waitForExistence(timeout: 10))
 
         // 시스템 뒤로가기는 모달을 닫지 않고 캘린더로 돌아간다
-        history.buttons.element(boundBy: 0).tap()
-        XCTAssertTrue(history.waitForDisappearance())
+        stats.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(stats.waitForDisappearance())
         XCTAssertTrue(app.navigationBars["캘린더"].exists)
 
-        app.buttons["학습 리포트 닫기"].tap()
+        app.buttons["학습 통계 닫기"].tap()
         XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.navigationBars["캘린더"].exists)
     }

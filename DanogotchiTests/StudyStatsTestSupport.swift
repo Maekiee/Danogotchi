@@ -10,7 +10,7 @@ func makeQuizAnswer(_ word: Vocab, isCorrect: Bool = true, id: UUID = UUID(),
     )
 }
 
-func reportCalendar(_ timeZone: String = "Asia/Seoul") -> Calendar {
+func statsCalendar(_ timeZone: String = "Asia/Seoul") -> Calendar {
     guard let zone = TimeZone(identifier: timeZone) else {
         fatalError("알 수 없는 시간대: \(timeZone)")
     }
@@ -19,8 +19,8 @@ func reportCalendar(_ timeZone: String = "Asia/Seoul") -> Calendar {
     return calendar
 }
 
-func reportDate(_ year: Int = 2026, _ month: Int = 9, _ day: Int = 26,
-                _ hour: Int = 12, calendar: Calendar = reportCalendar()) -> Date {
+func statsDate(_ year: Int = 2026, _ month: Int = 9, _ day: Int = 26,
+                _ hour: Int = 12, calendar: Calendar = statsCalendar()) -> Date {
     guard let date = calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour)) else {
         fatalError("만들 수 없는 날짜: \(year)-\(month)-\(day) \(hour)시")
     }

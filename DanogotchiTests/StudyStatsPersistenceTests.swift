@@ -3,7 +3,7 @@ import XCTest
 @testable import Danogotchi
 
 @MainActor
-final class StudyReportPersistenceTests: XCTestCase {
+final class StudyStatsPersistenceTests: XCTestCase {
     func test_invalidQuestionIndexAndEmptySessionDoNotInsertRows() throws {
         let context = makeInMemoryContext()
         let word = try DefaultVocabRepository(context: context).createVocab(vocab: "apple", meaning: "사과")
@@ -120,9 +120,9 @@ final class StudyReportPersistenceTests: XCTestCase {
         let earned = try useCase.record(makeQuizAnswer(word))
         context.failsSave = true
         XCTAssertThrowsError(try useCase.commit(earned: earned, correct: 1, total: 1))
-        let records = try await history.fetchReportRecords()
-        let report = try DefaultFetchStudyReportUseCase.aggregate(records, period: .all, now: Date(), calendar: reportCalendar())
-        XCTAssertEqual(report.sessions.count, 1)
+        let records = try await history.fetchStatsRecords()
+        let stats = try DefaultFetchStudyStatsUseCase.aggregate(records, period: .all, now: Date(), calendar: statsCalendar())
+        XCTAssertEqual(stats.sessions.count, 1)
         context.failsSave = false
         _ = try useCase.commit(earned: earned, correct: 1, total: 1)
         XCTAssertEqual(try history.fetchAllHistory().count, 1)

@@ -1,24 +1,24 @@
 import Foundation
 
-protocol FetchStudyReportUseCase {
-    func execute(period: StudyReportPeriod, now: Date, calendar: Calendar) async throws -> StudyReport
+protocol FetchStudyStatsUseCase {
+    func execute(period: StudyStatsPeriod, now: Date, calendar: Calendar) async throws -> StudyStats
 }
 
-final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
+final class DefaultFetchStudyStatsUseCase: FetchStudyStatsUseCase {
     private let repository: LearningHistoryRepository
 
     init(repository: LearningHistoryRepository) {
         self.repository = repository
     }
 
-    func execute(period: StudyReportPeriod, now: Date, calendar: Calendar) async throws -> StudyReport {
-        let records = try await repository.fetchReportRecords()
+    func execute(period: StudyStatsPeriod, now: Date, calendar: Calendar) async throws -> StudyStats {
+        let records = try await repository.fetchStatsRecords()
         try Task.checkCancellation()
         return try Self.aggregate(records, period: period, now: now, calendar: calendar)
     }
 
-    static func aggregate(_ records: StudyReportRecords, period: StudyReportPeriod,
-                          now: Date, calendar: Calendar) throws -> StudyReport {
+    static func aggregate(_ records: StudyStatsRecords, period: StudyStatsPeriod,
+                          now: Date, calendar: Calendar) throws -> StudyStats {
         let all = records.histories.filter { $0.createAt <= now }
         let start = period.start(now: now, calendar: calendar)
         let rows = all.filter { row in start.map { row.createAt >= $0 } ?? true }
@@ -29,36 +29,36 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
         let periodStart = start ?? calendar.startOfDay(for: firstDate)
         let activityUnit: Calendar.Component = period == .all ? .month : .day
         // 날짜 계산 실패 시 크래시 대신 기록 오류로 처리
-        guard let weekStart = StudyReportPeriod.week.start(now: now, calendar: calendar),
-              let monthStart = StudyReportPeriod.month.start(now: now, calendar: calendar),
+        guard let weekStart = StudyStatsPeriod.week.start(now: now, calendar: calendar),
+              let monthStart = StudyStatsPeriod.month.start(now: now, calendar: calendar),
               let activityStart = calendar.dateInterval(of: activityUnit, for: periodStart)?.start else {
-            throw StudyReportDataError.invalidRecord
+            throw StudyStatsDataError.invalidRecord
         }
         var bucketWords: [Date: Set<UUID>] = [:]
         for row in rows {
             guard let bucket = calendar.dateInterval(of: activityUnit, for: row.createAt)?.start else {
-                throw StudyReportDataError.invalidRecord
+                throw StudyStatsDataError.invalidRecord
             }
-            bucketWords[bucket, default: []].insert(row.reportWordId)
+            bucketWords[bucket, default: []].insert(row.statsWordId)
         }
         let activity = dates(from: activityStart, through: now, unit: activityUnit, calendar: calendar)
-            .map { StudyReport.Activity(date: $0, count: bucketWords[$0]?.count ?? 0) }
+            .map { StudyStats.Activity(date: $0, count: bucketWords[$0]?.count ?? 0) }
         let recentDays = dates(from: weekStart, through: now, unit: .day, calendar: calendar)
-            .map { StudyReport.Activity(date: $0, count: days.contains($0) ? 1 : 0) }
+            .map { StudyStats.Activity(date: $0, count: days.contains($0) ? 1 : 0) }
 
         let partGroups = Dictionary(grouping: selectedWords) {
-            StudyReportCategoryKind.partOfSpeech.identifier($0.snapshot.partOfSpeechSnapshot)
+            StudyStatsCategoryKind.partOfSpeech.identifier($0.snapshot.partOfSpeechSnapshot)
         }
-        let parts = StudyReportCategoryKind.partOfSpeech.identifiers.map {
-            StudyReport.Category(id: $0, total: partGroups[$0]?.count ?? 0)
+        let parts = StudyStatsCategoryKind.partOfSpeech.identifiers.map {
+            StudyStats.Category(id: $0, total: partGroups[$0]?.count ?? 0)
         }
-        return StudyReport(
+        return StudyStats(
             period: period, now: now, calendar: calendar, periodStart: periodStart,
             allStart: calendar.startOfDay(for: firstDate),
             totalAnswers: all.count, totalCorrect: all.filter(\.isCorrect).count,
             streak: streak(days: days, now: now, calendar: calendar),
-            weekWordCount: Set(all.filter { $0.createAt >= weekStart }.map(\.reportWordId)).count,
-            monthWordCount: Set(all.filter { $0.createAt >= monthStart }.map(\.reportWordId)).count,
+            weekWordCount: Set(all.filter { $0.createAt >= weekStart }.map(\.statsWordId)).count,
+            monthWordCount: Set(all.filter { $0.createAt >= monthStart }.map(\.statsWordId)).count,
             recentDays: recentDays, allWords: allWords, words: selectedWords,
             periodAnswerCount: rows.count, activity: activity,
             sessions: try completedSessions(records.sessions, histories: all, start: start),
@@ -67,13 +67,13 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
         )
     }
 
-    private static func words(from rows: [LearningHistory]) -> [StudyReport.Word] {
-        let grouped = Dictionary(grouping: rows, by: \.reportWordId)
-        let words = grouped.compactMap { id, answers -> StudyReport.Word? in
+    private static func words(from rows: [LearningHistory]) -> [StudyStats.Word] {
+        let grouped = Dictionary(grouping: rows, by: \.statsWordId)
+        let words = grouped.compactMap { id, answers -> StudyStats.Word? in
             guard let latest = answers.max(by: {
                 $0.createAt == $1.createAt ? $0.id.uuidString < $1.id.uuidString : $0.createAt < $1.createAt
             }) else { return nil }
-            return StudyReport.Word(id: id, snapshot: latest, total: answers.count,
+            return StudyStats.Word(id: id, snapshot: latest, total: answers.count,
                                     correct: answers.filter(\.isCorrect).count)
         }
         return words.sorted {
@@ -84,26 +84,26 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
         }
     }
 
-    private static func categories(_ rows: [LearningHistory], kind: StudyReportCategoryKind) -> [StudyReport.Category] {
+    private static func categories(_ rows: [LearningHistory], kind: StudyStatsCategoryKind) -> [StudyStats.Category] {
         let grouped = Dictionary(grouping: rows) { row in
             kind.identifier(kind == .topic ? row.topicSnapshot : row.partOfSpeechSnapshot)
         }
         return kind.identifiers.map { id in
             let answers = grouped[id] ?? []
-            return StudyReport.Category(id: id, total: answers.count,
+            return StudyStats.Category(id: id, total: answers.count,
                                         wrong: answers.filter { !$0.isCorrect }.count)
         }
     }
 
     private static func completedSessions(_ sessions: [QuizSession], histories: [LearningHistory],
-                                          start: Date?) throws -> [StudyReport.Session] {
+                                          start: Date?) throws -> [StudyStats.Session] {
         let groups = histories.reduce(into: [UUID: [LearningHistory]]()) { result, row in
             if let id = row.sessionId { result[id, default: []].append(row) }
         }
-        var results: [StudyReport.Session] = []
+        var results: [StudyStats.Session] = []
         var sessionIDs = Set<UUID>()
         for session in sessions {
-            guard sessionIDs.insert(session.id).inserted else { throw StudyReportDataError.invalidIdentifiers }
+            guard sessionIDs.insert(session.id).inserted else { throw StudyStatsDataError.invalidIdentifiers }
             guard session.questionCount > 0, let answers = groups[session.id] else { continue }
             var questions: [Int: LearningHistory] = [:]
             var valid = true
@@ -113,14 +113,14 @@ final class DefaultFetchStudyReportUseCase: FetchStudyReportUseCase {
                     continue
                 }
                 if let existing = questions[index], existing != answer {
-                    throw StudyReportDataError.conflictingAnswer
+                    throw StudyStatsDataError.conflictingAnswer
                 }
                 questions[index] = answer
             }
             guard valid, questions.count == session.questionCount,
                   let completedAt = questions.values.map(\.createAt).max(),
                   start.map({ completedAt >= $0 }) ?? true else { continue }
-            results.append(StudyReport.Session(
+            results.append(StudyStats.Session(
                 id: session.id, completedAt: completedAt,
                 correct: questions.values.filter(\.isCorrect).count, total: session.questionCount
             ))

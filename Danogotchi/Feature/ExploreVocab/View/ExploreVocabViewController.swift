@@ -67,7 +67,7 @@ final class ExploreVocabViewController: BaseViewController {
     }()
     private let calendarButton: CircularIconButton = {
         let button = CircularIconButton(systemName: "calendar")
-        button.accessibilityIdentifier = "explore.studyReport"
+        button.accessibilityIdentifier = "explore.studyStats"
         return button
     }()
     private let openCharacterButton: CircularIconButton = {

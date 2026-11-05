@@ -10,15 +10,15 @@ struct CalendarView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button { store.send(.closeButtonTapped) } label: {
                         Image(systemName: "xmark").frame(width: 40, height: 40)
-                    }.accessibilityLabel("학습 리포트 닫기")
+                    }.accessibilityLabel("학습 통계 닫기")
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { store.send(.historyButtonTapped) } label: {
+                    Button { store.send(.statsButtonTapped) } label: {
                         HStack(spacing: 2) {
-                            Text("학습 기록")
+                            Text("학습 통계")
                             Image(systemName: "chevron.right")
                         }
-                    }.accessibilityLabel("학습 기록")
+                    }.accessibilityLabel("학습 통계")
                 }
             }
     }

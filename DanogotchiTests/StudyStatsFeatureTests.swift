@@ -3,18 +3,18 @@ import XCTest
 @testable import Danogotchi
 
 @MainActor
-final class StudyReportFeatureTests: XCTestCase {
+final class StudyStatsFeatureTests: XCTestCase {
     private let firstID = UUID(0)
     private let secondID = UUID(1)
 
     func test_closeButtonTappedCallsOnCloseAndCancelsLoading() async throws {
         let closedCount = LockIsolated(0)
         let errorCount = LockIsolated(0)
-        let report = try makeReport()
-        let store = TestStore(initialState: StudyReportFeature.State()) {
-            StudyReportFeature(fetch: { _, _, _ in
+        let stats = try makeStats()
+        let store = TestStore(initialState: StudyStatsFeature.State()) {
+            StudyStatsFeature(fetch: { _, _, _ in
                 try await Task.sleep(for: .seconds(3600))
-                return report
+                return stats
             }, reportError: { _ in errorCount.withValue { $0 += 1 } },
                onClose: { closedCount.withValue { $0 += 1 } })
         } withDependencies: { $0.uuid = .incrementing }
@@ -25,38 +25,38 @@ final class StudyReportFeatureTests: XCTestCase {
         XCTAssertEqual(errorCount.value, 0)
     }
 
-    func test_loadPopulatesReportAndDefaultSelections() async throws {
-        let report = try makeReport()
-        let store = TestStore(initialState: StudyReportFeature.State()) {
-            StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
+    func test_loadPopulatesStatsAndDefaultSelections() async throws {
+        let stats = try makeStats()
+        let store = TestStore(initialState: StudyStatsFeature.State()) {
+            StudyStatsFeature(fetch: { _, _, _ in stats }, reportError: { _ in }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
         await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
-        await store.receive(.loaded(firstID, report)) {
+        await store.receive(.loaded(firstID, stats)) {
             $0.loadStatus = .idle
-            $0.report = report
+            $0.stats = stats
         }
         // 막대 값이 모두 0이면 선택 문구를 띄우지 않음
-        await store.send(.activitySelected(report.activity.last?.date))
+        await store.send(.activitySelected(stats.activity.last?.date))
         await store.send(.appeared)
     }
 
     func test_chartSelectionsDefaultToLatestAndIgnoreTouchEnd() async throws {
         let words = makeQuizWords(2)
-        let answers = [makeQuizAnswer(words[0], createAt: reportDate(2026, 9, 24)),
-                       makeQuizAnswer(words[1], isCorrect: false, createAt: reportDate())]
-        let report = try DefaultFetchStudyReportUseCase.aggregate(
+        let answers = [makeQuizAnswer(words[0], createAt: statsDate(2026, 9, 24)),
+                       makeQuizAnswer(words[1], isCorrect: false, createAt: statsDate())]
+        let stats = try DefaultFetchStudyStatsUseCase.aggregate(
             .init(histories: answers.map(\.history), sessions: answers.map(\.session)),
-            period: .week, now: reportDate(), calendar: reportCalendar()
+            period: .week, now: statsDate(), calendar: statsCalendar()
         )
-        let earlier = reportCalendar().startOfDay(for: reportDate(2026, 9, 24))
-        let store = TestStore(initialState: StudyReportFeature.State()) {
-            StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
+        let earlier = statsCalendar().startOfDay(for: statsDate(2026, 9, 24))
+        let store = TestStore(initialState: StudyStatsFeature.State()) {
+            StudyStatsFeature(fetch: { _, _, _ in stats }, reportError: { _ in }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
         await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
-        await store.receive(.loaded(firstID, report)) {
+        await store.receive(.loaded(firstID, stats)) {
             $0.loadStatus = .idle
-            $0.report = report
-            $0.selectedActivity = reportCalendar().startOfDay(for: reportDate())
+            $0.stats = stats
+            $0.selectedActivity = statsCalendar().startOfDay(for: statsDate())
             $0.selectedSession = 1
         }
         await store.send(.activitySelected(earlier)) { $0.selectedActivity = earlier }
@@ -69,11 +69,11 @@ final class StudyReportFeatureTests: XCTestCase {
     }
 
     func test_newPeriodCancelsPreviousRequestAndIgnoresItsLateResponse() async throws {
-        let week = try makeReport()
-        let month = try makeReport(.month)
+        let week = try makeStats()
+        let month = try makeStats(.month)
         let errorCount = LockIsolated(0)
-        let store = TestStore(initialState: StudyReportFeature.State()) {
-            StudyReportFeature(fetch: { period, _, _ in
+        let store = TestStore(initialState: StudyStatsFeature.State()) {
+            StudyStatsFeature(fetch: { period, _, _ in
                 if period == .week {
                     do { try await Task.sleep(for: .seconds(3600)) }
                     catch { throw CocoaError(.fileReadUnknown) }
@@ -88,22 +88,22 @@ final class StudyReportFeatureTests: XCTestCase {
         }
         await store.receive(.loaded(secondID, month)) {
             $0.loadStatus = .idle
-            $0.report = month
+            $0.stats = month
         }
         await store.send(.loaded(firstID, week))
         await store.finish()
         XCTAssertEqual(errorCount.value, 0)
     }
 
-    func test_failedLoadRetriesAndCanLoadEmptyReport() async throws {
+    func test_failedLoadRetriesAndCanLoadEmptyStats() async throws {
         let attempts = LockIsolated(0)
         let errors = LockIsolated<[NSError]>([])
-        let report = try makeReport()
-        let store = TestStore(initialState: StudyReportFeature.State()) {
-            StudyReportFeature(fetch: { _, _, _ in
+        let stats = try makeStats()
+        let store = TestStore(initialState: StudyStatsFeature.State()) {
+            StudyStatsFeature(fetch: { _, _, _ in
                 let attempt = attempts.withValue { $0 += 1; return $0 }
                 if attempt == 1 { throw CocoaError(.fileReadUnknown) }
-                return report
+                return stats
             }, reportError: { error in errors.withValue { $0.append(error as NSError) } }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
         await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
@@ -112,25 +112,25 @@ final class StudyReportFeatureTests: XCTestCase {
         XCTAssertEqual(errors.value.map(\.domain), [NSCocoaErrorDomain])
         XCTAssertEqual(errors.value.map(\.code), [CocoaError.Code.fileReadUnknown.rawValue])
         await store.send(.refresh) { $0.loadStatus = .loading(self.secondID) }
-        await store.receive(.loaded(secondID, report)) {
+        await store.receive(.loaded(secondID, stats)) {
             $0.loadStatus = .idle
-            $0.report = report
+            $0.stats = stats
         }
-        XCTAssertEqual(store.state.report?.totalAnswers, 0)
+        XCTAssertEqual(store.state.stats?.totalAnswers, 0)
         XCTAssertEqual(errors.value.count, 1)
     }
 
     func test_wordNavigationPreservesSelectedPeriodAndLifetimeUsesEarliestAnswer() async throws {
         let word = makeQuizWords(1)[0]
-        let rows = [makeQuizAnswer(word, createAt: reportDate(2026, 8, 1)).history,
-                    makeQuizAnswer(word, createAt: reportDate()).history]
-        let report = try DefaultFetchStudyReportUseCase.aggregate(.init(histories: rows, sessions: []), period: .week,
-                                                         now: reportDate(), calendar: reportCalendar())
-        let destinations = LockIsolated<[StudyReportDestination]>([])
-        var state = StudyReportFeature.State()
-        state.report = report
+        let rows = [makeQuizAnswer(word, createAt: statsDate(2026, 8, 1)).history,
+                    makeQuizAnswer(word, createAt: statsDate()).history]
+        let stats = try DefaultFetchStudyStatsUseCase.aggregate(.init(histories: rows, sessions: []), period: .week,
+                                                         now: statsDate(), calendar: statsCalendar())
+        let destinations = LockIsolated<[StudyStatsDestination]>([])
+        var state = StudyStatsFeature.State()
+        state.stats = stats
         let store = TestStore(initialState: state) {
-            StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {},
+            StudyStatsFeature(fetch: { _, _, _ in stats }, reportError: { _ in }, onClose: {},
                                onNavigate: { route in destinations.withValue { $0.append(route) } })
         }
         await store.send(.wordsTapped(.all))
@@ -140,7 +140,7 @@ final class StudyReportFeatureTests: XCTestCase {
         guard case let .words(all) = destinations.value[0],
               case let .words(week) = destinations.value[1],
               case let .word(detail, scope) = destinations.value[2] else { return XCTFail("Expected routes") }
-        XCTAssertEqual(all.start, report.allStart)
+        XCTAssertEqual(all.start, stats.allStart)
         XCTAssertEqual(all.words.first?.total, 2)
         XCTAssertEqual(week.period, .week)
         XCTAssertEqual(week.words.first?.total, 1)
@@ -149,26 +149,26 @@ final class StudyReportFeatureTests: XCTestCase {
     }
 
     func test_mistakeKindClearsSelectionAndPeriodClearsChartSelections() async throws {
-        let report = try makeReport()
-        var state = StudyReportFeature.State()
-        state.report = report
-        state.selectedActivity = report.activity.last?.date
+        let stats = try makeStats()
+        var state = StudyStatsFeature.State()
+        state.stats = stats
+        state.selectedActivity = stats.activity.last?.date
         state.selectedTopic = "travel"
         state.selectedPart = "noun"
         state.selectedMistake = "travel"
         let store = TestStore(initialState: state) {
-            StudyReportFeature(fetch: { _, _, _ in report }, reportError: { _ in }, onClose: {})
+            StudyStatsFeature(fetch: { _, _, _ in stats }, reportError: { _ in }, onClose: {})
         } withDependencies: { $0.uuid = .incrementing }
         await store.send(.mistakeKindChanged(.partOfSpeech)) {
             $0.mistakeKind = .partOfSpeech
             $0.selectedMistake = nil
         }
-        // 로딩 중엔 선택 유지, 새 리포트 도착 시 초기화
+        // 로딩 중엔 선택 유지, 새 통계 도착 시 초기화
         await store.send(.periodChanged(.all)) {
             $0.period = .all
             $0.loadStatus = .loading(self.firstID)
         }
-        await store.receive(.loaded(firstID, report)) {
+        await store.receive(.loaded(firstID, stats)) {
             $0.loadStatus = .idle
             $0.selectedActivity = nil
             $0.selectedTopic = nil
@@ -177,8 +177,8 @@ final class StudyReportFeatureTests: XCTestCase {
         await store.finish()
     }
 
-    private func makeReport(_ period: StudyReportPeriod = .week) throws -> StudyReport {
-        try DefaultFetchStudyReportUseCase.aggregate(.init(histories: [], sessions: []), period: period,
-                                             now: reportDate(), calendar: reportCalendar())
+    private func makeStats(_ period: StudyStatsPeriod = .week) throws -> StudyStats {
+        try DefaultFetchStudyStatsUseCase.aggregate(.init(histories: [], sessions: []), period: period,
+                                             now: statsDate(), calendar: statsCalendar())
     }
 }

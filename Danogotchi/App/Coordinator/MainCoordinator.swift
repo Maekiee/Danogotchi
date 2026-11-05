@@ -53,14 +53,14 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
-    // 학습 리포트
+    // 학습 통계
     func didTapCalendarButton() {
         let nav = UINavigationController()
         let feature = container.makeCalendarFeature(
             onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
             onNavigate: { [weak self, weak nav] destination in
                 guard let nav else { return }
-                self?.showStudyReport(destination, in: nav)
+                self?.showStudyStats(destination, in: nav)
             }
         )
         
@@ -72,29 +72,29 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
 
-    private func showStudyReport(_ destination: StudyReportDestination, in nav: UINavigationController) {
+    private func showStudyStats(_ destination: StudyStatsDestination, in nav: UINavigationController) {
         switch destination {
-        case .history:
-            let feature = container.makeStudyReportFeature(
+        case .stats:
+            let feature = container.makeStudyStatsFeature(
                 onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
                 onNavigate: {[weak self, weak nav] destination in
                     guard let nav else { return }
-                    self?.showStudyReport(destination, in: nav)
+                    self?.showStudyStats(destination, in: nav)
                 })
-            let store = Store(initialState: StudyReportFeature.State()) { feature }
-            nav.pushViewController(UIHostingController(rootView: StudyReportView(store: store)), animated: true)
+            let store = Store(initialState: StudyStatsFeature.State()) { feature }
+            nav.pushViewController(UIHostingController(rootView: StudyStatsView(store: store)), animated: true)
         case let .words(list):
-            let view = StudyReportWordListView(
+            let view = StudyStatsWordListView(
                 list: list,
                 onSelect: { [weak self, weak nav] word in
                     guard let nav else { return }
-                    self?.showStudyReport(.word(word, list), in: nav)
+                    self?.showStudyStats(.word(word, list), in: nav)
                 },
                 onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) }
             )
             nav.pushViewController(UIHostingController(rootView: view), animated: true)
         case let .word(word, _):
-            let view = StudyReportWordDetailView(word: word)
+            let view = StudyStatsWordDetailView(word: word)
             let controller = UIHostingController(rootView: view)
             controller.modalPresentationStyle = .pageSheet
             controller.sheetPresentationController?.detents = [.medium(), .large()]

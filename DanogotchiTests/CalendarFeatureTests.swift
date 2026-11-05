@@ -4,21 +4,21 @@ import XCTest
 
 @MainActor
 final class CalendarFeatureTests: XCTestCase {
-    func test_historyButtonNavigatesToHistory() async {
-        let destinations = LockIsolated<[StudyReportDestination]>([])
+    func test_statsButtonNavigatesToStats() async {
+        let destinations = LockIsolated<[StudyStatsDestination]>([])
         let store = TestStore(initialState: CalendarFeature.State()) {
             CalendarFeature(onClose: {}, onNavigate: { route in destinations.withValue { $0.append(route) } })
         }
 
-        await store.send(.historyButtonTapped)
+        await store.send(.statsButtonTapped)
         await store.finish()
 
-        XCTAssertEqual(destinations.value, [.history])
+        XCTAssertEqual(destinations.value, [.stats])
     }
 
     func test_closeButtonCallsOnCloseWithoutNavigating() async {
         let closeCount = LockIsolated(0)
-        let destinations = LockIsolated<[StudyReportDestination]>([])
+        let destinations = LockIsolated<[StudyStatsDestination]>([])
         let store = TestStore(initialState: CalendarFeature.State()) {
             CalendarFeature(onClose: { closeCount.withValue { $0 += 1 } },
                             onNavigate: { route in destinations.withValue { $0.append(route) } })

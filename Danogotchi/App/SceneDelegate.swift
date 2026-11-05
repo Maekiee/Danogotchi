@@ -4,7 +4,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var appCoordinator: AppFlowCoordinator?
     #if DEBUG
-    private var studyReportTestCoordinator: MainCoordinator?
+    private var studyStatsTestCoordinator: MainCoordinator?
     #endif
     
     
@@ -20,8 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         UITestingSupport.seedMainFlowIfRequested(container: container)
         UITestingSupport.seedThemeSelectedIfRequested(container: container)
         UITestingSupport.seedSolidThemeIfRequested(container: container)
-        if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window, container: container) {
-            studyReportTestCoordinator = coordinator
+        if let coordinator = UITestingSupport.startStudyStatsIfRequested(window: window, container: container) {
+            studyStatsTestCoordinator = coordinator
             return
         }
         #endif

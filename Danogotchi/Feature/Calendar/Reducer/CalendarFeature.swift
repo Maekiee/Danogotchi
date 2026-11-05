@@ -7,18 +7,18 @@ struct CalendarFeature {
     struct State: Equatable { }
     
     enum Action: Equatable {
-        case historyButtonTapped
+        case statsButtonTapped
         case closeButtonTapped
     }
     
     let onClose: @MainActor @Sendable () -> Void
-    let onNavigate: @MainActor @Sendable (StudyReportDestination) -> Void
+    let onNavigate: @MainActor @Sendable (StudyStatsDestination) -> Void
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .historyButtonTapped:
-                return .run { _ in await onNavigate(.history) }
+            case .statsButtonTapped:
+                return .run { _ in await onNavigate(.stats) }
             case .closeButtonTapped:
                 return .run { _ in await onClose() }
             }

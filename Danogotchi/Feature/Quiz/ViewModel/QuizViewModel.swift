@@ -212,7 +212,7 @@ final class QuizViewModel: BaseViewModel {
 
     // 대상 부재와 기록 충돌은 같은 요청의 재시도로 복구 불가
     private static func failure(for error: Error) -> SaveFailure {
-        error is PersistenceError || error is StudyReportDataError ? .unrecoverable : .retryable
+        error is PersistenceError || error is StudyStatsDataError ? .unrecoverable : .retryable
     }
 
     // 정답 단어 데이터, 오답 데이터, 정답 뜻 인덱스
