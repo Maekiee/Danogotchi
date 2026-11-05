@@ -110,7 +110,7 @@ struct StudyStatsSelection: View {
 
 // 단어 학습 카드 UI
 struct StudyStatsWordCard: View {
-    let word: StudyStats.Word
+    let word: VocabStats
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.space12) {

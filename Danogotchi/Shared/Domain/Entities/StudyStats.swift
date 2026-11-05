@@ -32,15 +32,6 @@ struct StudyStatsRecords: Sendable {
 }
 
 struct StudyStats: Equatable, Sendable {
-    struct Word: Equatable, Sendable, Identifiable {
-        let id: UUID
-        var snapshot: LearningHistory
-        var total: Int
-        var correct: Int
-
-        var accuracy: Double { Double(correct) / Double(total) }
-    }
-
     struct Activity: Equatable, Sendable, Identifiable {
         let date: Date
         let count: Int
@@ -75,8 +66,8 @@ struct StudyStats: Equatable, Sendable {
     let weekWordCount: Int
     let monthWordCount: Int
     let recentDays: [Activity]
-    let allWords: [Word]
-    let words: [Word]
+    let allWords: [VocabStats]
+    let words: [VocabStats]
     let periodAnswerCount: Int
     let activity: [Activity]
     let sessions: [Session]

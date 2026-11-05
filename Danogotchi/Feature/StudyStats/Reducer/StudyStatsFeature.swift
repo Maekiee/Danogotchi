@@ -6,13 +6,13 @@ struct StudyStatsWordList: Equatable, Sendable {
     let start: Date
     let end: Date
     let calendar: Calendar
-    let words: [StudyStats.Word]
+    let words: [VocabStats]
 }
 
 enum StudyStatsDestination: Equatable, Sendable {
     case stats
     case words(StudyStatsWordList)
-    case word(StudyStats.Word, StudyStatsWordList)
+    case word(VocabStats, StudyStatsWordList)
 }
 
 @Reducer

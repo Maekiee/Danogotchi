@@ -2,7 +2,7 @@ import SwiftUI
 
 struct StudyStatsWordListView: View {
     let list: StudyStatsWordList
-    let onSelect: (StudyStats.Word) -> Void
+    let onSelect: (VocabStats) -> Void
     let onClose: () -> Void
 
     var body: some View {

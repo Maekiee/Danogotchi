@@ -88,7 +88,7 @@ private struct StudyStatsPreview: View {
         id: UUID(), vocabId: UUID(), isCorrect: true, createAt: date,
         wordSnapshot: "journey", meaningSnapshot: "여행", topicSnapshot: "travel", partOfSpeechSnapshot: "noun"
     )
-    let word = StudyStats.Word(id: snapshot.vocabId, snapshot: snapshot, total: 342, correct: 267)
+    let word = VocabStats(id: snapshot.vocabId, snapshot: snapshot, total: 342, correct: 267)
     StudyStatsWordDetailView(word: word)
 }
 #endif

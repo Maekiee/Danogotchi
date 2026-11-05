@@ -67,14 +67,14 @@ final class DefaultFetchStudyStatsUseCase: FetchStudyStatsUseCase {
         )
     }
 
-    private static func words(from rows: [LearningHistory]) -> [StudyStats.Word] {
+    private static func words(from rows: [LearningHistory]) -> [VocabStats] {
         let grouped = Dictionary(grouping: rows, by: \.statsWordId)
-        let words = grouped.compactMap { id, answers -> StudyStats.Word? in
+        let words = grouped.compactMap { id, answers -> VocabStats? in
             guard let latest = answers.max(by: {
                 $0.createAt == $1.createAt ? $0.id.uuidString < $1.id.uuidString : $0.createAt < $1.createAt
             }) else { return nil }
-            return StudyStats.Word(id: id, snapshot: latest, total: answers.count,
-                                    correct: answers.filter(\.isCorrect).count)
+            return VocabStats(id: id, snapshot: latest, total: answers.count,
+                              correct: answers.filter(\.isCorrect).count)
         }
         return words.sorted {
             if $0.correct != $1.correct { return $0.correct > $1.correct }

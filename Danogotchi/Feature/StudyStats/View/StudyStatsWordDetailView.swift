@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct StudyStatsWordDetailView: View {
-    let word: StudyStats.Word
+    let word: VocabStats
 
     var body: some View {
         ScrollView {
