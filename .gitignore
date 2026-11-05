@@ -2,6 +2,7 @@ Secret.swift
 Secret/
 .claude/settings.local.json
 output/
+/docs/readme-guide.md
 /AGENTS.md
 /CLAUDE.md
 
