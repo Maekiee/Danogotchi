@@ -9,6 +9,7 @@ enum AppColor {
     static let lavender = named("lavender")
     static let butter = named("butter")
     static let ocean = named("ocean")
+    static let grass = named("grass")  // 캘린더 잔디·달력 농도, 칩, 오늘 테두리
 
     static let white = named("white")
     static let black = named("black")
