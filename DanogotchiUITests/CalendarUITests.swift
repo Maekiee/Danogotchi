@@ -1,6 +1,6 @@
 import XCTest
 
-// CALENDAR_UI_TEST 예시 기록: 기준 2026-11-03(화), 8/10 1개, 10/15 5개, 10/20 15개, 11/1 2개, 11/2 1개
+// CALENDAR_UI_TEST 예시 기록: 기준 2026-11-03(화), 8/10 1개, 10/15 5개, 10/20 15개, 10/22 25개, 10/27 45개, 10/29 61개, 11/1 2개, 11/2 1개
 @MainActor
 final class CalendarUITests: XCTestCase {
     func test_opensOnTodayAndDateTapShowsDailyWordsAndDetail() {
@@ -8,9 +8,9 @@ final class CalendarUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["오늘은 아직 학습 기록이 없어요"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.element("calendar.month").label.contains("2026년 11월"))
         XCTAssertTrue(app.otherElements["연속 학습 2일"].exists)
-        XCTAssertTrue(app.otherElements["총 학습일 5일"].exists)
+        XCTAssertTrue(app.otherElements["총 학습일 8일"].exists)
         let heatmap = app.otherElements["최근 1년 학습 기록"]
-        XCTAssertEqual(heatmap.value as? String, "5일 학습, 가장 많이 학습한 날 10월 20일 15개")
+        XCTAssertEqual(heatmap.value as? String, "8일 학습, 가장 많이 학습한 날 10월 29일 61개")
         XCTAssertFalse(app.buttons["다음 달"].isEnabled)
         XCTAssertFalse(app.buttons["오늘"].isEnabled)
         attachScreen(app, name: "calendar-today")

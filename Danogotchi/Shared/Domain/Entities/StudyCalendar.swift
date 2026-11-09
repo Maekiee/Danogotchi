@@ -13,9 +13,10 @@ struct StudyCalendar: Equatable, Sendable {
         var level: Int {
             switch words.count {
             case 0: return 0
-            case 1...4: return 1
-            case 5...14: return 2
-            default: return 3
+            case 1...20: return 1
+            case 21...40: return 2
+            case 41...60: return 3
+            default: return 4
             }
         }
     }

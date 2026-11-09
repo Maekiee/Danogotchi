@@ -25,9 +25,9 @@ enum CalendarStyle {
         formatter(template, calendar: calendar).string(from: date)
     }
 
-    // 농도 1~3단계 색, 0단계는 화면마다 다르다
+    // 농도 1~4단계 색, 0단계는 화면마다 다르다
     static func levelColor(_ level: Int) -> Color {
-        Color(AppColor.grass).opacity([0, 0.3, 0.6, 1][min(max(level, 0), 3)])
+        Color(AppColor.grass).opacity([0, 0.25, 0.5, 0.75, 1][min(max(level, 0), 4)])
     }
 
     static func partTitle(_ rawValue: String?) -> String {

@@ -89,7 +89,7 @@ struct CalendarMonthGrid: View {
         let color: Color = isAdjacent ? Color(AppColor.gray45).opacity(0.5)
             : isFuture ? Color(AppColor.textSecondary).opacity(0.4)
             : level == 0 ? Color(AppColor.textSecondary)
-            : level == 3 ? .white : Color(AppColor.textPrimary)
+            : level == 4 ? .white : Color(AppColor.textPrimary)
         let content = VStack(spacing: AppSpacing.space2) {
             Text("\(calendar.calendar.component(.day, from: date))")
                 .font(CalendarStyle.font(isSelected ? AppFont.bodyEmphasis : AppFont.body))

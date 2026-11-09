@@ -41,9 +41,15 @@ extension UITestingSupport {
             CalendarExample(word: "reluctant", meaning: "꺼리는", part: "adj"),
             CalendarExample(word: "schedule", meaning: "일정", part: "noun")
         ]
-        let wordIDs = words.map { _ in UUID() }
-        // (월, 일, 단어 수): 농도 1·2·3단계, 9월은 기록 없는 달, 오늘 미학습 + 2일 연속
-        let days = [(8, 10, 1), (10, 15, 5), (10, 20, 15), (11, 1, 2), (11, 2, 1)]
+        // (월, 일, 단어 수): 농도 1~4단계, 9월은 기록 없는 달, 오늘 미학습 + 2일 연속
+        let days = [(8, 10, 1), (10, 15, 5), (10, 20, 15), (10, 22, 25), (10, 27, 45), (10, 29, 61), (11, 1, 2), (11, 2, 1)]
+        // 15개를 넘는 날은 목록을 돌려 쓰고 번호를 붙인다 (예: journey2)
+        let pool = (0..<(days.map { $0.2 }.max() ?? 0)).map { index in
+            let base = words[index % words.count]
+            let round = index / words.count
+            return CalendarExample(word: round == 0 ? base.word : "\(base.word)\(round + 1)", meaning: base.meaning, part: base.part)
+        }
+        let wordIDs = pool.map { _ in UUID() }
         let histories = days.flatMap { month, day, count -> [LearningHistory] in
             guard let date = calendar.date(from: DateComponents(year: 2026, month: month, day: day, hour: 9)) else { return [] }
             let session = UUID()
@@ -53,8 +59,8 @@ extension UITestingSupport {
                     LearningHistory(
                         id: UUID(), vocabId: wordIDs[index], isCorrect: index == 0 || attempt == 0,
                         createAt: date.addingTimeInterval(Double(index * 2 + attempt)),
-                        wordSnapshot: words[index].word, meaningSnapshot: words[index].meaning,
-                        topicSnapshot: "travel", partOfSpeechSnapshot: words[index].part, sessionId: session
+                        wordSnapshot: pool[index].word, meaningSnapshot: pool[index].meaning,
+                        topicSnapshot: "travel", partOfSpeechSnapshot: pool[index].part, sessionId: session
                     )
                 }
             }

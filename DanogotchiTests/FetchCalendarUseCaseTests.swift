@@ -7,11 +7,11 @@ final class FetchCalendarUseCaseTests: XCTestCase {
 
     func test_levelBoundariesUseUniqueWordCount() throws {
         let word = try XCTUnwrap([makeQuizAnswer(makeQuizWords(1)[0], createAt: now).history].vocabStats().first)
-        let levels = [0, 1, 4, 5, 14, 15].map { count in
+        let levels = [0, 1, 20, 21, 40, 41, 60, 61].map { count in
             StudyCalendar.Day(date: now, words: Array(repeating: word, count: count),
                               answerCount: count, correctCount: count, quizCount: 1).level
         }
-        XCTAssertEqual(levels, [0, 1, 1, 2, 2, 3])
+        XCTAssertEqual(levels, [0, 1, 1, 2, 2, 3, 3, 4])
     }
 
     func test_sameWordOnSameDayCountsOnceAndSumsAnswers() throws {
