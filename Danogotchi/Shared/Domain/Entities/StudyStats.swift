@@ -1,17 +1,5 @@
 import Foundation
 
-enum StudyStatsPeriod: String, CaseIterable, Sendable {
-    case week, month, all
-
-    func start(now: Date, calendar: Calendar) -> Date? {
-        switch self {
-        case .week: return calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: now))
-        case .month: return calendar.dateInterval(of: .month, for: now)?.start
-        case .all: return nil
-        }
-    }
-}
-
 enum StudyStatsCategoryKind: String, CaseIterable, Sendable {
     case topic, partOfSpeech
 
@@ -26,58 +14,38 @@ enum StudyStatsCategoryKind: String, CaseIterable, Sendable {
     }
 }
 
+// 많이 틀린 단어 기준, 누적 필터
+enum StudyStatsMistakeThreshold: Int, CaseIterable, Sendable {
+    case seventy = 70, forty = 40, twenty = 20
+
+    // 화면 표기(StudyStatsStyle.percent)와 같은 반올림 정수로 판정
+    func contains(_ word: VocabStats) -> Bool {
+        Int((Double(word.correct) / Double(word.total) * 100).rounded()) <= rawValue
+    }
+}
+
 struct StudyStatsRecords: Sendable {
     let histories: [LearningHistory]
     let sessions: [QuizSession]
 }
 
 struct StudyStats: Equatable, Sendable {
-    struct Activity: Equatable, Sendable, Identifiable {
-        let date: Date
-        let count: Int
-        var id: Date { date }
-        // count가 Int라 isEmpty 대체 불가 (empty_count 오탐)
-        // swiftlint:disable:next empty_count
-        var hasStudied: Bool { count > 0 }
-    }
-
-    struct Session: Equatable, Sendable, Identifiable {
-        let id: UUID
-        let completedAt: Date
-        let correct: Int
-        let total: Int
-        var accuracy: Double { Double(correct) / Double(total) }
-    }
-
     struct Category: Equatable, Sendable, Identifiable {
         let id: String
         var total: Int = 0
-        var wrong: Int = 0
     }
 
-    let period: StudyStatsPeriod
     let now: Date
     let calendar: Calendar
-    let periodStart: Date
-    let allStart: Date
+    let start: Date
     let totalAnswers: Int
     let totalCorrect: Int
-    let streak: Int
-    let weekWordCount: Int
-    let monthWordCount: Int
-    let recentDays: [Activity]
-    let allWords: [VocabStats]
     let words: [VocabStats]
-    let periodAnswerCount: Int
-    let activity: [Activity]
-    let sessions: [Session]
+    let mistakeWords: [VocabStats]
     let topics: [Category]
     let parts: [Category]
-    let mistakesByPart: [Category]
 
     var accuracy: Double? {
         totalAnswers == 0 ? nil : Double(totalCorrect) / Double(totalAnswers)
     }
-
-    var hasActivity: Bool { activity.contains(where: \.hasStudied) }
 }
