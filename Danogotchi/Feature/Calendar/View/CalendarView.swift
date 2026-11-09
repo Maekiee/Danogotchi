@@ -5,7 +5,9 @@ struct CalendarView: View {
     let store: StoreOf<CalendarFeature>
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isPickingMonth = false
+    @State private var slideEdge: Edge = .trailing
 
     var body: some View {
         ScrollView {
@@ -16,14 +18,15 @@ struct CalendarView: View {
                     }
                     chips(calendar)
                     CalendarCard {
-                        CalendarMonthGrid(calendar: calendar, month: month, selected: store.selectedDate) {
+                        CalendarMonthGrid(calendar: calendar, month: month, selected: store.selectedDate,
+                                          slideEdge: slideEdge) {
                             store.send(.dateTapped($0))
                         }
                         // 좌우 스와이프로 달 이동, simultaneous라 세로 스크롤·셀 탭을 막지 않음
                         .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { value in
                             let width = value.translation.width
                             guard abs(width) > 50, abs(width) > abs(value.translation.height) else { return }
-                            store.send(.monthMoved(width < 0 ? 1 : -1))
+                            slideMonth(width < 0 ? 1 : -1)
                         })
                         controls(calendar, month: month)
                     }
@@ -117,32 +120,42 @@ struct CalendarView: View {
                 .presentationDragIndicator(.visible)
             }
             HStack(spacing: AppSpacing.space8) {
-                controlButton(disabled: isToday, action: .todayTapped) {
-                    Text("오늘").font(CalendarStyle.font(AppFont.label, relativeTo: .subheadline))
-                        .padding(.horizontal, AppSpacing.space12)
-                        .frame(minHeight: 44)
+                controlButton(disabled: isToday, label: Text("오늘")
+                    .font(CalendarStyle.font(AppFont.label, relativeTo: .subheadline))
+                    .padding(.horizontal, AppSpacing.space12)
+                    .frame(minHeight: 44)) {
+                    store.send(.todayTapped)
                 }
-                controlButton(disabled: month <= calendar.oldestMonth, action: .monthMoved(-1)) {
-                    Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold))
-                        .frame(width: 44, height: 44)
+                controlButton(disabled: month <= calendar.oldestMonth, label: Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 44, height: 44)) {
+                    slideMonth(-1)
                 }
                 .accessibilityLabel("이전 달")
-                controlButton(disabled: month >= calendar.currentMonth, action: .monthMoved(1)) {
-                    Image(systemName: "chevron.right").font(.system(size: 16, weight: .semibold))
-                        .frame(width: 44, height: 44)
+                controlButton(disabled: month >= calendar.currentMonth, label: Image(systemName: "chevron.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 44, height: 44)) {
+                    slideMonth(1)
                 }
                 .accessibilityLabel("다음 달")
             }
         }
     }
 
-    private func controlButton<Label: View>(disabled: Bool, action: CalendarFeature.Action,
-                                            @ViewBuilder label: () -> Label) -> some View {
-        Button { store.send(action) } label: {
-            label().background(Color(AppColor.gray45).opacity(0.12), in: Capsule())
+    private func controlButton(disabled: Bool, label: some View, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            label.background(Color(AppColor.gray45).opacity(0.12), in: Capsule())
         }
         .buttonStyle(CalendarControlStyle())
         .disabled(disabled)
+    }
+
+    // 방향을 먼저 그려야 빠지는 달도 같은 방향으로 밀림(빠지는 뷰는 마지막에 그려진 transition을 씀)
+    private func slideMonth(_ offset: Int) {
+        slideEdge = offset > 0 ? .trailing : .leading
+        Task { @MainActor in
+            store.send(.monthMoved(offset), animation: reduceMotion ? nil : .easeInOut(duration: 0.25))
+        }
     }
 
     @ViewBuilder

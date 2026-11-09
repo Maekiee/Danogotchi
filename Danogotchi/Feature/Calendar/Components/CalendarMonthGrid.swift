@@ -5,6 +5,8 @@ struct CalendarMonthGrid: View {
     let calendar: StudyCalendar
     let month: Date
     let selected: Date?
+    // 새 달 날짜가 들어오는 쪽, 애니메이션 트랜잭션일 때만 밀림
+    let slideEdge: Edge
     let onSelect: (Date) -> Void
 
     private var columns: [GridItem] { Array(repeating: GridItem(.flexible(), spacing: AppSpacing.space4), count: 7) }
@@ -32,9 +34,14 @@ struct CalendarMonthGrid: View {
                         .accessibilityHidden(true)
                 }
             }
-            LazyVGrid(columns: columns, spacing: AppSpacing.space4) {
-                ForEach(dates, id: \.self) { date in cell(date, label: formatter.string(from: date)) }
+            ZStack {
+                LazyVGrid(columns: columns, spacing: AppSpacing.space4) {
+                    ForEach(dates, id: \.self) { date in cell(date, label: formatter.string(from: date)) }
+                }
+                .id(month)
+                .transition(.push(from: slideEdge))
             }
+            .clipped()
         }
     }
 

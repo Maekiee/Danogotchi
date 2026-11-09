@@ -67,17 +67,16 @@ final class CalendarUITests: XCTestCase {
 
     func test_swipeMovesMonthButNotIntoFuture() {
         let app = launchCalendar()
-        let month = app.element("calendar.month")
         let november = app.buttons["11월 2일 월요일, 학습 단어 1개"]
         XCTAssertTrue(november.waitForExistence(timeout: 5))
         drag(november, by: 160)
         XCTAssertTrue(app.buttons["10월 15일 목요일, 학습 단어 5개"].waitForExistence(timeout: 5))
-        XCTAssertTrue(month.label.contains("2026년 10월"))
+        XCTAssertTrue(waitForMonth("2026년 10월", in: app))
         drag(app.buttons["10월 15일 목요일, 학습 단어 5개"], by: -160)
         XCTAssertTrue(november.waitForExistence(timeout: 5))
         // 화면 밖으로 끌지 않도록 가운데 열(오늘)에서 시작
         drag(app.buttons["11월 3일 화요일, 학습 안 함"], by: -160)
-        XCTAssertTrue(month.label.contains("2026년 11월"))
+        XCTAssertTrue(waitForMonth("2026년 11월", in: app))
         XCTAssertFalse(app.buttons["다음 달"].isEnabled)
     }
 
@@ -91,7 +90,7 @@ final class CalendarUITests: XCTestCase {
 
         // 기록이 없어도 과거 달로 이동하고 오늘로 돌아온다
         app.buttons["이전 달"].tap()
-        XCTAssertTrue(app.element("calendar.month").label.contains("2026년 10월"))
+        XCTAssertTrue(waitForMonth("2026년 10월", in: app))
         XCTAssertTrue(app.buttons["오늘"].waitForEnabled(true))
         app.buttons["오늘"].tap()
         XCTAssertTrue(app.element("calendar.month").label.contains("2026년 11월"))
@@ -124,6 +123,13 @@ final class CalendarUITests: XCTestCase {
         app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
         return app
+    }
+
+    // 스와이프·‹ ›는 한 틱 뒤 애니메이션과 함께 달이 바뀌어 라벨을 기다린다
+    private func waitForMonth(_ text: String, in app: XCUIApplication) -> Bool {
+        let predicate = NSPredicate(format: "label CONTAINS %@", text)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: app.element("calendar.month"))
+        return XCTWaiter().wait(for: [expectation], timeout: 5) == .completed
     }
 
     // 셀이 작아 swipeLeft/Right 거리가 짧을 수 있어 좌표로 가로 드래그
