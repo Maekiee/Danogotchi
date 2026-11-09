@@ -7,7 +7,6 @@ struct CalendarView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isPickingMonth = false
-    @State private var slideEdge: Edge = .trailing
 
     var body: some View {
         ScrollView {
@@ -19,15 +18,8 @@ struct CalendarView: View {
                     chips(calendar)
                     CalendarCard {
                         CalendarMonthGrid(calendar: calendar, month: month, selected: store.selectedDate,
-                                          slideEdge: slideEdge) {
-                            store.send(.dateTapped($0))
-                        }
-                        // 좌우 스와이프로 달 이동, simultaneous라 세로 스크롤·셀 탭을 막지 않음
-                        .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { value in
-                            let width = value.translation.width
-                            guard abs(width) > 50, abs(width) > abs(value.translation.height) else { return }
-                            slideMonth(width < 0 ? 1 : -1)
-                        })
+                                          onMonthChange: { store.send(.monthPicked($0)) },
+                                          onSelect: { store.send(.dateTapped($0)) })
                         controls(calendar, month: month)
                     }
                     // 다시 읽기 실패는 기존 화면을 두고 선택 영역 위에 알린다
@@ -150,12 +142,9 @@ struct CalendarView: View {
         .disabled(disabled)
     }
 
-    // 방향을 먼저 그려야 빠지는 달도 같은 방향으로 밀림(빠지는 뷰는 마지막에 그려진 transition을 씀)
+    // ‹ ›는 페이지를 애니메이션으로 넘김, 동작 줄이기면 바로 바꿈
     private func slideMonth(_ offset: Int) {
-        slideEdge = offset > 0 ? .trailing : .leading
-        Task { @MainActor in
-            store.send(.monthMoved(offset), animation: reduceMotion ? nil : .easeInOut(duration: 0.25))
-        }
+        store.send(.monthMoved(offset), animation: reduceMotion ? nil : .easeInOut(duration: 0.25))
     }
 
     @ViewBuilder

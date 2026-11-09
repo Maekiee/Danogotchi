@@ -1,22 +1,34 @@
 import SwiftUI
 
-// 요일 머리글 + 6행 고정 월 달력 UI
+// 요일 머리글 + 달마다 한 페이지인 6행 달력 UI, 손가락을 따라 넘어감
 struct CalendarMonthGrid: View {
     let calendar: StudyCalendar
     let month: Date
     let selected: Date?
-    // 새 달 날짜가 들어오는 쪽, 애니메이션 트랜잭션일 때만 밀림
-    let slideEdge: Edge
+    // 손가락으로 넘겨 바뀐 달
+    let onMonthChange: (Date) -> Void
     let onSelect: (Date) -> Void
 
     private var columns: [GridItem] { Array(repeating: GridItem(.flexible(), spacing: AppSpacing.space4), count: 7) }
 
+    // 최근 5개 연도 1월부터 현재 달까지, 미래 페이지가 없어 현재 달에서 더 넘어가지 않음
+    private var pages: [Date] {
+        var result: [Date] = []
+        var page = calendar.oldestMonth
+        while page <= calendar.currentMonth {
+            result.append(page)
+            guard let next = calendar.calendar.date(byAdding: .month, value: 1, to: page), next > page else { break }
+            page = next
+        }
+        return result
+    }
+
     // 첫 주 시작일부터 42일, 앞뒤는 이웃 달
-    private var dates: [Date] {
+    private func dates(in page: Date) -> [Date] {
         let cal = calendar.calendar
-        let offset = (cal.component(.weekday, from: month) - cal.firstWeekday + 7) % 7
+        let offset = (cal.component(.weekday, from: page) - cal.firstWeekday + 7) % 7
         return (0..<42).compactMap { index in
-            cal.date(byAdding: .day, value: index - offset, to: month).map { cal.startOfDay(for: $0) }
+            cal.date(byAdding: .day, value: index - offset, to: page).map { cal.startOfDay(for: $0) }
         }
     }
 
@@ -34,14 +46,27 @@ struct CalendarMonthGrid: View {
                         .accessibilityHidden(true)
                 }
             }
-            ZStack {
-                LazyVGrid(columns: columns, spacing: AppSpacing.space4) {
-                    ForEach(dates, id: \.self) { date in cell(date, label: formatter.string(from: date)) }
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 0) {
+                    ForEach(pages, id: \.self) { page in
+                        LazyVGrid(columns: columns, spacing: AppSpacing.space4) {
+                            ForEach(dates(in: page), id: \.self) { date in
+                                cell(date, page: page, label: formatter.string(from: date))
+                            }
+                        }
+                        .containerRelativeFrame(.horizontal)
+                        // 보고 있는 달만 VoiceOver에 노출, 달 이동은 ‹ › 버튼
+                        .accessibilityHidden(page != month)
+                    }
                 }
-                .id(month)
-                .transition(.push(from: slideEdge))
+                .scrollTargetLayout()
             }
-            .clipped()
+            .scrollTargetBehavior(.paging)
+            .scrollIndicators(.hidden)
+            .scrollPosition(id: Binding(get: { month }, set: { page in
+                // 같은 달 재보고는 무시해야 선택이 풀리지 않음
+                if let page, page != month { onMonthChange(page) }
+            }), anchor: .center)
         }
     }
 
@@ -54,8 +79,8 @@ struct CalendarMonthGrid: View {
     }
 
     @ViewBuilder
-    private func cell(_ date: Date, label: String) -> some View {
-        let isAdjacent = calendar.month(of: date) != month
+    private func cell(_ date: Date, page: Date, label: String) -> some View {
+        let isAdjacent = calendar.month(of: date) != page
         let isFuture = date > calendar.now
         let day = calendar.days[date]
         let level = isAdjacent || isFuture ? 0 : day?.level ?? 0

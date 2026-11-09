@@ -132,10 +132,11 @@ final class CalendarUITests: XCTestCase {
         return XCTWaiter().wait(for: [expectation], timeout: 5) == .completed
     }
 
-    // 셀이 작아 swipeLeft/Right 거리가 짧을 수 있어 좌표로 가로 드래그
+    // 셀이 작아 swipeLeft/Right 거리가 짧을 수 있어 좌표로 빠르게 가로 플릭(페이징은 속도로 넘어감)
     private func drag(_ element: XCUIElement, by offset: CGFloat) {
         let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: offset, dy: 0)))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: offset, dy: 0)),
+                    withVelocity: .fast, thenHoldForDuration: 0)
     }
 
     private func attachScreen(_ app: XCUIApplication, name: String) {
