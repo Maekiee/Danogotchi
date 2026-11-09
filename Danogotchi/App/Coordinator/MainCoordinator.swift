@@ -93,9 +93,11 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
                 onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) }
             )
             nav.pushViewController(UIHostingController(rootView: view), animated: true)
-        case let .word(word, _):
-            let view = StudyStatsWordDetailView(word: word)
-            let controller = UIHostingController(rootView: view)
+        case let .word(word, isDaily):
+            // 캘린더는 그날 풀이("이날"), 학습 통계는 전체 기간
+            let controller: UIViewController = isDaily
+                ? UIHostingController(rootView: CalendarWordDetailView(word: word))
+                : UIHostingController(rootView: StudyStatsWordDetailView(word: word))
             controller.modalPresentationStyle = .pageSheet
             controller.sheetPresentationController?.detents = [.medium(), .large()]
             controller.sheetPresentationController?.prefersGrabberVisible = true
