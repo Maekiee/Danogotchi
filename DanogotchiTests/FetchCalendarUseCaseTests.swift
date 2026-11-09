@@ -48,16 +48,15 @@ final class FetchCalendarUseCaseTests: XCTestCase {
         XCTAssertEqual(utc.days.values.first?.answerCount, 2)
     }
 
-    func test_earliestMonthIsFirstRecordMonthOrCurrentMonthWhenEmpty() throws {
+    // 기록 유무와 상관없이 현재 연도 포함 최근 5개 연도의 1월
+    func test_oldestMonthIsJanuaryOfFourYearsBack() throws {
         let word = makeQuizWords(1)[0]
-        let stats = try aggregate([makeQuizAnswer(word, createAt: statsDate(2026, 5, 11)).history,
-                                   makeQuizAnswer(word, createAt: now).history])
-        XCTAssertEqual(stats.earliestMonth, statsDate(2026, 5, 1, 0))
-        XCTAssertEqual(stats.months, [9, 8, 7, 6, 5].map { statsDate(2026, $0, 1, 0) })
+        let stats = try aggregate([makeQuizAnswer(word, createAt: statsDate(2026, 5, 11)).history])
+        XCTAssertEqual(stats.oldestMonth, statsDate(2022, 1, 1, 0))
+        XCTAssertEqual(stats.currentMonth, statsDate(2026, 9, 1, 0))
 
         let empty = try aggregate([])
-        XCTAssertEqual(empty.earliestMonth, statsDate(2026, 9, 1, 0))
-        XCTAssertEqual(empty.months, [statsDate(2026, 9, 1, 0)])
+        XCTAssertEqual(empty.oldestMonth, statsDate(2022, 1, 1, 0))
         XCTAssertTrue(empty.days.isEmpty)
         XCTAssertEqual(empty.streak, 0)
         XCTAssertEqual(empty.studiedDayCount, 0)
@@ -70,7 +69,6 @@ final class FetchCalendarUseCaseTests: XCTestCase {
                                    makeQuizAnswer(word, createAt: statsDate(2026, 10, 1)).history])
         XCTAssertEqual(stats.studiedDayCount, 1)
         XCTAssertEqual(stats.days[calendar.startOfDay(for: now)]?.answerCount, 1)
-        XCTAssertEqual(stats.earliestMonth, statsDate(2026, 9, 1, 0))
     }
 
     // FetchStudyStatsUseCase 연속일 테스트를 옮겨 옴

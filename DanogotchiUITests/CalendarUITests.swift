@@ -35,29 +35,67 @@ final class CalendarUITests: XCTestCase {
         attachScreen(app, name: "calendar-word-detail")
     }
 
-    func test_monthMenuStopsAtEarliestMonthAndShowsEmptyMonth() {
+    func test_monthSheetPicksPastMonthAndStopsAtOldestYear() {
         let app = launchCalendar()
-        let menu = app.element("calendar.month")
-        XCTAssertTrue(menu.waitForExistence(timeout: 5))
-        menu.tap()
-        app.buttons["2026년 9월"].tap()
+        let month = app.element("calendar.month")
+        XCTAssertTrue(month.waitForExistence(timeout: 5))
+        month.tap()
+        XCTAssertTrue(app.staticTexts["월 선택"].waitForExistence(timeout: 5))
+        app.pickerWheels.element(boundBy: 0).adjust(toPickerWheelValue: "9월")
+        attachScreen(app, name: "calendar-month-sheet")
+        app.buttons["선택한 월 보기"].tap()
         XCTAssertTrue(app.staticTexts["이 달에는 학습 기록이 없어요"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["오늘은 아직 학습 기록이 없어요"].exists)
-        app.buttons["이전 달"].tap()
-        XCTAssertTrue(menu.waitForLabel("2026년 8월") || menu.label.contains("2026년 8월"))
+        XCTAssertTrue(month.label.contains("2026년 9월"))
+
+        // 연도 휠은 현재 연도 포함 5개(2022~2026), 가장 이른 달에서는 ‹ 비활성
+        month.tap()
+        app.pickerWheels.element(boundBy: 1).adjust(toPickerWheelValue: "2022")
+        app.pickerWheels.element(boundBy: 0).adjust(toPickerWheelValue: "1월")
+        app.buttons["선택한 월 보기"].tap()
+        XCTAssertTrue(month.waitForLabel("2022년 1월") || month.label.contains("2022년 1월"))
         XCTAssertTrue(app.buttons["이전 달"].waitForEnabled(false))
+
+        // 취소는 달을 바꾸지 않는다
+        month.tap()
+        app.pickerWheels.element(boundBy: 1).adjust(toPickerWheelValue: "2025")
+        app.buttons["취소"].tap()
+        XCTAssertTrue(app.staticTexts["월 선택"].waitForDisappearance())
+        XCTAssertTrue(month.label.contains("2022년 1월"))
         app.buttons["오늘"].tap()
         XCTAssertTrue(app.staticTexts["오늘은 아직 학습 기록이 없어요"].waitForExistence(timeout: 5))
     }
 
-    func test_emptyStateKeepsStatsButton() {
+    func test_swipeMovesMonthButNotIntoFuture() {
+        let app = launchCalendar()
+        let month = app.element("calendar.month")
+        let november = app.buttons["11월 2일 월요일, 학습 단어 1개"]
+        XCTAssertTrue(november.waitForExistence(timeout: 5))
+        drag(november, by: 160)
+        XCTAssertTrue(app.buttons["10월 15일 목요일, 학습 단어 5개"].waitForExistence(timeout: 5))
+        XCTAssertTrue(month.label.contains("2026년 10월"))
+        drag(app.buttons["10월 15일 목요일, 학습 단어 5개"], by: -160)
+        XCTAssertTrue(november.waitForExistence(timeout: 5))
+        // 화면 밖으로 끌지 않도록 가운데 열(오늘)에서 시작
+        drag(app.buttons["11월 3일 화요일, 학습 안 함"], by: -160)
+        XCTAssertTrue(month.label.contains("2026년 11월"))
+        XCTAssertFalse(app.buttons["다음 달"].isEnabled)
+    }
+
+    func test_emptyStateKeepsStatsButtonAndMovesToPastMonths() {
         let app = launchCalendar(scenario: "empty")
         XCTAssertTrue(app.staticTexts["학습을 시작하면 잔디와 달력이 채워져요"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.otherElements["연속 학습 0일"].exists)
         XCTAssertFalse(app.buttons["오늘"].isEnabled)
-        XCTAssertFalse(app.buttons["이전 달"].isEnabled)
         XCTAssertFalse(app.staticTexts["날짜를 누르면 그날 학습한 단어를 볼 수 있어요"].exists)
         attachScreen(app, name: "calendar-empty")
+
+        // 기록이 없어도 과거 달로 이동하고 오늘로 돌아온다
+        app.buttons["이전 달"].tap()
+        XCTAssertTrue(app.element("calendar.month").label.contains("2026년 10월"))
+        XCTAssertTrue(app.buttons["오늘"].waitForEnabled(true))
+        app.buttons["오늘"].tap()
+        XCTAssertTrue(app.element("calendar.month").label.contains("2026년 11월"))
+
         app.buttons["calendar.stats"].tap()
         XCTAssertTrue(app.navigationBars["학습 통계"].waitForExistence(timeout: 10))
     }
@@ -86,6 +124,12 @@ final class CalendarUITests: XCTestCase {
         app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
         return app
+    }
+
+    // 셀이 작아 swipeLeft/Right 거리가 짧을 수 있어 좌표로 가로 드래그
+    private func drag(_ element: XCUIElement, by offset: CGFloat) {
+        let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: offset, dy: 0)))
     }
 
     private func attachScreen(_ app: XCUIApplication, name: String) {

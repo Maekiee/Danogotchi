@@ -23,7 +23,6 @@ struct StudyCalendar: Equatable, Sendable {
     let now: Date
     let calendar: Calendar
     let days: [Date: Day]
-    let earliestMonth: Date
     let streak: Int
 
     var studiedDayCount: Int { days.count }
@@ -34,15 +33,9 @@ struct StudyCalendar: Equatable, Sendable {
         calendar.dateInterval(of: .month, for: date)?.start ?? calendar.startOfDay(for: date)
     }
 
-    // 현재 달부터 earliestMonth까지 최신순
-    var months: [Date] {
-        var result: [Date] = []
-        var month = currentMonth
-        while month >= earliestMonth {
-            result.append(month)
-            guard let previous = calendar.date(byAdding: .month, value: -1, to: month), previous < month else { break }
-            month = previous
-        }
-        return result
+    // 이동 가능한 가장 이른 달: 현재 연도 포함 최근 5개 연도의 1월
+    var oldestMonth: Date {
+        let year = calendar.component(.year, from: now) - 4
+        return calendar.date(from: DateComponents(year: year, month: 1, day: 1)) ?? currentMonth
     }
 }

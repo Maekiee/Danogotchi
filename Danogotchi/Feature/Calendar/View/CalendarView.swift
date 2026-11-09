@@ -5,6 +5,7 @@ struct CalendarView: View {
     let store: StoreOf<CalendarFeature>
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var isPickingMonth = false
 
     var body: some View {
         ScrollView {
@@ -18,14 +19,13 @@ struct CalendarView: View {
                         CalendarMonthGrid(calendar: calendar, month: month, selected: store.selectedDate) {
                             store.send(.dateTapped($0))
                         }
+                        // 좌우 스와이프로 달 이동, simultaneous라 세로 스크롤·셀 탭을 막지 않음
+                        .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { value in
+                            let width = value.translation.width
+                            guard abs(width) > 50, abs(width) > abs(value.translation.height) else { return }
+                            store.send(.monthMoved(width < 0 ? 1 : -1))
+                        })
                         controls(calendar, month: month)
-                        if !calendar.days.isEmpty {
-                            Text("날짜를 누르면 그날 학습한 단어를 볼 수 있어요")
-                                .font(CalendarStyle.font(AppFont.footnote, relativeTo: .footnote))
-                                .foregroundStyle(Color(AppColor.textSecondary))
-                                .multilineTextAlignment(.center)
-                                .frame(maxWidth: .infinity)
-                        }
                     }
                     // 다시 읽기 실패는 기존 화면을 두고 선택 영역 위에 알린다
                     if store.loadStatus == .failed {
@@ -87,19 +87,12 @@ struct CalendarView: View {
 
     // 월 메뉴 · 오늘 · ‹ ›, 접근성 글자 크기에서는 두 줄
     private func controls(_ calendar: StudyCalendar, month: Date) -> some View {
-        let isEmpty = calendar.days.isEmpty
         let isToday = month == calendar.currentMonth && store.selectedDate == calendar.today
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(spacing: AppSpacing.space8))
             : AnyLayout(HStackLayout(spacing: AppSpacing.space8))
         return layout {
-            Menu {
-                Picker("월 선택", selection: Binding(get: { month }, set: { store.send(.monthPicked($0)) })) {
-                    ForEach(calendar.months, id: \.self) { item in
-                        Text(CalendarStyle.date(item, calendar: calendar.calendar, template: "yMMM")).tag(item)
-                    }
-                }
-            } label: {
+            Button { isPickingMonth = true } label: {
                 HStack(spacing: AppSpacing.space4) {
                     Text(CalendarStyle.date(month, calendar: calendar.calendar, template: "yMMM"))
                         .font(CalendarStyle.font(AppFont.bodyEmphasis))
@@ -112,14 +105,24 @@ struct CalendarView: View {
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .background(Color(AppColor.gray45).opacity(0.12), in: Capsule())
             }
+            .buttonStyle(CalendarControlStyle())
             .accessibilityIdentifier("calendar.month")
+            // 화면 안 입력 컨트롤이라 Coordinator 대신 로컬 시트, 결과는 monthPicked로 전달
+            .sheet(isPresented: $isPickingMonth) {
+                CalendarMonthPickerSheet(calendar: calendar, month: month, onSelect: { picked in
+                    store.send(.monthPicked(picked))
+                    isPickingMonth = false
+                }, onCancel: { isPickingMonth = false })
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
             HStack(spacing: AppSpacing.space8) {
-                controlButton(disabled: isEmpty || isToday, action: .todayTapped) {
+                controlButton(disabled: isToday, action: .todayTapped) {
                     Text("오늘").font(CalendarStyle.font(AppFont.label, relativeTo: .subheadline))
                         .padding(.horizontal, AppSpacing.space12)
                         .frame(minHeight: 44)
                 }
-                controlButton(disabled: month <= calendar.earliestMonth, action: .monthMoved(-1)) {
+                controlButton(disabled: month <= calendar.oldestMonth, action: .monthMoved(-1)) {
                     Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold))
                         .frame(width: 44, height: 44)
                 }

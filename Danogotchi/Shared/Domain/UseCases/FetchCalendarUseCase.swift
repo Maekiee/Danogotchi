@@ -27,11 +27,7 @@ final class DefaultFetchCalendarUseCase: FetchCalendarUseCase {
                 quizCount: Set(answers.compactMap(\.sessionId)).count
             ))
         })
-        // 날짜 계산 실패 시 크래시 대신 기록 오류로 처리
-        guard let earliestMonth = calendar.dateInterval(of: .month, for: rows.map(\.createAt).min() ?? now)?.start else {
-            throw StudyStatsDataError.invalidRecord
-        }
-        return StudyCalendar(now: now, calendar: calendar, days: days, earliestMonth: earliestMonth,
+        return StudyCalendar(now: now, calendar: calendar, days: days,
                              streak: streak(days: Set(days.keys), now: now, calendar: calendar))
     }
 

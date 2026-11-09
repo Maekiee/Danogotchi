@@ -92,9 +92,7 @@ struct CalendarFeature {
                 state.selectedDate = calendar.calendar.startOfDay(for: date)
                 return .none
             case let .heatmapTapped(date):
-                // 첫 기록 달보다 앞선 칸은 달력이 갈 수 없어 무시
-                guard let calendar = state.calendar, date <= calendar.now,
-                      calendar.month(of: date) >= calendar.earliestMonth else { return .none }
+                guard let calendar = state.calendar, date <= calendar.now else { return .none }
                 state.selectedDate = calendar.calendar.startOfDay(for: date)
                 state.displayedMonth = calendar.month(of: date)
                 return .none
@@ -111,11 +109,11 @@ struct CalendarFeature {
         }
     }
 
-    // earliestMonth~현재 달 안에서만 이동, 이동하면 선택 해제
+    // 최근 5개 연도~현재 달 안에서만 이동(기록 유무 무관), 이동하면 선택 해제
     private func show(month: Date, in state: inout State) {
         guard let calendar = state.calendar else { return }
         let month = calendar.month(of: month)
-        guard month >= calendar.earliestMonth, month <= calendar.currentMonth else { return }
+        guard month >= calendar.oldestMonth, month <= calendar.currentMonth else { return }
         state.displayedMonth = month
         state.selectedDate = nil
     }

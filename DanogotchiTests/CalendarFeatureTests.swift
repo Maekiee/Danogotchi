@@ -23,6 +23,7 @@ final class CalendarFeatureTests: XCTestCase {
         await store.send(.appeared)
     }
 
+    // 범위는 2022년 1월(현재 연도 포함 5개 연도)~현재 달
     func test_monthMovesStayInRangeAndClearSelection() async throws {
         let store = makeStore(state: try loadedState())
         await store.send(.monthMoved(1))
@@ -30,20 +31,38 @@ final class CalendarFeatureTests: XCTestCase {
             $0.displayedMonth = statsDate(2026, 8, 1, 0)
             $0.selectedDate = nil
         }
-        await store.send(.monthMoved(-1)) { $0.displayedMonth = statsDate(2026, 7, 1, 0) }
+        await store.send(.monthPicked(statsDate(2022, 1, 1, 0))) { $0.displayedMonth = statsDate(2022, 1, 1, 0) }
         await store.send(.monthMoved(-1))
-        await store.send(.monthPicked(statsDate(2026, 6, 1, 0)))
+        await store.send(.monthPicked(statsDate(2021, 12, 1, 0)))
+        await store.send(.monthPicked(statsDate(2026, 10, 1, 0)))
         await store.send(.monthPicked(statsDate(2026, 9, 15))) { $0.displayedMonth = self.september }
     }
 
-    func test_heatmapTapMovesMonthAndIgnoresFutureOrBeforeEarliestMonth() async throws {
+    func test_emptyRecordsStillMoveToPastMonths() async throws {
+        let empty = try DefaultFetchCalendarUseCase.aggregate([], now: statsDate(), calendar: statsCalendar())
+        let store = makeStore(state: CalendarFeature.State(calendar: empty, displayedMonth: september, selectedDate: today))
+        await store.send(.monthMoved(-1)) {
+            $0.displayedMonth = statsDate(2026, 8, 1, 0)
+            $0.selectedDate = nil
+        }
+        await store.send(.todayTapped) {
+            $0.displayedMonth = self.september
+            $0.selectedDate = self.today
+        }
+    }
+
+    func test_heatmapTapMovesMonthAndIgnoresFuture() async throws {
         let store = makeStore(state: try loadedState())
         await store.send(.heatmapTapped(statsDate(2026, 7, 10, 14))) {
             $0.selectedDate = statsDate(2026, 7, 10, 0)
             $0.displayedMonth = statsDate(2026, 7, 1, 0)
         }
         await store.send(.heatmapTapped(statsDate(2026, 9, 27, 0)))
-        await store.send(.heatmapTapped(statsDate(2026, 6, 30)))
+        // 첫 기록 달 이전 칸도 이동
+        await store.send(.heatmapTapped(statsDate(2026, 6, 30))) {
+            $0.selectedDate = statsDate(2026, 6, 30, 0)
+            $0.displayedMonth = statsDate(2026, 6, 1, 0)
+        }
     }
 
     func test_dateTapIgnoresFutureAndTodayReturnsToCurrentMonth() async throws {
