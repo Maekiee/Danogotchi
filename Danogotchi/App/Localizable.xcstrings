@@ -26,6 +26,12 @@
     },
     "%@ · %@ · 전체의 %@" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@ · 全体の%3$@"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -34,69 +40,12 @@
         }
       }
     },
-    "%@ · %lld / %lld개 · %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ · %2$lld / %3$lld個 · %4$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$lld / %3$lld개 · %4$@"
-          }
-        }
-      }
-    },
     "%@ · %lld번 학습" : {
-
-    },
-    "%@ · %lld회 풀이 · 전체의 %@" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ · %2$lld回解答 · 全体の%3$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$lld회 풀이 · 전체의 %3$@"
-          }
-        }
-      }
-    },
-    "%@ · 오답 %lld / 풀이 %lld회 · %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ · 不正解 %2$lld / 解答 %3$lld回 · %4$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · 오답 %2$lld / 풀이 %3$lld회 · %4$@"
-          }
-        }
-      }
-    },
-    "%@ · 정답 %lld / %lld문제 · %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ · 正解 %2$lld / %3$lld問 · %4$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · 정답 %2$lld / %3$lld문제 · %4$@"
+            "value" : "%1$@ · %2$lld回学習"
           }
         }
       }
@@ -117,24 +66,15 @@
         }
       }
     },
-    "%@ · 학습한 단어 %lld개" : {
+    "%@ 발음" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ · 学習した単語 %2$lld個"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · 학습한 단어 %2$lld개"
+            "value" : "%@の発音"
           }
         }
       }
-    },
-    "%@ 발음" : {
-
     },
     "%@ 알" : {
       "localizations" : {
@@ -156,32 +96,25 @@
         }
       }
     },
-    "%@ 학습 단어" : {
+    "%@, 학습 단어 %lld개" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@の学習単語"
+            "value" : "%1$@、学習単語 %2$lld個"
           }
         }
       }
     },
-    "%@, %@" : {
+    "%@, 학습 안 함" : {
       "localizations" : {
-        "ko" : {
+        "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@"
+            "state" : "translated",
+            "value" : "%@、未学習"
           }
         }
-      },
-      "shouldTranslate" : false
-    },
-    "%@, 학습 단어 %lld개" : {
-
-    },
-    "%@, 학습 안 함" : {
-
+      }
     },
     "%@이(가) 위험해요. 체력이 줄고 있어요." : {
       "localizations" : {
@@ -216,7 +149,14 @@
       "shouldTranslate" : false
     },
     "%lld%% 이하" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%%以下"
+          }
+        }
+      }
     },
     "%lld개" : {
       "localizations" : {
@@ -224,22 +164,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld個"
-          }
-        }
-      }
-    },
-    "%lld개 · %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld個 · %2$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld개 · %2$@"
           }
         }
       }
@@ -256,22 +180,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld개 전부 정답! 보너스 +%2$lld"
-          }
-        }
-      }
-    },
-    "%lld개, %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld個、%2$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld개, %2$@"
           }
         }
       }
@@ -297,23 +205,34 @@
       }
     },
     "%lld일 연속" : {
-
-    },
-    "%lld일 연속 학습" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld日連続学習"
+            "value" : "%lld日連続"
           }
         }
       }
     },
     "%lld일 학습" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld日学習"
+          }
+        }
+      }
     },
     "%lld일 학습, 가장 많이 학습한 날 %@ %lld개" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld日学習、最も多く学習した日 %2$@ %3$lld個"
+          }
+        }
+      }
     },
     "%lld퍼센트" : {
       "localizations" : {
@@ -345,56 +264,6 @@
         }
       }
     },
-    "0회" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "0回"
-          }
-        }
-      }
-    },
-    "M월 d일" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "M月d日"
-          }
-        }
-      }
-    },
-    "M월 d일 HH:mm" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "M月d日 HH:mm"
-          }
-        }
-      }
-    },
-    "yyyy년 M월" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "yyyy年M月"
-          }
-        }
-      }
-    },
-    "yyyy년 M월 d일" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "yyyy年M月d日"
-          }
-        }
-      }
-    },
     "갈증" : {
       "localizations" : {
         "ja" : {
@@ -416,7 +285,14 @@
       }
     },
     "값" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "値"
+          }
+        }
+      }
     },
     "개인정보 처리방침" : {
       "localizations" : {
@@ -489,7 +365,14 @@
       }
     },
     "고유 단어 기준" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニーク単語基準"
+          }
+        }
+      }
     },
     "관심 있는 주제를 골라주세요" : {
       "localizations" : {
@@ -533,16 +416,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録を読み込めませんでした"
-          }
-        }
-      }
-    },
-    "날짜" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "日付"
           }
         }
       }
@@ -618,7 +491,14 @@
       }
     },
     "다음 달" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の月"
+          }
+        }
+      }
     },
     "다크" : {
       "localizations" : {
@@ -641,7 +521,14 @@
       }
     },
     "단어 %lld개 · 정답률 %lld%% · 퀴즈 %lld회" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単語 %1$lld個 · 正答率 %2$lld%% · クイズ %3$lld回"
+          }
+        }
+      }
     },
     "단어 학습" : {
       "localizations" : {
@@ -704,7 +591,14 @@
       }
     },
     "대기" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待機中"
+          }
+        }
+      }
     },
     "데이터 조회 실패" : {
       "localizations" : {
@@ -822,25 +716,12 @@
         }
       }
     },
-    "많이 맞힌 단어" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "よく正解した単語"
-          }
-        }
-      }
-    },
     "많이 틀린 단어" : {
-
-    },
-    "많이 틀린 종류" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "よく間違えた種類"
+            "value" : "よく間違える単語"
           }
         }
       }
@@ -936,7 +817,14 @@
       }
     },
     "발음 중" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発音中"
+          }
+        }
+      }
     },
     "밥주기" : {
       "localizations" : {
@@ -1014,16 +902,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "復活"
-          }
-        }
-      }
-    },
-    "분석 기간" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分析期間"
           }
         }
       }
@@ -1138,28 +1016,15 @@
         }
       }
     },
-    "선택한 기간에 학습 기록이 없어요. 다른 기간을 선택해 보세요." : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した期間に学習記録がありません。別の期間を選んでみてください。"
-          }
-        }
-      }
-    },
-    "선택한 기간에 학습한 단어가 없어요." : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した期間に学習した単語はありません。"
-          }
-        }
-      }
-    },
     "선택한 월 보기" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した月を表示"
+          }
+        }
+      }
     },
     "선택한 주제로 학습을 시작해요. 나중에 언제든 바꿀 수 있어요." : {
       "localizations" : {
@@ -1227,16 +1092,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "システム"
-          }
-        }
-      }
-    },
-    "시작" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開始"
           }
         }
       }
@@ -1362,16 +1217,44 @@
       }
     },
     "연도" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年"
+          }
+        }
+      }
     },
     "연속 학습 %lld일" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連続学習 %lld日"
+          }
+        }
+      }
     },
     "오늘" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日"
+          }
+        }
+      }
     },
     "오늘은 아직 학습 기록이 없어요" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はまだ学習記録がありません"
+          }
+        }
+      }
     },
     "오늘의 단어 학습" : {
       "localizations" : {
@@ -1394,14 +1277,11 @@
       }
     },
     "오답 %lld회" : {
-
-    },
-    "오답 분류" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不正解の分類"
+            "value" : "不正解 %lld回"
           }
         }
       }
@@ -1412,16 +1292,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完了"
-          }
-        }
-      }
-    },
-    "완료한 회차가 아직 없어요.\n회차별 기록은 통계 기능 도입 이후 모든 답변을 저장한 퀴즈부터 표시돼요." : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "まだ完了した回がありません。\n回ごとの記録は、統計機能の導入後にすべての解答を保存したクイズから表示されます。"
           }
         }
       }
@@ -1437,19 +1307,54 @@
       }
     },
     "월" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月"
+          }
+        }
+      }
     },
     "월 선택" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月を選択"
+          }
+        }
+      }
     },
     "이 달에는 학습 기록이 없어요" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この月は学習記録がありません"
+          }
+        }
+      }
     },
     "이날 정답 %lld / %lld회" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この日の正解 %1$lld / %2$lld回"
+          }
+        }
+      }
     },
     "이날은 학습 기록이 없어요" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この日は学習記録がありません"
+          }
+        }
+      }
     },
     "이름" : {
       "localizations" : {
@@ -1511,28 +1416,15 @@
         }
       }
     },
-    "이번 달" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今月"
-          }
-        }
-      }
-    },
-    "이번 달 학습 단어" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今月の学習単語"
-          }
-        }
-      }
-    },
     "이전 달" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前の月"
+          }
+        }
+      }
     },
     "일반" : {
       "localizations" : {
@@ -1654,44 +1546,15 @@
         }
       }
     },
-    "전체" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "すべて"
-          }
-        }
-      }
-    },
-    "전체 %lld회 · 오답률 %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全%1$lld回 · 不正解率 %2$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "전체 %1$lld회 · 오답률 %2$@"
-          }
-        }
-      }
-    },
-    "전체 보기" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "すべて見る"
-          }
-        }
-      }
-    },
     "전체 학습 단어" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての学習単語"
+          }
+        }
+      }
     },
     "정답" : {
       "localizations" : {
@@ -1699,22 +1562,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正解"
-          }
-        }
-      }
-    },
-    "정답 %lld / %lld문제, %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正解 %1$lld / %2$lld問、%3$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "정답 %1$lld / %2$lld문제, %3$@"
           }
         }
       }
@@ -1735,38 +1582,12 @@
         }
       }
     },
-    "정답 %lld회, 오답 %lld회" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正解 %1$lld回、不正解 %2$lld回"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "정답 %1$lld회, 오답 %2$lld회"
-          }
-        }
-      }
-    },
     "정답 횟수순 · 단어를 누르면 상세 내용을 볼 수 있어요." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "正解回数順 · 単語をタップすると詳細を確認できます。"
-          }
-        }
-      }
-    },
-    "정답률" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正答率"
           }
         }
       }
@@ -1789,6 +1610,12 @@
     },
     "정답률 %lld%% 이하 · %lld개" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率 %1$lld%%以下 · %2$lld個"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "new",
@@ -1798,10 +1625,24 @@
       }
     },
     "정답률 %lld%% 이하인 단어가 없어요" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率 %lld%%以下の単語はありません"
+          }
+        }
+      }
     },
     "정답률 기준" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率の基準"
+          }
+        }
+      }
     },
     "정말로 학습을 중단하시겠습니까?" : {
       "localizations" : {
@@ -1819,16 +1660,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終了"
-          }
-        }
-      }
-    },
-    "주제" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "テーマ"
           }
         }
       }
@@ -1944,7 +1775,14 @@
       }
     },
     "총 %lld일 학습" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合計%lld日学習"
+          }
+        }
+      }
     },
     "총 정답률" : {
       "localizations" : {
@@ -1957,27 +1795,21 @@
       }
     },
     "총 학습일 %lld일" : {
-
-    },
-    "최근 1년 학습 기록" : {
-
-    },
-    "최근 7일" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "直近7日"
+            "value" : "総学習日数 %lld日"
           }
         }
       }
     },
-    "최근 7일 학습 단어" : {
+    "최근 1년 학습 기록" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "直近7日の学習単語"
+            "value" : "直近1年の学習記録"
           }
         }
       }
@@ -2013,7 +1845,14 @@
       }
     },
     "캘린더" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カレンダー"
+          }
+        }
+      }
     },
     "퀴즈에서 답변을 저장하면 학습량과 정답률을 확인할 수 있어요." : {
       "localizations" : {
@@ -2046,14 +1885,11 @@
       }
     },
     "풀이 횟수 기준" : {
-
-    },
-    "품사" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "品詞"
+            "value" : "解答回数基準"
           }
         }
       }
@@ -2088,32 +1924,12 @@
         }
       }
     },
-    "학습 단어 %lld개" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学習単語 %lld個"
-          }
-        }
-      }
-    },
     "학습 단어의 품사" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "学習単語の品詞"
-          }
-        }
-      }
-    },
-    "학습 안 함" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未学習"
           }
         }
       }
@@ -2179,7 +1995,14 @@
       }
     },
     "학습을 시작하면 잔디와 달력이 채워져요" : {
-
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学習を始めると、ヒートマップとカレンダーに記録が表示されます"
+          }
+        }
+      }
     },
     "학습을 시작하지 못했어요. 다시 시도해주세요." : {
       "localizations" : {
@@ -2221,16 +2044,6 @@
         }
       }
     },
-    "학습한 단어 수" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学習した単語数"
-          }
-        }
-      }
-    },
     "학습할 단어가 없습니다." : {
       "localizations" : {
         "ja" : {
@@ -2251,32 +2064,12 @@
         }
       }
     },
-    "학습함" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学習済み"
-          }
-        }
-      }
-    },
     "함께할 알을 골라주세요" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "一緒に過ごす卵を選んでください"
-          }
-        }
-      }
-    },
-    "항목" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "項目"
           }
         }
       }
@@ -2342,24 +2135,11 @@
       }
     },
     "회 풀이" : {
-
-    },
-    "회차" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "回"
-          }
-        }
-      }
-    },
-    "회차별 정답률" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "回ごとの正答率"
+            "value" : "回解答"
           }
         }
       }
@@ -2370,16 +2150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "獲得経験値"
-          }
-        }
-      }
-    },
-    "횟수" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "回数"
           }
         }
       }
