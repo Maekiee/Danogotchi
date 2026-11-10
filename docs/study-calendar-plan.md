@@ -5,7 +5,7 @@
 - v3(2026-11-04) 대비 변경 (이름)
   - `StudyReport*` → `StudyStats*`. 화면과 모달 이름은 "학습 통계"다. 저장소·마이그레이션 타입 이름까지 바꾸고, 저장된 키·Core Data 모델은 그대로 둔다.
   - `StudyCalendar*` → `Calendar*`. 도메인 모델 `StudyCalendar`만 Foundation `Calendar`와 겹치지 않게 유지한다.
-  - `StudyStatsComponents`의 컴포넌트는 학습 통계에서만 쓴다. 캘린더는 같은 수치로 자기 컴포넌트를 만든다(§8.3).
+  - `StudyStats/Components`의 컴포넌트는 학습 통계에서만 쓴다. 캘린더는 같은 수치로 자기 컴포넌트를 만든다(§8.3).
   - `StudyStats.Word` → 최상위 `VocabStats`. 캘린더와 같이 쓰는 원본 단어 기준 풀이 통계다. 카드(`vocabId`)별 수치인 `LearningStats`와는 별개다.
 - v2(2026-11-03) 대비 변경
   - 캘린더 기획을 학습 통계 리뉴얼과 하나로 묶었다.
@@ -446,7 +446,7 @@ struct StudyStats: Equatable, Sendable {
 
 ### 8.3 컴포넌트
 
-`StudyStatsComponents.swift`의 컴포넌트와 스타일(`StudyStatsStyle` 포함)은 학습 통계에서만 쓴다. 캘린더는 같은 시안 수치로 `Feature/Calendar/Components`에 따로 만든다.
+`Feature/StudyStats/Components`의 컴포넌트와 스타일(`StudyStatsStyle` 포함)은 학습 통계에서만 쓴다. 캘린더는 같은 시안 수치로 `Feature/Calendar/Components`에 따로 만든다.
 
 | 시안 | 학습 통계 | 캘린더 |
 |---|---|---|
@@ -586,7 +586,7 @@ enum StudyStatsDestination: Equatable, Sendable {
 | 학습 통계 카드 순서 | 요약 → 주제 → 품사 → 많이 틀린 단어 |
 | 타입 이름 | `StudyReport*` → `StudyStats*`(저장소·마이그레이션 포함), `StudyCalendar*` → `Calendar*`(모델 `StudyCalendar`만 유지). `StudyStats.Word` → 최상위 `VocabStats`(`LearningStats`와 별개). 저장된 UserDefaults 키·Core Data 모델은 그대로 |
 | 화면·모달 이름 | "학습 통계". ✕ 접근성 라벨은 "학습 통계 닫기" |
-| 컴포넌트 공유 | `StudyStatsComponents`는 학습 통계 전용. 캘린더는 같은 시안 수치로 `Calendar*` 컴포넌트를 따로 만든다 |
+| 컴포넌트 공유 | `StudyStats/Components`는 학습 통계 전용. 캘린더는 같은 시안 수치로 `Calendar*` 컴포넌트를 따로 만든다 |
 | 날짜별 노트 | 제외 |
 | 잔디 농도 | 4단계, 고유 단어 수 기준 |
 | 달력 셀 | 잔디와 같은 4단계 농도 |
