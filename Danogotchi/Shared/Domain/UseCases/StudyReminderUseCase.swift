@@ -13,15 +13,18 @@ final class DefaultStudyReminderUseCase: StudyReminderUseCase {
     private let userSettings: UserSettingsRepository
     private let learningHistoryRepository: LearningHistoryRepository
     private let scheduler: LocalNotificationScheduling
+    private let now: () -> Date
 
     init(
         userSettings: UserSettingsRepository,
         learningHistoryRepository: LearningHistoryRepository,
-        scheduler: LocalNotificationScheduling
+        scheduler: LocalNotificationScheduling,
+        now: @escaping () -> Date = Date.init
     ) {
         self.userSettings = userSettings
         self.learningHistoryRepository = learningHistoryRepository
         self.scheduler = scheduler
+        self.now = now
     }
 
     var isEnabled: Bool {
@@ -43,7 +46,7 @@ final class DefaultStudyReminderUseCase: StudyReminderUseCase {
         scheduler.cancel(ids: StudyReminderPolicy.allIdentifiers)
         guard userSettings.isStudyReminderEnabled else { return }
         StudyReminderPolicy
-            .reminders(lastStudiedAt: lastStudiedAt, now: Date())
+            .reminders(lastStudiedAt: lastStudiedAt, now: now())
             .forEach { scheduler.schedule($0) }
     }
 }

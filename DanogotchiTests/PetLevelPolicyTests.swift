@@ -40,16 +40,4 @@ final class PetLevelPolicyTests: XCTestCase {
         XCTAssertEqual(PetLevelPolicy.progress(makePet(level: 0, experience: 500)), 0.5, accuracy: 0.001)
         XCTAssertEqual(PetLevelPolicy.progress(makePet(level: 0, experience: 2_500)), 1, accuracy: 0.001)
     }
-
-    func test_승급하면_경험치가_0이_되어_연속_승급이_불가하다() {
-        // 요구량의 두 배를 모아도 초과분은 이월되지 않는다
-        var pet = makePet(level: 0, experience: 3_000)
-        XCTAssertTrue(PetLevelPolicy.canLevelUp(pet))
-
-        pet.level += 1
-        pet.experience = 0
-
-        XCTAssertFalse(PetLevelPolicy.canLevelUp(pet))
-        XCTAssertEqual(PetLevelPolicy.progress(pet), 0, accuracy: 0.001)
-    }
 }

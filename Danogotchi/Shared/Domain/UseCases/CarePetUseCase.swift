@@ -8,9 +8,11 @@ protocol CarePetUseCase {
 
 final class DefaultCarePetUseCase: CarePetUseCase {
     private let petRepository: PetRepository
+    private let now: () -> Date
 
-    init(petRepository: PetRepository) {
+    init(petRepository: PetRepository, now: @escaping () -> Date = Date.init) {
         self.petRepository = petRepository
+        self.now = now
     }
 
     /// 이미 100이거나 사망 상태여도 정산분은 저장한다 — 저장하지 않으면 경과 시간이 유실된다.
@@ -19,7 +21,7 @@ final class DefaultCarePetUseCase: CarePetUseCase {
 
         let settled: Pet
         let rejection: PetActionRejection?
-        switch PetStatePolicy.care(pet, stat: stat, now: Date()) {
+        switch PetStatePolicy.care(pet, stat: stat, now: now()) {
         case .success(let updated):
             settled = updated
             rejection = nil

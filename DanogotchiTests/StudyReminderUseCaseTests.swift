@@ -3,14 +3,17 @@ import XCTest
 @testable import Danogotchi
 
 final class StudyReminderUseCaseTests: XCTestCase {
+    private let now = testBase
+    private let studiedAt = hoursAgo(1)
+
     private enum Event: Equatable {
         case cancel([String])
-        case schedule(String)
+        case schedule(StudyReminderPolicy.Reminder)
     }
 
     private final class RecordingNotificationScheduler: LocalNotificationScheduling {
         private(set) var events: [Event] = []
-        func schedule(_ reminder: StudyReminderPolicy.Reminder) { events.append(.schedule(reminder.id)) }
+        func schedule(_ reminder: StudyReminderPolicy.Reminder) { events.append(.schedule(reminder)) }
         func cancel(ids: [String]) { events.append(.cancel(ids)) }
     }
 
@@ -29,19 +32,20 @@ final class StudyReminderUseCaseTests: XCTestCase {
         let useCase = DefaultStudyReminderUseCase(
             userSettings: settings,
             learningHistoryRepository: DefaultLearningHistoryRepository(context: context),
-            scheduler: scheduler
+            scheduler: scheduler,
+            now: { [now] in now }
         )
         return SUT(useCase: useCase, settings: settings, scheduler: scheduler, context: context)
     }
 
     private func recordStudy(in context: NSManagedObjectContext) throws {
         let word = try DefaultVocabRepository(context: context).createVocab(vocab: "apple", meaning: "사과")
-        try DefaultLearningHistoryRepository(context: context).addHistory(makeQuizAnswer(word))
+        try DefaultLearningHistoryRepository(context: context).addHistory(makeQuizAnswer(word, createAt: studiedAt))
     }
 
-    /// 정책이 지금 돌려주는 알림 id — 시각은 내부 `Date()`라 id만 비교한다
+    /// 같은 기준 시각으로 정책이 돌려주는 알림 — 시각까지 비교한다
     private func expectedSchedules(studied: Bool) -> [Event] {
-        StudyReminderPolicy.reminders(lastStudiedAt: studied ? Date() : nil, now: Date()).map { .schedule($0.id) }
+        StudyReminderPolicy.reminders(lastStudiedAt: studied ? studiedAt : nil, now: now).map { .schedule($0) }
     }
 
     func test_enablingCancelsEverythingThenSchedulesDailyAndInactivityWhenStudied() throws {
@@ -75,14 +79,20 @@ final class StudyReminderUseCaseTests: XCTestCase {
         XCTAssertEqual(sut.scheduler.events, [.cancel(StudyReminderPolicy.allIdentifiers)])
     }
 
-    func test_refreshFollowsStoredSetting() throws {
-        let disabled = makeSUT(enabled: false)
-        try disabled.useCase.refresh()
-        XCTAssertEqual(disabled.scheduler.events, [.cancel(StudyReminderPolicy.allIdentifiers)])
+    func test_refreshWhileDisabledOnlyCancels() throws {
+        let sut = makeSUT(enabled: false)
 
-        let enabled = makeSUT(enabled: true)
-        try recordStudy(in: enabled.context)
-        try enabled.useCase.refresh()
-        XCTAssertEqual(enabled.scheduler.events, [.cancel(StudyReminderPolicy.allIdentifiers)] + expectedSchedules(studied: true))
+        try sut.useCase.refresh()
+
+        XCTAssertEqual(sut.scheduler.events, [.cancel(StudyReminderPolicy.allIdentifiers)])
+    }
+
+    func test_refreshWhileEnabledReschedulesFromLastStudy() throws {
+        let sut = makeSUT(enabled: true)
+        try recordStudy(in: sut.context)
+
+        try sut.useCase.refresh()
+
+        XCTAssertEqual(sut.scheduler.events, [.cancel(StudyReminderPolicy.allIdentifiers)] + expectedSchedules(studied: true))
     }
 }

@@ -85,11 +85,16 @@ extension AppDependencies {
         )
     }
 
+    private func makeSearchThemeRepository() -> SearchThemeRepository {
+        #if DEBUG
+        if let repository = UITestingSupport.makeSearchThemeRepositoryIfRequested() { return repository }
+        #endif
+        return DefaultSearchThemeRepository(apiClient: apiClient)
+    }
+
     func makeSearchThemeViewModel() -> SearchThemeViewModel {
         return SearchThemeViewModel(
-            searchThemeUseCase: DefaultSearchThemeUseCase(
-                repository: DefaultSearchThemeRepository(apiClient: apiClient)
-            ),
+            searchThemeUseCase: DefaultSearchThemeUseCase(repository: makeSearchThemeRepository()),
             saveThemeUseCase: DefaultSaveThemeUseCase(themeImageRepository: makeThemeImageRepository()),
             reportError: reportError
         )

@@ -1,6 +1,6 @@
 import XCTest
 
-/// 새 UI 테스트들이 공유하는 실행·조회 도우미. 기존 파일의 private 헬퍼는 그대로 둔다
+/// UI 테스트들이 공유하는 실행·조회 도우미
 extension XCUIApplication {
     /// 첫 설치 상태로 실행한다. 시스템 버튼 문구(취소·닫기)를 한국어로 고정
     static func launchFresh(seed: String? = nil) -> XCUIApplication {
@@ -40,14 +40,6 @@ extension XCUIApplication {
         }
     }
 
-    /// 오프라인이면 테마 검색 실패 알림이 뜬다 — 흐름과 무관하므로 닫는다
-    func dismissNetworkAlertIfNeeded() {
-        let alert = alerts["알림"]
-        if alert.waitForExistence(timeout: 2) {
-            alert.buttons["확인"].tap()
-        }
-    }
-
     func scroll(to element: XCUIElement, maxSwipes: Int = 10) {
         for _ in 0..<maxSwipes where !element.isHittable {
             swipeUp()
@@ -76,5 +68,16 @@ extension XCUIElement {
     private func wait(_ predicate: NSPredicate, timeout: TimeInterval) -> Bool {
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: self)
         return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
+    }
+}
+
+extension XCTestCase {
+    /// 결과 번들에 남겨 화면을 눈으로 확인한다
+    @MainActor
+    func attachScreen(_ app: XCUIApplication, name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

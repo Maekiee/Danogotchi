@@ -138,11 +138,4 @@ final class CalendarUITests: XCTestCase {
         start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: offset, dy: 0)),
                     withVelocity: .fast, thenHoldForDuration: 0)
     }
-
-    private func attachScreen(_ app: XCUIApplication, name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
-    }
 }

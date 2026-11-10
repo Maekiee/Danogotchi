@@ -20,18 +20,22 @@ final class AddVocabViewModelTests: XCTestCase {
         XCTAssertEqual(screen.isValid, false)
     }
 
-    func test_initialFormIsNilForAddAndMirrorsEditingVocab() throws {
+    func test_addModeHasNoInitialForm() throws {
         XCTAssertNil(try AddVocabTestScreen().initialForm)
         XCTAssertFalse(try AddVocabTestScreen().isEditing)
+    }
 
+    func test_editModeMirrorsEditingVocab() throws {
         let adjective = makeVocab(word: "quick", meaning: "빠른", partOfSpeech: .adj)
         let editing = try AddVocabTestScreen(editing: adjective)
         XCTAssertTrue(editing.isEditing)
         XCTAssertEqual(editing.initialForm?.word, "quick")
         XCTAssertEqual(editing.initialForm?.meaning, "빠른")
         XCTAssertEqual(editing.initialForm?.partOfSpeechIndex, PartOfSpeech.allCases.firstIndex(of: .adj))
+    }
 
-        // 품사 정보가 없으면 첫 세그먼트로 떨어진다
+    // 품사 정보가 없으면 첫 세그먼트로 떨어진다
+    func test_editModeWithoutPartOfSpeechSelectsFirstSegment() throws {
         let untyped = try AddVocabTestScreen(editing: makeVocab(word: "x", meaning: "y", partOfSpeech: nil))
         XCTAssertEqual(untyped.initialForm?.partOfSpeechIndex, 0)
     }

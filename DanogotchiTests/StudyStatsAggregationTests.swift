@@ -5,17 +5,16 @@ final class StudyStatsAggregationTests: XCTestCase {
     private let calendar = statsCalendar()
     private let now = statsDate()
 
-    func test_largeSyntheticHistoryAggregationPerformance() {
+    // 기준값 없는 measure는 느려져도 실패하지 않아 한 번만 집계
+    func test_largeSyntheticHistoryAggregatesEveryAnswerAndWord() {
         let words = makeQuizWords(500)
         let rows = (0..<30_000).map { index in
             LearningHistory(id: UUID(), vocabId: words[index % words.count].id,
                             isCorrect: index % 3 != 0, createAt: now.addingTimeInterval(-Double(index)))
         }
-        measure {
-            let stats = aggregate(rows)
-            XCTAssertEqual(stats.totalAnswers, 30_000)
-            XCTAssertEqual(stats.words.count, 500)
-        }
+        let stats = aggregate(rows)
+        XCTAssertEqual(stats.totalAnswers, 30_000)
+        XCTAssertEqual(stats.words.count, 500)
     }
 
     func test_uniqueWordsWeightedAccuracyAndPartDistribution() {
@@ -70,11 +69,14 @@ final class StudyStatsAggregationTests: XCTestCase {
         XCTAssertEqual(stats.topics.first { $0.id == "unknown" }?.total, 2)
     }
 
-    func test_futureAnswersAreExcludedAndEmptyHasNoAccuracy() {
+    func test_futureAnswersAreExcluded() {
         let future = answers(UUID(), correct: 1, total: 1, at: now.addingTimeInterval(1))
         let stats = aggregate(future + answers(UUID(), correct: 0, total: 1))
         XCTAssertEqual(stats.totalAnswers, 1)
         XCTAssertEqual(stats.words.count, 1)
+    }
+
+    func test_emptyHistoryHasNoAccuracyAndStartsToday() {
         let empty = aggregate([])
         XCTAssertNil(empty.accuracy)
         XCTAssertTrue(empty.words.isEmpty)

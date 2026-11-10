@@ -5,14 +5,14 @@ final class StudyStatsUITests: XCTestCase {
     func test_mistakeThresholdFiltersRowsAndShowsEmptyGuidance() {
         let app = launchStats()
         let first = app.buttons["studyStats.mistake.1"]
-        scrollTo(first, in: app)
+        app.scroll(to: first, maxSwipes: 14)
         for text in ["prepare", "오답 3회", "준비하다", "정답률 25%", "전체 4회 풀이"] {
             XCTAssertTrue(first.label.contains(text), "첫 행에서 \(text) 누락: \(first.label)")
         }
         // 오답 횟수가 같으면 정답률이 낮은 단어가 위
         for (rank, word) in [(2, "happily"), (3, "moment")] {
             let row = app.buttons["studyStats.mistake.\(rank)"]
-            scrollTo(row, in: app)
+            app.scroll(to: row, maxSwipes: 14)
             XCTAssertTrue(row.label.hasPrefix(word), "\(rank)번째 행: \(row.label)")
         }
         XCTAssertFalse(app.buttons["studyStats.mistake.4"].exists)
@@ -36,7 +36,7 @@ final class StudyStatsUITests: XCTestCase {
     func test_mistakeRowOpensDetailSheetWithLifetimeCounts() {
         let app = launchStats()
         let first = app.buttons["studyStats.mistake.1"]
-        scrollTo(first, in: app)
+        app.scroll(to: first, maxSwipes: 14)
         first.tap()
         assertDetail(in: app, texts: ["prepare", "준비하다", "동사", "25%", "정답 1 / 4회"])
         attachScreen(app, name: "word-detail-sheet")
@@ -63,9 +63,10 @@ final class StudyStatsUITests: XCTestCase {
 
     func test_topicSelectionStaysAfterTouchEndsAndLegendSelects() {
         let app = launchStats()
-        dismissNotificationPermissionIfNeeded()
+        // 알림 권한 팝업의 dim·터치 가로채기 방지
+        XCUIApplication.dismissSystemAlertIfNeeded()
         // 다음 카드 제목이 보이면 주제 카드 전체가 화면 안에 있음
-        scrollTo(app.staticTexts["학습 단어의 품사"], in: app)
+        app.scroll(to: app.staticTexts["학습 단어의 품사"], maxSwipes: 14)
         press(chartMark("여행", value: "342회, 96%", in: app))
         XCTAssertTrue(app.staticTexts["여행 · 342회 · 전체의 96%"].waitForExistence(timeout: 3))
         let business = app.buttons["studyStats.topics.business"]
@@ -79,8 +80,9 @@ final class StudyStatsUITests: XCTestCase {
 
     func test_partSelectionStaysAfterTouchEnds() {
         let app = launchStats()
-        dismissNotificationPermissionIfNeeded()
-        scrollTo(app.staticTexts["많이 틀린 단어"], in: app)
+        // 알림 권한 팝업의 dim·터치 가로채기 방지
+        XCUIApplication.dismissSystemAlertIfNeeded()
+        app.scroll(to: app.staticTexts["많이 틀린 단어"], maxSwipes: 14)
         press(chartMark("명사", value: "2개, 40%", in: app))
         XCTAssertTrue(app.staticTexts["명사 · 2개 · 전체의 40%"].waitForExistence(timeout: 3))
         attachScreen(app, name: "part-selection")
@@ -113,14 +115,6 @@ final class StudyStatsUITests: XCTestCase {
         return app
     }
 
-    private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
-        for _ in 0..<14 {
-            if element.isHittable { return }
-            app.swipeUp()
-        }
-        XCTAssertTrue(element.isHittable)
-    }
-
     private func assertDetail(in app: XCUIApplication, texts: [String]) {
         let card = app.descendants(matching: .any).matching(identifier: "studyStats.detailCard").firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 5))
@@ -138,19 +132,6 @@ final class StudyStatsUITests: XCTestCase {
             app.swipeDown()
         }
         XCTAssertTrue(element.isHittable)
-    }
-
-    private func attachScreen(_ app: XCUIApplication, name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
-    }
-
-    // 알림 권한 팝업의 dim·터치 가로채기 방지
-    private func dismissNotificationPermissionIfNeeded() {
-        let permission = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.firstMatch
-        if permission.waitForExistence(timeout: 3) { permission.buttons.element(boundBy: 0).tap() }
     }
 
     private func chartMark(_ label: String, value: String, in app: XCUIApplication) -> XCUIElement {

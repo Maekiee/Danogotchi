@@ -10,9 +10,9 @@ func hoursLater(_ hours: Double) -> Date {
     testBase.addingTimeInterval(hours * 3600)
 }
 
-/// UseCase는 내부에서 `Date()`를 쓰므로 저장소 테스트는 실제 현재 시각 기준으로 경과를 심는다.
+/// 유스케이스에 `now: { testBase }`를 넘기고 그 이전 시각으로 경과를 심는다.
 func hoursAgo(_ hours: Double) -> Date {
-    Date().addingTimeInterval(-hours * 3600)
+    testBase.addingTimeInterval(-hours * 3600)
 }
 
 /// 컨테이너마다 모델을 다시 로드하면 같은 엔티티를 여러 NSEntityDescription이 주장한다는 경고가 난다.
@@ -63,4 +63,19 @@ func petAfterCare(_ pet: Pet, _ stat: PetCareStat, _ now: Date) -> Pet {
     case .success(let updated), .alreadyFull(let updated), .dead(let updated):
         return updated
     }
+}
+
+final class FailingSaveContext: NSManagedObjectContext, @unchecked Sendable {
+    var failsSave = false
+
+    override func save() throws {
+        if failsSave { throw CocoaError(.fileWriteOutOfSpace) }
+        try super.save()
+    }
+}
+
+func makeFailingSaveContext() -> FailingSaveContext {
+    let context = FailingSaveContext(concurrencyType: .mainQueueConcurrencyType)
+    context.persistentStoreCoordinator = makeInMemoryContext().persistentStoreCoordinator
+    return context
 }

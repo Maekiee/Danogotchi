@@ -3,14 +3,7 @@ import RxSwift
 import XCTest
 @testable import Danogotchi
 
-func makeQuizWords(_ count: Int) -> [Vocab] {
-    (0..<count).map {
-        Vocab(id: UUID(), word: "word\($0)", meaning: "meaning\($0)", bookType: .myBook,
-              level: nil, partOfSpeech: .noun, sourceWordId: nil, createAt: testBase.addingTimeInterval(Double($0)))
-    }
-}
-
-final class RecordingExperienceUseCase: EarnExperienceUseCase {
+private final class RecordingExperienceUseCase: EarnExperienceUseCase {
     var failsRecord = false
     var failsCommit = false
     /// 켜면 저장 실패 대신 복구 불가능한 대상 부재를 던진다.
@@ -35,7 +28,7 @@ final class RecordingExperienceUseCase: EarnExperienceUseCase {
     }
 }
 
-final class RecordingReminderUseCase: StudyReminderUseCase {
+private final class RecordingReminderUseCase: StudyReminderUseCase {
     var isEnabled = true
     var refreshCount = 0
     var failsRefresh = false

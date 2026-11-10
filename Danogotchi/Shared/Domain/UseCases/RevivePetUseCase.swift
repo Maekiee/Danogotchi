@@ -8,9 +8,11 @@ protocol RevivePetUseCase {
 
 final class DefaultRevivePetUseCase: RevivePetUseCase {
     private let petRepository: PetRepository
+    private let now: () -> Date
 
-    init(petRepository: PetRepository) {
+    init(petRepository: PetRepository, now: @escaping () -> Date = Date.init) {
         self.petRepository = petRepository
+        self.now = now
     }
 
     /// 정책이 복구와 페널티를 모두 반영한 Pet 하나를 돌려주므로 저장은 한 번이면 된다.
@@ -19,7 +21,7 @@ final class DefaultRevivePetUseCase: RevivePetUseCase {
 
         let settled: Pet
         let rejection: PetActionRejection?
-        switch PetStatePolicy.revive(pet, now: Date()) {
+        switch PetStatePolicy.revive(pet, now: now()) {
         case .success(let updated):
             settled = updated
             rejection = nil

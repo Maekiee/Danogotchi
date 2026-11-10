@@ -10,16 +10,18 @@ protocol AdjustPetLevelUseCase {
 /// 경험치는 건드리지 않는다. 레벨업 버튼의 활성 조건까지 그대로 재현하려면 경험치가 남아 있어야 한다.
 final class DefaultAdjustPetLevelUseCase: AdjustPetLevelUseCase {
     private let petRepository: PetRepository
+    private let now: () -> Date
 
-    init(petRepository: PetRepository) {
+    init(petRepository: PetRepository, now: @escaping () -> Date = Date.init) {
         self.petRepository = petRepository
+        self.now = now
     }
 
     func execute(delta: Int) throws -> PetActionResult? {
         guard let pet = try petRepository.readPet() else { return nil }
 
         // 다른 쓰기 경로와 같이 정산부터 한다 — 저장은 한 번이면 된다
-        var settled = PetStatePolicy.settle(pet, now: Date())
+        var settled = PetStatePolicy.settle(pet, now: now())
         // 정책 범위를 넘기면 시트가 없는 레벨이 된다
         settled.level = min(max(0, settled.level + delta), PetLevelPolicy.maxLevel)
         try petRepository.updatePet(settled)

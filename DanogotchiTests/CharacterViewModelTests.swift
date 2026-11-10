@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class CharacterViewModelTests: XCTestCase {
     func test_appearLoadsSettledPetInfoWithoutToast() throws {
-        let screen = try CharacterTestScreen(pet: makePet(satiety: 50, stateUpdatedAt: Date()))
+        let screen = try CharacterTestScreen(pet: makePet(satiety: 50))
         screen.appear.accept(())
         XCTAssertEqual(screen.infos.count, 1)
         XCTAssertEqual(screen.infos.last?.pet.name, "테스트")
@@ -28,7 +28,7 @@ final class CharacterViewModelTests: XCTestCase {
     }
 
     func test_loadFailureShowsToastAndKeepsPreviousInfo() throws {
-        let screen = try CharacterTestScreen(pet: makePet(stateUpdatedAt: Date()))
+        let screen = try CharacterTestScreen(pet: makePet())
         screen.appear.accept(())
         // 조회가 곧 정산 저장이므로 저장 실패가 조회 실패다
         screen.context.failsSave = true
@@ -38,52 +38,60 @@ final class CharacterViewModelTests: XCTestCase {
     }
 
     func test_careRecoversStatAndPersistsWithoutToast() throws {
-        let screen = try CharacterTestScreen(pet: makePet(satiety: 50, stateUpdatedAt: Date()))
+        let screen = try CharacterTestScreen(pet: makePet(satiety: 50))
         screen.care.accept(.satiety)
         XCTAssertEqual(screen.infos.last?.pet.satiety ?? 0, 75, accuracy: 0.01)
         XCTAssertTrue(screen.toasts.isEmpty)
         XCTAssertEqual(try screen.repository.readPet()?.satiety ?? 0, 75, accuracy: 0.01)
     }
 
-    func test_rejectionsStillRedrawAndExplainWhy() throws {
-        let full = try CharacterTestScreen(pet: makePet(satiety: 100, stateUpdatedAt: Date()))
-        full.care.accept(.satiety)
-        XCTAssertEqual(full.infos.count, 1)
-        XCTAssertEqual(full.toasts, [String(localized: "이미 충분해요")])
-
-        let dead = try CharacterTestScreen(pet: makePet(satiety: 50, hp: 0, stateUpdatedAt: Date()))
-        dead.care.accept(.satiety)
-        XCTAssertEqual(dead.infos.last?.pet.satiety ?? 0, 50, accuracy: 0.01)
-        XCTAssertEqual(dead.toasts, [String(localized: "먼저 부활시켜 주세요")])
-
-        let poor = try CharacterTestScreen(pet: makePet(level: 2, experience: 0, stateUpdatedAt: Date()))
-        poor.levelUp.accept(())
-        XCTAssertEqual(poor.infos.last?.pet.level, 2)
-        XCTAssertEqual(poor.toasts, [String(localized: "경험치가 부족해요")])
-
-        let alive = try CharacterTestScreen(pet: makePet(stateUpdatedAt: Date()))
-        alive.revive.accept(())
-        XCTAssertEqual(alive.infos.count, 1)
-        XCTAssertEqual(alive.toasts, [String(localized: "아직 건강해요")])
+    // 거절돼도 화면은 다시 그리고 이유를 알린다
+    func test_careOnFullStatRedrawsAndExplains() throws {
+        let screen = try CharacterTestScreen(pet: makePet(satiety: 100))
+        screen.care.accept(.satiety)
+        XCTAssertEqual(screen.infos.count, 1)
+        XCTAssertEqual(screen.toasts, [String(localized: "이미 충분해요")])
     }
 
-    func test_levelUpAndReviveApplyWhenAllowed() throws {
-        let ready = try CharacterTestScreen(pet: makePet(level: 0, experience: 1_000, stateUpdatedAt: Date()))
-        ready.levelUp.accept(())
-        XCTAssertEqual(ready.infos.last?.pet.level, 1)
-        XCTAssertEqual(ready.infos.last?.pet.experience, 0)
-        XCTAssertTrue(ready.toasts.isEmpty)
+    func test_careOnDeadPetRedrawsAndAsksToRevive() throws {
+        let screen = try CharacterTestScreen(pet: makePet(satiety: 50, hp: 0))
+        screen.care.accept(.satiety)
+        XCTAssertEqual(screen.infos.last?.pet.satiety ?? 0, 50, accuracy: 0.01)
+        XCTAssertEqual(screen.toasts, [String(localized: "먼저 부활시켜 주세요")])
+    }
 
-        let dead = try CharacterTestScreen(pet: makePet(satiety: 0, hydration: 0, fun: 0, cleanliness: 0, hp: 0,
-                                                        stateUpdatedAt: Date()))
-        dead.revive.accept(())
-        XCTAssertEqual(dead.infos.last?.pet.hp ?? 0, PetStatePolicy.maxHP, accuracy: 0.01)
-        XCTAssertEqual(dead.infos.last?.pet.satiety ?? 0, PetStatePolicy.reviveFloor, accuracy: 0.01)
-        XCTAssertTrue(dead.toasts.isEmpty)
+    func test_levelUpWithoutExperienceRedrawsAndExplains() throws {
+        let screen = try CharacterTestScreen(pet: makePet(level: 2, experience: 0))
+        screen.levelUp.accept(())
+        XCTAssertEqual(screen.infos.last?.pet.level, 2)
+        XCTAssertEqual(screen.toasts, [String(localized: "경험치가 부족해요")])
+    }
+
+    func test_reviveOnAlivePetRedrawsAndExplains() throws {
+        let screen = try CharacterTestScreen(pet: makePet())
+        screen.revive.accept(())
+        XCTAssertEqual(screen.infos.count, 1)
+        XCTAssertEqual(screen.toasts, [String(localized: "아직 건강해요")])
+    }
+
+    func test_levelUpAppliesWhenExperienceIsEnough() throws {
+        let screen = try CharacterTestScreen(pet: makePet(level: 0, experience: 1_000))
+        screen.levelUp.accept(())
+        XCTAssertEqual(screen.infos.last?.pet.level, 1)
+        XCTAssertEqual(screen.infos.last?.pet.experience, 0)
+        XCTAssertTrue(screen.toasts.isEmpty)
+    }
+
+    func test_reviveRestoresDeadPet() throws {
+        let screen = try CharacterTestScreen(pet: makePet(satiety: 0, hydration: 0, fun: 0, cleanliness: 0, hp: 0))
+        screen.revive.accept(())
+        XCTAssertEqual(screen.infos.last?.pet.hp ?? 0, PetStatePolicy.maxHP, accuracy: 0.01)
+        XCTAssertEqual(screen.infos.last?.pet.satiety ?? 0, PetStatePolicy.reviveFloor, accuracy: 0.01)
+        XCTAssertTrue(screen.toasts.isEmpty)
     }
 
     func test_levelDeltaMovesLevelWithinBounds() throws {
-        let screen = try CharacterTestScreen(pet: makePet(level: 0, stateUpdatedAt: Date()))
+        let screen = try CharacterTestScreen(pet: makePet(level: 0))
         screen.levelDelta.accept(-1)
         XCTAssertEqual(screen.infos.last?.pet.level, 0)
         screen.levelDelta.accept(1)
@@ -94,7 +102,7 @@ final class CharacterViewModelTests: XCTestCase {
     }
 
     func test_saveFailureShowsToastAndLeavesStoredPetUntouched() throws {
-        let screen = try CharacterTestScreen(pet: makePet(satiety: 50, stateUpdatedAt: Date()))
+        let screen = try CharacterTestScreen(pet: makePet(satiety: 50))
         screen.context.failsSave = true
         screen.care.accept(.satiety)
         XCTAssertTrue(screen.infos.isEmpty)
@@ -201,11 +209,11 @@ private final class CharacterTestScreen {
         repository = DefaultPetRepository(context: context)
         if let pet { _ = try repository.createPet(pet) }
         viewModel = CharacterViewModel(
-            fetchPetStateUseCase: DefaultFetchPetStateUseCase(petRepository: repository),
-            carePetUseCase: DefaultCarePetUseCase(petRepository: repository),
-            levelUpPetUseCase: DefaultLevelUpPetUseCase(petRepository: repository),
-            adjustPetLevelUseCase: DefaultAdjustPetLevelUseCase(petRepository: repository),
-            revivePetUseCase: DefaultRevivePetUseCase(petRepository: repository),
+            fetchPetStateUseCase: DefaultFetchPetStateUseCase(petRepository: repository, now: { testBase }),
+            carePetUseCase: DefaultCarePetUseCase(petRepository: repository, now: { testBase }),
+            levelUpPetUseCase: DefaultLevelUpPetUseCase(petRepository: repository, now: { testBase }),
+            adjustPetLevelUseCase: DefaultAdjustPetLevelUseCase(petRepository: repository, now: { testBase }),
+            revivePetUseCase: DefaultRevivePetUseCase(petRepository: repository, now: { testBase }),
             fetchCurrentWeatherUseCase: weather
         )
         let output = viewModel.transform(input: .init(

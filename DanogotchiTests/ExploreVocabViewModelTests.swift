@@ -132,7 +132,7 @@ extension ExploreVocabViewModelTests {
         XCTAssertEqual(screen.showsSave, false)
     }
 
-    func test_missingActiveBookKeepsScreenAndReadFailureAlerts() {
+    func test_missingActiveBookKeepsScreenWithoutAlert() {
         let screen = FullScreen()
         let words = makeDisplayInfos(2)
         screen.fetch.content = .success((bookType: .travel, items: words))
@@ -143,6 +143,13 @@ extension ExploreVocabViewModelTests {
         screen.appear.accept(())
         XCTAssertEqual(Set(screen.items), Set(words))
         XCTAssertTrue(screen.alerts.isEmpty)
+    }
+
+    func test_readFailureKeepsScreenAndAlerts() {
+        let screen = FullScreen()
+        let words = makeDisplayInfos(2)
+        screen.fetch.content = .success((bookType: .travel, items: words))
+        screen.appear.accept(())
 
         screen.fetch.content = .failure(CocoaError(.fileReadUnknown))
         screen.appear.accept(())
@@ -150,22 +157,28 @@ extension ExploreVocabViewModelTests {
         XCTAssertEqual(screen.alerts, [String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요.")])
     }
 
-    func test_saveToggleUpdatesOnlyThatWordAndFailureAlerts() {
+    func test_saveToggleUpdatesOnlyThatWordAndKeepsOrder() {
         let screen = FullScreen()
-        let words = makeDisplayInfos(3)
-        screen.fetch.content = .success((bookType: .travel, items: words))
+        screen.fetch.content = .success((bookType: .travel, items: makeDisplayInfos(3)))
         screen.appear.accept(())
+        let order = screen.items.map(\.word.id)
         let target = screen.items[1]
 
         screen.toggle.result = .success(true)
         screen.save.accept(target)
         XCTAssertEqual(screen.items.map(\.isSaved), [false, true, false])
-        XCTAssertEqual(screen.items.map(\.word.id), screen.items.map(\.word.id))
+        XCTAssertEqual(screen.items.map(\.word.id), order)
         XCTAssertEqual(screen.toggle.toggled, [target.word.id])
+    }
+
+    func test_saveToggleFailureKeepsListAndAlerts() {
+        let screen = FullScreen()
+        screen.fetch.content = .success((bookType: .travel, items: makeDisplayInfos(3)))
+        screen.appear.accept(())
 
         screen.toggle.result = .failure(CocoaError(.fileWriteOutOfSpace))
         screen.save.accept(screen.items[1])
-        XCTAssertEqual(screen.items.map(\.isSaved), [false, true, false])
+        XCTAssertEqual(screen.items.map(\.isSaved), [false, false, false])
         XCTAssertEqual(screen.alerts, [String(localized: "저장하지 못했어요. 다시 시도해주세요.")])
     }
 

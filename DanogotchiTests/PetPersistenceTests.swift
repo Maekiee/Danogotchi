@@ -73,7 +73,7 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_전체_저장이_정산_결과를_그대로_덮어쓴다() throws {
         let pet = try XCTUnwrap(try repository.createPet(makePet(satiety: 60, stateUpdatedAt: hoursAgo(10))))
-        let settled = PetStatePolicy.settle(pet, now: Date())
+        let settled = PetStatePolicy.settle(pet, now: testBase)
 
         try repository.updatePet(settled)
 
@@ -114,25 +114,23 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_조회는_정산_결과를_저장한다() throws {
         _ = try repository.createPet(makePet(stateUpdatedAt: hoursAgo(24)))
-        let useCase = DefaultFetchPetStateUseCase(petRepository: repository)
+        let useCase = DefaultFetchPetStateUseCase(petRepository: repository, now: { testBase })
 
         guard let info = try useCase.execute() else { return XCTFail("조회 실패") }
 
         // 24시간 방치 — 포만감 100 - 24 × 0.8
         XCTAssertEqual(info.pet.satiety, 80.8, accuracy: 0.01)
         XCTAssertEqual(try repository.readPet()?.satiety ?? 0, 80.8, accuracy: 0.01)
-        XCTAssertEqual(
-            try repository.readPet()?.stateUpdatedAt.timeIntervalSinceNow ?? -1, 0, accuracy: 1
-        )
+        XCTAssertEqual(try repository.readPet()?.stateUpdatedAt, testBase)
     }
 
     func test_펫이_없으면_조회는_nil을_돌려준다() throws {
-        XCTAssertNil(try DefaultFetchPetStateUseCase(petRepository: repository).execute())
+        XCTAssertNil(try DefaultFetchPetStateUseCase(petRepository: repository, now: { testBase }).execute())
     }
 
     func test_연속_조회가_같은_경과를_두_번_적용하지_않는다() throws {
         _ = try repository.createPet(makePet(stateUpdatedAt: hoursAgo(24)))
-        let useCase = DefaultFetchPetStateUseCase(petRepository: repository)
+        let useCase = DefaultFetchPetStateUseCase(petRepository: repository, now: { testBase })
 
         let first = try useCase.execute()
         let second = try useCase.execute()
@@ -144,7 +142,7 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_돌보기는_감소분_위에_25를_더해_저장한다() throws {
         _ = try repository.createPet(makePet(satiety: 50, stateUpdatedAt: hoursAgo(24)))
-        let useCase = DefaultCarePetUseCase(petRepository: repository)
+        let useCase = DefaultCarePetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute(stat: .satiety)
 
@@ -156,21 +154,19 @@ final class PetPersistenceTests: XCTestCase {
     /// 감소가 계속 일어나므로 "이미 100"은 경과 시간이 `0` 이하일 때만 성립한다 —
     /// 기기 시각을 미래로 옮겼다 되돌린 상황이다. 거절돼도 타임스탬프 재동기화는 저장돼야 한다.
     func test_이미_100이면_거절하지만_정산분은_저장한다() throws {
-        _ = try repository.createPet(makePet(stateUpdatedAt: Date().addingTimeInterval(60)))
-        let useCase = DefaultCarePetUseCase(petRepository: repository)
+        _ = try repository.createPet(makePet(stateUpdatedAt: testBase.addingTimeInterval(60)))
+        let useCase = DefaultCarePetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute(stat: .satiety)
 
         XCTAssertEqual(result?.rejection, .alreadyFull)
         XCTAssertEqual(try repository.readPet()?.satiety ?? 0, 100)
-        XCTAssertEqual(
-            try repository.readPet()?.stateUpdatedAt.timeIntervalSinceNow ?? -1, 0, accuracy: 1
-        )
+        XCTAssertEqual(try repository.readPet()?.stateUpdatedAt, testBase)
     }
 
     func test_사망_상태에서_돌보기는_거절되지만_정산분은_저장한다() throws {
         _ = try repository.createPet(makePet(satiety: 50, hp: 0, stateUpdatedAt: hoursAgo(24)))
-        let useCase = DefaultCarePetUseCase(petRepository: repository)
+        let useCase = DefaultCarePetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute(stat: .satiety)
 
@@ -184,7 +180,7 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_경험치가_부족하면_직접_호출해도_레벨이_오르지_않는다() throws {
         _ = try repository.createPet(makePet(experience: 999, stateUpdatedAt: hoursAgo(1)))
-        let useCase = DefaultLevelUpPetUseCase(petRepository: repository)
+        let useCase = DefaultLevelUpPetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute()
 
@@ -194,7 +190,7 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_레벨업은_초과_경험치를_버린다() throws {
         _ = try repository.createPet(makePet(experience: 2_500, stateUpdatedAt: hoursAgo(1)))
-        let useCase = DefaultLevelUpPetUseCase(petRepository: repository)
+        let useCase = DefaultLevelUpPetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute()
 
@@ -210,7 +206,7 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_테스트용_레벨_조절은_경험치를_두고_정책_범위_안에서만_움직인다() throws {
         _ = try repository.createPet(makePet(experience: 500, stateUpdatedAt: hoursAgo(1)))
-        let useCase = DefaultAdjustPetLevelUseCase(petRepository: repository)
+        let useCase = DefaultAdjustPetLevelUseCase(petRepository: repository, now: { testBase })
 
         _ = try useCase.execute(delta: -1)
         XCTAssertEqual(try repository.readPet()?.level, 0)
@@ -236,7 +232,7 @@ final class PetPersistenceTests: XCTestCase {
                 stateUpdatedAt: hoursAgo(24)
             )
         )
-        let useCase = DefaultRevivePetUseCase(petRepository: repository)
+        let useCase = DefaultRevivePetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute()
 
@@ -253,7 +249,7 @@ final class PetPersistenceTests: XCTestCase {
 
     func test_살아_있으면_부활을_거절한다() throws {
         _ = try repository.createPet(makePet(stateUpdatedAt: hoursAgo(1)))
-        let useCase = DefaultRevivePetUseCase(petRepository: repository)
+        let useCase = DefaultRevivePetUseCase(petRepository: repository, now: { testBase })
 
         let result = try useCase.execute()
 
@@ -264,7 +260,7 @@ final class PetPersistenceTests: XCTestCase {
     // MARK: - CreatePetUseCase
 
     func test_생성은_모든_수치를_최대로_시작한다() throws {
-        let useCase = DefaultCreatePetUseCase(petRepository: repository)
+        let useCase = DefaultCreatePetUseCase(petRepository: repository, now: { testBase })
 
         let pet = try XCTUnwrap(try useCase.execute(type: .sprout, name: "새싹"))
 
@@ -278,7 +274,7 @@ final class PetPersistenceTests: XCTestCase {
     }
 
     func test_생성을_두_번_호출해도_펫은_한_마리다() throws {
-        let useCase = DefaultCreatePetUseCase(petRepository: repository)
+        let useCase = DefaultCreatePetUseCase(petRepository: repository, now: { testBase })
 
         let first = try XCTUnwrap(try useCase.execute(type: .sprout, name: "새싹"))
         let second = try XCTUnwrap(try useCase.execute(type: .sprout, name: "다른이름"))

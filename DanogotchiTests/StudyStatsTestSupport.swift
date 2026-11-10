@@ -26,3 +26,10 @@ func statsDate(_ year: Int = 2026, _ month: Int = 9, _ day: Int = 26,
     }
     return date
 }
+
+func makeQuizWords(_ count: Int) -> [Vocab] {
+    (0..<count).map {
+        Vocab(id: UUID(), word: "word\($0)", meaning: "meaning\($0)", bookType: .myBook,
+              level: nil, partOfSpeech: .noun, sourceWordId: nil, createAt: testBase.addingTimeInterval(Double($0)))
+    }
+}

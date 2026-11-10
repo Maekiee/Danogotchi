@@ -58,5 +58,17 @@ enum UITestingSupport {
             assertionFailure("UI 테스트 시드 실패: \(error)")
         }
     }
+
+    /// 첫 설치 상태로 실행한 UI 테스트는 테마 검색이 실제 네트워크를 타지 않게 빈 결과를 받는다
+    static func makeSearchThemeRepositoryIfRequested() -> SearchThemeRepository? {
+        guard ProcessInfo.processInfo.arguments.contains("-uiTestingReset") else { return nil }
+        return EmptySearchThemeRepository()
+    }
+}
+
+private struct EmptySearchThemeRepository: SearchThemeRepository {
+    func searchPhotos(query: String, page: Int) async throws -> SearchPhotoEntity {
+        SearchPhotoEntity(total: 0, totalPages: 0, results: [])
+    }
 }
 #endif

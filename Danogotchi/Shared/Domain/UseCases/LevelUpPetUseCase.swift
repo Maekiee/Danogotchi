@@ -8,9 +8,11 @@ protocol LevelUpPetUseCase {
 
 final class DefaultLevelUpPetUseCase: LevelUpPetUseCase {
     private let petRepository: PetRepository
+    private let now: () -> Date
 
-    init(petRepository: PetRepository) {
+    init(petRepository: PetRepository, now: @escaping () -> Date = Date.init) {
         self.petRepository = petRepository
+        self.now = now
     }
 
     /// 버튼 활성 상태를 신뢰하지 않고 저장 직전에 다시 검사한다.
@@ -18,7 +20,7 @@ final class DefaultLevelUpPetUseCase: LevelUpPetUseCase {
     func execute() throws -> PetActionResult? {
         guard let pet = try petRepository.readPet() else { return nil }
 
-        var settled = PetStatePolicy.settle(pet, now: Date())
+        var settled = PetStatePolicy.settle(pet, now: now())
         let canLevelUp = PetLevelPolicy.canLevelUp(settled)
         if canLevelUp {
             settled.level += 1

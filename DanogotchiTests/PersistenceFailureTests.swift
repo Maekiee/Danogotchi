@@ -2,21 +2,6 @@ import CoreData
 import XCTest
 @testable import Danogotchi
 
-final class FailingSaveContext: NSManagedObjectContext, @unchecked Sendable {
-    var failsSave = false
-
-    override func save() throws {
-        if failsSave { throw CocoaError(.fileWriteOutOfSpace) }
-        try super.save()
-    }
-}
-
-func makeFailingSaveContext() -> FailingSaveContext {
-    let context = FailingSaveContext(concurrencyType: .mainQueueConcurrencyType)
-    context.persistentStoreCoordinator = makeInMemoryContext().persistentStoreCoordinator
-    return context
-}
-
 final class PersistenceFailureTests: XCTestCase {
     func test_failedUpdateRollsBackAndCanRetry() throws {
         let context = makeFailingSaveContext()
