@@ -11,21 +11,33 @@ struct CalendarView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: AppSpacing.space16) {
-                if let calendar = store.calendar, let month = store.displayedMonth {
+                if let calendar = store.calendar,
+                    let month = store.displayedMonth {
                     CalendarCard {
-                        CalendarHeatmap(calendar: calendar, selected: store.selectedDate) { store.send(.heatmapTapped($0)) }
+                        CalendarHeatmap(calendar: calendar, selected: store.selectedDate) {
+                            store.send(.heatmapTapped($0))
+                        }
                     }
+                    
                     chips(calendar)
+                    
                     CalendarCard {
-                        CalendarMonthGrid(calendar: calendar, month: month, selected: store.selectedDate,
-                                          onMonthChange: { store.send(.monthPicked($0)) },
-                                          onSelect: { store.send(.dateTapped($0)) })
+                        CalendarMonthGrid(
+                            calendar: calendar,
+                            month: month,
+                            selected: store.selectedDate,
+                            onMonthChange: { store.send(.monthPicked($0)) },
+                            onSelect: { store.send(.dateTapped($0)) }
+                        )
+                        
                         controls(calendar, month: month)
                     }
+                    
                     // 다시 읽기 실패는 기존 화면을 두고 선택 영역 위에 알린다
                     if store.loadStatus == .failed {
                         CalendarStateCard(kind: .failed) { store.send(.refresh) }
                     }
+                    
                     selection(calendar, month: month)
                 } else if store.loadStatus == .failed {
                     CalendarStateCard(kind: .failed) { store.send(.refresh) }
