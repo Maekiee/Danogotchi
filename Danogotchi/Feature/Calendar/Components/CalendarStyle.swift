@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-// 캘린더 공통 스타일 (글꼴·퍼센트·날짜·농도 색)
+// 캘린더 공통 스타일 (글꼴·퍼센트·날짜·농도 색·품사 이름)
 enum CalendarStyle {
     static func font(_ font: UIFont, relativeTo style: Font.TextStyle = .body) -> Font {
         .custom(font.fontName, size: font.pointSize, relativeTo: style)

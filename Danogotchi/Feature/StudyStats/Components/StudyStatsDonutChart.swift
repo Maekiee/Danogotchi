@@ -19,7 +19,7 @@ struct StudyStatsDonutChart: View {
                 SectorMark(angle: .value("값", category.total), innerRadius: .ratio(0.68), angularInset: 2)
                     .foregroundStyle(color(index, category.id))
                     .opacity(selected == nil || selected == category.id ? 1 : 0.45)
-                    .accessibilityLabel(kind.title(for: category.id))
+                    .accessibilityLabel(title(category.id))
                     .accessibilityValue(value)
             }
             .chartAngleSelection(value: $selectedAngle)
@@ -37,7 +37,7 @@ struct StudyStatsDonutChart: View {
                     Button { onSelect(category.id) } label: {
                         HStack(spacing: AppSpacing.space4) {
                             Circle().fill(color(index, category.id)).frame(width: 8, height: 8)
-                            Text(kind.title(for: category.id))
+                            Text(title(category.id))
                             Spacer(minLength: 2)
                             Text(value).monospacedDigit()
                         }
@@ -63,13 +63,17 @@ struct StudyStatsDonutChart: View {
         }
         if let category = categories.first(where: { $0.id == selected }) {
             let percent = StudyStatsStyle.percent(category.total, total)
-            StudyStatsSelection(text: String(localized: "\(kind.title(for: category.id)) · \(count(category.total)) · 전체의 \(percent)"))
+            StudyStatsSelection(text: String(localized: "\(title(category.id)) · \(count(category.total)) · 전체의 \(percent)"))
         }
     }
 
     // 주제는 풀이 횟수, 품사는 고유 단어 수
     private func count(_ value: Int) -> String {
         kind == .topic ? String(localized: "\(value)회") : String(localized: "\(value)개")
+    }
+
+    private func title(_ id: String) -> String {
+        kind == .topic ? StudyStatsStyle.topicTitle(id) : StudyStatsStyle.partTitle(id)
     }
 
     private func color(_ index: Int, _ id: String) -> Color {
