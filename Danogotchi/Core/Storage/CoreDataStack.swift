@@ -4,11 +4,19 @@ import OSLog
 final class CoreDataStack {
     private let container: NSPersistentContainer
     private var isPrepared = false
+    private let willLoadStore: (URL, NSManagedObjectModel) throws -> Void
+    private let didLoadStore: (NSManagedObjectContext) throws -> Void
 
     var viewContext: NSManagedObjectContext { container.viewContext }
 
-    init() {
-        container = NSPersistentContainer(name: "Model")
+    init(
+        modelName: String,
+        willLoadStore: @escaping (URL, NSManagedObjectModel) throws -> Void = { _, _ in },
+        didLoadStore: @escaping (NSManagedObjectContext) throws -> Void = { _ in }
+    ) {
+        container = NSPersistentContainer(name: modelName)
+        self.willLoadStore = willLoadStore
+        self.didLoadStore = didLoadStore
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
@@ -22,7 +30,7 @@ final class CoreDataStack {
         if container.persistentStoreCoordinator.persistentStores.isEmpty {
             for description in container.persistentStoreDescriptions {
                 if let url = description.url, description.type == NSSQLiteStoreType {
-                    try StudyStatsMigration.preflight(storeURL: url, destinationModel: container.managedObjectModel)
+                    try willLoadStore(url, container.managedObjectModel)
                 }
                 description.shouldAddStoreAsynchronously = false
                 description.shouldMigrateStoreAutomatically = true
@@ -32,7 +40,7 @@ final class CoreDataStack {
             container.loadPersistentStores { _, error in loadError = error }
             if let loadError { throw loadError }
         }
-        try StudyStatsMigration.backfillIfNeeded(context: viewContext)
+        try didLoadStore(viewContext)
         isPrepared = true
     }
 }

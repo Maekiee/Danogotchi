@@ -1,8 +1,6 @@
 import Foundation
 
-enum PetType: String, CaseIterable {
-    case sprout
-
+extension PetType {
     var title: String {
         switch self {
         case .sprout:

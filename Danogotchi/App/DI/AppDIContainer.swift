@@ -121,7 +121,11 @@ final class AppDIContainer {
     /// screenPixelSize는 SceneDelegate가 연결된 UIWindowScene.screen에서 읽어 넘긴다
     /// window는 화면 모드를 걸 앱 창이다
     init(screenPixelSize: CGSize, window: UIWindow) {
-        let coreDataStack = CoreDataStack()
+        let coreDataStack = CoreDataStack(
+            modelName: "Model",
+            willLoadStore: StudyStatsMigration.preflight(storeURL:destinationModel:),
+            didLoadStore: StudyStatsMigration.backfillIfNeeded(context:)
+        )
         dependencies = AppDependencies(
             screenPixelSize: screenPixelSize,
             coreDataStack: coreDataStack,

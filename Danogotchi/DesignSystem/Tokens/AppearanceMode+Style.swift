@@ -22,4 +22,12 @@ extension AppearanceMode {
         image?.accessibilityLabel = title
         return image
     }
+
+    var title: String {
+        switch self {
+        case .system: return String(localized: "시스템")
+        case .light: return String(localized: "라이트")
+        case .dark: return String(localized: "다크")
+        }
+    }
 }

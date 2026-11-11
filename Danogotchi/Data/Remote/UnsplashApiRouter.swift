@@ -13,7 +13,9 @@ enum UnsplashApiRouter: Endpoint {
     
     var method: HTTPMethod { .get }
     
-    var headers: [String: String] { APIHeader.dict([.unsplashKey, .applicationJSON]) }
+    var headers: [String: String] {
+        APIHeader.dict([.applicationJSON]).merging(["Authorization": "Client-ID \(APIConfig.Unsplash.apiKey)"]) { $1 }
+    }
     
     var queryItems: [URLQueryItem]? {
         switch self {
