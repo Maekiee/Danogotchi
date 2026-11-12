@@ -112,7 +112,7 @@ final class VocabBookDetailViewController: BaseViewController {
     }
     
     override func configView() {
-        navigationItem.title = viewModel.key.title
+        navigationItem.title = viewModel.key.topic.title
 
         navigationItem.backButtonDisplayMode = .minimal
 
