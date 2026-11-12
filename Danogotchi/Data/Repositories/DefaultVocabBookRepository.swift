@@ -18,14 +18,6 @@ final class DefaultVocabBookRepository {
         return try context.fetch(request).first
     }
 
-    /// 불변식상 0~1개지만, 해제 시 잔여물까지 훑도록 fetchLimit을 두지 않는다.
-    private func fetchActiveBookEntities() throws -> [VocabBookEntity] {
-        let request = VocabBookEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "isActive == YES")
-
-        return try context.fetch(request)
-    }
-
 }
 
 extension DefaultVocabBookRepository: VocabBookRepository {
@@ -33,20 +25,53 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         return activeBookChangedBroadcaster.stream()
     }
 
-    func readActiveBook() throws -> VocabBook? {
-        return try fetchActiveBookEntities().first?.toDomain()
+    func readActiveBooks() throws -> [VocabBook] {
+        let request = VocabBookEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "isActive == YES")
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "createAt", ascending: true)
+        ]
+
+        return try context.fetch(request).map { $0.toDomain() }
     }
 
-    /// 해제와 지정을 한 트랜잭션으로 처리해 "활성 단어장은 항상 1개" 불변식을 저장 시점에 보장한다.
-    func setActiveBook(id: UUID) throws {
-        guard let targetEntity = try fetchBookEntity(id: id) else { throw PersistenceError.entityNotFound }
-
-        try fetchActiveBookEntities().forEach { $0.isActive = false }
-        targetEntity.isActive = true
+    func setActive(id: UUID, isActive: Bool) throws {
+        guard let vocabBookEntity = try fetchBookEntity(id: id) else { throw PersistenceError.entityNotFound }
+        vocabBookEntity.isActive = isActive
 
         try context.saveOrRollback()
 
         activeBookChangedBroadcaster.send(())
+    }
+
+    func importBook(key: VocabBookKey, vocabs: [Vocab], isActive: Bool) throws -> VocabBook {
+        let vocabBookEntity = VocabBookEntity(context: context)
+        vocabBookEntity.id = UUID()
+        // 기존 시드·설치본과 같은 주제 제목 — 레벨이 붙은 표시용 제목은 화면이 만든다
+        vocabBookEntity.title = key.topic.title
+        vocabBookEntity.bookType = key.topic.rawValue
+        vocabBookEntity.level = key.level?.rawValue
+        vocabBookEntity.isActive = isActive
+        vocabBookEntity.createAt = Date()
+
+        for vocab in vocabs {
+            let vocabEntity = VocabEntity(context: context)
+            vocabEntity.id = vocab.id
+            vocabEntity.word = vocab.word
+            vocabEntity.meaning = vocab.meaning
+            vocabEntity.bookType = vocab.bookType.rawValue
+            vocabEntity.level = vocab.level?.rawValue
+            vocabEntity.partOfSpeech = vocab.partOfSpeech?.rawValue
+            vocabEntity.createAt = vocab.createAt
+            vocabBookEntity.addToVocabs(vocabEntity)
+        }
+
+        try context.saveOrRollback()
+
+        if isActive {
+            activeBookChangedBroadcaster.send(())
+        }
+        return vocabBookEntity.toDomain()
     }
 
     func createBook(title: String, bookType: BookTopic, level: VocabLevel?) throws -> VocabBook {
@@ -62,6 +87,14 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         return vocabBookEntity.toDomain()
     }
     
+    func readBookSummaries() throws -> [VocabBookSummary] {
+        let request = VocabBookEntity.fetchRequest()
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "createAt", ascending: true)
+        ]
+        return try context.fetch(request).map { $0.toSummary() }
+    }
+
     func readAllBooks() throws -> [VocabBook] {
         let request = VocabBookEntity.fetchRequest()
         request.sortDescriptors = [

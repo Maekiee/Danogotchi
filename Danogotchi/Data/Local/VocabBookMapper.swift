@@ -22,4 +22,17 @@ extension VocabBookEntity {
             createAt: createAt
         )
     }
+
+    /// vocabs 관계를 건드리지 않아 단어를 읽지 않는다
+    func toSummary() -> VocabBookSummary {
+        guard let id = id,
+              let bookTypeRawValue = bookType,
+              let bookType = BookTopic(rawValue: bookTypeRawValue) else { preconditionFailure("VocabBookEntity required property is nil") }
+
+        return VocabBookSummary(
+            id: id,
+            key: VocabBookKey(topic: bookType, level: level.flatMap(VocabLevel.init(rawValue:))),
+            isActive: isActive
+        )
+    }
 }

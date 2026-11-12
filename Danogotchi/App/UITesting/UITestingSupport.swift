@@ -64,6 +64,38 @@ enum UITestingSupport {
         guard ProcessInfo.processInfo.arguments.contains("-uiTestingReset") else { return nil }
         return EmptySearchThemeRepository()
     }
+
+    /// 첫 설치 상태로 실행한 UI 테스트는 단어장을 실제 서버 대신 고정 데이터에서 받는다
+    static func makeRemoteVocabBookRepositoryIfRequested() -> RemoteVocabBookRepository? {
+        guard ProcessInfo.processInfo.arguments.contains("-uiTestingReset") else { return nil }
+        return FixedRemoteVocabBookRepository()
+    }
+
+    /// 주제마다 고정 UUID 단어 20개 — 학습 한 세트(20문제)를 채운다
+    static func vocabs(key: VocabBookKey) -> [Vocab] {
+        let topicIndex = FixedRemoteVocabBookRepository.topics.firstIndex(of: key.topic) ?? 0
+        return (1...20).compactMap { index in
+            UUID(uuidString: String(format: "00000000-0000-0000-%04ld-%012ld", topicIndex, index)).map {
+                Vocab(id: $0, word: "\(key.topic.rawValue)\(index)", meaning: "\(key.topic.title) 뜻 \(index)",
+                      bookType: key.topic, level: key.level, partOfSpeech: .noun, sourceWordId: nil,
+                      createAt: Date(timeIntervalSince1970: Double(index)))
+            }
+        }
+    }
+}
+
+private struct FixedRemoteVocabBookRepository: RemoteVocabBookRepository {
+    static let topics: [BookTopic] = [.travel, .business, .emotion, .life]
+
+    func fetchBooks() async throws -> [RemoteVocabBook] {
+        Self.topics.enumerated().map { order, topic in
+            RemoteVocabBook(key: VocabBookKey(topic: topic, level: .a1), wordCount: 20, order: order)
+        }
+    }
+
+    func fetchVocabs(key: VocabBookKey) async throws -> [Vocab] {
+        UITestingSupport.vocabs(key: key)
+    }
 }
 
 private struct EmptySearchThemeRepository: SearchThemeRepository {

@@ -1,6 +1,6 @@
 import XCTest
 
-/// 단어 저장·학습 단어장 지정이 탐색·라이브러리·상세 화면에 반영되는 흐름
+/// 단어 저장·학습중 단어장 켜고 끄기가 탐색·라이브러리·상세 화면에 반영되는 흐름
 @MainActor
 final class VocabBookFlowUITests: XCTestCase {
     private let saved = "저장됨"
@@ -32,7 +32,7 @@ final class VocabBookFlowUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts[word].exists)
     }
 
-    func test_startLearningRefreshesLibraryAndExplore() throws {
+    func test_learningSeveralBooksAndTogglingOffRefreshesLibraryAndExplore() throws {
         let app = launchToExplore()
         let word = try visibleWord(in: app)
         let save = saveButton(for: word, in: app)
@@ -40,24 +40,32 @@ final class VocabBookFlowUITests: XCTestCase {
         XCTAssertTrue(save.waitForValue(saved))
 
         app.buttons["explore.library"].tap()
-        let travel = app.buttons["library.book.travel"]
+        let travel = app.buttons["library.book.travel_A1"]
         let myBook = app.buttons["library.book.myBook"]
         XCTAssertTrue(travel.waitForValue(learning))
         XCTAssertNotEqual(myBook.value as? String, learning)
 
-        // 나의 단어장을 학습 단어장으로 지정한다
+        // 나의 단어장도 학습중으로 둔다 — 여행은 그대로 학습중
         myBook.tap()
         let start = app.navigationBars.buttons["학습하기"]
         XCTAssertTrue(start.waitForExistence(timeout: 5))
         start.tap()
         XCTAssertTrue(app.navigationBars.buttons[learning].waitForExistence(timeout: 5))
+        goBack(in: app)
+        XCTAssertTrue(myBook.waitForValue(learning))
+        XCTAssertEqual(travel.value as? String, learning)
 
-        // 라이브러리의 학습중 표시가 옮겨간다
+        // 여행 학습중을 해제한다
+        travel.tap()
+        let learningButton = app.navigationBars.buttons[learning]
+        XCTAssertTrue(learningButton.waitForExistence(timeout: 5))
+        learningButton.tap()
+        XCTAssertTrue(app.navigationBars.buttons["학습하기"].waitForExistence(timeout: 5))
         goBack(in: app)
         XCTAssertTrue(myBook.waitForValue(learning))
         XCTAssertNotEqual(travel.value as? String, learning)
 
-        // 탐색 화면이 나의 단어장으로 바뀌어 저장 버튼이 사라진다
+        // 탐색 화면에는 나의 단어장 단어만 남아 저장 버튼이 사라진다
         app.buttons["library.close"].tap()
         XCTAssertTrue(app.staticTexts[word].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons.matching(identifier: "explore.save").firstMatch.waitForDisappearance())

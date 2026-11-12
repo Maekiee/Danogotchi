@@ -1,22 +1,26 @@
 import Foundation
 
 protocol FetchVocabsUseCase {
-    /// 활성 단어장 변경 신호. 값 캐시가 아니므로 신호를 받으면 executeActive()로 다시 읽는다.
+    /// 학습중 단어장 변경 신호. 값 캐시가 아니므로 신호를 받으면 executeActive()로 다시 읽는다.
     var activeBookChanged: AsyncStream<Void> { get }
-    func execute(topic: BookTopic) throws -> [VocabDisplayInfo]
-    /// 활성 단어장이 없으면 nil
-    func executeActive() throws -> (bookType: BookTopic, items: [VocabDisplayInfo])?
+    /// 받은 단어장은 CoreData에서, 받지 않은 단어장은 화면이 받아 둔 loaded에서, 그것도 비었으면 서버 문서 1개에서 읽는다
+    @MainActor func execute(key: VocabBookKey, loaded: [Vocab]) async throws -> [VocabDisplayInfo]
+    /// 학습중 단어장 단어의 합. 학습중 단어장이 없으면 빈 배열
+    func executeActive() throws -> [VocabDisplayInfo]
 }
 
 final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
     private let vocabBookRepository: VocabBookRepository
+    private let remoteVocabBookRepository: RemoteVocabBookRepository
     private let learningHistoryRepository: LearningHistoryRepository
 
     init(
         vocabBookRepository: VocabBookRepository,
+        remoteVocabBookRepository: RemoteVocabBookRepository,
         learningHistoryRepository: LearningHistoryRepository
     ) {
         self.vocabBookRepository = vocabBookRepository
+        self.remoteVocabBookRepository = remoteVocabBookRepository
         self.learningHistoryRepository = learningHistoryRepository
     }
 
@@ -24,29 +28,28 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
         return vocabBookRepository.activeBookChanged
     }
     
-    func execute(topic: BookTopic) throws -> [VocabDisplayInfo] {
-        let vocabs = try fetchVocabs(topic: topic)
-        return try joinWithHistory(vocabs, savedSourceIDs: savedSourceIDs(topic: topic))
-    }
-
-    func executeActive() throws -> (bookType: BookTopic, items: [VocabDisplayInfo])? {
-        guard let book = try vocabBookRepository.readActiveBook() else { return nil }
-        let items = try joinWithHistory(book.vocabList, savedSourceIDs: savedSourceIDs(topic: book.bookType))
-        return (bookType: book.bookType, items: items)
-    }
-
-    private func fetchVocabs(topic: BookTopic) throws -> [Vocab] {
-        guard let book = try vocabBookRepository.readAllBooks(bookType: topic).first else { return [] }
-        if topic == .myBook {
-            return try Array(vocabBookRepository.fetchVocabs(inBookId: book.id).reversed())
+    @MainActor
+    func execute(key: VocabBookKey, loaded: [Vocab]) async throws -> [VocabDisplayInfo] {
+        let vocabs: [Vocab]
+        if let book = try vocabBookRepository.readBookSummary(key: key) {
+            let local = try vocabBookRepository.fetchVocabs(inBookId: book.id)
+            vocabs = key.topic == .myBook ? local.reversed() : local
+        } else if !loaded.isEmpty {
+            // 다시 읽지 않고 정답률·저장 여부만 새로 붙인다
+            vocabs = loaded
+        } else {
+            vocabs = try await remoteVocabBookRepository.fetchVocabs(key: key)
         }
-        return book.vocabList
+        return try joinWithHistory(vocabs, savedSourceIDs: savedSourceIDs())
     }
 
-    /// 추천 단어장 화면에서만 필요 — 나의 단어장에 복사된 단어들의 원본 id 집합
-    private func savedSourceIDs(topic: BookTopic) throws -> Set<UUID> {
-        guard topic != .myBook,
-              let myBook = try vocabBookRepository.readAllBooks(bookType: .myBook).first else { return [] }
+    func executeActive() throws -> [VocabDisplayInfo] {
+        return try joinWithHistory(vocabBookRepository.readActiveBooks().learningVocabs, savedSourceIDs: savedSourceIDs())
+    }
+
+    /// 나의 단어장에 복사된 단어들의 원본 id 집합
+    private func savedSourceIDs() throws -> Set<UUID> {
+        guard let myBook = try vocabBookRepository.readBookSummary(key: VocabBookKey(topic: .myBook, level: nil)) else { return [] }
         return try Set(vocabBookRepository.fetchVocabs(inBookId: myBook.id).compactMap { $0.sourceWordId })
     }
 
@@ -57,7 +60,8 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
             VocabDisplayInfo(
                 word: vocab,
                 stats: stats[vocab.id],
-                isSaved: savedSourceIDs.contains(vocab.id)
+                // 저장 여부는 추천 단어에만 있다
+                isSaved: vocab.bookType != .myBook && savedSourceIDs.contains(vocab.id)
             )
         }
     }

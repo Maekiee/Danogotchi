@@ -112,13 +112,13 @@ final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
     }
     
     func binding(with item: VocabBookCardInfo) {
-        icon.image = UIImage(named: item.topic.icon)?
+        icon.image = UIImage(named: item.key.topic.icon)?
             .withRenderingMode(.alwaysTemplate)
-        textLabel.text = item.topic.title
-        backgroundColor = item.topic.color
+        textLabel.text = item.key.title
+        backgroundColor = item.key.topic.color
         activeIcon.isHidden = !item.isActive
-        button.accessibilityIdentifier = "library.book.\(item.topic.rawValue)"
-        button.accessibilityLabel = item.topic.title
+        button.accessibilityIdentifier = "library.book.\(item.key.id)"
+        button.accessibilityLabel = item.key.title
         button.accessibilityValue = item.isActive ? String(localized: "학습중") : nil
     }
     

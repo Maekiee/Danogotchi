@@ -93,8 +93,8 @@ private final class RecordingSpeechSynthesizer: SpeechSynthesizing {
 
 private struct StubFetchVocabsUseCase: FetchVocabsUseCase {
     var activeBookChanged: AsyncStream<Void> { AsyncStream { $0.finish() } }
-    func execute(topic: BookTopic) throws -> [VocabDisplayInfo] { [] }
-    func executeActive() throws -> (bookType: BookTopic, items: [VocabDisplayInfo])? { nil }
+    func execute(key: VocabBookKey, loaded: [Vocab]) async throws -> [VocabDisplayInfo] { [] }
+    func executeActive() throws -> [VocabDisplayInfo] { [] }
 }
 
 private struct StubStartQuizUseCase: StartQuizUseCase {
@@ -113,42 +113,33 @@ private struct StubObserveThemeUseCase: ObserveThemeUseCase {
 
 @MainActor
 extension ExploreVocabViewModelTests {
-    func test_appearLoadsActiveBookAndShowsSaveButtonForRecommendedBooks() {
+    func test_appearLoadsLearningWords() {
         let screen = FullScreen()
         let words = makeDisplayInfos(3)
-        screen.fetch.content = .success((bookType: .travel, items: words))
+        screen.fetch.content = .success(words)
 
         screen.appear.accept(())
 
         XCTAssertEqual(Set(screen.items), Set(words))
-        XCTAssertEqual(screen.showsSave, true)
         XCTAssertTrue(screen.alerts.isEmpty)
     }
 
-    func test_myBookHidesSaveButton() {
+    func test_noLearningBookEmptiesScreenWithoutAlert() {
         let screen = FullScreen()
-        screen.fetch.content = .success((bookType: .myBook, items: makeDisplayInfos(2)))
-        screen.appear.accept(())
-        XCTAssertEqual(screen.showsSave, false)
-    }
-
-    func test_missingActiveBookKeepsScreenWithoutAlert() {
-        let screen = FullScreen()
-        let words = makeDisplayInfos(2)
-        screen.fetch.content = .success((bookType: .travel, items: words))
+        screen.fetch.content = .success(makeDisplayInfos(2))
         screen.appear.accept(())
 
-        // 활성 단어장이 없으면 화면을 그대로 둔다
-        screen.fetch.content = .success(nil)
+        // 학습중을 모두 끄면 카드가 빈다
+        screen.fetch.content = .success([])
         screen.appear.accept(())
-        XCTAssertEqual(Set(screen.items), Set(words))
+        XCTAssertTrue(screen.items.isEmpty)
         XCTAssertTrue(screen.alerts.isEmpty)
     }
 
     func test_readFailureKeepsScreenAndAlerts() {
         let screen = FullScreen()
         let words = makeDisplayInfos(2)
-        screen.fetch.content = .success((bookType: .travel, items: words))
+        screen.fetch.content = .success(words)
         screen.appear.accept(())
 
         screen.fetch.content = .failure(CocoaError(.fileReadUnknown))
@@ -159,7 +150,7 @@ extension ExploreVocabViewModelTests {
 
     func test_saveToggleUpdatesOnlyThatWordAndKeepsOrder() {
         let screen = FullScreen()
-        screen.fetch.content = .success((bookType: .travel, items: makeDisplayInfos(3)))
+        screen.fetch.content = .success(makeDisplayInfos(3))
         screen.appear.accept(())
         let order = screen.items.map(\.word.id)
         let target = screen.items[1]
@@ -173,7 +164,7 @@ extension ExploreVocabViewModelTests {
 
     func test_saveToggleFailureKeepsListAndAlerts() {
         let screen = FullScreen()
-        screen.fetch.content = .success((bookType: .travel, items: makeDisplayInfos(3)))
+        screen.fetch.content = .success(makeDisplayInfos(3))
         screen.appear.accept(())
 
         screen.toggle.result = .failure(CocoaError(.fileWriteOutOfSpace))
@@ -207,18 +198,18 @@ extension ExploreVocabViewModelTests {
     func test_sameWordSetKeepsShuffledOrderAndChangedSetReshuffles() {
         let screen = FullScreen()
         let words = makeDisplayInfos(6)
-        screen.fetch.content = .success((bookType: .travel, items: words))
+        screen.fetch.content = .success(words)
         screen.appear.accept(())
         let firstOrder = screen.items.map(\.word.id)
         XCTAssertEqual(Set(firstOrder), Set(words.map(\.word.id)))
 
         // 같은 구성이면 입력 순서가 달라도 기존 순서를 유지한다
-        screen.fetch.content = .success((bookType: .travel, items: words.reversed()))
+        screen.fetch.content = .success(words.reversed())
         screen.appear.accept(())
         XCTAssertEqual(screen.items.map(\.word.id), firstOrder)
 
         let changed = words + makeDisplayInfos(1)
-        screen.fetch.content = .success((bookType: .travel, items: changed))
+        screen.fetch.content = .success(changed)
         screen.appear.accept(())
         XCTAssertEqual(Set(screen.items.map(\.word.id)), Set(changed.map(\.word.id)))
         XCTAssertEqual(screen.items.count, 7)
@@ -226,7 +217,7 @@ extension ExploreVocabViewModelTests {
 
     func test_activeBookChangeReloadsOnMain() async {
         let screen = FullScreen()
-        screen.fetch.content = .success((bookType: .life, items: makeDisplayInfos(2)))
+        screen.fetch.content = .success(makeDisplayInfos(2))
         let reloaded = expectation(description: "active book change reloads words")
         screen.onItems = { items in
             guard !items.isEmpty else { return }
@@ -238,7 +229,6 @@ extension ExploreVocabViewModelTests {
 
         await fulfillment(of: [reloaded], timeout: 2)
         XCTAssertEqual(screen.fetch.executions, 1)
-        XCTAssertEqual(screen.showsSave, true)
     }
 
     private func makeDisplayInfos(_ count: Int) -> [VocabDisplayInfo] {
@@ -255,7 +245,6 @@ private final class FullScreen {
     let startLearning = PublishRelay<Void>()
     let save = PublishRelay<VocabDisplayInfo>()
     private(set) var items: [VocabDisplayInfo] = []
-    private(set) var showsSave: Bool?
     private(set) var quizzes: [QuizData] = []
     private(set) var alerts: [String] = []
     var onItems: (([VocabDisplayInfo]) -> Void)?
@@ -280,14 +269,13 @@ private final class FullScreen {
             self?.items = items
             self?.onItems?(items)
         }).disposed(by: disposeBag)
-        output.showsSaveButton.drive(onNext: { [weak self] in self?.showsSave = $0 }).disposed(by: disposeBag)
         output.startQuiz.emit(onNext: { [weak self] in self?.quizzes.append($0) }).disposed(by: disposeBag)
         output.alertMessage.emit(onNext: { [weak self] in self?.alerts.append($0) }).disposed(by: disposeBag)
     }
 }
 
 private final class ControlledFetchVocabsUseCase: FetchVocabsUseCase {
-    var content: Result<(bookType: BookTopic, items: [VocabDisplayInfo])?, Error> = .success(nil)
+    var content: Result<[VocabDisplayInfo], Error> = .success([])
     private(set) var executions = 0
     private var continuation: AsyncStream<Void>.Continuation?
 
@@ -295,9 +283,9 @@ private final class ControlledFetchVocabsUseCase: FetchVocabsUseCase {
         AsyncStream { [weak self] continuation in self?.continuation = continuation }
     }
 
-    func execute(topic: BookTopic) throws -> [VocabDisplayInfo] { try content.get()?.items ?? [] }
+    func execute(key: VocabBookKey, loaded: [Vocab]) async throws -> [VocabDisplayInfo] { try content.get() }
 
-    func executeActive() throws -> (bookType: BookTopic, items: [VocabDisplayInfo])? {
+    func executeActive() throws -> [VocabDisplayInfo] {
         executions += 1
         return try content.get()
     }

@@ -9,13 +9,16 @@ final class LibraryDIContainer {
 
     func makeLibraryViewModel() -> LibraryViewModel {
         return LibraryViewModel(
-            fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(vocabBookRepository: dependencies.vocabBookRepository)
+            fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(
+                vocabBookRepository: dependencies.vocabBookRepository,
+                remoteVocabBookRepository: dependencies.makeRemoteVocabBookRepository()
+            )
         )
     }
 
-    func makeVocabDetailViewModel(topic: BookTopic) -> VocabBookDetailViewModel {
+    func makeVocabDetailViewModel(key: VocabBookKey) -> VocabBookDetailViewModel {
         return VocabBookDetailViewModel(
-            topic: topic,
+            key: key,
             fetchVocabsUseCase: dependencies.makeFetchVocabsUseCase(),
             toggleSaveVocabUseCase: dependencies.makeToggleSaveVocabUseCase(),
             deleteVocabUseCase: DefaultDeleteVocabUseCase(vocabRepository: dependencies.makeVocabRepository()),

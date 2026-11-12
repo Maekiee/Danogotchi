@@ -1,8 +1,8 @@
 import Foundation
 
 protocol IsActiveBookUseCase {
-    /// 해당 토픽의 단어장이 현재 활성 단어장인지 여부. 단어장이 없으면 false.
-    func execute(topic: BookTopic) throws -> Bool
+    /// 단어장이 학습중인지 여부. 받지 않은 단어장이면 false.
+    func execute(key: VocabBookKey) throws -> Bool
 }
 
 final class DefaultIsActiveBookUseCase: IsActiveBookUseCase {
@@ -12,7 +12,7 @@ final class DefaultIsActiveBookUseCase: IsActiveBookUseCase {
         self.vocabBookRepository = vocabBookRepository
     }
 
-    func execute(topic: BookTopic) throws -> Bool {
-        return try vocabBookRepository.readAllBooks(bookType: topic).first?.isActive ?? false
+    func execute(key: VocabBookKey) throws -> Bool {
+        return try vocabBookRepository.readBookSummary(key: key)?.isActive ?? false
     }
 }

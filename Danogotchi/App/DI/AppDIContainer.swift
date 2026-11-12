@@ -67,13 +67,24 @@ extension AppDependencies {
         )
     }
 
+    func makeRemoteVocabBookRepository() -> RemoteVocabBookRepository {
+        #if DEBUG
+        if let repository = UITestingSupport.makeRemoteVocabBookRepositoryIfRequested() { return repository }
+        #endif
+        return FirestoreVocabBookRepository()
+    }
+
     func makeSetActiveBookUseCase() -> SetActiveBookUseCase {
-        return DefaultSetActiveBookUseCase(vocabBookRepository: vocabBookRepository)
+        return DefaultSetActiveBookUseCase(
+            vocabBookRepository: vocabBookRepository,
+            remoteVocabBookRepository: makeRemoteVocabBookRepository()
+        )
     }
 
     func makeFetchVocabsUseCase() -> FetchVocabsUseCase {
         return DefaultFetchVocabsUseCase(
             vocabBookRepository: vocabBookRepository,
+            remoteVocabBookRepository: makeRemoteVocabBookRepository(),
             learningHistoryRepository: makeLearningHistoryRepository()
         )
     }
@@ -176,7 +187,10 @@ extension AppDIContainer {
     /// UI 테스트 전용 — 관심사·테마까지만 고른 상태. 펫이 없어 온보딩이 알 선택부터 이어진다
     func seedThemeSelectedForUITesting() throws {
         try makeDatabasePreparer().prepareIfNeeded()
-        try dependencies.makeSetActiveBookUseCase().execute(topic: .travel)
+        let travel = VocabBookKey(topic: .travel, level: .a1)
+        _ = try dependencies.vocabBookRepository.importBook(
+            key: travel, vocabs: UITestingSupport.vocabs(key: travel), isActive: true
+        )
         // 없는 파일명만 지정 — 원본 URL이 없어 복구 다운로드가 일어나지 않는다
         dependencies.userSettingsRepository.currentThemeImageFileName = "ui-test-theme.png"
     }

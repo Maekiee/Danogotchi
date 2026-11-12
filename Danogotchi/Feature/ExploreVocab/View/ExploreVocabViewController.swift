@@ -127,7 +127,6 @@ final class ExploreVocabViewController: BaseViewController {
     private let speakTappedRelay = PublishRelay<String>()
     /// 셀이 재사용될 때마다 다시 구독하므로 최신 값을 보관한다
     private let speakingTextRelay = BehaviorRelay<String?>(value: nil)
-    private var showsSaveButton = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -250,11 +249,8 @@ extension ExploreVocabViewController {
             .drive(speakingTextRelay)
             .disposed(by: disposeBag)
 
-        // 셀 구성 시점에 저장 버튼 노출 여부가 최신이어야 하므로 목록과 같이 반영한다
-        Driver.combineLatest(output.wordItems, output.showsSaveButton)
-            .drive(with: self) { owner, pair in
-                let (wordList, showsSaveButton) = pair
-                owner.showsSaveButton = showsSaveButton
+        output.wordItems
+            .drive(with: self) { owner, wordList in
                 owner.collectionView.isHidden = wordList.isEmpty
                 owner.applySnapshot(items: wordList)
             }.disposed(by: disposeBag)
@@ -315,7 +311,8 @@ extension ExploreVocabViewController {
                 with: item,
                 parentVC: self,
                 isSaved: item.isSaved,
-                showsSaveButton: self.showsSaveButton
+                // 나의 단어장 단어는 저장할 곳이 없다
+                showsSaveButton: item.word.bookType != .myBook
             )
 
             cell.onTouchTopIcon

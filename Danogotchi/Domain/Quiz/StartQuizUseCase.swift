@@ -3,14 +3,14 @@ import Foundation
 
 enum StartQuizResult {
     case success(QuizData)
-    /// 활성 단어장이 없거나 단어가 0개
+    /// 학습중 단어장이 없거나 단어가 0개
     case noWords
     /// 4지선다 보기 구성을 위해 최소 4개 필요
     case notEnoughWords
 }
 
 protocol StartQuizUseCase {
-    /// 활성 단어장에서 출제 세트를 선정
+    /// 학습중 단어장 단어를 합쳐 출제 세트를 선정
     func execute() throws -> StartQuizResult
 }
 
@@ -29,11 +29,8 @@ final class DefaultStartQuizUseCase: StartQuizUseCase {
     }
 
     func execute() throws -> StartQuizResult {
-        guard let activeBook = try vocabBookRepository.readActiveBook(),
-              !activeBook.vocabList.isEmpty else {
-            return .noWords
-        }
-        let allWords = activeBook.vocabList
+        let allWords = try vocabBookRepository.readActiveBooks().learningVocabs
+        guard !allWords.isEmpty else { return .noWords }
 
         guard allWords.count >= Self.minimumWordCount else {
             return .notEnoughWords

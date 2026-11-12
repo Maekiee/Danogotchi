@@ -3,27 +3,25 @@ import XCTest
 @testable import Danogotchi
 
 final class DatabaseSeederTests: XCTestCase {
-    func test_seedsMeaningsInAppLanguage() throws {
-        let japanese = makeInMemoryContext()
-        try DatabaseSeeder.seedIfNeeded(context: japanese, language: "ja")
-        XCTAssertEqual(try firstBusinessMeaning(in: japanese), MockBusinessWordsJa.data[0].1)
+    func test_seedsOnlyEmptyMyBookAndIsIdempotent() throws {
+        let context = makeInMemoryContext()
 
-        let korean = makeInMemoryContext()
-        try DatabaseSeeder.seedIfNeeded(context: korean, language: "ko")
-        XCTAssertEqual(try firstBusinessMeaning(in: korean), MockBusinessWords.data[0].1)
+        try DatabaseSeeder.seedIfNeeded(context: context)
+        try DatabaseSeeder.seedIfNeeded(context: context)
 
-        // 지원하지 않는 언어는 한국어 뜻으로 시드
-        let other = makeInMemoryContext()
-        try DatabaseSeeder.seedIfNeeded(context: other, language: "fr")
-        XCTAssertEqual(try firstBusinessMeaning(in: other), MockBusinessWords.data[0].1)
-        XCTAssertEqual(try other.count(for: VocabEntity.fetchRequest()), 1457)
+        let books = try DefaultVocabBookRepository(context: context).readAllBooks()
+        XCTAssertEqual(books.map(\.bookType), [.myBook])
+        XCTAssertEqual(books.first?.isActive, false)
+        XCTAssertEqual(try context.count(for: VocabEntity.fetchRequest()), 0)
     }
 
-    private func firstBusinessMeaning(in context: NSManagedObjectContext) throws -> String? {
-        let request = VocabEntity.fetchRequest()
-        request.predicate = NSPredicate(
-            format: "word == %@ AND bookType == %@", MockBusinessWords.data[0].0, BookTopic.business.rawValue
-        )
-        return try context.fetch(request).first?.meaning
+    func test_existingBooksSkipSeeding() throws {
+        let context = makeInMemoryContext()
+        // 기존 설치본 — 추천 단어장이 이미 있으면 나의 단어장을 다시 만들지 않는다
+        _ = try DefaultVocabBookRepository(context: context).createBook(title: "Travel", bookType: .travel, level: .a1)
+
+        try DatabaseSeeder.seedIfNeeded(context: context)
+
+        XCTAssertEqual(try DefaultVocabBookRepository(context: context).readAllBooks().map(\.bookType), [.travel])
     }
 }

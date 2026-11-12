@@ -29,7 +29,7 @@ final class AppDIContainerTests: XCTestCase {
 
         let library = main.makeLibraryDIContainer()
         _ = library.makeLibraryViewModel()
-        _ = library.makeVocabDetailViewModel(topic: .travel)
+        _ = library.makeVocabDetailViewModel(key: VocabBookKey(topic: .travel, level: .a1))
         _ = library.makeAddVocabViewModel()
 
         let quiz = main.makeQuizDIContainer()

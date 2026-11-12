@@ -38,7 +38,6 @@ final class ExploreVocabViewModel: BaseViewModel {
 
     struct Output {
         let wordItems: Driver<[VocabDisplayInfo]>
-        let showsSaveButton: Driver<Bool>
         let startQuiz: Signal<QuizData>
         let alertMessage: Signal<String>
         let themeImageFileURL: Driver<URL?>
@@ -48,7 +47,6 @@ final class ExploreVocabViewModel: BaseViewModel {
 
     func transform(input: Input) -> Output {
         let allWordItems = BehaviorRelay<[VocabDisplayInfo]>(value: [])
-        let showsSaveButton = BehaviorRelay<Bool>(value: false)
         let startQuizRelay = PublishRelay<QuizData>()
         let alertMessageRelay = PublishRelay<String>()
 
@@ -58,11 +56,8 @@ final class ExploreVocabViewModel: BaseViewModel {
         Observable.merge(activeBookChanged, input.viewWillAppear)
             .bind(with: self) { owner, _ in
                 do {
-                    // 활성 단어장이 없으면 화면을 그대로 둔다
-                    guard let content = try owner.fetchVocabsUseCase.executeActive() else { return }
-                    allWordItems.accept(owner.shuffledItems(content.items))
-                    // 나의 단어장을 학습중이면 저장할 곳이 없다
-                    showsSaveButton.accept(content.bookType != .myBook)
+                    // 학습중 단어장이 없으면 빈 목록 그대로 반영한다
+                    allWordItems.accept(owner.shuffledItems(try owner.fetchVocabsUseCase.executeActive()))
                 } catch {
                     alertMessageRelay.accept(String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요."))
                 }
@@ -109,7 +104,6 @@ final class ExploreVocabViewModel: BaseViewModel {
 
         return Output(
             wordItems: allWordItems.asDriver(),
-            showsSaveButton: showsSaveButton.asDriver(),
             startQuiz: startQuizRelay.asSignal(),
             alertMessage: alertMessageRelay.asSignal(),
             themeImageFileURL: themeImageFileURL,

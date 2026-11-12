@@ -15,7 +15,10 @@ final class OnboardingDIContainer {
     }
 
     func makeOnboardingInterestViewModel() -> OnboardingInterestViewModel {
-        return OnboardingInterestViewModel(setActiveBookUseCase: dependencies.makeSetActiveBookUseCase())
+        return OnboardingInterestViewModel(selectInterestUseCase: DefaultSelectInterestUseCase(
+            setActiveBookUseCase: dependencies.makeSetActiveBookUseCase(),
+            vocabBookRepository: dependencies.vocabBookRepository
+        ))
     }
 
     func makeSearchThemeViewModel() -> SearchThemeViewModel {

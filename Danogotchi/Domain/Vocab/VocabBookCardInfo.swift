@@ -1,7 +1,6 @@
 import Foundation
 
 struct VocabBookCardInfo: Hashable {
-    let id: UUID
-    let topic: BookTopic
+    let key: VocabBookKey
     let isActive: Bool
 }

@@ -15,7 +15,7 @@ final class SQLitePersistenceTests: XCTestCase {
         let book = try books.createBook(title: "my", bookType: .myBook, level: nil)
         let word = try books.addVocab(bookId: book.id, word: "apple", meaning: "사과",
                                       bookType: .myBook, level: nil, partOfSpeech: .noun)
-        try books.setActiveBook(id: book.id)
+        try books.setActive(id: book.id, isActive: true)
         try DefaultVocabRepository(context: context).updateVocab(id: word.id, word: "pear", meaning: "배", partOfSpeech: nil)
         try DefaultLearningHistoryRepository(context: context).addHistory(makeQuizAnswer(word))
         let pets = DefaultPetRepository(context: context)
@@ -26,7 +26,7 @@ final class SQLitePersistenceTests: XCTestCase {
         let reopened = try openStore(url: url)
         defer { try? closeStore(reopened) }
         let reopenedBooks = DefaultVocabBookRepository(context: reopened.viewContext)
-        XCTAssertEqual(try reopenedBooks.readActiveBook()?.id, book.id)
+        XCTAssertEqual(try reopenedBooks.readActiveBooks().map(\.id), [book.id])
         let persistedWord = try XCTUnwrap(reopenedBooks.fetchVocabs(inBookId: book.id).first)
         XCTAssertEqual(persistedWord.id, word.id)
         XCTAssertEqual(persistedWord.word, "pear")

@@ -68,6 +68,12 @@ final class VocabBookDetailViewController: BaseViewController {
     private let startLearningButton = UIBarButtonItem(
         title: String(localized: "학습하기"), style: .plain, target: nil, action: nil
     )
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .large)
+        view.color = AppColor.textPrimary
+        view.hidesWhenStopped = true
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,7 +89,8 @@ final class VocabBookDetailViewController: BaseViewController {
     override func configHierarchy() {
         [
             collectionView,
-            addVocabButton
+            addVocabButton,
+            loadingIndicator
         ].forEach { view.addSubview($0) }
     }
     
@@ -98,10 +105,14 @@ final class VocabBookDetailViewController: BaseViewController {
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(AppSpacing.space20)
             make.size.equalTo(48)
         }
+
+        loadingIndicator.snp.makeConstraints { make in
+            make.center.equalTo(collectionView)
+        }
     }
     
     override func configView() {
-        navigationItem.title = viewModel.topic.title
+        navigationItem.title = viewModel.key.title
 
         navigationItem.backButtonDisplayMode = .minimal
 
@@ -142,11 +153,20 @@ extension VocabBookDetailViewController {
             .bind(to: startLearningRelay)
             .disposed(by: disposeBag)
 
+        // 학습중을 다시 누르면 해제된다 — 버튼은 전환 중에만 막는다
         output.isActiveBook
             .drive(with: self) { owner, isActive in
                 owner.startLearningButton.title = isActive ? String(localized: "학습중") : String(localized: "학습하기")
-                owner.startLearningButton.isEnabled = !isActive
             }.disposed(by: disposeBag)
+
+        output.isLoading
+            .map { !$0 }
+            .drive(startLearningButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+
+        output.isLoadingWords
+            .drive(loadingIndicator.rx.isAnimating)
+            .disposed(by: disposeBag)
 
         addVocabButton.rx.tap
             .bind(with: self) { owner, _ in
