@@ -6,10 +6,12 @@ import RxCocoa
 final class LibraryViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let fetchVocabBooksUseCase: FetchVocabBooksUseCase
+    private let reportError: (Error) -> Void
     private var remoteBooksTask: Task<Void, Never>?
 
-    init(fetchVocabBooksUseCase: FetchVocabBooksUseCase) {
+    init(fetchVocabBooksUseCase: FetchVocabBooksUseCase, reportError: @escaping (Error) -> Void) {
         self.fetchVocabBooksUseCase = fetchVocabBooksUseCase
+        self.reportError = reportError
     }
 
     deinit {
@@ -45,6 +47,7 @@ final class LibraryViewModel: BaseViewModel {
             do {
                 bookItems.accept(try owner.fetchVocabBooksUseCase.execute(remoteBooks: remoteBooks.value ?? []))
             } catch {
+                owner.reportError(error)
                 alertMessage.accept(String(localized: "단어장을 불러오지 못했어요. 다시 시도해주세요."))
             }
         }
@@ -56,6 +59,7 @@ final class LibraryViewModel: BaseViewModel {
             .bind(with: self) { owner, _ in
                 isFetchingRemoteBooks.accept(true)
                 let useCase = owner.fetchVocabBooksUseCase
+                let reportError = owner.reportError
                 // owner를 캡처하지 않아 요청 중에도 ViewModel이 해제될 수 있다.
                 owner.remoteBooksTask = Task { @MainActor in
                     defer { isFetchingRemoteBooks.accept(false) }
@@ -64,8 +68,9 @@ final class LibraryViewModel: BaseViewModel {
                         guard !Task.isCancelled else { return }
                         remoteBooks.accept(books)
                     } catch {
-                        // 알림 없이 받은 단어장만 보여준다
+                        // 알림 없이 받은 단어장만 보여준다 — 오프라인(Firestore unavailable)은 CrashReportPolicy가 거른다
                         AppLogger.network.error("서버 단어장 목록 조회 실패: \(String(describing: error), privacy: .public)")
+                        reportError(error)
                     }
                 }
             }

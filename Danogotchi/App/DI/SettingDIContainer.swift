@@ -15,7 +15,7 @@ final class SettingDIContainer {
 
     func makeSettingTabViewModel() -> SettingTabViewModel {
         return SettingTabViewModel(
-            appEnv: DefaultAppEnvProvider(),
+            appEnv: DefaultAppEnvProvider(installationID: DefaultInstallationIDRepository().installationID),
             studyReminderUseCase: dependencies.makeStudyReminderUseCase(),
             appearanceModeUseCase: dependencies.makeAppearanceModeUseCase()
         )

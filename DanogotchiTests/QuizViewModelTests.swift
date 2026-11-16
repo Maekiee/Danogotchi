@@ -39,10 +39,16 @@ private final class RecordingReminderUseCase: StudyReminderUseCase {
     }
 }
 
+private final class ErrorRecorder {
+    private(set) var errors: [Error] = []
+    func record(_ error: Error) { errors.append(error) }
+}
+
 @MainActor
 private final class QuizTestScreen {
     let experience = RecordingExperienceUseCase()
     let reminder = RecordingReminderUseCase()
+    let reporter = ErrorRecorder()
     let selected = PublishRelay<Int>()
     let retry = PublishRelay<Void>()
     let viewModel: QuizViewModel
@@ -58,7 +64,8 @@ private final class QuizTestScreen {
     init(questionCount: Int = 1) {
         let words = makeQuizWords(4)
         viewModel = QuizViewModel(earnExperienceUseCase: experience, studyReminderUseCase: reminder,
-                                  quizData: QuizData(words: Array(words.prefix(questionCount)), allWord: words))
+                                  quizData: QuizData(words: Array(words.prefix(questionCount)), allWord: words),
+                                  reportError: { [reporter] in reporter.record($0) })
         let output = viewModel.transform(input: .init(choiceSelected: selected.asObservable(), retrySave: retry.asObservable()))
         output.choices.drive(onNext: { [weak self] in self?.choices = $0 }).disposed(by: bag)
         output.questionWord.drive(onNext: { [weak self] in self?.question = $0 }).disposed(by: bag)
@@ -198,5 +205,6 @@ final class QuizViewModelTests: XCTestCase {
         XCTAssertEqual(screen.experience.commits.count, 1)
         XCTAssertEqual(screen.completions.count, 1)
         XCTAssertEqual(screen.failures, 0)
+        XCTAssertEqual(screen.reporter.errors.count, 1, "알림 갱신 실패는 화면을 막지 않고 한 번 보고한다")
     }
 }

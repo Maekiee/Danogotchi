@@ -9,7 +9,13 @@ class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresenta
         view.backgroundColor = AppColor.background
         AppLogger.lifecycle.debug("✅ Init: \(String(describing: type(of: self)), privacy: .public) ✅")
     }
-    
+
+    /// 하위 클래스가 override하면 반드시 super를 호출해야 화면 breadcrumb가 남는다
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        CrashReporter.screenDidAppear(String(describing: type(of: self)))
+    }
+
     deinit {
         AppLogger.lifecycle.debug("☑️ Deinit 해제: \(String(describing: type(of: self)), privacy: .public) ☑️")
     }

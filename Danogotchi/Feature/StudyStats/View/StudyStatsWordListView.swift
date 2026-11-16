@@ -31,6 +31,7 @@ struct StudyStatsWordListView: View {
         .background(Color(AppColor.background).ignoresSafeArea())
         .navigationTitle("학습한 단어")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { CrashReporter.screenDidAppear("StudyStatsWordListView") }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: onClose) { Image(systemName: "xmark").frame(minWidth: 44, minHeight: 44) }

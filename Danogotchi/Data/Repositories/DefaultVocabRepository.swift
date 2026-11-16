@@ -43,7 +43,11 @@ extension DefaultVocabRepository: VocabRepository {
         let vocabEntities = try context.fetch(request)
         return vocabEntities.map { $0.toDomain() }
     }
-    
+
+    func countAllVocabs() throws -> Int {
+        return try context.count(for: VocabEntity.fetchRequest())
+    }
+
     func readVocab(id: UUID) throws -> Vocab? {
         return try fetchEntity(id: id)?.toDomain()
     }

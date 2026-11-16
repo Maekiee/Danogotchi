@@ -36,7 +36,8 @@ final class MainDIContainer {
                     AppLogger.network.error("테마 이미지 복구 실패: \(String(describing: error), privacy: .public)")
                 }
             ),
-            speechSynthesizer: dependencies.speechSynthesizer
+            speechSynthesizer: dependencies.speechSynthesizer,
+            reportError: dependencies.reportError
         )
     }
 
@@ -53,7 +54,8 @@ final class MainDIContainer {
             fetchCurrentWeatherUseCase: DefaultFetchCurrentWeatherUseCase(
                 locationProvider: DeviceLocationProvider(),
                 weatherRepository: DefaultWeatherRepository(apiClient: dependencies.apiClient)
-            )
+            ),
+            reportError: dependencies.reportError
         )
     }
 

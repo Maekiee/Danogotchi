@@ -61,6 +61,9 @@ enum AppColor {
 
     private static func named(_ name: String) -> UIColor {
         guard let color = UIColor(named: name) else {
+            // 컬러셋 이름은 코드 상수라 로그에 남겨도 된다 — 같은 non-fatal 보고서에 붙는다
+            CrashReporter.log("missing color: \(name)")
+            CrashReporter.recordInvariantViolation("missing_color_asset")
             assertionFailure("Assets에 '\(name)' 컬러셋이 없습니다")
             return .systemPink
         }

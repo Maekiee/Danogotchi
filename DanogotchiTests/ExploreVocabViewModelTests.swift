@@ -49,7 +49,8 @@ final class ExploreVocabViewModelTests: XCTestCase {
                 startQuizUseCase: StubStartQuizUseCase(),
                 toggleSaveVocabUseCase: StubToggleSaveVocabUseCase(),
                 observeThemeUseCase: StubObserveThemeUseCase(),
-                speechSynthesizer: synthesizer
+                speechSynthesizer: synthesizer,
+                reportError: { _ in }
             )
             let output = viewModel.transform(input: ExploreVocabViewModel.Input(
                 viewWillAppear: .never(),
@@ -146,6 +147,7 @@ extension ExploreVocabViewModelTests {
         screen.appear.accept(())
         XCTAssertEqual(Set(screen.items), Set(words))
         XCTAssertEqual(screen.alerts, [String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요.")])
+        XCTAssertEqual(screen.reporter.errors.count, 1, "읽기 실패는 한 번 보고한다")
     }
 
     func test_saveToggleUpdatesOnlyThatWordAndKeepsOrder() {
@@ -171,6 +173,7 @@ extension ExploreVocabViewModelTests {
         screen.save.accept(screen.items[1])
         XCTAssertEqual(screen.items.map(\.isSaved), [false, false, false])
         XCTAssertEqual(screen.alerts, [String(localized: "저장하지 못했어요. 다시 시도해주세요.")])
+        XCTAssertTrue(screen.reporter.errors.isEmpty, "저장 실패는 saveOrRollback이 기록한다")
     }
 
     func test_startLearningMapsEveryOutcome() {
@@ -193,6 +196,7 @@ extension ExploreVocabViewModelTests {
             String(localized: "최소 4개 이상의 단어가 필요합니다."),
             String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요."),
         ])
+        XCTAssertEqual(screen.reporter.errors.count, 1, "단어 부족은 실패가 아니다 — 읽기 실패만 보고한다")
     }
 
     func test_sameWordSetKeepsShuffledOrderAndChangedSetReshuffles() {
@@ -241,6 +245,7 @@ private final class FullScreen {
     let fetch = ControlledFetchVocabsUseCase()
     let start = ControlledStartQuizUseCase()
     let toggle = ControlledToggleSaveVocabUseCase()
+    let reporter = ErrorRecorder()
     let appear = PublishRelay<Void>()
     let startLearning = PublishRelay<Void>()
     let save = PublishRelay<VocabDisplayInfo>()
@@ -257,7 +262,8 @@ private final class FullScreen {
             startQuizUseCase: start,
             toggleSaveVocabUseCase: toggle,
             observeThemeUseCase: StubObserveThemeUseCase(),
-            speechSynthesizer: RecordingSpeechSynthesizer()
+            speechSynthesizer: RecordingSpeechSynthesizer(),
+            reportError: { [reporter] in reporter.record($0) }
         )
         let output = viewModel.transform(input: ExploreVocabViewModel.Input(
             viewWillAppear: appear.asObservable(),
@@ -272,6 +278,11 @@ private final class FullScreen {
         output.startQuiz.emit(onNext: { [weak self] in self?.quizzes.append($0) }).disposed(by: disposeBag)
         output.alertMessage.emit(onNext: { [weak self] in self?.alerts.append($0) }).disposed(by: disposeBag)
     }
+}
+
+private final class ErrorRecorder {
+    private(set) var errors: [Error] = []
+    func record(_ error: Error) { errors.append(error) }
 }
 
 private final class ControlledFetchVocabsUseCase: FetchVocabsUseCase {

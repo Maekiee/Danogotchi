@@ -154,6 +154,7 @@ struct StudyStatsView: View {
             }
         }
         .task { store.send(.appeared) }
+        .onAppear { CrashReporter.screenDidAppear("StudyStatsView") }
         .onDisappear { store.send(.disappeared) }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.send(.refresh) }

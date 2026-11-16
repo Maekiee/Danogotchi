@@ -22,13 +22,17 @@ extension AppFlowCoordinator {
         container.makeAppearanceModeUseCase().applySaved()
 
         do {
+            CrashReporter.log("db: prepare_start")
             try container.makeDatabasePreparer().prepareIfNeeded()
+            CrashReporter.log("db: prepare_success")
+            container.recordStoreContextForCrashReports()
 
             // 알림 재예약은 부가 기능이다 — 실패해도 앱 진입을 막지 않는다.
             do {
                 try container.makeStudyReminderUseCase().refresh()
             } catch {
                 AppLogger.push.error("학습 알림 재예약 실패: \(String(describing: error), privacy: .public)")
+                container.reportError(error)
             }
 
             if try container.makeOnboardingProgressUseCase().isComplete() {
@@ -38,6 +42,8 @@ extension AppFlowCoordinator {
             }
             window.makeKeyAndVisible()
         } catch {
+            AppLogger.database.error("앱 시작 데이터 준비 실패: \(String(describing: error), privacy: .public)")
+            container.reportError(error)
             let retryViewController = UIViewController()
             retryViewController.view.backgroundColor = AppColor.background
             window.rootViewController = retryViewController

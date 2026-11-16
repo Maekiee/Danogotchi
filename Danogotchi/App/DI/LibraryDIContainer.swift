@@ -12,7 +12,8 @@ final class LibraryDIContainer {
             fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(
                 vocabBookRepository: dependencies.vocabBookRepository,
                 remoteVocabBookRepository: dependencies.makeRemoteVocabBookRepository()
-            )
+            ),
+            reportError: dependencies.reportError
         )
     }
 
@@ -23,7 +24,8 @@ final class LibraryDIContainer {
             toggleSaveVocabUseCase: dependencies.makeToggleSaveVocabUseCase(),
             deleteVocabUseCase: DefaultDeleteVocabUseCase(vocabRepository: dependencies.makeVocabRepository()),
             setActiveBookUseCase: dependencies.makeSetActiveBookUseCase(),
-            isActiveBookUseCase: DefaultIsActiveBookUseCase(vocabBookRepository: dependencies.vocabBookRepository)
+            isActiveBookUseCase: DefaultIsActiveBookUseCase(vocabBookRepository: dependencies.vocabBookRepository),
+            reportError: dependencies.reportError
         )
     }
 

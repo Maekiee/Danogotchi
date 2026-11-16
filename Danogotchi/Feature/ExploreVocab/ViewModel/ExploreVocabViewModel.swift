@@ -10,6 +10,7 @@ final class ExploreVocabViewModel: BaseViewModel {
     private let toggleSaveVocabUseCase: ToggleSaveVocabUseCase
     private let observeThemeUseCase: ObserveThemeUseCase
     private let speechSynthesizer: SpeechSynthesizing
+    private let reportError: (Error) -> Void
 
     /// 표시 순서를 고정하는 셔플 결과. 같은 단어 구성이면 재조회해도 이 순서를 재사용한다.
     private var shuffledOrder: [UUID] = []
@@ -19,13 +20,15 @@ final class ExploreVocabViewModel: BaseViewModel {
         startQuizUseCase: StartQuizUseCase,
         toggleSaveVocabUseCase: ToggleSaveVocabUseCase,
         observeThemeUseCase: ObserveThemeUseCase,
-        speechSynthesizer: SpeechSynthesizing
+        speechSynthesizer: SpeechSynthesizing,
+        reportError: @escaping (Error) -> Void
     ) {
         self.fetchVocabsUseCase = fetchVocabsUseCase
         self.startQuizUseCase = startQuizUseCase
         self.toggleSaveVocabUseCase = toggleSaveVocabUseCase
         self.observeThemeUseCase = observeThemeUseCase
         self.speechSynthesizer = speechSynthesizer
+        self.reportError = reportError
     }
 
     struct Input {
@@ -59,6 +62,7 @@ final class ExploreVocabViewModel: BaseViewModel {
                     // 학습중 단어장이 없으면 빈 목록 그대로 반영한다
                     allWordItems.accept(owner.shuffledItems(try owner.fetchVocabsUseCase.executeActive()))
                 } catch {
+                    owner.reportError(error)
                     alertMessageRelay.accept(String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }.disposed(by: disposeBag)
@@ -96,6 +100,7 @@ final class ExploreVocabViewModel: BaseViewModel {
                         alertMessageRelay.accept(String(localized: "최소 4개 이상의 단어가 필요합니다."))
                     }
                 } catch {
+                    owner.reportError(error)
                     alertMessageRelay.accept(String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요."))
                 }
             }.disposed(by: disposeBag)

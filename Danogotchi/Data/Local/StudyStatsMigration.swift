@@ -99,7 +99,8 @@ enum StudyStatsMigration {
                     // 독립 ID를 보강 완료 표시로 사용해 기존 스냅샷 유지
                     history.vocabId = id
                 }
-                try context.saveOrRollback()
+                // 실패 보고는 DB 준비 단계 정보를 붙여 한 번만 한다 — rollback은 아래 catch가 한다
+                try context.save()
             } catch {
                 context.rollback()
                 throw error

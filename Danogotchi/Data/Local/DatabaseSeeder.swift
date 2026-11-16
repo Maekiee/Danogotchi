@@ -13,6 +13,12 @@ enum DatabaseSeeder {
         book.bookType = BookTopic.myBook.rawValue
         book.createAt = Date()
 
-        try context.saveOrRollback()
+        // saveOrRollback은 실패를 기록한다 — 단계 정보를 붙인 보고는 앱 시작(AppFlowCoordinator)에서 한 번만 한다
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
     }
 }

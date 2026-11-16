@@ -96,6 +96,7 @@ final class VocabBookDetailViewModelTests: XCTestCase {
 
         XCTAssertTrue(screen.words.isEmpty)
         XCTAssertEqual(screen.alerts.first, String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요."))
+        XCTAssertEqual(screen.reporter.errors.count, 1, "단어 읽기 실패는 한 번 보고한다 — 오프라인 거르기는 CrashReportPolicy 몫")
     }
 
     func test_saveToggleUpdatesOnlyThatWordAndPersists() async throws {
@@ -122,7 +123,13 @@ final class VocabBookDetailViewModelTests: XCTestCase {
         screen.save.accept(screen.words[0])
         XCTAssertEqual(screen.words.map(\.isSaved), [false, false])
         XCTAssertEqual(screen.alerts, [String(localized: "저장하지 못했어요. 다시 시도해주세요.")])
+        XCTAssertTrue(screen.reporter.errors.isEmpty, "저장 실패는 saveOrRollback이 기록한다")
     }
+}
+
+private final class ErrorRecorder {
+    private(set) var errors: [Error] = []
+    func record(_ error: Error) { errors.append(error) }
 }
 
 /// 실제 유스케이스를 인메모리 Core Data에 올린다 — 받은 여행 단어장 2단어 + 빈 나의 단어장, 원격은 대역
@@ -131,6 +138,7 @@ private final class BookDetailTestScreen {
     let context = makeFailingSaveContext()
     let books: DefaultVocabBookRepository
     let remote = ControlledRemoteVocabBookRepository()
+    let reporter = ErrorRecorder()
     let travel: VocabBook
     let myBook: VocabBook
     let appear = PublishRelay<Void>()
@@ -159,7 +167,8 @@ private final class BookDetailTestScreen {
             toggleSaveVocabUseCase: DefaultToggleSaveVocabUseCase(vocabBookRepository: books, vocabRepository: wordsRepository),
             deleteVocabUseCase: DefaultDeleteVocabUseCase(vocabRepository: wordsRepository),
             setActiveBookUseCase: DefaultSetActiveBookUseCase(vocabBookRepository: books, remoteVocabBookRepository: remote),
-            isActiveBookUseCase: DefaultIsActiveBookUseCase(vocabBookRepository: books)
+            isActiveBookUseCase: DefaultIsActiveBookUseCase(vocabBookRepository: books),
+            reportError: { [reporter] in reporter.record($0) }
         )
         let output = viewModel.transform(input: .init(
             viewWillAppear: appear.asObservable(), saveVocabTrigger: save.asObservable(),

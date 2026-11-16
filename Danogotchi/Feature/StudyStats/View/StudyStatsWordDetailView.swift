@@ -13,5 +13,6 @@ struct StudyStatsWordDetailView: View {
         .foregroundStyle(Color(AppColor.textPrimary))
         .background(Color(AppColor.background).ignoresSafeArea())
         .accessibilityIdentifier("studyStats.wordDetail")
+        .onAppear { CrashReporter.screenDidAppear("StudyStatsWordDetailView") }
     }
 }

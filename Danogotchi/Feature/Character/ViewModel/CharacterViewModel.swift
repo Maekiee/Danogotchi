@@ -13,6 +13,7 @@ final class CharacterViewModel: BaseViewModel {
     private let adjustPetLevelUseCase: AdjustPetLevelUseCase
     private let revivePetUseCase: RevivePetUseCase
     private let fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
+    private let reportError: (Error) -> Void
 
     init(
         fetchPetStateUseCase: FetchPetStateUseCase,
@@ -20,7 +21,8 @@ final class CharacterViewModel: BaseViewModel {
         levelUpPetUseCase: LevelUpPetUseCase,
         adjustPetLevelUseCase: AdjustPetLevelUseCase,
         revivePetUseCase: RevivePetUseCase,
-        fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
+        fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase,
+        reportError: @escaping (Error) -> Void
     ) {
         self.fetchPetStateUseCase = fetchPetStateUseCase
         self.carePetUseCase = carePetUseCase
@@ -28,6 +30,7 @@ final class CharacterViewModel: BaseViewModel {
         self.adjustPetLevelUseCase = adjustPetLevelUseCase
         self.revivePetUseCase = revivePetUseCase
         self.fetchCurrentWeatherUseCase = fetchCurrentWeatherUseCase
+        self.reportError = reportError
     }
 
     struct Input {
@@ -74,6 +77,8 @@ final class CharacterViewModel: BaseViewModel {
                             "현재 날씨 — 도시=\(weather.cityName, privacy: .public), 종류=\(String(describing: weather.weatherType), privacy: .public), 기온=\(weather.temperature, privacy: .public)℃, 체감=\(weather.feelsLike, privacy: .public)℃, 습도=\(weather.humidity, privacy: .public)%, 상태=\(weather.description, privacy: .public)")
                     } catch {
                         AppLogger.network.error("현재 날씨 조회 실패: \(String(describing: error), privacy: .public)")
+                        // 오프라인·위치 권한 거부는 CrashReportPolicy가 거른다
+                        owner.reportError(error)
                     }
                 }
             }.disposed(by: disposeBag)

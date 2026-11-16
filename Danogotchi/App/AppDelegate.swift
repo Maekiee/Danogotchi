@@ -14,6 +14,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         FirebaseApp.configure()
+        CrashReporter.setUserID(DefaultInstallationIDRepository().installationID)
+        CrashReporter.shouldRecord = CrashReportPolicy.shouldRecord
+        // 앱 언어를 바꾸면 iOS가 앱을 다시 띄우므로 시작 시 한 번이면 된다
+        CrashReporter.setValue(Bundle.main.preferredLocalizations.first ?? "unknown", for: .appLanguage)
+        DeviceContextMonitor.start()
+        HangDiagnosticsReporter.shared.start()
 
         IQKeyboardManager.shared.isEnabled = true
         

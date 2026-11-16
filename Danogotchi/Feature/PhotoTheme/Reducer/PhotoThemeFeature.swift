@@ -79,10 +79,12 @@ struct PhotoThemeFeature {
                 state.isLoading = false
                 state.crop = nil
                 state.hasCrop = false
+                // 사용자가 고른 사진의 포맷 문제는 입력값 검증 실패라 Crashlytics에 보고하지 않는다
                 guard let image else {
                     state.imageData = nil
                     state.previewImage = nil
-                    fail(&state, with: PhotoThemeError.unsupportedFormat)
+                    AppLogger.ui.error("사진첩 테마 처리 실패: \(String(describing: PhotoThemeError.unsupportedFormat), privacy: .public)")
+                    state.alertMessage = Self.unsupportedMessage
                     return .none
                 }
 
