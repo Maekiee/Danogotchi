@@ -2,7 +2,7 @@ Secret.swift
 Secret/
 .claude/settings.local.json
 output/
-/docs/
+/docs/readme-guide.md
 /AGENTS.md
 /CLAUDE.md
 
@@ -137,3 +137,7 @@ iOSInjectionProject/
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,swift,xcode
+
+# 로컬 작업 문서
+docs/TODO.md
+docs/intent.md

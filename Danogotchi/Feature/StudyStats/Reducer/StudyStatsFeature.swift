@@ -1,0 +1,122 @@
+import ComposableArchitecture
+import Foundation
+
+@Reducer
+struct StudyStatsFeature {
+    @ObservableState
+    struct State: Equatable {
+        enum LoadStatus: Equatable {
+            case idle
+            case loading(UUID)
+            case failed
+        }
+
+        var stats: StudyStats?
+        var loadStatus: LoadStatus = .idle
+        var selectedTopic: String?
+        var selectedPart: String?
+        var mistakeThreshold: StudyStatsMistakeThreshold = .seventy
+
+        var isLoading: Bool {
+            if case .loading = loadStatus { return true }
+            return false
+        }
+    }
+
+    enum Action: Equatable {
+        case appeared
+        case refresh
+        case loaded(UUID, StudyStats)
+        case loadFailed(UUID)
+        case topicSelected(String?)
+        case partSelected(String?)
+        case mistakeThresholdChanged(StudyStatsMistakeThreshold)
+        case wordsTapped
+        case wordTapped(UUID)
+        case closeButtonTapped
+        case disappeared
+    }
+
+    private enum CancelID { case load }
+
+    let fetch: @Sendable (Date, Calendar) async throws -> StudyStats
+    let reportError: @Sendable (Error) -> Void
+    let onClose: @MainActor @Sendable () -> Void
+    var onNavigate: @MainActor @Sendable (StudyStatsDestination) -> Void = { _ in }
+    var now: @Sendable () -> Date = Date.init
+    var calendar: @Sendable () -> Calendar = { Calendar.current }
+    @Dependency(\.uuid) var uuid
+
+    var body: some ReducerOf<Self> {
+        Reduce { state, action in
+            switch action {
+            case .appeared:
+                guard !state.isLoading, state.stats == nil else { return .none }
+                return load(&state)
+            case .refresh:
+                return load(&state)
+            case let .loaded(id, stats):
+                guard state.loadStatus == .loading(id) else { return .none }
+                state.loadStatus = .idle
+                state.stats = stats
+                // 로딩 중엔 이전 선택 유지, 새 통계 도착 시 초기화
+                state.selectedTopic = nil
+                state.selectedPart = nil
+                return .none
+            case let .loadFailed(id):
+                guard state.loadStatus == .loading(id) else { return .none }
+                state.loadStatus = .failed
+                return .none
+            case let .topicSelected(value):
+                // 터치 종료(nil)는 기존 선택 유지
+                guard let value else { return .none }
+                state.selectedTopic = value
+                return .none
+            case let .partSelected(value):
+                // 터치 종료(nil)는 기존 선택 유지
+                guard let value else { return .none }
+                state.selectedPart = value
+                return .none
+            case let .mistakeThresholdChanged(value):
+                state.mistakeThreshold = value
+                return .none
+            case .wordsTapped:
+                guard let stats = state.stats, state.loadStatus == .idle else { return .none }
+                let list = StudyStatsWordList(start: stats.start, end: stats.now, calendar: stats.calendar, words: stats.words)
+                return .run { _ in await onNavigate(.words(list)) }
+            case let .wordTapped(id):
+                guard let stats = state.stats, state.loadStatus == .idle,
+                      let word = stats.words.first(where: { $0.id == id }) else { return .none }
+                return .run { _ in await onNavigate(.word(word, isDaily: false)) }
+            case .closeButtonTapped:
+                // 로딩만 취소, 오류 상태는 유지
+                if state.isLoading { state.loadStatus = .idle }
+                return .concatenate(.cancel(id: CancelID.load), .run { _ in await onClose() })
+            case .disappeared:
+                if state.isLoading { state.loadStatus = .idle }
+                return .cancel(id: CancelID.load)
+            }
+        }
+    }
+
+    private func load(_ state: inout State) -> Effect<Action> {
+        let id = uuid()
+        let date = now()
+        let calendar = calendar()
+        state.loadStatus = .loading(id)
+        return .run { send in
+            do {
+                let stats = try await fetch(date, calendar)
+                try Task.checkCancellation()
+                await send(.loaded(id, stats))
+            } catch is CancellationError {
+                return
+            } catch {
+                guard !Task.isCancelled else { return }
+                reportError(error)
+                await send(.loadFailed(id))
+            }
+        }
+        .cancellable(id: CancelID.load, cancelInFlight: true)
+    }
+}

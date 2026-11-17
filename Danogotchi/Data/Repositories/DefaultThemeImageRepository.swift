@@ -1,0 +1,152 @@
+import Foundation
+import OSLog
+
+final class DefaultThemeImageRepository {
+    /// 내려받을 포맷. 앞에서부터 시도하고, 실패하면 다음으로 넘어간다.
+    private enum Format: String, CaseIterable {
+        case heic
+        case webp
+    }
+
+    private static let quality = 85
+
+    private let apiClient: ApiClient
+    private let storage: ImageFileStorage
+    private let userSettings: UserSettingsRepository
+    /// 내려받기·합성 기준 화면 픽셀 크기
+    private let targetPixelSize: CGSize
+
+    init(
+        apiClient: ApiClient,
+        storage: ImageFileStorage,
+        userSettings: UserSettingsRepository,
+        targetPixelSize: CGSize
+    ) {
+        self.apiClient = apiClient
+        self.storage = storage
+        self.userSettings = userSettings
+        self.targetPixelSize = targetPixelSize
+    }
+}
+
+extension DefaultThemeImageRepository: ThemeImageRepository {
+    var storedImageChanged: AsyncStream<URL?> {
+        // 파일명 구독을 먼저 등록하고, Task는 파일 URL로 바꿔 전달만 한다
+        let fileNames = userSettings.themeImageFileNameChanges
+        let (stream, continuation) = AsyncStream.makeStream(of: URL?.self, bufferingPolicy: .bufferingNewest(1))
+        let task = Task { [storage] in
+            for await fileName in fileNames {
+                continuation.yield(fileName.flatMap { storage.existingFileURL(fileName: $0) })
+            }
+            continuation.finish()
+        }
+        continuation.onTermination = { _ in task.cancel() }
+        return stream
+    }
+
+    var lastSelectedRawUrl: String? {
+        return userSettings.currentThemeUrl
+    }
+
+    func storedImageFileURL() -> URL? {
+        guard let fileName = userSettings.currentThemeImageFileName else { return nil }
+        return storage.existingFileURL(fileName: fileName)
+    }
+
+    /// 검색 테마 저장과 사라진 배경 복구가 같이 쓴다
+    func replace(rawUrl: String) async throws {
+        try await performReplace(rawUrl: rawUrl)
+        CrashReporter.log("theme: save_url")
+    }
+
+    func replace(imageData: Data, crop: PhotoThemeCrop) async throws {
+        try performReplace(imageData: imageData, crop: crop)
+        CrashReporter.log("theme: save_photo")
+    }
+}
+
+private extension DefaultThemeImageRepository {
+    /// 순서가 중요하다. 먼저 지우면 다운로드가 실패했을 때 기존 배경까지 잃는다.
+    func performReplace(rawUrl: String) async throws {
+        let (data, fileExtension) = try await fetchImageData(rawUrl: rawUrl)
+
+        let fileName = UUID().uuidString + "." + fileExtension
+        try storage.save(data, fileName: fileName)
+
+        userSettings.currentThemeImageFileName = fileName
+        userSettings.currentThemeUrl = rawUrl
+
+        // 마지막에 정리한다. 여기서 실패하거나 직전에 앱이 죽어도 다음 저장 때 함께 치워진다.
+        storage.removeAllExcept(fileName: fileName)
+    }
+
+    /// 순서가 중요하다. rawUrl을 먼저 지우면 저장이 실패했을 때 기존 배경의 복구 경로까지 잃는다.
+    func performReplace(imageData: Data, crop: PhotoThemeCrop) throws {
+        let (data, fileExtension) = try ThemeImageRenderer.render(
+            data: imageData,
+            crop: crop,
+            targetPixelSize: targetPixelSize
+        )
+
+        let fileName = UUID().uuidString + "." + fileExtension
+        try storage.save(data, fileName: fileName)
+
+        userSettings.currentThemeImageFileName = fileName
+        // 로컬 사진은 다시 내려받을 원본이 없다 — 복구 대상에서 제외한다
+        userSettings.currentThemeUrl = nil
+
+        storage.removeAllExcept(fileName: fileName)
+    }
+
+    /// HEIC로 먼저 받고, 실패하면 WebP로 한 번 더 시도한다.
+    /// 돌려주는 확장자는 요청한 포맷이 아니라 **실제로 받은 바이트의 타입**이다.
+    func fetchImageData(rawUrl: String) async throws -> (Data, String) {
+        var lastError: Error = NetworkError.invalidURL
+
+        for format in Format.allCases {
+            // 취소됐으면 다음 포맷을 시도하지 않는다
+            try Task.checkCancellation()
+
+            guard let url = makeImageURL(rawUrl: rawUrl, format: format) else {
+                lastError = NetworkError.invalidURL
+                continue
+            }
+
+            do {
+                let data = try await apiClient.data(from: url)
+
+                // 상태코드로는 판정할 수 없다 — CDN은 fm 값을 못 알아들어도 200에 다른 포맷을 준다
+                guard let fileExtension = ImageDecoder.validate(data) else {
+                    throw NetworkError.transport(URLError(.cannotDecodeContentData))
+                }
+                return (data, fileExtension)
+            } catch {
+                lastError = error
+                AppLogger.network.error("테마 이미지 \(format.rawValue, privacy: .public) 내려받기 실패: \(String(describing: error), privacy: .public)")
+            }
+        }
+
+        throw lastError
+    }
+
+    /// scaleAspectFill이 기기에서 하는 센터 크롭을 서버에서 미리 한다.
+    /// 화면에 나오는 결과는 같고 용량과 디코딩 메모리만 줄어든다.
+    ///
+    /// 기존 urls.full을 복구할 때도 변환 조건이 중복되지 않도록 교체한다.
+    private func makeImageURL(rawUrl: String, format: Format) -> URL? {
+        guard var components = URLComponents(string: rawUrl) else { return nil }
+        let transformationItems = [
+            URLQueryItem(name: "w", value: String(Int(targetPixelSize.width))),
+            URLQueryItem(name: "h", value: String(Int(targetPixelSize.height))),
+            URLQueryItem(name: "fit", value: "crop"),
+            URLQueryItem(name: "crop", value: "center"),
+            URLQueryItem(name: "fm", value: format.rawValue),
+            URLQueryItem(name: "q", value: String(Self.quality))
+        ]
+        let transformationNames = Set(transformationItems.map(\.name))
+        components.queryItems = (components.queryItems ?? []).filter {
+            !transformationNames.contains($0.name)
+        } + transformationItems
+        return components.url
+    }
+}

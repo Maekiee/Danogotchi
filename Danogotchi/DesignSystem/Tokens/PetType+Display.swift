@@ -1,0 +1,24 @@
+import Foundation
+
+extension PetType {
+    var title: String {
+        switch self {
+        case .sprout:
+            return String(localized: "새싹이")
+        }
+    }
+    
+    func sheetName(level: Int) -> String {
+        switch self {
+        case .sprout:
+            return "spritesheet\(min(max(0, level), PetLevelPolicy.maxLevel))"
+        }
+    }
+
+    var eggImageName: String {
+        switch self {
+        case .sprout:
+            return "egg_sprout"
+        }
+    }
+}

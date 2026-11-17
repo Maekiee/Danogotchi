@@ -1,6 +1,6 @@
 import XCTest
 
-/// 관심사 → 테마 → 알 → 이름 → 메인. 테마 검색은 네트워크라 그 화면 진입까지만 본다
+/// 관심사 → 테마 → 알 → 이름 → 메인. 테마 검색은 빈 결과로 대체돼 그 화면 진입까지만 본다
 @MainActor
 final class OnboardingFlowUITests: XCTestCase {
     override func setUp() {
@@ -24,7 +24,6 @@ final class OnboardingFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["searchTheme.myPhoto"].exists)
         // 이미지를 고르기 전에는 시작 버튼이 숨어 있다
         XCTAssertFalse(app.buttons["searchTheme.submit"].isHittable)
-        app.dismissNetworkAlertIfNeeded()
     }
 
     func test_eggAndNameScreensFinishOnboardingIntoMain() {

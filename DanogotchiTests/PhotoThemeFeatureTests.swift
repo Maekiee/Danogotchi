@@ -151,8 +151,7 @@ final class PhotoThemeFeatureTests: XCTestCase {
             $0.alertMessage = "지원하지 않는 이미지 형식이에요. 다른 사진을 선택해주세요"
         }
         XCTAssertFalse(fixture.store.state.canConfirm)
-        XCTAssertEqual(fixture.reportedErrors.value.count, 1)
-        XCTAssertEqual(fixture.reportedErrors.value.first as? PhotoThemeError, .unsupportedFormat)
+        XCTAssertTrue(fixture.reportedErrors.value.isEmpty, "사용자가 고른 사진의 포맷 문제는 입력값이라 보고하지 않는다")
 
         await fixture.store.send(.confirmTapped)
         XCTAssertTrue(fixture.save.datas.isEmpty)

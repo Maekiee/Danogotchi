@@ -27,7 +27,9 @@ final class QuizCoordinator: Coordinator {
         navigationController.setViewControllers([vc], animated: false)
     }
     
+    /// 처음 시작·다음 퀴즈·오답 재시도가 모두 여기서 새 회차를 만든다
     private func makeQuizViewController(quizData: QuizData) -> QuizViewController {
+        CrashReporter.log("quiz: start")
         let vm = container.makeQuizViewModel(quizData: quizData)
         let vc = QuizViewController(viewModel: vm)
         vc.delegate = self
@@ -38,6 +40,7 @@ final class QuizCoordinator: Coordinator {
 // 학습 화면
 extension QuizCoordinator: QuizViewControllerDelegate {
     func quizDidComplete(originalData: QuizData, result: QuizResult) {
+        CrashReporter.log("quiz: complete")
         let vm = container.makeCompleteQuizViewModel(result: result)
         let vc = CompleteQuizViewController(
             viewModel: vm,
@@ -78,6 +81,7 @@ extension QuizCoordinator: CompleteQuizViewControllerDelegate {
                     finish()
                 }
             } catch {
+                container.reportError(error)
                 AlertPresenter.showNotificationAlert(
                     on: navigationController.presentedViewController ?? navigationController,
                     title: String(localized: "알림"), message: String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요.")

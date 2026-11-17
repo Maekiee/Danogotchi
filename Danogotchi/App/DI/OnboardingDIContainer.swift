@@ -3,6 +3,8 @@ import Foundation
 final class OnboardingDIContainer {
     private let dependencies: AppDependencies
 
+    var reportError: @Sendable (Error) -> Void { dependencies.reportError }
+
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
     }
@@ -15,7 +17,10 @@ final class OnboardingDIContainer {
     }
 
     func makeOnboardingInterestViewModel() -> OnboardingInterestViewModel {
-        return OnboardingInterestViewModel(setActiveBookUseCase: dependencies.makeSetActiveBookUseCase())
+        return OnboardingInterestViewModel(selectInterestUseCase: DefaultSelectInterestUseCase(
+            setActiveBookUseCase: dependencies.makeSetActiveBookUseCase(),
+            vocabBookRepository: dependencies.vocabBookRepository
+        ))
     }
 
     func makeSearchThemeViewModel() -> SearchThemeViewModel {

@@ -6,7 +6,7 @@ import RxCocoa
 
 protocol LibraryViewControllerDelegate: AnyObject {
     func libraryDidTapClose()
-    func libraryDidTapMore(topic: BookTopic)
+    func libraryDidTapMore(key: VocabBookKey)
 }
 
 final class LibraryViewController: BaseViewController {
@@ -176,9 +176,9 @@ extension LibraryViewController {
             cell.binding(with: item)
 
             cell.buttonTap
-                .map { item.topic }
-                .bind(with: self) { owner, topic in
-                    owner.delegate?.libraryDidTapMore(topic: topic)
+                .map { item.key }
+                .bind(with: self) { owner, key in
+                    owner.delegate?.libraryDidTapMore(key: key)
                 }.disposed(by: cell.disposeBag)
         }
         

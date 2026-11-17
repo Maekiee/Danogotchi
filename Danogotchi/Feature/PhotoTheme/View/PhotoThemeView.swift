@@ -32,6 +32,7 @@ struct PhotoThemeView: View {
             }
         }
         .overlay(alignment: .bottom) { bottomBar }
+        .onAppear { CrashReporter.screenDidAppear("PhotoThemeView") }
         .disabled(store.isSaving || store.isLoading)
         .photosPicker(
             isPresented: $store.isPickerPresented,

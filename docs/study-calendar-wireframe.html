@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학습 통계 디자인 시안</title>
+<style>
+/* 저장소의 앱 글꼴 (Danogotchi/App/Fonts). 저장소 밖에서 열면 시스템 글꼴로 대체 */
+@font-face { font-family: "Pretendard JP"; src: url("../Danogotchi/App/Fonts/PretendardJP-Regular.otf"); font-weight: 400; }
+@font-face { font-family: "Pretendard JP"; src: url("../Danogotchi/App/Fonts/PretendardJP-Medium.otf"); font-weight: 500; }
+@font-face { font-family: "Pretendard JP"; src: url("../Danogotchi/App/Fonts/PretendardJP-SemiBold.otf"); font-weight: 600; }
+@font-face { font-family: "Pretendard JP"; src: url("../Danogotchi/App/Fonts/PretendardJP-Bold.otf"); font-weight: 700; }
+
+:root {
+    /* AppColor (Assets 컬러셋, AppColor.swift) */
+    --background: #FCFAF4;     /* background */
+    --card: #FFFFFF;           /* card */
+    --textPrimary: #1E1B15;    /* textPrimary */
+    --textSecondary: #6A6A6E;  /* textSecondary = gray75 / 다크 gray45 */
+    --primary: #4E88DA;        /* primary = ocean */
+    --grass: #1F883D;          /* grass (신규) */
+    --gray45: #ABABAE;
+    --sage: #ABD18C; --sky: #93CCDE; --coral: #F4A688; --butter: #EFCD6A; --lavender: #B9A3F0;
+    /* iOS 시스템 색 (코드에서 지정하지 않음) */
+    --sysLabel: #000000; --sysBlue: #007AFF; --separator: rgba(60, 60, 67, .29);
+    --segTrack: rgba(118, 118, 128, .12); --segThumb: #FFFFFF; --menuBg: rgba(242, 242, 242, .97); --grabber: rgba(60, 60, 67, .3);
+    /* 문서용 (앱 색 아님) */
+    --page: #EEEDE8; --line: #D6D4CC; --code: #E2E0D8; --th: #F5F4EF; --frame: #1E1B15; --pin: #D6336C; --docText: #1E1B15; --docText2: #6A6A6E;
+    --app: "Pretendard JP", -apple-system, system-ui, sans-serif;
+    --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+:root[data-theme="dark"] {
+    --background: #1A1712; --card: #2B2720; --textPrimary: #F4EEE2; --textSecondary: #ABABAE; --primary: #1F7AD6; --grass: #2EA043;
+    --sage: #2E8F44; --sky: #0E7E92; --coral: #CC4A28; --butter: #BE8516; --lavender: #6A3FD0;
+    --sysLabel: #FFFFFF; --sysBlue: #0A84FF; --separator: rgba(84, 84, 88, .6);
+    --segTrack: rgba(118, 118, 128, .24); --segThumb: #636366; --menuBg: rgba(37, 37, 37, .97); --grabber: rgba(235, 235, 245, .3);
+    --page: #100F0C; --line: #3A362E; --code: #3A362E; --th: #332F27; --frame: #5A554B; --docText: #F4EEE2; --docText2: #ABABAE;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--docText); font: 15px/1.5 var(--ui); }
+main { max-width: 1320px; margin: 0 auto; padding: 40px 24px 80px; }
+h1 { font-size: 28px; margin: 0 0 8px; }
+h2 { font-size: 21px; margin: 56px 0 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+h3 { font-size: 15px; margin: 24px 0 10px; }
+.lead { color: var(--docText2); margin: 0; }
+.rules { color: var(--docText2); margin: 12px 0 0; padding-left: 20px; }
+code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code); padding: 1px 4px; border-radius: 4px; }
+.toggles { position: fixed; top: 16px; right: 16px; z-index: 10; display: flex; gap: 8px; }
+.toggles button { height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid var(--line); background: var(--th); color: var(--docText); font: 14px var(--ui); cursor: pointer; }
+
+/* 문서 표 */
+table.t { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--th); border-radius: 12px; overflow: hidden; }
+.t th, .t td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.t th { font-weight: 600; color: var(--docText2); }
+.t tr:last-child td { border-bottom: 0; }
+.sw { display: inline-flex; align-items: center; gap: 8px; font: 13px ui-monospace, Menlo, monospace; white-space: nowrap; }
+.sw i { width: 28px; height: 28px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(128, 128, 128, .35); }
+.sample { font-family: var(--app); color: var(--docText); white-space: nowrap; }
+
+/* 흐름 */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 4px; }
+.flow .node { background: var(--th); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 14px; }
+.flow .node b { display: block; font-size: 15px; }
+.flow .edge { font-size: 13px; color: var(--docText2); padding: 0 6px; text-align: center; }
+.flow .edge::after { content: "──▶"; display: block; color: var(--docText); letter-spacing: -2px; }
+.branches { display: grid; gap: 6px; font-size: 14px; }
+.branches span { background: var(--th); border: 1px dashed var(--line); border-radius: 8px; padding: 6px 10px; }
+.flow-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 24px; margin-top: 8px; }
+
+/* 컴포넌트 스펙 카드 */
+.specs { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px; }
+.spec { margin: 0; background: var(--th); border-radius: 16px; overflow: hidden; }
+.spec > figcaption { padding: 14px 16px 0; font-weight: 700; }
+.spec > figcaption small { font-weight: 400; color: var(--docText2); margin-left: 6px; }
+.pv { margin: 12px 16px; padding: 20px; background: var(--background); color: var(--textPrimary); border-radius: 12px; font: 400 16px/normal var(--app); display: flex; flex-direction: column; gap: 16px; }
+.pv.row { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+.spec dl { margin: 0; padding: 4px 16px 16px; display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: 13.5px; }
+.spec dt { color: var(--docText2); }
+.spec dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.states { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+.states figure { margin: 0; font: 12px/1.35 var(--ui); color: var(--docText2); text-align: center; }
+.states .cell { margin-bottom: 6px; background-clip: padding-box; }
+
+/* 프레임 배치 */
+.frames { display: flex; flex-wrap: wrap; gap: 48px 40px; }
+.frames > figure { margin: 0; width: 375px; }
+.frames > figure > figcaption { font-weight: 700; margin-bottom: 12px; }
+.frames > figure > figcaption small { display: block; font-weight: 400; color: var(--docText2); }
+.notes { font-size: 13.5px; padding-left: 0; list-style: none; counter-reset: n; margin: 16px 0 0; }
+.notes li { counter-increment: n; position: relative; padding-left: 26px; margin-bottom: 8px; }
+.notes li::before { content: counter(n); position: absolute; left: 0; top: 1px; width: 18px; height: 18px; border-radius: 50%; background: var(--pin); color: #fff; font-size: 11px; font-weight: 700; text-align: center; line-height: 18px; }
+.notes .ref { color: var(--docText2); }
+
+/* ───── 앱 화면 ───── */
+.phone { width: 375px; min-height: 812px; border: 1px solid var(--frame); border-radius: 44px; overflow: hidden; background: var(--background); color: var(--textPrimary); display: flex; flex-direction: column; position: relative; box-shadow: 0 8px 24px rgba(0, 0, 0, .08); font: 400 16px/normal var(--app); }
+.phone.fixed { height: 812px; }
+.fold { position: absolute; left: 0; right: 0; top: 812px; border-top: 1px dashed var(--pin); z-index: 4; }
+.fold::after { content: "첫 화면 경계 812pt"; position: absolute; right: 12px; top: 2px; font: 11px var(--ui); color: var(--pin); background: var(--background); padding: 0 4px; }
+.status { height: 44px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font: 600 15px var(--ui); color: var(--sysLabel); }
+/* 시스템 내비게이션 바 (inline) */
+.nav { height: 44px; flex: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 8px; }
+.nav .title { font: 600 17px var(--ui); color: var(--sysLabel); }
+.nav .back { justify-self: start; display: flex; align-items: center; gap: 2px; color: var(--sysBlue); font: 400 17px var(--ui); padding-left: 0; }
+.nav .back svg { width: 20px; height: 22px; }
+.nav .start { justify-self: start; display: flex; }
+.nav .end { justify-self: end; display: flex; }
+.nav .fwd { height: 44px; display: flex; align-items: center; gap: 3px; padding: 0 8px; color: var(--sysBlue); font: 400 17px var(--ui); }
+.nav .fwd svg { width: 9px; height: 15px; }
+.nav .ib { width: 44px; height: 44px; display: grid; place-items: center; color: var(--sysBlue); }
+.nav .ib svg { width: 19px; height: 19px; }
+.screen { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* C3 StudyStatsCard · CalendarCard */
+.card { background: var(--card); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+/* C4 StudyStatsHeading · CalendarHeading */
+.heading b { display: block; font: 600 18px/normal var(--app); }
+.heading span { display: block; margin-top: 4px; font: 400 14px/normal var(--app); color: var(--textSecondary); }
+/* C5 StudyStatsSelection · CalendarSelection */
+.selection { font: 400 14px/normal var(--app); padding: 12px; border-radius: 8px; background: color-mix(in srgb, var(--gray45) 12%, transparent); }
+
+/* 농도 4단계 */
+.lv1 { background: color-mix(in srgb, var(--grass) 30%, transparent); }
+.lv2 { background: color-mix(in srgb, var(--grass) 60%, transparent); }
+.lv3 { background: var(--grass); }
+
+/* C6 잔디: 요일 열 16 + 4, 월 줄 12 + 4, 셀 12 · 간격 3 · 모서리 3 */
+.hm { display: flex; position: relative; }
+.hm::after { content: ""; position: absolute; left: 20px; top: 0; bottom: 0; width: 16px; background: linear-gradient(to right, var(--card), transparent); pointer-events: none; }
+.hm-days { flex: none; width: 16px; margin-right: 4px; padding-top: 16px; display: grid; grid-template-rows: repeat(7, 12px); row-gap: 3px; font: 400 10px/12px var(--app); color: var(--textSecondary); }
+.hm-scroll { overflow-x: auto; scrollbar-width: none; }
+.hm-scroll::-webkit-scrollbar { display: none; }
+.hm-months { position: relative; height: 12px; margin-bottom: 4px; font: 400 10px/12px var(--app); color: var(--textSecondary); }
+.hm-months span { position: absolute; top: 0; white-space: nowrap; }
+.hm-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 12px); grid-auto-columns: 12px; gap: 3px; }
+.hm-grid i, .hmcell { display: block; width: 12px; height: 12px; border-radius: 3px; }
+.hm-grid i.lv0, .hmcell.lv0 { background: color-mix(in srgb, var(--gray45) 15%, transparent); }
+.hm-grid i.sel, .hmcell.sel { box-shadow: inset 0 0 0 1.5px var(--textPrimary); }
+
+/* C7 칩 */
+.chips { display: flex; gap: 8px; }
+.chip { height: 32px; padding: 0 12px; border-radius: 16px; display: inline-flex; align-items: center; gap: 4px; background: color-mix(in srgb, var(--grass) 12%, transparent); color: var(--grass); font: 500 14px/normal var(--app); }
+.chip svg { width: 14px; height: 14px; }
+
+/* C8 달력 */
+.cal-block { display: flex; flex-direction: column; gap: 8px; }
+.week, .grid { display: grid; grid-template-columns: repeat(7, 1fr); column-gap: 4px; }
+.grid { row-gap: 4px; }
+.week span { height: 20px; line-height: 20px; text-align: center; font: 500 14px/20px var(--app); color: var(--textSecondary); }
+.cell { height: 44px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: 400 16px/normal var(--app); font-variant-numeric: tabular-nums; position: relative; }
+.cell b { font-weight: 400; }
+.cell i { width: 4px; height: 4px; border-radius: 2px; }
+.cell.lv0 b { color: var(--textSecondary); }
+.cell.lv3 { color: #FFFFFF; }
+.cell.today { box-shadow: inset 0 0 0 1.5px var(--grass); }
+.cell.future b { color: var(--textSecondary); opacity: .4; }
+.cell.adj b { color: var(--gray45); opacity: .5; }
+.cell.selected b { font-weight: 600; }
+.cell.selected i { background: currentColor; }
+/* C9 하단 컨트롤 */
+.controls { display: flex; gap: 8px; align-items: center; }
+.ctl { height: 44px; border-radius: 22px; flex: none; display: flex; align-items: center; justify-content: center; gap: 4px; background: color-mix(in srgb, var(--gray45) 12%, transparent); color: var(--textPrimary); white-space: nowrap; }
+.ctl.month { flex: 1; min-width: 0; padding: 0 12px; font: 600 16px/normal var(--app); font-variant-numeric: tabular-nums; }
+.ctl.month svg { width: 12px; height: 12px; color: var(--textSecondary); }
+.ctl.today { padding: 0 12px; font: 500 14px/normal var(--app); }
+.ctl.round { width: 44px; }
+.ctl.round svg { width: 16px; height: 16px; }
+.ctl.off { opacity: .4; }
+.hint { margin: 0; text-align: center; font: 400 14px/normal var(--app); color: var(--textSecondary); }
+/* 시스템 Menu */
+.menu { position: absolute; left: 20px; bottom: 105px; width: 250px; background: var(--menuBg); border-radius: 13px; box-shadow: 0 12px 40px rgba(0, 0, 0, .22); overflow: hidden; z-index: 3; font: 400 17px var(--ui); color: var(--sysLabel); }
+.menu div { height: 44px; padding: 0 16px 0 12px; display: flex; align-items: center; gap: 6px; border-bottom: .5px solid var(--separator); }
+.menu div:last-child { border-bottom: 0; }
+.menu div em { width: 20px; font-style: normal; font-weight: 600; text-align: center; }
+
+/* C16 StudyStatsWordCard · CalendarWordDetailCard (단어 상세 시트·학습한 단어 목록): 파스텔 HSB(h, 0.30, 0.95), 글자 검정, 모드 무관 */
+.word { border-radius: 20px; padding: 18px; min-height: 132px; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; color: #000000; }
+.word .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font: 400 14px/normal var(--app); }
+.word .pos { font: 500 14px/normal var(--app); padding: 0 12px; min-height: 24px; display: inline-flex; align-items: center; border: 1.5px solid #000000; border-radius: 999px; }
+.word .bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.word .term { display: block; font: 700 24px/normal var(--app); }
+.word .meaning { display: block; margin-top: 4px; font: 400 14px/normal var(--app); }
+.word .rate { font: 700 32px/normal var(--app); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* C10 날짜별 단어 카드: 단어장 상세 카드(VocabBookDetailCollectionViewCell)와 같은 모양, 북마크 없음 */
+.vcard { flex: none; height: 168px; border-radius: 20px; padding: 18px 18px 20px; display: flex; flex-direction: column; justify-content: space-between; color: #0B0B0B; }
+.vcard .pos { align-self: flex-start; height: 24px; padding: 0 12px; border: 1.5px solid #0B0B0B; border-radius: 12px; display: inline-flex; align-items: center; font: 500 14px/normal var(--app); }
+.vcard .bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+.vcard .bottom > div { min-width: 0; }
+.vcard .term { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; font: 700 24px/normal var(--app); }
+.vcard .meta { display: block; font: 400 14px/normal var(--app); }
+.vcard .rate { flex: none; font: 700 32px/normal var(--app); white-space: nowrap; }
+.vcard .rate small { font: 700 14px/normal var(--app); }
+
+/* C11 요약 카드 */
+.card.stats { flex-direction: row; gap: 16px; align-items: flex-start; }
+.stats > div { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.stats .k { font: 500 14px/normal var(--app); }
+.stats .v { font: 700 28px/normal var(--app); font-variant-numeric: tabular-nums; }
+
+/* C12 도넛 + 범례 */
+.donut-row { display: flex; gap: 16px; align-items: center; }
+.donut { position: relative; flex: none; width: 126px; height: 126px; }
+.donut svg { display: block; transform: rotate(-90deg); }
+.donut p { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.donut p b { font: 600 20px/normal var(--app); font-variant-numeric: tabular-nums; }
+.donut p span { font: 400 10px/normal var(--app); }
+.lg { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lg div { min-height: 44px; display: flex; align-items: center; gap: 4px; font: 500 14px/normal var(--app); }
+.lg i { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.lg span { margin-left: auto; padding-left: 2px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lg .on { font-weight: 700; }
+
+/* C13 시스템 세그먼트 */
+.segment { display: flex; height: 32px; padding: 2px; border-radius: 9px; background: var(--segTrack); font: 400 13px var(--ui); color: var(--sysLabel); }
+.segment span { flex: 1; display: grid; place-items: center; border-radius: 7px; }
+.segment .on { background: var(--segThumb); font-weight: 600; box-shadow: 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04); }
+
+/* C14 많이 틀린 단어 행 */
+.mlist { display: flex; flex-direction: column; }
+.mrow { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; min-height: 44px; }
+.mrow:first-child { padding-top: 0; }
+.mrow:last-child { padding-bottom: 0; }
+.mrow + .mrow { border-top: 1px solid var(--separator); }
+.mrow .l1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.mrow .term { font: 600 16px/normal var(--app); }
+.mrow .wrong { font: 500 14px/normal var(--app); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mrow .mean, .mrow small { font: 400 14px/normal var(--app); color: var(--textSecondary); font-variant-numeric: tabular-nums; }
+
+/* C15 빈·실패 상태 */
+.state .sym { width: 34px; height: 34px; }
+.prominent { align-self: flex-start; min-height: 44px; padding: 0 20px; border-radius: 10px; display: inline-flex; align-items: center; background: var(--primary); color: #FFFFFF; font: 400 16px/normal var(--app); }
+
+/* 시스템 시트 */
+.dim { position: absolute; inset: 0; background: rgba(0, 0, 0, .2); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 52%; background: var(--background); border-radius: 12px 12px 0 0; padding: 20px; }
+.grabber { position: absolute; top: 5px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: var(--grabber); }
+.piece { width: 375px; padding: 20px; background: var(--background); color: var(--textPrimary); border: 1px dashed var(--frame); border-radius: 24px; font: 400 16px/normal var(--app); }
+
+/* 주석 표식 */
+:where([data-pin]) { position: relative; }
+[data-pin]::after { content: attr(data-pin); position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 50%; background: var(--pin); color: #fff; font: 700 11px/18px var(--ui); text-align: center; z-index: 5; box-shadow: 0 0 0 2px var(--background); }
+body.clean [data-pin]::after, body.clean .fold { display: none; }
+
+.foot { margin-top: 40px; font-size: 13px; color: var(--docText2); }
+</style>
+</head>
+<body>
+<div class="toggles"><button id="pins" type="button">주석 숨기기</button><button id="theme" type="button">다크 모드로 보기</button></div>
+<main>
+<h1>학습 통계 디자인 시안</h1>
+<p class="lead">캘린더(진입 화면) + 학습 통계(기존 화면 재구성) · 기준 문서 <code>docs/study-calendar-plan.md</code> (v3.1) · 2026-11-04 확정, 2026-11-05 이름 변경 · 예시 기준일 2026-11-03(화), 첫 기록 2026-05-11</p>
+<ul class="rules">
+    <li><b>개발 기준</b>: 색, 글꼴, 크기, 굵기, 간격, 모서리는 이 문서 값을 따릅니다. 값은 모두 기존 디자인 토큰(<code>AppColor</code> · <code>AppFont</code> · <code>AppSpacing</code> · <code>AppRadius</code> · <code>AppBorder</code>)이고 새 토큰은 없습니다. 투명도는 SwiftUI <code>.opacity()</code>입니다.</li>
+    <li><b>단위</b>는 pt(이 문서의 1px = 1pt)입니다. 기준 폭은 가장 좁은 375pt이고, 글자 크기는 기본(Large)입니다. 글자 크기를 키우면 <code>StudyStatsStyle.font</code>·<code>CalendarStyle.font(_, relativeTo:)</code>로 함께 커집니다(§4.8 §5.8).</li>
+    <li><b>시스템 컴포넌트</b>: 상태 표시줄, 내비게이션 바, 세그먼트, 메뉴, 시트, <code>.borderedProminent</code> 버튼은 코드에서 꾸미지 않고 iOS 기본을 씁니다. 이 문서의 모양은 iOS 17–18 기준이고, iOS 26 이상은 시스템이 Liquid Glass로 그립니다.</li>
+    <li><b>보조 글자</b>는 모두 <code>AppColor.textSecondary</code>입니다. 지금 코드의 <code>.secondary</code>는 이 색으로 바꿉니다(§8.3).</li>
+    <li>분홍 번호는 주석이며 앱 UI가 아닙니다(오른쪽 위에서 숨길 수 있음). 글꼴은 저장소의 Pretendard JP 파일을 불러와 그리므로 이 파일을 저장소 안에서 열어야 정확합니다.</li>
+</ul>
+
+<h2>1. 디자인 토큰</h2>
+<h3>색 — 쓰는 토큰만</h3>
+<table class="t">
+    <tr><th>토큰</th><th>라이트</th><th>다크</th><th>쓰는 곳</th></tr>
+    <tr><td><code>AppColor.background</code></td><td><span class="sw"><i style="background:#FCFAF4"></i>#FCFAF4</span></td><td><span class="sw"><i style="background:#1A1712"></i>#1A1712</span></td><td>화면 배경, 시트 배경</td></tr>
+    <tr><td><code>AppColor.card</code></td><td><span class="sw"><i style="background:#FFFFFF"></i>#FFFFFF</span></td><td><span class="sw"><i style="background:#2B2720"></i>#2B2720</span></td><td><code>StudyStatsCard</code>·<code>CalendarCard</code> 배경 (C3)</td></tr>
+    <tr><td><code>AppColor.textPrimary</code></td><td><span class="sw"><i style="background:#1E1B15"></i>#1E1B15</span></td><td><span class="sw"><i style="background:#F4EEE2"></i>#F4EEE2</span></td><td>본문, 숫자, 제목, 잔디 선택 테두리</td></tr>
+    <tr><td><code>AppColor.textSecondary</code></td><td><span class="sw"><i style="background:#6A6A6E"></i>#6A6A6E</span></td><td><span class="sw"><i style="background:#ABABAE"></i>#ABABAE</span></td><td>부제, 요일·월 라벨, 안내 문구, 학습 없는 날 숫자, 행의 뜻·정답률</td></tr>
+    <tr><td><code>AppColor.primary</code> (ocean)</td><td><span class="sw"><i style="background:#4E88DA"></i>#4E88DA</span></td><td><span class="sw"><i style="background:#1F7AD6"></i>#1F7AD6</span></td><td>빈 상태 아이콘, 다시 시도 버튼, 품사 도넛 1번</td></tr>
+    <tr><td><code>AppColor.grass</code> (신규)</td><td><span class="sw"><i style="background:#1F883D"></i>#1F883D</span></td><td><span class="sw"><i style="background:#2EA043"></i>#2EA043</span></td><td>잔디·달력 농도 30/60/100%, 칩(12% 배경 + 글자·아이콘), 오늘 테두리. Assets에 <code>grass</code> 컬러셋 추가</td></tr>
+    <tr><td><code>AppColor.gray45</code></td><td><span class="sw"><i style="background:#ABABAE"></i>#ABABAE</span></td><td><span class="sw"><i style="background:#ABABAE"></i>#ABABAE</span></td><td>잔디 0단계(15%), 컨트롤·안내 배경(12%), 이웃 달 숫자(50%), 미분류</td></tr>
+    <tr><td><code>AppColor.sky</code></td><td><span class="sw"><i style="background:#93CCDE"></i>#93CCDE</span></td><td><span class="sw"><i style="background:#0E7E92"></i>#0E7E92</span></td><td>주제 여행, 품사 3번</td></tr>
+    <tr><td><code>AppColor.sage</code></td><td><span class="sw"><i style="background:#ABD18C"></i>#ABD18C</span></td><td><span class="sw"><i style="background:#2E8F44"></i>#2E8F44</span></td><td>주제 비즈니스, 품사 2번</td></tr>
+    <tr><td><code>AppColor.coral</code></td><td><span class="sw"><i style="background:#F4A688"></i>#F4A688</span></td><td><span class="sw"><i style="background:#CC4A28"></i>#CC4A28</span></td><td>주제 감정</td></tr>
+    <tr><td><code>AppColor.butter</code></td><td><span class="sw"><i style="background:#EFCD6A"></i>#EFCD6A</span></td><td><span class="sw"><i style="background:#BE8516"></i>#BE8516</span></td><td>주제 일상</td></tr>
+    <tr><td><code>AppColor.lavender</code></td><td><span class="sw"><i style="background:#B9A3F0"></i>#B9A3F0</span></td><td><span class="sw"><i style="background:#6A3FD0"></i>#6A3FD0</span></td><td>품사 4번</td></tr>
+    <tr><td><code>AppColor.pastel(for:)</code></td><td colspan="2"><span class="sw"><i style="background:rgb(170,242,224)"></i>HSB(h, 30%, 95%), h = 0–300°</span> 모드 무관</td><td>단어 카드 배경. h는 단어 해시라 실행마다 달라지므로 시안 색은 예시</td></tr>
+    <tr><td>흰색 · 검정</td><td colspan="2"><span class="sw"><i style="background:#FFFFFF"></i>#FFFFFF</span> &nbsp; <span class="sw"><i style="background:#000000"></i>#000000 (SwiftUI <code>.black</code>)</span> 모드 무관</td><td>3단계 달력 숫자·버튼 글자 / 단어 상세 카드(C16) 글자·품사 테두리</td></tr>
+    <tr><td><code>AppColor.black</code></td><td colspan="2"><span class="sw"><i style="background:#0B0B0B"></i>#0B0B0B</span> 모드 무관</td><td>날짜별 단어 카드(C10) 글자·품사 테두리. 단어장 카드와 같음</td></tr>
+    <tr><td>시스템 tint</td><td><span class="sw"><i style="background:#007AFF"></i>#007AFF</span></td><td><span class="sw"><i style="background:#0A84FF"></i>#0A84FF</span></td><td>내비게이션 바 버튼. <code>AccentColor</code> 미지정이라 시스템 파랑(코드 지정 없음)</td></tr>
+    <tr><td>시스템 <code>label</code> · <code>separator</code></td><td><span class="sw"><i style="background:#000000"></i>#000000</span> <span class="sw"><i style="background:rgba(60,60,67,.29)"></i>3C3C43 29%</span></td><td><span class="sw"><i style="background:#FFFFFF"></i>#FFFFFF</span> <span class="sw"><i style="background:rgba(84,84,88,.6)"></i>545458 60%</span></td><td>내비게이션 타이틀 / 많이 틀린 단어 행 사이 <code>Divider()</code></td></tr>
+</table>
+
+<h3>글꼴 — Pretendard JP (<code>AppFont</code>), 시스템 요소만 SF Pro</h3>
+<table class="t">
+    <tr><th>토큰</th><th>크기 / 굵기</th><th>relativeTo</th><th>쓰는 곳</th><th>미리보기</th></tr>
+    <tr><td><code>largeDisplay</code></td><td>32 / Bold</td><td>.largeTitle</td><td>단어 카드 정답률 숫자</td><td class="sample" style="font:700 32px var(--app)">100%</td></tr>
+    <tr><td><code>display</code></td><td>28 / Bold</td><td>.largeTitle</td><td>요약 카드 수치</td><td class="sample" style="font:700 28px var(--app)">248개</td></tr>
+    <tr><td><code>title1</code></td><td>24 / Bold</td><td>.title</td><td>단어 카드 단어(C10은 최대 2줄)</td><td class="sample" style="font:700 24px var(--app)">journey</td></tr>
+    <tr><td><code>title2</code></td><td>20 / SemiBold</td><td>.title2</td><td>도넛 가운데 숫자</td><td class="sample" style="font:600 20px var(--app)">1,240</td></tr>
+    <tr><td><code>title3</code></td><td>18 / SemiBold</td><td>.headline</td><td>카드 제목, 선택 날짜, 빈·실패 제목</td><td class="sample" style="font:600 18px var(--app)">많이 틀린 단어</td></tr>
+    <tr><td><code>bodyEmphasis</code></td><td>16 / SemiBold</td><td>.body</td><td>월 메뉴, 선택 날짜 숫자, 많이 틀린 단어</td><td class="sample" style="font:600 16px var(--app)">2026년 11월 · reluctant</td></tr>
+    <tr><td><code>body</code></td><td>16 / Regular</td><td>.body</td><td>달력 숫자, 화면 기본, 다시 시도 버튼</td><td class="sample" style="font:400 16px var(--app)">15 · 다시 시도</td></tr>
+    <tr><td><code>label</code></td><td>14 / Medium</td><td>.subheadline</td><td>요일 머리글, 칩, 오늘, 요약 라벨, 범례, 품사 캡슐, 오답 N회</td><td class="sample" style="font:500 14px var(--app)">5일 연속 · 여행 372회 · 30%</td></tr>
+    <tr><td><code>footnote</code></td><td>14 / Regular</td><td>.footnote</td><td>부제, 안내 문구, C5 안내, 단어 카드 결과·뜻, 행의 뜻·정답률</td><td class="sample" style="font:400 14px var(--app)">날짜를 누르면 그날 학습한 단어를 볼 수 있어요</td></tr>
+    <tr><td><code>caption</code></td><td>10 / Regular</td><td>.caption</td><td>잔디 월·요일 라벨, 도넛 캡션</td><td class="sample" style="font:400 10px var(--app)">11월 · 월 · 회 풀이</td></tr>
+    <tr><td><code>AppFont.font(.bold, size: 14)</code></td><td>14 / Bold</td><td>.footnote</td><td>날짜별 단어 카드 정답률의 "%" (단어장 카드와 같음)</td><td class="sample" style="font:700 32px var(--app)">100<span style="font:700 14px var(--app)">%</span></td></tr>
+    <tr><td>시스템</td><td>SF Pro 17 Semibold / 17 Regular / 13</td><td>—</td><td>내비게이션 타이틀 / 뒤로가기·메뉴 / 세그먼트(선택 Semibold)</td><td class="sample" style="font:600 17px var(--ui)">캘린더</td></tr>
+</table>
+<p class="lead" style="margin-top:8px">숫자가 바뀌는 자리(달력, 수치, 범례, 오답 N회)는 <code>.monospacedDigit()</code>. 행간은 글꼴 기본값(SwiftUI 기본)이고 따로 지정하지 않습니다.</p>
+
+<h3>간격 · 모서리 · 테두리</h3>
+<table class="t">
+    <tr><th>토큰</th><th>값</th><th>쓰는 곳</th></tr>
+    <tr><td><code>AppSpacing.space2</code> · <code>space4</code></td><td>2 · 4</td><td>도넛 숫자↔캡션, 달력 숫자↔점 / 제목↔부제, 칩 아이콘↔글자, 범례 점↔글자, 행 안 줄 간격, 달력 열·행 간격</td></tr>
+    <tr><td><code>space8</code></td><td>8</td><td>칩 사이, 컨트롤 사이, 요일 머리글↔그리드, 요약 라벨↔수치</td></tr>
+    <tr><td><code>space12</code></td><td>12</td><td>컨트롤 좌우 여백, 칩 좌우 여백, C5 안내 여백, 행 위아래 여백</td></tr>
+    <tr><td><code>space16</code></td><td>16</td><td>카드 사이, 카드 안 블록 사이, 요약 두 열 사이, 도넛↔범례</td></tr>
+    <tr><td><code>space20</code></td><td>20</td><td>화면 여백, 카드 안쪽 여백</td></tr>
+    <tr><td><code>AppRadius.radius8</code> · <code>radius16</code> · <code>radius20</code></td><td>8 · 16 · 20</td><td>달력 셀·C5 안내 / 카드 / 단어 카드. 잔디 셀은 3(셀이 12pt라 토큰 없이 고정)</td></tr>
+    <tr><td><code>AppBorder.regular</code></td><td>1.5</td><td>오늘 테두리(grass), 잔디 선택 테두리(textPrimary), 품사 캡슐(검정). 모두 안쪽 테두리(<code>strokeBorder</code>)</td></tr>
+</table>
+
+<h2>2. 컴포넌트 스펙</h2>
+<p class="lead">미리보기는 실제 크기입니다. C3 이후 미리보기는 카드 안 폭 335pt(= 375 − 화면 여백 20 × 2) 기준입니다.</p>
+<div class="specs" style="margin-top:16px">
+
+    <figure class="spec">
+        <figcaption>C1 화면 공통<small>캘린더 · 학습 통계</small></figcaption>
+        <dl>
+            <dt>컨테이너</dt><dd><code>ScrollView</code> › <code>LazyVStack(alignment: .leading, spacing: 16)</code></dd>
+            <dt>여백</dt><dd>상하좌우 20 (<code>space20</code>)</dd>
+            <dt>배경</dt><dd><code>background</code>, 안전 영역까지 칠함</dd>
+            <dt>기본 글자</dt><dd><code>body</code> 16 Regular · <code>textPrimary</code></dd>
+            <dt>보조 글자</dt><dd><code>textSecondary</code> (<code>.secondary</code> 쓰지 않음)</dd>
+            <dt>스크롤 표시</dt><dd>세로 스크롤만. 잔디 안쪽만 가로 스크롤</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C2 내비게이션 바<small>시스템 · inline</small></figcaption>
+        <div class="pv" style="padding:0;gap:0">
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="nav" style="border-top:1px solid var(--separator)"><span class="back"><svg viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 11l8 8"/></svg>캘린더</span><span class="title">학습 통계</span><span class="end"><span class="ib x"></span></span></div>
+        </div>
+        <dl>
+            <dt>모양</dt><dd>시스템 기본, <code>.navigationBarTitleDisplayMode(.inline)</code>. 높이 44. 맨 위에서는 배경 투명, 스크롤하면 시스템 블러</dd>
+            <dt>타이틀</dt><dd>SF Pro 17 Semibold · 시스템 <code>label</code></dd>
+            <dt>버튼 색</dt><dd>시스템 tint (#007AFF / #0A84FF). 코드에서 지정하지 않음</dd>
+            <dt>캘린더 왼쪽</dt><dd><code>xmark</code>(<code>topBarLeading</code>), SF Symbol 17pt Regular, 터치 영역 44 × 44. 라벨 "학습 통계 닫기"</dd>
+            <dt>캘린더 오른쪽</dt><dd>텍스트 버튼(<code>topBarTrailing</code>) "학습 통계" + <code>chevron.right</code>, SF Pro 17 Regular, 글자와 간격 3, 높이 44. 라벨 "학습 통계", 식별자 <code>calendar.stats</code></dd>
+            <dt>학습 통계</dt><dd>시스템 뒤로가기("‹ 캘린더", 17 Regular) + 오른쪽 <code>xmark</code>(지금 그대로)</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C3 카드 · C4 제목 · C5 안내<small>학습 통계 StudyStatsCard · Heading · Selection (기존) / 캘린더 CalendarCard · Heading · Selection (신규, 같은 수치)</small></figcaption>
+        <div class="pv">
+            <div class="card"><div class="heading"><b>많이 틀린 단어</b><span>정답률 70% 이하 · 12개</span></div><div class="selection">여행 · 372회 · 전체의 30%</div></div>
+        </div>
+        <dl>
+            <dt>C3 카드</dt><dd>배경 <code>card</code> · 모서리 16 · 안쪽 여백 20 · 안쪽 세로 간격 16 · 왼쪽 정렬, 가로 꽉 채움 · 테두리·그림자 없음</dd>
+            <dt>C4 제목</dt><dd><code>title3</code> 18 SemiBold · <code>textPrimary</code> · header trait</dd>
+            <dt>C4 부제</dt><dd><code>footnote</code> 14 Regular · <code>textSecondary</code> · 제목과 간격 4</dd>
+            <dt>C5 안내</dt><dd><code>footnote</code> 14 · <code>textPrimary</code> · 여백 12 · 배경 <code>gray45</code> 12% · 모서리 8 · 가로 꽉 채움</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C6 학습 잔디 카드<small>CalendarHeatmap (신규)</small></figcaption>
+        <div class="pv">
+            <div class="card" data-heatmap='{"set":"main","selected":"2026-10-15"}'></div>
+            <div class="pv row" style="margin:0;padding:0;gap:16px;font:12px var(--ui);color:var(--docText2)">
+                <span><i class="hmcell lv0" style="display:inline-block;vertical-align:middle"></i> 0</span>
+                <span><i class="hmcell lv1" style="display:inline-block;vertical-align:middle"></i> 1–4</span>
+                <span><i class="hmcell lv2" style="display:inline-block;vertical-align:middle"></i> 5–14</span>
+                <span><i class="hmcell lv3" style="display:inline-block;vertical-align:middle"></i> 15+</span>
+                <span><i class="hmcell lv2 sel" style="display:inline-block;vertical-align:middle"></i> 선택</span>
+            </div>
+        </div>
+        <dl>
+            <dt>카드</dt><dd>C3, 높이 158 = 20 + 월 줄 12 + 4 + 그리드 102 + 20. 제목 없음</dd>
+            <dt>셀</dt><dd>12 × 12, 간격 3, 모서리 3. 7행 × 53열 = 102 × 792</dd>
+            <dt>농도</dt><dd>0 <code>gray45</code> 15% · 1–4 <code>grass</code> 30% · 5–14 60% · 15+ 100%</dd>
+            <dt>선택</dt><dd>안쪽 테두리 1.5 (<code>AppBorder.regular</code>) <code>textPrimary</code></dd>
+            <dt>요일 열</dt><dd>폭 16 + 간격 4, <code>caption</code> 10 <code>textSecondary</code>, 2·4·6행만, 고정</dd>
+            <dt>월 줄</dt><dd>높이 12 + 간격 4, <code>caption</code> 10 <code>textSecondary</code>, 1일이 든 열 왼쪽에 맞춤</dd>
+            <dt>페이드</dt><dd>요일 열 바로 오른쪽 16pt, <code>card</code> → 투명 가로 그라디언트</dd>
+            <dt>스크롤</dt><dd>처음엔 오른쪽 끝(<code>defaultScrollAnchor(.trailing)</code>), 스크롤 막대 숨김. 셀 터치 영역 15 × 15</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C7 칩<small>CalendarChip (신규)</small></figcaption>
+        <div class="pv"><div class="chips" data-chips="main"></div></div>
+        <dl>
+            <dt>크기</dt><dd>높이 32 · 좌우 여백 12 · 캡슐 · 내용만큼 폭 · 칩 사이 8 · 왼쪽 정렬</dd>
+            <dt>색</dt><dd>배경 <code>grass</code> 12% · 글자·아이콘 <code>grass</code></dd>
+            <dt>글자</dt><dd><code>label</code> 14 Medium, 숫자 <code>.monospacedDigit()</code></dd>
+            <dt>아이콘</dt><dd><code>flame</code> / <code>calendar</code>, 14pt(글자 크기 따라감), 글자와 간격 4</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C8 달력 셀<small>CalendarMonthGrid (신규)</small></figcaption>
+        <div class="pv">
+            <div class="states">
+                <figure><div class="cell lv0"><b>3</b><i></i></div>학습 없음<br>숫자 textSecondary</figure>
+                <figure><div class="cell lv1"><b>3</b><i></i></div>1–4개<br>grass 30%</figure>
+                <figure><div class="cell lv2"><b>3</b><i></i></div>5–14개<br>grass 60%</figure>
+                <figure><div class="cell lv3"><b>3</b><i></i></div>15개+<br>100%, 숫자 흰색</figure>
+                <figure><div class="cell lv0 today selected"><b>3</b><i></i></div>오늘 + 선택<br>테두리 1.5 grass</figure>
+                <figure><div class="cell lv2 selected"><b>7</b><i></i></div>선택<br>SemiBold + 점</figure>
+                <figure><div class="cell lv0 future"><b>4</b><i></i></div>미래<br>textSecondary 40%</figure>
+                <figure><div class="cell adj"><b>1</b><i></i></div>이웃 달<br>gray45 50%</figure>
+            </div>
+        </div>
+        <dl>
+            <dt>그리드</dt><dd>7열 × 6행, 열·행 간격 4. 셀 폭 = (295 − 24) ÷ 7 ≈ 38.7, 높이 44, 모서리 8</dd>
+            <dt>머리글</dt><dd>높이 20, <code>label</code> 14 Medium <code>textSecondary</code>, 그리드와 간격 8</dd>
+            <dt>숫자</dt><dd><code>body</code> 16 Regular, 선택 시 <code>bodyEmphasis</code> 16 SemiBold, <code>.monospacedDigit()</code></dd>
+            <dt>점</dt><dd>4 × 4 원, 숫자 아래 2, 숫자와 같은 색. 선택일 때만 보임(자리는 항상 차지)</dd>
+            <dt>테두리</dt><dd>오늘만 안쪽 1.5 <code>grass</code>, 농도 배경과 겹침</dd>
+            <dt>탭</dt><dd>미래·이웃 달은 탭 없음. 나머지 셀 전체가 터치 영역</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C9 달력 하단 컨트롤 · 안내<small>신규</small></figcaption>
+        <div class="pv">
+            <div class="card" style="gap:16px">
+                <div class="controls"><span class="ctl month">2026년 10월 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg></span><span class="ctl today">오늘</span><span class="ctl round"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></span><span class="ctl round"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></span></div>
+                <div class="controls"><span class="ctl month">2026년 11월 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg></span><span class="ctl today off">오늘</span><span class="ctl round"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></span><span class="ctl round off"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></span></div>
+                <p class="hint">날짜를 누르면 그날 학습한 단어를 볼 수 있어요</p>
+            </div>
+        </div>
+        <dl>
+            <dt>줄</dt><dd>높이 44, 요소 사이 8. 월 메뉴가 남는 폭을 채움</dd>
+            <dt>공통 모양</dt><dd>캡슐(원), 배경 <code>gray45</code> 12%, 글자 <code>textPrimary</code>, 테두리 없음</dd>
+            <dt>월 메뉴</dt><dd>좌우 12, "2026년 11월" <code>bodyEmphasis</code> 16 SemiBold + <code>chevron.down</code> 12pt Semibold <code>textSecondary</code>, 간격 4, 가운데 정렬</dd>
+            <dt>오늘</dt><dd>좌우 12, <code>label</code> 14 Medium</dd>
+            <dt>‹ ›</dt><dd>44 × 44 원, <code>chevron.left</code>/<code>right</code> 16pt Semibold</dd>
+            <dt>비활성</dt><dd>버튼 전체 <code>.opacity(0.4)</code>, 탭 없음</dd>
+            <dt>안내 문구</dt><dd><code>footnote</code> 14 <code>textSecondary</code>, 가운데 정렬, 컨트롤과 간격 16</dd>
+            <dt>메뉴</dt><dd>시스템 <code>Menu</code> + <code>Picker</code>(표시 중인 달에 체크). 모양은 시스템 기본</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C10 날짜별 단어 카드<small>CalendarWordCard (신규 · 단어장 카드 모양)</small></figcaption>
+        <div class="pv"><div data-vcard='{"t":"journey","m":"여행","p":"명사","c":2,"n":2,"h":205}'></div><div data-vcard='{"t":"accommodate","m":"수용하다","p":"동사","c":1,"n":3,"h":40}'></div></div>
+        <dl>
+            <dt>기준</dt><dd>단어장 상세 카드 <code>VocabBookDetailCollectionViewCell</code>와 같은 모양·수치. 오른쪽 위 북마크·더보기 아이콘은 없음</dd>
+            <dt>카드</dt><dd>높이 168 고정 · 모서리 20 · 배경 <code>pastel(for: 단어)</code> · 글자 <code>AppColor.black</code>(#0B0B0B), 모드 무관 · 카드 사이 16</dd>
+            <dt>품사 캡슐</dt><dd>위·왼쪽 18, 높이 24, 좌우 12, 모서리 12, 테두리 1.5 <code>AppColor.black</code>, <code>label</code> 14 Medium</dd>
+            <dt>단어</dt><dd><code>title1</code> 24 Bold, 최대 2줄, 왼쪽 18, 뜻 줄과 간격 6, 정답률과 간격 8 이상</dd>
+            <dt>뜻 줄</dt><dd>뜻 + " · N번 학습", <code>footnote</code> 14, 왼쪽 18 · 아래 20</dd>
+            <dt>정답률</dt><dd>숫자 <code>largeDisplay</code> 32 Bold + "%" 14 Bold(<code>AppFont.font(.bold, size: 14)</code>), 오른쪽 18 · 아래 20, 줄어들지 않음</dd>
+            <dt>수치</dt><dd>그날 풀이만. N = 그날 그 단어를 푼 횟수, 정답률 = 그날 정답 ÷ 풀이(반올림)</dd>
+            <dt>탭</dt><dd>카드 전체가 버튼 → 단어 상세 시트(C16, "이날 정답 c / t회")</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C11 요약 카드<small>학습 통계 (기존에서 연속 학습 제거)</small></figcaption>
+        <div class="pv"><div class="card stats" data-summary='{}'></div></div>
+        <dl>
+            <dt>배치</dt><dd>C3 안에 <code>HStack(alignment: .top, spacing: 16)</code>, 두 열 같은 폭. 접근성 글자 크기에서는 세로(간격 20)</dd>
+            <dt>라벨</dt><dd><code>label</code> 14 Medium <code>textPrimary</code>. "누적 학습 단어 ›"는 버튼(열 전체가 터치 영역)</dd>
+            <dt>수치</dt><dd><code>display</code> 28 Bold, <code>.monospacedDigit()</code>, 라벨과 간격 8</dd>
+            <dt>비활성</dt><dd>실패 상태에서 누적 학습 단어 버튼만 <code>.disabled</code>(시스템 흐림)</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C12 도넛 + 범례<small>StudyStatsDonutChart (품사 차트 일반화)</small></figcaption>
+        <div class="pv"><div class="card" data-donut='{"set":"topics","sel":0}'></div></div>
+        <dl>
+            <dt>배치</dt><dd>제목(C4) 아래 <code>HStack(spacing: 16)</code>, 세로 가운데. 접근성 글자 크기에서는 세로</dd>
+            <dt>도넛</dt><dd>126 × 126, <code>innerRadius: .ratio(0.68)</code>, <code>angularInset: 2</code>, 12시 방향부터 시계 방향, 0인 항목은 그리지 않음</dd>
+            <dt>가운데</dt><dd>숫자 <code>title2</code> 20 SemiBold + 캡션 <code>caption</code> 10 ("회 풀이" / "고유 단어"), 간격 2, <code>textPrimary</code></dd>
+            <dt>범례 행</dt><dd>최소 높이 44, 점 8 원 · 간격 4 · 이름 · <code>Spacer(minLength: 2)</code> · "372회 · 30%". 모두 <code>label</code> 14 Medium, 숫자 고정폭</dd>
+            <dt>주제 색</dt><dd><code>BookTopic.color</code>: 여행 <code>sky</code> · 비즈니스 <code>sage</code> · 감정 <code>coral</code> · 일상 <code>butter</code> · 미분류 <code>gray45</code></dd>
+            <dt>품사 색</dt><dd><code>StudyStatsStyle.color(index)</code>: 명사 <code>primary</code> · 동사 <code>sage</code> · 형용사 <code>sky</code> · 부사 <code>lavender</code> · 미분류 <code>gray45</code></dd>
+            <dt>선택</dt><dd>다른 섹터 <code>.opacity(0.45)</code>, 범례 행 <code>.fontWeight(.bold)</code>, 아래에 C5 "여행 · 372회 · 전체의 30%"</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C13 기준 세그먼트<small>시스템 Picker(.segmented)</small></figcaption>
+        <div class="pv"><div class="segment"><span class="on">70% 이하</span><span>40% 이하</span><span>20% 이하</span></div></div>
+        <dl>
+            <dt>모양</dt><dd>시스템 기본, 높이 32, 가로 꽉 채움, 3등분</dd>
+            <dt>글자</dt><dd>SF Pro 13, 선택 Semibold (시스템). 라벨 "정답률 기준"</dd>
+            <dt>위치</dt><dd>카드 제목 아래 16, 목록 위 16</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C14 많이 틀린 단어 행<small>신규 ('많이 맞힌 단어' 행 고쳐 씀)</small></figcaption>
+        <div class="pv"><div class="card"><div class="mlist" data-rows='{"set":"main","th":70,"limit":3}'></div></div></div>
+        <dl>
+            <dt>행</dt><dd><code>VStack(alignment: .leading, spacing: 4)</code>, 위아래 여백 12(첫 행 위·마지막 행 아래는 0), 최소 높이 44, 행 전체가 버튼</dd>
+            <dt>1줄</dt><dd>단어 <code>bodyEmphasis</code> 16 SemiBold ↔ "오답 4회" <code>label</code> 14 Medium <code>textPrimary</code>, 간격 8, 글자 기준선 맞춤</dd>
+            <dt>2줄</dt><dd>뜻 <code>footnote</code> 14 <code>textSecondary</code></dd>
+            <dt>3줄</dt><dd>"정답률 14% · 전체 7회 풀이" <code>footnote</code> 14 <code>textSecondary</code>, 숫자 고정폭</dd>
+            <dt>구분선</dt><dd>행 사이 <code>Divider()</code>(시스템 separator, 두께 1px)</dd>
+            <dt>없는 것</dt><dd>순위 번호, 막대, 전체 보기</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C15 빈 상태 · 실패 카드<small>학습 통계 기존 / 캘린더 CalendarStateCard (신규, 같은 수치)</small></figcaption>
+        <div class="pv">
+            <div class="card state"><svg class="sym" viewBox="0 0 34 34" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"><path d="M7 5h15a5 5 0 0 1 5 5v19H12a5 5 0 0 1-5-5z"/><path d="M7 24a5 5 0 0 1 5-5h15"/></svg><div class="heading"><b>첫 학습을 기다리고 있어요</b><span>퀴즈에서 답변을 저장하면 학습량과 정답률을 확인할 수 있어요.</span></div></div>
+            <div class="card state"><svg class="sym" viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="17" cy="17" r="14"/><path d="M17 9.5v9.5M17 24v.5"/></svg><div class="heading"><b>기록을 불러오지 못했어요</b><span>잠시 후 다시 시도해 주세요. 저장된 학습 기록은 그대로 남아 있어요.</span></div><span class="prominent">다시 시도</span></div>
+        </div>
+        <dl>
+            <dt>아이콘</dt><dd>SF Symbol <code>.largeTitle</code>(34pt). 빈 상태 <code>book.closed</code> <code>primary</code> / 실패 <code>exclamationmark.circle</code> <code>textPrimary</code></dd>
+            <dt>글자</dt><dd>C4 제목·부제</dd>
+            <dt>버튼</dt><dd>시스템 <code>.borderedProminent</code>, <code>.tint(primary)</code>, 최소 높이 44, 글자 흰색 <code>body</code> 16(환경 글꼴)</dd>
+            <dt>간격</dt><dd>C3 기본(16)</dd>
+        </dl>
+    </figure>
+
+    <figure class="spec">
+        <figcaption>C16 단어 상세 카드<small>학습 통계 StudyStatsWordCard (기존) / 캘린더 CalendarWordDetailCard (신규, 접두어) · 상세 시트, 학습한 단어 목록</small></figcaption>
+        <div class="pv"><div data-word='{"t":"journey","m":"여행","p":"명사","c":2,"n":2,"h":205,"pre":"이날 "}'></div></div>
+        <dl>
+            <dt>카드</dt><dd>최소 높이 132 · 여백 18 · 모서리 20 · 배경 <code>pastel(for: 단어)</code> · 글자 검정, 모드 무관</dd>
+            <dt>위 줄</dt><dd>품사 캡슐(<code>label</code> 14 Medium, 좌우 12, 높이 24 이상, 검정 1.5 테두리) ↔ 결과 "이날 정답 2 / 2회"(<code>footnote</code> 14, 오른쪽 정렬), 간격 8</dd>
+            <dt>아래 줄</dt><dd>단어 <code>title1</code> 24 Bold + 뜻 <code>footnote</code> 14 (간격 4) ↔ 정답률 <code>largeDisplay</code> 32 Bold, 한 줄·최소 70% 축소, 간격 12</dd>
+            <dt>위↔아래</dt><dd>최소 24</dd>
+            <dt>접두어</dt><dd>캘린더에서만 "이날 ". 학습 통계·단어 목록은 "정답 1 / 7회"</dd>
+        </dl>
+    </figure>
+
+</div>
+
+<h2>3. 사용자 흐름 (§3)</h2>
+<div class="flow">
+    <div class="node"><b>단어 탐색</b>메인 화면</div>
+    <div class="edge">차트 아이콘</div>
+    <div class="node"><b>① 캘린더</b>전체 화면 모달 루트 · 현재 달 · 오늘 선택</div>
+    <div class="edge">학습 통계 › · push</div>
+    <div class="node"><b>H1 학습 통계</b>전체 기간</div>
+    <div class="edge">누적 학습 단어 › · push</div>
+    <div class="node"><b>학습한 단어</b>전체 학습 단어 · 기존 화면</div>
+</div>
+<div class="flow-more">
+    <div>
+        <h3>캘린더 안에서</h3>
+        <div class="branches">
+            <span>잔디 셀 탭 → ② 그 날짜 선택, 달력이 그 달로 이동</span>
+            <span>달력 날짜 탭 → ② 요약·단어 목록</span>
+            <span>월 선택 메뉴 → ③ / ‹ › → ④ 선택 해제</span>
+            <span>오늘 → 현재 달 · 오늘 선택</span>
+            <span>단어 카드 탭 → ⑦ 단어 상세 시트</span>
+        </div>
+    </div>
+    <div>
+        <h3>학습 통계 안에서</h3>
+        <div class="branches">
+            <span>누적 학습 단어 › → 학습한 단어 (전체 학습 단어, 정답 횟수순)</span>
+            <span>기준 세그먼트 → H2 목록 바뀜</span>
+            <span>도넛 섹터·범례 탭 → H2 선택 강조</span>
+            <span>많이 틀린 단어 행 · 목록의 단어 카드 → 단어 상세 시트</span>
+        </div>
+    </div>
+    <div>
+        <h3>단어 상세 시트 — 두 곳에서 열림</h3>
+        <div class="branches">
+            <span>캘린더 단어 카드 → "이날 정답 2 / 2회" · 그날 풀이만 (⑦)</span>
+            <span>학습 통계 행 · 학습한 단어 카드 → "정답 1 / 7회" · 전체 기간</span>
+        </div>
+    </div>
+</div>
+<p class="lead" style="margin-top:16px">뒤로가기: 학습한 단어 → 학습 통계 → 캘린더. 캘린더로 돌아오면 보던 달과 선택한 날짜가 그대로 남습니다. ✕는 어느 화면에서든 모달 전체를 닫습니다. 상세 시트는 <code>.pageSheet</code>, <code>[.medium(), .large()]</code>, 그래버 표시.</p>
+
+<h2>4. 캘린더 화면 (§4)</h2>
+<div class="frames">
+
+    <!-- ① 기본 -->
+    <figure>
+        <figcaption>① 기본 — 오늘 선택<small>단어 탐색 차트 아이콘으로 진입, 현재 달(11월), 오늘(3일)은 아직 학습 기록 없음</small></figcaption>
+        <div class="phone">
+            <div class="fold"></div>
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd" data-pin="9">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card" data-pin="1" data-heatmap='{"set":"main","selected":"2026-11-3","pins":{"days":2}}'></div>
+                <div class="chips" data-pin="3" data-chips="main"></div>
+                <div class="card" data-cal='{"y":2026,"m":11,"sel":"2026-11-3","set":"main","pins":{"2026-11-3":4,"2026-11-4":5,"2026-12-6":6,"month":7}}'></div>
+                <div class="selection" data-pin="8">오늘은 아직 학습 기록이 없어요</div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>잔디 카드(C6). 최근 53주, 처음엔 오른쪽 끝(이번 주). 이번 주의 미래 날짜 칸은 그리지 않습니다. 잔디 전체가 VoiceOver 요소 하나("최근 1년 학습 기록")입니다. <span class="ref">§4.2 §4.8</span></li>
+            <li>요일 라벨은 월·수·금 행에만, 가로 스크롤해도 고정. 월 라벨은 1일이 든 열 위. <span class="ref">§4.2</span></li>
+            <li>칩(C7), 탭 불가. 오늘 기록이 없어도 어제까지 이어졌으면 연속일을 유지합니다. <span class="ref">§4.3</span></li>
+            <li>오늘 = 안쪽 1.5 <code>grass</code> 테두리 + 선택(SemiBold 숫자·점). 잔디의 같은 날짜에도 선택 테두리. <span class="ref">§4.4</span></li>
+            <li>미래 날짜: 숫자 <code>textSecondary</code> 40%, 탭 불가. <span class="ref">§4.4</span></li>
+            <li>항상 6행. 남는 칸은 이웃 달 날짜를 <code>gray45</code> 50%로. <span class="ref">§4.4</span></li>
+            <li>하단 컨트롤(C9). 현재 달에 오늘이 선택돼 있어 오늘과 ›가 40%(비활성). <span class="ref">§4.4</span></li>
+            <li>오늘 기록이 없으면 C5 "오늘은 아직 학습 기록이 없어요". <span class="ref">§4.7</span></li>
+            <li>모달 루트라 뒤로가기 없음. 왼쪽 ✕는 모달을 닫고, 오른쪽 "학습 통계 ›"(<code>calendar.stats</code>)는 H1을 push합니다. 로딩·실패·기록 0건이어도 누를 수 있습니다. <span class="ref">§4.1</span></li>
+        </ol>
+    </figure>
+
+    <!-- ② 날짜 선택 -->
+    <figure>
+        <figcaption>② 잔디 탭 → 날짜 선택<small>잔디에서 10월 15일 탭 (단어 12개 · 정답률 83% · 퀴즈 2회)</small></figcaption>
+        <div class="phone">
+            <div class="fold"></div>
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card" data-pin="1" data-heatmap='{"set":"main","selected":"2026-10-15"}'></div>
+                <div class="chips" data-chips="main"></div>
+                <div class="card" data-cal='{"y":2026,"m":10,"sel":"2026-10-15","set":"main","pins":{"2026-10-15":2,"today":3}}'></div>
+                <div class="heading" data-pin="4"><b>10월 15일 (목)</b><span>단어 12개 · 정답률 83% · 퀴즈 2회</span></div>
+                <div data-pin="5" data-vcard='{"t":"journey","m":"여행","p":"명사","c":2,"n":2,"h":205}'></div>
+                <div data-vcard='{"t":"negotiate","m":"협상하다","p":"동사","c":2,"n":2,"h":140}'></div>
+                <div data-vcard='{"t":"anxious","m":"불안한","p":"형용사","c":1,"n":2,"h":30}'></div>
+                <div data-vcard='{"t":"briefly","m":"잠시","p":"부사","c":1,"n":2,"h":270}'></div>
+                <div class="selection" style="text-align:center;background:none;color:var(--textSecondary)">… 나머지 8개 (시안 생략)</div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>잔디 셀 탭 → 그 날짜에 1.5 선택 테두리, 달력이 10월로 이동(<code>heatmapTapped</code>). 셀 터치 영역 15pt. <span class="ref">§4.2 §8.1</span></li>
+            <li>12개 → 2단계(<code>grass</code> 60%) + 선택. 라벨 "10월 15일 목요일, 학습 단어 12개". <span class="ref">§4.6 §4.8</span></li>
+            <li>현재 달이 아니므로 오늘과 › 활성. <span class="ref">§4.4</span></li>
+            <li>C4: 제목 "10월 15일 (목)" <code>title3</code>, 부제 <code>footnote</code> <code>textSecondary</code>. 퀴즈 = 그날 고유 <code>sessionId</code> 수. <span class="ref">§4.5</span></li>
+            <li>C10 날짜별 단어 카드(단어장 카드 모양, 북마크 없음). 높이 168, 카드 사이 16. "N번 학습"과 정답률은 <b>그날</b> 풀이만, 정답 횟수순. 탭 → ⑦. <span class="ref">§4.5</span></li>
+        </ol>
+    </figure>
+
+    <!-- ③ 월 선택 메뉴 -->
+    <figure>
+        <figcaption>③ 월 선택 메뉴<small>"2026년 11월 ⌄" 탭</small></figcaption>
+        <div class="phone">
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card" data-heatmap='{"set":"main","selected":"2026-11-3"}'></div>
+                <div class="chips" data-chips="main"></div>
+                <div class="card" style="position:relative" data-cal='{"y":2026,"m":11,"sel":"2026-11-3","set":"main","menu":true,"pins":{"menu":1}}'></div>
+                <div class="selection">오늘은 아직 학습 기록이 없어요</div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>시스템 <code>Menu</code>(SF Pro 17, 행 44, 체크는 앞쪽). <code>earliestMonth</code>(5월)부터 현재 달까지 최신순, 기록 없는 달(8월)도 넣습니다. <span class="ref">§4.4</span></li>
+            <li>달을 고르면 그 달로 이동하고 선택 해제(④). <span class="ref">§8.1</span></li>
+        </ol>
+    </figure>
+
+    <!-- ④ 기록 없는 달 -->
+    <figure>
+        <figcaption>④ 달 이동 후 — 기록 없는 달<small>메뉴에서 2026년 8월 선택</small></figcaption>
+        <div class="phone">
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card" data-pin="1" data-heatmap='{"set":"main"}'></div>
+                <div class="chips" data-chips="main"></div>
+                <div class="card" data-cal='{"y":2026,"m":8,"set":"main","pins":{"grid":2,"prev":3}}'></div>
+                <div class="selection" data-pin="4">이 달에는 학습 기록이 없어요</div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>달을 옮겨도 잔디 스크롤 위치·내용은 그대로. 선택이 없어 테두리도 없습니다.</li>
+            <li>8월은 6행이 꽉 차는 달. 이웃 달(7·9월)은 기록이 있어도 농도 없이 숫자만 50%. <span class="ref">§4.4</span></li>
+            <li>‹ ›·오늘 모두 활성. 5월로 가면 ‹가 40%. <span class="ref">§4.4</span></li>
+            <li>선택이 없고 그 달 기록도 없을 때만 이 문구(C5). <span class="ref">§4.7</span></li>
+        </ol>
+    </figure>
+
+    <!-- ⑤ 빈 상태 -->
+    <figure>
+        <figcaption>⑤ 빈 상태 — 기록 0건<small>학습 기록이 전혀 없는 사용자</small></figcaption>
+        <div class="phone">
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card" data-pin="1" data-heatmap='{"set":"none"}'></div>
+                <div class="chips" data-pin="2" data-chips="none"></div>
+                <div class="card" data-cal='{"y":2026,"m":11,"sel":"2026-11-3","set":"none","pins":{"month":3}}'></div>
+                <div class="card state" data-pin="4"><svg class="sym" viewBox="0 0 34 34" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"><path d="M7 5h15a5 5 0 0 1 5 5v19H12a5 5 0 0 1-5-5z"/><path d="M7 24a5 5 0 0 1 5-5h15"/></svg><div class="heading"><b>학습을 시작하면 잔디와 달력이 채워져요</b></div></div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>잔디는 0단계 칸으로 그대로 그립니다. <span class="ref">§4.2</span></li>
+            <li>칩은 "0일 연속", "총 0일 학습"으로 같은 모양. <span class="ref">§4.3</span></li>
+            <li>메뉴는 현재 달 하나, ‹ ›·오늘 모두 40%. 안내 문구 숨김. <span class="ref">§4.4</span></li>
+            <li>C15 빈 상태(제목만). 오늘 문구보다 우선합니다. <span class="ref">§4.7</span></li>
+        </ol>
+    </figure>
+
+    <!-- ⑥ 로드 실패 -->
+    <figure>
+        <figcaption>⑥ 로드 실패<small>첫 진입에서 <code>fetchStatsRecords()</code> 오류</small></figcaption>
+        <div class="phone">
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card state" data-pin="1"><svg class="sym" viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="17" cy="17" r="14"/><path d="M17 9.5v9.5M17 24v.5"/></svg><div class="heading"><b>기록을 불러오지 못했어요</b><span>잠시 후 다시 시도해 주세요. 저장된 학습 기록은 그대로 남아 있어요.</span></div><span class="prominent" data-pin="2">다시 시도</span></div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>C15 실패 카드. 잔디·칩·달력을 그리지 않습니다. 오류는 <code>reportError</code>로 보냅니다. <span class="ref">§4.7</span></li>
+            <li><code>refresh</code>. 다시 읽기만 실패하면 기존 잔디·달력은 두고 선택 날짜 영역 위에 이 카드. <span class="ref">§4.7</span></li>
+        </ol>
+    </figure>
+
+    <!-- ⑦ 단어 상세 시트 -->
+    <figure>
+        <figcaption>⑦ 단어 상세 시트<small>②에서 journey 탭, 기존 시트 재사용</small></figcaption>
+        <div class="phone fixed">
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="start"><span class="ib x"></span></span><span class="title">캘린더</span><span class="end"><span class="fwd">학습 통계</span></span></div>
+            <div class="screen">
+                <div class="card" data-heatmap='{"set":"main","selected":"2026-10-15"}'></div>
+                <div class="chips" data-chips="main"></div>
+                <div class="card" data-cal='{"y":2026,"m":10,"sel":"2026-10-15","set":"main"}'></div>
+            </div>
+            <div class="dim"></div>
+            <div class="sheet">
+                <div class="grabber" data-pin="1"></div>
+                <div data-word='{"t":"journey","m":"여행","p":"명사","c":2,"n":2,"h":205,"pre":"이날 ","pin":2}'></div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>시스템 시트 <code>.pageSheet</code>, <code>[.medium(), .large()]</code>, 그래버 표시. 시트 배경 <code>background</code>, 여백 20. <span class="ref">§8.4</span></li>
+            <li>C16에 접두어 "이날 ". 학습 통계에서 열면 접두어 없이 "정답 1 / 7회". <span class="ref">§4.5 §8.3</span></li>
+        </ol>
+    </figure>
+
+</div>
+
+<h2>5. 학습 통계 화면 (§5)</h2>
+<p class="lead">모든 카드가 전체 기간 기준입니다. 예시 데이터: 고유 단어 248개 = 품사 합, 풀이 1,240회 = 주제 합, 정답 1,005회(81%). 많이 틀린 단어는 70% 이하 12개 ⊃ 40% 이하 9개 ⊃ 20% 이하 4개.</p>
+<div class="frames" style="margin-top:24px">
+
+    <!-- H1 기본 -->
+    <figure>
+        <figcaption>H1 학습 통계 — 기본<small>캘린더 우측 상단 "학습 통계 ›"로 push, 기준 70% 이하(기본값)</small></figcaption>
+        <div class="phone">
+            <div class="fold"></div>
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="back" data-pin="1"><svg viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 11l8 8"/></svg>캘린더</span><span class="title">학습 통계</span><span class="end"><span class="ib x"></span></span></div>
+            <div class="screen">
+                <div class="card stats" data-summary='{"pins":{"words":2}}'></div>
+                <div class="card" data-donut='{"set":"topics","pins":{"chart":3,"legend":4}}'></div>
+                <div class="card" data-donut='{"set":"parts","pins":{"chart":5}}'></div>
+                <div class="card" data-mistakes='{"set":"main","th":70,"pins":{"segment":6,"r1":7}}'></div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>시스템 뒤로가기 → 캘린더(보던 달·선택 유지). ✕는 모달 전체를 닫습니다. <span class="ref">§3 §5.1</span></li>
+            <li>요약 카드(C11). "누적 학습 단어 ›" → 학습한 단어(전체 학습 단어). 248 = 품사 합, 81% = 1,005 / 1,240. <span class="ref">§5.2</span></li>
+            <li>주제 도넛(C12). 풀이 횟수 기준, 가운데 1,240 = 범례 합. 색은 앱의 주제 색(<code>BookTopic.color</code>). <span class="ref">§5.3</span></li>
+            <li>범례 5행은 0회여도 고정 순서(여행·비즈니스·감정·일상·미분류). 행은 버튼(<code>studyStats.topics.&lt;id&gt;</code>). <span class="ref">§5.3 §5.8</span></li>
+            <li>품사 도넛(C12). 고유 단어 기준, 색은 <code>StudyStatsStyle.color(index)</code>. <span class="ref">§5.4</span></li>
+            <li>기준 세그먼트(C13). 70·40·20% 이하 누적 필터, 기본 70%. 반올림 정수로 판정해 souvenir(7/10, 70%) 포함. <span class="ref">§5.5</span></li>
+            <li>행(C14). 고른 기준의 단어 전부, 오답 횟수 → 정답률 낮은 순. 행 탭 → 단어 상세 시트(전체 기간). <span class="ref">§5.5 §5.8</span></li>
+        </ol>
+    </figure>
+
+    <!-- H2 선택 상태 -->
+    <figure>
+        <figcaption>H2 선택 상태<small>주제 도넛에서 여행 선택 + 많이 틀린 단어 기준 20% 이하</small></figcaption>
+        <div class="phone">
+            <div class="fold"></div>
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="back"><svg viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 11l8 8"/></svg>캘린더</span><span class="title">학습 통계</span><span class="end"><span class="ib x"></span></span></div>
+            <div class="screen">
+                <div class="card stats" data-summary='{}'></div>
+                <div class="card" data-donut='{"set":"topics","sel":0,"pins":{"chart":1,"selection":2}}'></div>
+                <div class="card" data-donut='{"set":"parts"}'></div>
+                <div class="card" data-mistakes='{"set":"main","th":20,"pins":{"segment":3,"r4":4}}'></div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>선택한 주제만 100%, 나머지 섹터 45%, 범례 행 Bold. 터치가 끝나도 선택 유지. <span class="ref">§5.3</span></li>
+            <li>C5 "여행 · 372회 · 전체의 30%". 품사도 같은 형식. <span class="ref">§5.3 §5.4</span></li>
+            <li>부제가 "정답률 20% 이하 · 4개"로 바뀝니다. 누적 필터라 이 4개는 70%·40%에도 있습니다. <span class="ref">§5.5</span></li>
+            <li>commute(1회 풀어 틀림, 0%)는 오답 횟수가 적어 맨 아래. <span class="ref">§5.5 §9</span></li>
+        </ol>
+    </figure>
+
+    <!-- H3 기준에 맞는 단어 없음 -->
+    <figure>
+        <figcaption>H3 기준에 맞는 단어 없음<small>카드 조각 · 다른 예시 사용자(70% 이하 3개, 40% 이하 1개, 20% 이하 0개)</small></figcaption>
+        <div class="piece">
+            <div class="card" data-mistakes='{"set":"few","th":20,"pins":{"empty":1}}'></div>
+        </div>
+        <ol class="notes">
+            <li>목록 자리에 C5 "정답률 20% 이하인 단어가 없어요". 세그먼트는 그대로, 부제는 "· 0개". <span class="ref">§5.5 §5.7</span></li>
+        </ol>
+    </figure>
+
+    <!-- H4 기록 0건 -->
+    <figure>
+        <figcaption>H4 빈 상태 — 기록 0건<small>학습 기록이 전혀 없는 사용자(캘린더 ⑤에서 아이콘 탭)</small></figcaption>
+        <div class="phone fixed">
+            <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="nav"><span class="back"><svg viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 11l8 8"/></svg>캘린더</span><span class="title">학습 통계</span><span class="end"><span class="ib x"></span></span></div>
+            <div class="screen">
+                <div class="card state" data-pin="1"><svg class="sym" viewBox="0 0 34 34" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"><path d="M7 5h15a5 5 0 0 1 5 5v19H12a5 5 0 0 1-5-5z"/><path d="M7 24a5 5 0 0 1 5-5h15"/></svg><div class="heading"><b>첫 학습을 기다리고 있어요</b><span>퀴즈에서 답변을 저장하면 학습량과 정답률을 확인할 수 있어요.</span></div></div>
+            </div>
+        </div>
+        <ol class="notes">
+            <li>요약 카드를 숨기고 C15 빈 상태 카드만. 주제·품사·많이 틀린 단어 카드도 없습니다. <span class="ref">§5.2 §5.7</span></li>
+        </ol>
+    </figure>
+
+</div>
+
+<p class="foot">이 문서에 없는 것: 로딩 스켈레톤(지금 통계와 같음: "학습 기록을 불러오고 있어요." + <code>gray45</code> 12% 회색 카드 높이 150, 모서리 16 × 3), 다시 읽기 실패 화면, 학습 통계 쪽 단어 상세 시트(⑦과 같고 접두어 없음), "전체 학습 단어" 목록(기존 화면), 접근성 글자 크기 레이아웃(§4.8 §5.8), ja 문구.</p>
+</main>
+
+<script>
+// 예시 데이터: 기준일 2026-11-03(화), 첫 기록 2026-05-11, 일요일 시작
+const TODAY = new Date(2026, 10, 3);
+const FIRST = new Date(2026, 4, 11);
+const WD = '일월화수목금토';
+const day = (y, m, d) => new Date(y, m, d);           // m은 0부터
+const next = (d, n) => day(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const key = d => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+// 연속 학습 5일(10/29~11/2), 오늘 미학습, ②의 10/15 = 12개
+const FIXED = { '2026-10-15': 12, '2026-10-28': 0, '2026-10-29': 6, '2026-10-30': 3, '2026-10-31': 9, '2026-11-1': 4, '2026-11-2': 12, '2026-11-3': 0 };
+
+// 날짜 → 학습 고유 단어 수
+function count(d, set) {
+    if (set === 'none' || d < FIRST || d > TODAY) return 0;
+    const k = key(d);
+    if (k in FIXED) return FIXED[k];
+    if (d.getMonth() === 7) return 0; // 8월: 기록 없는 달 예시
+    const h = Math.abs(Math.sin(d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate()) * 43758.5453) % 1;
+    return h < .35 ? 0 : Math.ceil(((h - .35) / .65) ** 2 * 24);
+}
+const level = c => c === 0 ? 0 : c <= 4 ? 1 : c <= 14 ? 2 : 3;
+const label = (d, c) => `${d.getMonth() + 1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일, ${c ? `학습 단어 ${c}개` : '학습 안 함'}`;
+const pin = (o, k) => o.pins && o.pins[k] ? ` data-pin="${o.pins[k]}"` : '';
+const svg = (p, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const chevron = d => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+
+// 내비게이션 아이콘 (SF Symbol xmark / chevron.right 흉내)
+document.querySelectorAll('.nav .fwd').forEach(el => { el.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5l6 6-6 6"/></svg>'); });
+document.querySelectorAll('.ib.x').forEach(el => { el.innerHTML = svg('<path d="M5 5l14 14M19 5L5 19"/>', 1.9); });
+
+// 잔디: 이번 주 포함 53주, 미래 칸은 그리지 않음
+document.querySelectorAll('[data-heatmap]').forEach(el => {
+    const o = JSON.parse(el.dataset.heatmap);
+    const start = next(TODAY, -TODAY.getDay() - 52 * 7);
+    let cells = '', months = '';
+    for (let i = 0, d = start; d <= TODAY; d = next(start, ++i)) {
+        if (d.getDate() === 1) months += `<span style="left:${Math.floor(i / 7) * 15}px">${d.getMonth() + 1}월</span>`;
+        const c = count(d, o.set);
+        cells += `<i class="lv${level(c)}${key(d) === o.selected ? ' sel' : ''}" title="${label(d, c)}"></i>`;
+    }
+    const days = [...WD].map((w, r) => `<span>${r % 2 ? w : ''}</span>`).join('');
+    el.innerHTML = `<div class="hm"><div class="hm-days"${pin(o, 'days')}>${days}</div>`
+        + `<div class="hm-scroll"><div class="hm-months" style="width:${53 * 15 - 3}px">${months}</div><div class="hm-grid">${cells}</div></div></div>`;
+    const s = el.querySelector('.hm-scroll');
+    s.scrollLeft = s.scrollWidth;
+});
+
+// 칩: 연속 학습(오늘 미학습이면 어제부터), 총 학습일
+document.querySelectorAll('[data-chips]').forEach(el => {
+    const set = el.dataset.chips;
+    let total = 0, streak = 0;
+    for (let d = FIRST; d <= TODAY; d = next(d, 1)) if (count(d, set)) total++;
+    let d = count(TODAY, set) ? TODAY : next(TODAY, -1);
+    while (count(d, set)) { streak++; d = next(d, -1); }
+    el.innerHTML = `<span class="chip">${svg('<path d="M12 3c.5 3 4 5.5 4 10a4 4 0 0 1-8 0c0-2 .8-3.3 2-4.5.2 1.6 1 2.5 2 2.5-.8-2.5-.6-5.5 0-8z"/>')}${streak}일 연속</span>`
+        + `<span class="chip">${svg('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>')}총 ${total}일 학습</span>`;
+});
+
+// 달력: 6행 고정, 하단 컨트롤
+document.querySelectorAll('[data-cal]').forEach(el => {
+    const o = JSON.parse(el.dataset.cal);
+    const m = o.m - 1, first = day(o.y, m, 1);
+    const isCurrent = o.y === TODAY.getFullYear() && m === TODAY.getMonth();
+    const isEarliest = o.set === 'none' || (o.y === FIRST.getFullYear() && m === FIRST.getMonth());
+    let grid = '';
+    for (let i = 0; i < 42; i++) {
+        const d = day(o.y, m, 1 - first.getDay() + i), k = key(d), c = count(d, o.set);
+        const adj = d.getMonth() !== m, future = d > TODAY;
+        const cls = ['cell', adj ? 'adj' : future ? 'lv0 future' : 'lv' + level(c),
+            !adj && k === key(TODAY) && 'today', !adj && k === o.sel && 'selected'].filter(Boolean).join(' ');
+        grid += `<span class="${cls}" title="${adj || future ? '' : label(d, c)}"${pin(o, k)}><b>${d.getDate()}</b><i></i></span>`;
+    }
+    const todayOff = o.set === 'none' || (isCurrent && o.sel === key(TODAY));
+    let menu = '';
+    if (o.menu) {
+        for (let d = day(TODAY.getFullYear(), TODAY.getMonth(), 1); d >= day(FIRST.getFullYear(), FIRST.getMonth(), 1); d = day(d.getFullYear(), d.getMonth() - 1, 1)) {
+            menu += `<div><em>${d.getMonth() === m ? '✓' : ''}</em>${d.getFullYear()}년 ${d.getMonth() + 1}월</div>`;
+        }
+        menu = `<div class="menu"${pin(o, 'menu')}>${menu}</div>`;
+    }
+    el.innerHTML = `<div class="cal-block"><div class="week">${[...WD].map(w => `<span>${w}</span>`).join('')}</div>`
+        + `<div class="grid"${pin(o, 'grid')}>${grid}</div></div>`
+        + `<div class="controls"><span class="ctl month"${pin(o, 'month')}>${o.y}년 ${o.m}월 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg></span>`
+        + `<span class="ctl today${todayOff ? ' off' : ''}"${pin(o, 'today')}>오늘</span>`
+        + `<span class="ctl round${isEarliest ? ' off' : ''}" title="이전 달"${pin(o, 'prev')}>${chevron('M10 3L5 8l5 5')}</span>`
+        + `<span class="ctl round${isCurrent ? ' off' : ''}" title="다음 달"${pin(o, 'next')}>${chevron('M6 3l5 5-5 5')}</span></div>`
+        + (o.set === 'none' ? '' : '<p class="hint">날짜를 누르면 그날 학습한 단어를 볼 수 있어요</p>')
+        + menu;
+});
+
+// 단어 카드: pastel(for:) = HSB(h, 0.30, 0.95). h는 예시
+const pastel = h => {
+    const f = n => { const k = (n + h / 60) % 6; return .95 - .95 * .3 * Math.max(0, Math.min(k, 4 - k, 1)); };
+    return `rgb(${[f(5), f(3), f(1)].map(x => Math.round(x * 255)).join(',')})`;
+};
+document.querySelectorAll('[data-word]').forEach(el => {
+    const w = JSON.parse(el.dataset.word);
+    el.className = 'word';
+    el.style.background = pastel(w.h);
+    el.innerHTML = `<div class="top"><span class="pos">${w.p}</span><span${w.pin ? ` data-pin="${w.pin}"` : ''}>${w.pre || ''}정답 ${w.c} / ${w.n}회</span></div>`
+        + `<div class="bottom"><div><span class="term">${w.t}</span><span class="meaning">${w.m}</span></div><span class="rate">${Math.round(w.c / w.n * 100)}%</span></div>`;
+});
+
+// 날짜별 단어 카드: 단어장 상세 카드와 같은 모양, 북마크 없음
+document.querySelectorAll('[data-vcard]').forEach(el => {
+    const w = JSON.parse(el.dataset.vcard);
+    el.className = 'vcard';
+    el.style.background = pastel(w.h);
+    el.innerHTML = `<span class="pos">${w.p}</span><div class="bottom"><div><span class="term">${w.t}</span><span class="meta">${w.m} · ${w.n}번 학습</span></div>`
+        + `<span class="rate">${Math.round(w.c / w.n * 100)}<small>%</small></span></div>`;
+});
+
+// 학습 통계 예시 데이터 (전체 기간): 누적 학습 단어 = 품사 합, 총 풀이 = 주제 합
+const TOPICS = [['여행', 372], ['비즈니스', 298], ['감정', 186], ['일상', 310], ['미분류', 74]];
+const PARTS = [['명사', 104], ['동사', 72], ['형용사', 46], ['부사', 18], ['미분류', 8]];
+const TOTAL_CORRECT = 1005;
+// 많이 틀린 단어 후보 [단어, 뜻, 품사, 전체 풀이, 정답]. few = H3용 다른 사용자
+const MISTAKES = {
+    main: [
+        ['anxious', '불안한', '형용사', 6, 2], ['briefly', '잠시', '부사', 4, 1], ['reluctant', '꺼리는', '형용사', 7, 1],
+        ['itinerary', '여행 일정표', '명사', 6, 1], ['thorough', '철저한', '형용사', 8, 3], ['postpone', '미루다', '동사', 5, 1],
+        ['accommodate', '수용하다', '동사', 7, 3], ['deadline', '마감 기한', '명사', 5, 2], ['embarrassed', '당황한', '형용사', 6, 3],
+        ['souvenir', '기념품', '명사', 10, 7], ['invoice', '청구서', '명사', 3, 1], ['commute', '통근하다', '동사', 1, 0],
+    ],
+    few: [['schedule', '일정', '명사', 4, 2], ['delay', '지연시키다', '동사', 3, 2], ['fragile', '깨지기 쉬운', '형용사', 3, 1]],
+};
+const sum = a => a.reduce((s, [, n]) => s + n, 0);
+const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
+// 반올림 정답률로 기준 판정, 오답 횟수 → 정답률 낮은 순
+const mistakes = (set, th) => MISTAKES[set]
+    .map(([term, meaning, pos, total, correct]) => ({ term, meaning, pos, total, correct, wrong: total - correct, rate: Math.round(correct / total * 100) }))
+    .filter(w => w.rate <= th)
+    .sort((a, b) => b.wrong - a.wrong || a.correct / a.total - b.correct / b.total);
+
+// 요약 카드
+document.querySelectorAll('[data-summary]').forEach(el => {
+    const o = JSON.parse(el.dataset.summary);
+    el.innerHTML = `<div${pin(o, 'words')}><span class="k">누적 학습 단어 ›</span><span class="v">${sum(PARTS)}개</span></div>`
+        + `<div><span class="k">총 정답률</span><span class="v">${pct(TOTAL_CORRECT, sum(TOPICS))}</span></div>`;
+});
+
+// 도넛 카드: 0인 항목은 섹터만 빼고 범례에는 남김, 선택 외 섹터 45%
+const DONUTS = {
+    topics: { items: TOPICS, colors: ['sky', 'sage', 'coral', 'butter', 'gray45'], title: '주제별 학습 비중', sub: '풀이 횟수 기준', caption: '회 풀이', unit: '회' }, // BookTopic.color
+    parts: { items: PARTS, colors: ['primary', 'sage', 'sky', 'lavender', 'gray45'], title: '학습 단어의 품사', sub: '고유 단어 기준', caption: '고유 단어', unit: '개' }, // StudyStatsStyle.color(index)
+};
+document.querySelectorAll('[data-donut]').forEach(el => {
+    const o = JSON.parse(el.dataset.donut), d = DONUTS[o.set], total = sum(d.items);
+    const R = 52.92, C = 2 * Math.PI * R; // 바깥 63, 안쪽 63 × 0.68의 중간
+    let at = 0, arcs = '', rows = '';
+    d.items.forEach(([name, n], i) => {
+        const color = `var(--${d.colors[i]})`;
+        if (n) arcs += `<circle cx="63" cy="63" r="${R}" style="stroke:${color}" stroke-width="20.16" stroke-dasharray="${C * n / total - 2} ${C}" stroke-dashoffset="${-(at + 1)}"${o.sel != null && o.sel !== i ? ' opacity=".45"' : ''}/>`;
+        at += C * n / total;
+        rows += `<div${o.sel === i ? ' class="on"' : ''}><i style="background:${color}"></i>${name}<span>${n}${d.unit} · ${pct(n, total)}</span></div>`;
+    });
+    const s = d.items[o.sel];
+    el.innerHTML = `<div class="heading"><b>${d.title}</b><span>${d.sub}</span></div>`
+        + `<div class="donut-row"><div class="donut"${pin(o, 'chart')}><svg viewBox="0 0 126 126" width="126" height="126" fill="none">${arcs}</svg><p><b>${total.toLocaleString('ko-KR')}</b><span>${d.caption}</span></p></div>`
+        + `<div class="lg"${pin(o, 'legend')}>${rows}</div></div>`
+        + (s ? `<div class="selection"${pin(o, 'selection')}>${s[0]} · ${s[1]}${d.unit} · 전체의 ${pct(s[1], total)}</div>` : '');
+});
+
+// 많이 틀린 단어: 고른 기준의 단어 전부 (순위 번호·막대·전체 보기 없음)
+const rows = (o, list) => list.map((w, i) => `<div class="mrow"${pin(o, 'r' + (i + 1))}>`
+    + `<div class="l1"><span class="term">${w.term}</span><span class="wrong">오답 ${w.wrong}회</span></div><span class="mean">${w.meaning}</span>`
+    + `<small>정답률 ${w.rate}% · 전체 ${w.total}회 풀이</small></div>`).join('');
+document.querySelectorAll('[data-mistakes]').forEach(el => {
+    const o = JSON.parse(el.dataset.mistakes), list = mistakes(o.set, o.th);
+    el.innerHTML = `<div class="heading"><b>많이 틀린 단어</b><span>정답률 ${o.th}% 이하 · ${list.length}개</span></div>`
+        + `<div class="segment"${pin(o, 'segment')}>${[70, 40, 20].map(t => `<span${t === o.th ? ' class="on"' : ''}>${t}% 이하</span>`).join('')}</div>`
+        + (list.length ? `<div class="mlist">${rows(o, list)}</div>` : `<div class="selection"${pin(o, 'empty')}>정답률 ${o.th}% 이하인 단어가 없어요</div>`);
+});
+document.querySelectorAll('[data-rows]').forEach(el => {
+    const o = JSON.parse(el.dataset.rows);
+    el.innerHTML = rows(o, mistakes(o.set, o.th).slice(0, o.limit));
+});
+
+// 라이트·다크 전환 (첫 값은 시스템 설정), 주석 표시
+const btn = document.getElementById('theme');
+const apply = t => {
+    document.documentElement.dataset.theme = t;
+    btn.textContent = t === 'dark' ? '라이트 모드로 보기' : '다크 모드로 보기';
+};
+apply(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+btn.onclick = () => apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+const pinBtn = document.getElementById('pins');
+pinBtn.onclick = () => { pinBtn.textContent = document.body.classList.toggle('clean') ? '주석 보기' : '주석 숨기기'; };
+</script>
+</body>
+</html>

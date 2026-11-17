@@ -4,6 +4,8 @@ import Foundation
 final class QuizDIContainer {
     private let dependencies: AppDependencies
 
+    var reportError: @Sendable (Error) -> Void { dependencies.reportError }
+
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
     }
@@ -15,7 +17,8 @@ final class QuizDIContainer {
                 petRepository: dependencies.petRepository
             ),
             studyReminderUseCase: dependencies.makeStudyReminderUseCase(),
-            quizData: quizData
+            quizData: quizData,
+            reportError: dependencies.reportError
         )
     }
 

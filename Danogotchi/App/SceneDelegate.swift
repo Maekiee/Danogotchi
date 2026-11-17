@@ -4,7 +4,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var appCoordinator: AppFlowCoordinator?
     #if DEBUG
-    private var studyReportTestCoordinator: MainCoordinator?
+    private var studyStatsTestCoordinator: MainCoordinator?
     #endif
     
     
@@ -20,8 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         UITestingSupport.seedMainFlowIfRequested(container: container)
         UITestingSupport.seedThemeSelectedIfRequested(container: container)
         UITestingSupport.seedSolidThemeIfRequested(container: container)
-        if let coordinator = UITestingSupport.startStudyReportIfRequested(window: window, container: container) {
-            studyReportTestCoordinator = coordinator
+        if let coordinator = UITestingSupport.startStudyStatsIfRequested(window: window, container: container) {
+            studyStatsTestCoordinator = coordinator
             return
         }
         #endif
@@ -34,7 +34,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-        
+        CrashReporter.log("scene: active")
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -42,11 +42,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        
+        CrashReporter.log("scene: foreground")
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        
+        CrashReporter.log("scene: background")
     }
 }
 

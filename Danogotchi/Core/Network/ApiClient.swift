@@ -22,8 +22,8 @@ final class DefaultApiClient: ApiClient {
         
         do {
             (data, response) = try await session.data(for: url)
-        } catch let error as DecodingError {
-            throw NetworkError.decoding(error)
+        } catch let error as URLError {
+            throw NetworkError.transport(error)
         } catch {
             throw NetworkError.unknown(error)
         }

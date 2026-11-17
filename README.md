@@ -115,13 +115,13 @@
 
 ```
 Danogotchi/
-├── App/           앱 진입점 · AppDIContainer + 기능별 DIContainer · Coordinator 계층
-├── Core/          BaseViewController · CoreDataStack · 네트워크 · AppLogger
-├── Shared/
-│   ├── Domain/    Entity · Repository 프로토콜 · UseCase · Policy
-│   ├── Data/      Repository 구현 7종 · Mapper · CoreData 모델 · 추천 단어 시드
-│   └── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트
-└── Feature/       Feature 폴더 13개 (View / ViewModel 또는 Reducer / Components / Coordinator)
+├── App/           앱 진입점 · AppDIContainer + 기능별 DIContainer · Coordinator 계층 · UI 테스트 지원
+├── Feature/       Feature 폴더 14개 (View / ViewModel 또는 Reducer / Components / Coordinator) · Common(Base · 익스텐션)
+├── Domain/        주제별 폴더(Vocab · Quiz · Pet · StudyRecord · Theme · Weather · Setting) · Entity · Repository 프로토콜 · UseCase · Policy
+├── Data/          Repository 구현 8종 · API 라우터 · DTO · CoreData 모델 · Mapper · 추천 단어 시드 · 기기 서비스
+├── Core/          API 클라이언트 · CoreDataStack · 이미지 파일 저장소 (앱과 무관한 기술 기반)
+├── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트 · 스프라이트
+└── Util/          AppLogger · CrashReporter · 이미지 로딩 등 범용 도구
 ```
 
 ### TCA

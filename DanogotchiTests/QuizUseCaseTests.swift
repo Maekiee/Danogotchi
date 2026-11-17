@@ -2,23 +2,62 @@ import XCTest
 @testable import Danogotchi
 
 final class QuizUseCaseTests: XCTestCase {
-    func test_startRequiresActiveBookAndAtLeastFourWords() throws {
-        let context = makeInMemoryContext()
-        let books = DefaultVocabBookRepository(context: context)
-        let useCase = DefaultStartQuizUseCase(vocabBookRepository: books,
-                                               learningHistoryRepository: DefaultLearningHistoryRepository(context: context))
-        guard case .noWords = try useCase.execute() else { return XCTFail("No active book") }
-        let book = try books.createBook(title: "my", bookType: .myBook, level: nil)
-        try books.setActiveBook(id: book.id)
-        guard case .noWords = try useCase.execute() else { return XCTFail("Empty book") }
-        for word in makeQuizWords(3) {
-            _ = try books.addVocab(bookId: book.id, from: word)
-        }
-        guard case .notEnoughWords = try useCase.execute() else { return XCTFail("Three words cannot start") }
-        _ = try books.addVocab(bookId: book.id, from: makeQuizWords(4)[3])
-        guard case .success(let quiz) = try useCase.execute() else { return XCTFail("Four words must start") }
+    func test_startWithoutActiveBookHasNoWords() throws {
+        guard case .noWords = try startQuiz(wordCount: nil) else { return XCTFail("No active book") }
+    }
+
+    func test_startWithEmptyActiveBookHasNoWords() throws {
+        guard case .noWords = try startQuiz(wordCount: 0) else { return XCTFail("Empty book") }
+    }
+
+    func test_startWithThreeWordsIsNotEnough() throws {
+        guard case .notEnoughWords = try startQuiz(wordCount: 3) else { return XCTFail("Three words cannot start") }
+    }
+
+    func test_startWithFourWordsBuildsQuizOfDistinctWords() throws {
+        guard case .success(let quiz) = try startQuiz(wordCount: 4) else { return XCTFail("Four words must start") }
         XCTAssertEqual(quiz.words.count, 4)
         XCTAssertEqual(Set(quiz.words.map(\.id)).count, 4)
+    }
+
+    // wordCount가 nil이면 활성 단어장 없이 시작
+    private func startQuiz(wordCount: Int?) throws -> StartQuizResult {
+        let context = makeInMemoryContext()
+        let books = DefaultVocabBookRepository(context: context)
+        if let wordCount {
+            let book = try books.createBook(title: "my", bookType: .myBook, level: nil)
+            try books.setActive(id: book.id, isActive: true)
+            for word in makeQuizWords(wordCount) { _ = try books.addVocab(bookId: book.id, from: word) }
+        }
+        return try DefaultStartQuizUseCase(vocabBookRepository: books,
+                                           learningHistoryRepository: DefaultLearningHistoryRepository(context: context)).execute()
+    }
+
+    func test_startCombinesEveryLearningBookAndCountsWithoutSavedCopies() throws {
+        let context = makeInMemoryContext()
+        let books = DefaultVocabBookRepository(context: context)
+        let travel = try books.createBook(title: "travel", bookType: .travel, level: .a1)
+        let myBook = try books.createBook(title: "my", bookType: .myBook, level: nil)
+        _ = try books.createBook(title: "life", bookType: .life, level: .a1)
+        let travelWords = try (0..<2).map {
+            try books.addVocab(bookId: travel.id, word: "travel\($0)", meaning: "여행\($0)",
+                               bookType: .travel, level: .a1, partOfSpeech: .noun)
+        }
+        _ = try books.addVocab(bookId: myBook.id, from: travelWords[0])
+        let ownWord = try books.addVocab(bookId: myBook.id, word: "own", meaning: "내 단어",
+                                         bookType: .myBook, level: nil, partOfSpeech: .noun)
+        try books.setActive(id: travel.id, isActive: true)
+        try books.setActive(id: myBook.id, isActive: true)
+        let useCase = DefaultStartQuizUseCase(vocabBookRepository: books,
+                                               learningHistoryRepository: DefaultLearningHistoryRepository(context: context))
+
+        // 저장 복사본은 원본과 같은 단어라 세지 않는다 — 3개
+        guard case .notEnoughWords = try useCase.execute() else { return XCTFail("Copies must not count") }
+
+        _ = try books.addVocab(bookId: myBook.id, word: "more", meaning: "더", bookType: .myBook, level: nil, partOfSpeech: .noun)
+        guard case .success(let quiz) = try useCase.execute() else { return XCTFail("Four combined words must start") }
+        XCTAssertEqual(quiz.words.count, 4)
+        XCTAssertTrue(Set(quiz.words.map(\.id)).isSuperset(of: Set(travelWords.map(\.id) + [ownWord.id])))
     }
 
     func test_startCapsAtTwentyWithoutRepeatingWordsAndRetainsDistractorPool() throws {
@@ -26,7 +65,7 @@ final class QuizUseCaseTests: XCTestCase {
         let books = DefaultVocabBookRepository(context: context)
         let book = try books.createBook(title: "my", bookType: .myBook, level: nil)
         for word in makeQuizWords(30) { _ = try books.addVocab(bookId: book.id, from: word) }
-        try books.setActiveBook(id: book.id)
+        try books.setActive(id: book.id, isActive: true)
         let useCase = DefaultStartQuizUseCase(vocabBookRepository: books,
                                                learningHistoryRepository: DefaultLearningHistoryRepository(context: context))
         guard case .success(let quiz) = try useCase.execute() else { return XCTFail("Expected quiz") }

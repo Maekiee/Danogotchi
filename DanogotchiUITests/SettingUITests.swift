@@ -7,11 +7,9 @@ final class SettingUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func test_reminderToggleSurvivesReopenAndMenusOpenTheirScreens() {
+    func test_settingListShowsSectionsAndReminderToggleSurvivesReopen() {
         let app = XCUIApplication.launchMainFlow()
-        app.buttons["explore.setting"].tap()
-        let close = app.buttons["setting.close"]
-        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        let close = openSetting(in: app)
         for header in ["일반", "지원 및 피드백", "앱 정보"] {
             XCTAssertTrue(app.staticTexts[header].exists, header)
         }
@@ -29,23 +27,37 @@ final class SettingUITests: XCTestCase {
         app.buttons["explore.setting"].tap()
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         XCTAssertEqual(toggle.value as? String, "0")
+    }
 
-        // 시뮬레이터에는 메일 계정이 없어 안내 알림이 뜬다
+    // 시뮬레이터에는 메일 계정이 없어 안내 알림이 뜬다
+    func test_inquiryWithoutMailAccountShowsGuidance() {
+        let app = XCUIApplication.launchMainFlow()
+        _ = openSetting(in: app)
         app.element("setting.menu.inquiry").tap()
         let mailAlert = app.alerts["메일 전송 실패"]
         XCTAssertTrue(mailAlert.waitForExistence(timeout: 5))
         mailAlert.buttons["확인"].tap()
         XCTAssertTrue(mailAlert.waitForDisappearance())
+    }
 
+    func test_searchThemeMenuOpensThemeScreenAndBackReturns() {
+        let app = XCUIApplication.launchMainFlow()
+        let close = openSetting(in: app)
         app.element("setting.menu.searchTheme").tap()
         XCTAssertTrue(app.staticTexts["배경 테마를 골라주세요"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["searchTheme.submit"].isHittable)
-        app.dismissNetworkAlertIfNeeded()
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
         XCTAssertTrue(close.waitForExistence(timeout: 5))
         close.tap()
         XCTAssertTrue(app.buttons["explore.library"].waitForExistence(timeout: 5))
+    }
+
+    private func openSetting(in app: XCUIApplication) -> XCUIElement {
+        app.buttons["explore.setting"].tap()
+        let close = app.buttons["setting.close"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        return close
     }
 
     /// 화면 모드 세그먼트가 행 안에 다 보이고, 고른 모드가 다시 열어도 남는다

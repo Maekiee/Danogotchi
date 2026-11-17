@@ -35,8 +35,8 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
         }
     }
 
-    func libraryDidTapMore(topic: BookTopic) {
-        let vm = container.makeVocabDetailViewModel(topic: topic)
+    func libraryDidTapMore(key: VocabBookKey) {
+        let vm = container.makeVocabDetailViewModel(key: key)
         let vc = VocabBookDetailViewController(viewModel: vm)
         vc.delegate = self
         navigationController.pushViewController(vc, animated: true)

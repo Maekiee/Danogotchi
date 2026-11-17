@@ -53,38 +53,53 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
         navigationController.present(nav, animated: true)
     }
     
-    // 학습 리포트
-    func exploreVocabDidTapStudyReport() {
+    // 학습 통계
+    func didTapCalendarButton() {
         let nav = UINavigationController()
-        let feature = container.makeStudyReportFeature(
+        let feature = container.makeCalendarFeature(
             onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
             onNavigate: { [weak self, weak nav] destination in
                 guard let nav else { return }
-                self?.showStudyReport(destination, in: nav)
+                self?.showStudyStats(destination, in: nav)
             }
         )
-        let store = Store(initialState: StudyReportFeature.State()) { feature }
-        let vc = UIHostingController(rootView: StudyReportView(store: store))
+        
+        let store = Store(initialState: CalendarFeature.State() ) { feature }
+        let vc = UIHostingController(rootView: CalendarView(store: store))
+        
         nav.setViewControllers([vc], animated: false)
         nav.modalPresentationStyle = .fullScreen
         navigationController.present(nav, animated: true)
     }
 
-    private func showStudyReport(_ destination: StudyReportDestination, in nav: UINavigationController) {
+    private func showStudyStats(_ destination: StudyStatsDestination, in nav: UINavigationController) {
+        // 전환 중이거나 무언가 떠 있을 때 온 연속 탭은 버린다 — 같은 화면이 두 번 쌓이지 않게 한다
+        guard nav.transitionCoordinator == nil, nav.presentedViewController == nil else { return }
         switch destination {
+        case .stats:
+            let feature = container.makeStudyStatsFeature(
+                onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) },
+                onNavigate: {[weak self, weak nav] destination in
+                    guard let nav else { return }
+                    self?.showStudyStats(destination, in: nav)
+                })
+            let store = Store(initialState: StudyStatsFeature.State()) { feature }
+            nav.pushViewController(UIHostingController(rootView: StudyStatsView(store: store)), animated: true)
         case let .words(list):
-            let view = StudyReportWordListView(
+            let view = StudyStatsWordListView(
                 list: list,
                 onSelect: { [weak self, weak nav] word in
                     guard let nav else { return }
-                    self?.showStudyReport(.word(word, list), in: nav)
+                    self?.showStudyStats(.word(word, isDaily: false), in: nav)
                 },
                 onClose: { [weak nav] in nav?.presentingViewController?.dismiss(animated: true) }
             )
             nav.pushViewController(UIHostingController(rootView: view), animated: true)
-        case let .word(word, _):
-            let view = StudyReportWordDetailView(word: word)
-            let controller = UIHostingController(rootView: view)
+        case let .word(word, isDaily):
+            // 캘린더는 그날 풀이("이날"), 학습 통계는 전체 기간
+            let controller: UIViewController = isDaily
+                ? UIHostingController(rootView: CalendarWordDetailView(word: word))
+                : UIHostingController(rootView: StudyStatsWordDetailView(word: word))
             controller.modalPresentationStyle = .pageSheet
             controller.sheetPresentationController?.detents = [.medium(), .large()]
             controller.sheetPresentationController?.prefersGrabberVisible = true

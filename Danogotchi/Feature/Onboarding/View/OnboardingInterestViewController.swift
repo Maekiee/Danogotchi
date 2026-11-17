@@ -53,6 +53,12 @@ final class OnboardingInterestViewController: BaseViewController {
         return view
     }()
     private let nextButton = PrimaryFillButton(title: String(localized: "다음"))
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .large)
+        view.color = AppColor.textPrimary
+        view.hidesWhenStopped = true
+        return view
+    }()
 
     init(viewModel: OnboardingInterestViewModel) {
         self.viewModel = viewModel
@@ -79,6 +85,7 @@ final class OnboardingInterestViewController: BaseViewController {
             descriptionLabel,
             collectionView,
             nextButton,
+            loadingIndicator,
         ].forEach { view.addSubview($0) }
     }
 
@@ -103,6 +110,10 @@ final class OnboardingInterestViewController: BaseViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-AppSpacing.space20)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space20)
             make.height.equalTo(48)
+        }
+
+        loadingIndicator.snp.makeConstraints { make in
+            make.center.equalTo(collectionView)
         }
     }
 
@@ -133,6 +144,10 @@ extension OnboardingInterestViewController {
 
         output.isNextEnabled
             .drive(nextButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+
+        output.isLoading
+            .drive(loadingIndicator.rx.isAnimating)
             .disposed(by: disposeBag)
 
         output.didFinish

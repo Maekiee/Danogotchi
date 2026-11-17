@@ -24,11 +24,12 @@ final class AppDIContainerTests: XCTestCase {
         let main = app.makeMainDIContainer()
         _ = main.makeExploreVocabViewModel()
         _ = main.makeCharacterViewModel()
-        _ = main.makeStudyReportFeature(onClose: {}, onNavigate: { _ in })
+        _ = main.makeStudyStatsFeature(onClose: {}, onNavigate: { _ in })
+        _ = main.makeCalendarFeature(onClose: {}, onNavigate: { _ in })
 
         let library = main.makeLibraryDIContainer()
         _ = library.makeLibraryViewModel()
-        _ = library.makeVocabDetailViewModel(topic: .travel)
+        _ = library.makeVocabDetailViewModel(key: VocabBookKey(topic: .travel, level: .a1))
         _ = library.makeAddVocabViewModel()
 
         let quiz = main.makeQuizDIContainer()

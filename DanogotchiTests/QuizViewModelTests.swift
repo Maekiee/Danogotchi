@@ -3,14 +3,7 @@ import RxSwift
 import XCTest
 @testable import Danogotchi
 
-func makeQuizWords(_ count: Int) -> [Vocab] {
-    (0..<count).map {
-        Vocab(id: UUID(), word: "word\($0)", meaning: "meaning\($0)", bookType: .myBook,
-              level: nil, partOfSpeech: .noun, sourceWordId: nil, createAt: testBase.addingTimeInterval(Double($0)))
-    }
-}
-
-final class RecordingExperienceUseCase: EarnExperienceUseCase {
+private final class RecordingExperienceUseCase: EarnExperienceUseCase {
     var failsRecord = false
     var failsCommit = false
     /// 켜면 저장 실패 대신 복구 불가능한 대상 부재를 던진다.
@@ -35,7 +28,7 @@ final class RecordingExperienceUseCase: EarnExperienceUseCase {
     }
 }
 
-final class RecordingReminderUseCase: StudyReminderUseCase {
+private final class RecordingReminderUseCase: StudyReminderUseCase {
     var isEnabled = true
     var refreshCount = 0
     var failsRefresh = false
@@ -46,10 +39,16 @@ final class RecordingReminderUseCase: StudyReminderUseCase {
     }
 }
 
+private final class ErrorRecorder {
+    private(set) var errors: [Error] = []
+    func record(_ error: Error) { errors.append(error) }
+}
+
 @MainActor
 private final class QuizTestScreen {
     let experience = RecordingExperienceUseCase()
     let reminder = RecordingReminderUseCase()
+    let reporter = ErrorRecorder()
     let selected = PublishRelay<Int>()
     let retry = PublishRelay<Void>()
     let viewModel: QuizViewModel
@@ -65,7 +64,8 @@ private final class QuizTestScreen {
     init(questionCount: Int = 1) {
         let words = makeQuizWords(4)
         viewModel = QuizViewModel(earnExperienceUseCase: experience, studyReminderUseCase: reminder,
-                                  quizData: QuizData(words: Array(words.prefix(questionCount)), allWord: words))
+                                  quizData: QuizData(words: Array(words.prefix(questionCount)), allWord: words),
+                                  reportError: { [reporter] in reporter.record($0) })
         let output = viewModel.transform(input: .init(choiceSelected: selected.asObservable(), retrySave: retry.asObservable()))
         output.choices.drive(onNext: { [weak self] in self?.choices = $0 }).disposed(by: bag)
         output.questionWord.drive(onNext: { [weak self] in self?.question = $0 }).disposed(by: bag)
@@ -205,5 +205,6 @@ final class QuizViewModelTests: XCTestCase {
         XCTAssertEqual(screen.experience.commits.count, 1)
         XCTAssertEqual(screen.completions.count, 1)
         XCTAssertEqual(screen.failures, 0)
+        XCTAssertEqual(screen.reporter.errors.count, 1, "알림 갱신 실패는 화면을 막지 않고 한 번 보고한다")
     }
 }

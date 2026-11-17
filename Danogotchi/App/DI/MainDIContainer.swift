@@ -36,7 +36,8 @@ final class MainDIContainer {
                     AppLogger.network.error("테마 이미지 복구 실패: \(String(describing: error), privacy: .public)")
                 }
             ),
-            speechSynthesizer: dependencies.speechSynthesizer
+            speechSynthesizer: dependencies.speechSynthesizer,
+            reportError: dependencies.reportError
         )
     }
 
@@ -53,35 +54,62 @@ final class MainDIContainer {
             fetchCurrentWeatherUseCase: DefaultFetchCurrentWeatherUseCase(
                 locationProvider: DeviceLocationProvider(),
                 weatherRepository: DefaultWeatherRepository(apiClient: dependencies.apiClient)
-            )
+            ),
+            reportError: dependencies.reportError
         )
     }
 
-    // MARK: - StudyReport
-    func makeStudyReportFeature(
+    // MARK: - StudyStats
+    func makeStudyStatsFeature(
         onClose: @escaping @MainActor @Sendable () -> Void,
-        onNavigate: @escaping @MainActor @Sendable (StudyReportDestination) -> Void
-    ) -> StudyReportFeature {
+        onNavigate: @escaping @MainActor @Sendable (StudyStatsDestination) -> Void
+    ) -> StudyStatsFeature {
         #if DEBUG
-        if let feature = UITestingSupport.makeStudyReportFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
+        if let feature = UITestingSupport.makeStudyStatsFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
             return feature
         }
         #endif
-        let repository = DefaultLearningHistoryRepository(
-            context: dependencies.coreDataStack.viewContext,
-            reportContext: dependencies.coreDataStack.newBackgroundContext()
-        )
-        let useCase: FetchStudyReportUseCase = DefaultFetchStudyReportUseCase(repository: repository)
-        return StudyReportFeature(
-            fetch: { period, now, calendar in
-                try await useCase.execute(period: period, now: now, calendar: calendar)
+        let useCase: FetchStudyStatsUseCase = DefaultFetchStudyStatsUseCase(repository: makeStatsHistoryRepository())
+        return StudyStatsFeature(
+            fetch: { now, calendar in
+                try await useCase.execute(now: now, calendar: calendar)
             },
             reportError: { [reportError = dependencies.reportError] error in
-                AppLogger.database.error("학습 리포트 조회 실패: \(String(describing: error), privacy: .public)")
+                AppLogger.database.error("학습 통계 조회 실패: \(String(describing: error), privacy: .public)")
                 reportError(error)
             },
             onClose: onClose,
             onNavigate: onNavigate
+        )
+    }
+    
+    // MARK: 캘린더
+    func makeCalendarFeature(
+        onClose: @escaping @MainActor @Sendable () -> Void,
+        onNavigate: @escaping @MainActor @Sendable (StudyStatsDestination) -> Void
+    ) -> CalendarFeature {
+        #if DEBUG
+        if let feature = UITestingSupport.makeCalendarFeatureIfRequested(onClose: onClose, onNavigate: onNavigate) {
+            return feature
+        }
+        #endif
+        let useCase: FetchCalendarUseCase = DefaultFetchCalendarUseCase(repository: makeStatsHistoryRepository())
+        return CalendarFeature(
+            fetch: { now, calendar in try await useCase.execute(now: now, calendar: calendar) },
+            reportError: { [reportError = dependencies.reportError] error in
+                AppLogger.database.error("캘린더 조회 실패: \(String(describing: error), privacy: .public)")
+                reportError(error)
+            },
+            onClose: onClose,
+            onNavigate: onNavigate
+        )
+    }
+
+    // 캘린더·학습 통계 공용 — 화면마다 전용 읽기 context를 둔다
+    private func makeStatsHistoryRepository() -> LearningHistoryRepository {
+        return DefaultLearningHistoryRepository(
+            context: dependencies.coreDataStack.viewContext,
+            statsContext: dependencies.coreDataStack.newBackgroundContext()
         )
     }
 }

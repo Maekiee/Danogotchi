@@ -78,6 +78,7 @@ extension OnboardingCoordinator: SearchThemeViewControllerDelegate {
                 showEggSelection()
             }
         } catch {
+            container.reportError(error)
             AlertPresenter.showNotificationAlert(
                 on: navigationController,
                 title: String(localized: "데이터 조회 실패"),
