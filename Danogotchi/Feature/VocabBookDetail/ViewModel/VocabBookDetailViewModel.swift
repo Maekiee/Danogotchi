@@ -9,6 +9,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
     private let deleteVocabUseCase: DeleteVocabUseCase
     private let setActiveBookUseCase: SetActiveBookUseCase
     private let isActiveBookUseCase: IsActiveBookUseCase
+    private let reportError: (Error) -> Void
     private var loadTask: Task<Void, Never>?
     let key: VocabBookKey
     var topic: BookTopic { key.topic }
@@ -19,7 +20,8 @@ final class VocabBookDetailViewModel: BaseViewModel {
         toggleSaveVocabUseCase: ToggleSaveVocabUseCase,
         deleteVocabUseCase: DeleteVocabUseCase,
         setActiveBookUseCase: SetActiveBookUseCase,
-        isActiveBookUseCase: IsActiveBookUseCase
+        isActiveBookUseCase: IsActiveBookUseCase,
+        reportError: @escaping (Error) -> Void
     ) {
         self.key = key
         self.fetchVocabsUseCase = fetchVocabsUseCase
@@ -27,6 +29,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
         self.deleteVocabUseCase = deleteVocabUseCase
         self.setActiveBookUseCase = setActiveBookUseCase
         self.isActiveBookUseCase = isActiveBookUseCase
+        self.reportError = reportError
     }
 
     deinit {
@@ -64,6 +67,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                 isLoadingWords.accept(true)
                 let useCase = owner.fetchVocabsUseCase
                 let key = owner.key
+                let reportError = owner.reportError
                 // 이미 받아 둔 단어를 넘겨 다시 나타나도 서버를 다시 읽지 않는다
                 let loaded = vocabList.value.map(\.word)
                 // owner를 캡처하지 않아 요청 중에도 ViewModel이 해제될 수 있다.
@@ -76,6 +80,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                         vocabList.accept(items)
                     } catch {
                         guard !Task.isCancelled else { return }
+                        reportError(error)
                         alertMessage.accept(String(localized: "단어를 불러오지 못했어요. 다시 시도해주세요."))
                     }
                 }
@@ -144,6 +149,7 @@ final class VocabBookDetailViewModel: BaseViewModel {
                 do {
                     isActiveBook.accept(try owner.isActiveBookUseCase.execute(key: owner.key))
                 } catch {
+                    owner.reportError(error)
                     alertMessage.accept(String(localized: "단어장 상태를 변경하거나 불러오지 못했어요. 다시 시도해주세요."))
                 }
             }

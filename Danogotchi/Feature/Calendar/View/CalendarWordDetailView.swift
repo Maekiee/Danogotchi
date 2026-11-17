@@ -13,5 +13,6 @@ struct CalendarWordDetailView: View {
         .font(CalendarStyle.font(AppFont.body))
         .foregroundStyle(Color(AppColor.textPrimary))
         .background(Color(AppColor.background).ignoresSafeArea())
+        .onAppear { CrashReporter.screenDidAppear("CalendarWordDetailView") }
     }
 }

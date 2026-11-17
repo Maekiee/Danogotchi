@@ -67,6 +67,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         }
 
         try context.saveOrRollback()
+        CrashReporter.log("book: import")
 
         if isActive {
             activeBookChangedBroadcaster.send(())
@@ -151,6 +152,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         vocabBookEntity.addToVocabs(vocabEntity)
         
         try context.saveOrRollback()
+        CrashReporter.log("vocab: add")
         
         return vocabEntity.toDomain()
     }
@@ -175,6 +177,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
         vocabBookEntity.addToVocabs(vocabEntity)
 
         try context.saveOrRollback()
+        CrashReporter.log("vocab: save")
 
         return vocabEntity.toDomain()
     }

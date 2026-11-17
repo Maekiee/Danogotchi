@@ -102,6 +102,7 @@ extension SettingTabViewModel {
                     앱 버전: \(appEnv.appVersionDisplay)
                     기기: \(appEnv.deviceModel)
                     OS 버전: \(appEnv.systemVersion)
+                    문의 ID: \(appEnv.installationID)
                     -------------------
                     """)
     }

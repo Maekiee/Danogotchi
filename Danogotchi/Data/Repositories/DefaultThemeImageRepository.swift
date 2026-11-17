@@ -53,12 +53,15 @@ extension DefaultThemeImageRepository: ThemeImageRepository {
         return storage.existingFileURL(fileName: fileName)
     }
 
+    /// 검색 테마 저장과 사라진 배경 복구가 같이 쓴다
     func replace(rawUrl: String) async throws {
         try await performReplace(rawUrl: rawUrl)
+        CrashReporter.log("theme: save_url")
     }
 
     func replace(imageData: Data, crop: PhotoThemeCrop) async throws {
         try performReplace(imageData: imageData, crop: crop)
+        CrashReporter.log("theme: save_photo")
     }
 }
 

@@ -7,6 +7,7 @@ final class QuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let earnExperienceUseCase: EarnExperienceUseCase
     private let studyReminderUseCase: StudyReminderUseCase
+    private let reportError: (Error) -> Void
     private let session: QuizSession
 
     private let quizDataRelay: BehaviorRelay<QuizData>
@@ -40,10 +41,12 @@ final class QuizViewModel: BaseViewModel {
     init(
         earnExperienceUseCase: EarnExperienceUseCase,
         studyReminderUseCase: StudyReminderUseCase,
-        quizData: QuizData
+        quizData: QuizData,
+        reportError: @escaping (Error) -> Void
     ) {
         self.earnExperienceUseCase = earnExperienceUseCase
         self.studyReminderUseCase = studyReminderUseCase
+        self.reportError = reportError
         self.session = QuizSession(id: UUID(), startedAt: Date(), questionCount: quizData.words.count)
         self.quizDataRelay = BehaviorRelay(value: quizData)
         self.currentIndex = BehaviorRelay(value: 0)
@@ -108,6 +111,7 @@ final class QuizViewModel: BaseViewModel {
                     try owner.studyReminderUseCase.refresh()
                 } catch {
                     AppLogger.database.error("학습 알림 갱신 실패: \(String(describing: error), privacy: .public)")
+                    owner.reportError(error)
                 }
                 let result = QuizResult(
                     correct: correctCount,

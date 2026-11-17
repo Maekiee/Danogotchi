@@ -104,7 +104,8 @@ extension PersistenceViewModelTests {
             toggleSaveVocabUseCase: DefaultToggleSaveVocabUseCase(vocabBookRepository: books, vocabRepository: words),
             deleteVocabUseCase: DefaultDeleteVocabUseCase(vocabRepository: words),
             setActiveBookUseCase: DefaultSetActiveBookUseCase(vocabBookRepository: books, remoteVocabBookRepository: remote),
-            isActiveBookUseCase: DefaultIsActiveBookUseCase(vocabBookRepository: books)
+            isActiveBookUseCase: DefaultIsActiveBookUseCase(vocabBookRepository: books),
+            reportError: { _ in }
         )
         let appear = PublishRelay<Void>()
         let delete = PublishRelay<Vocab>()
@@ -128,7 +129,8 @@ extension PersistenceViewModelTests {
 
     func test_readFailureKeepsPreviousLibraryAndNextRefreshStillWorks() {
         let useCase = ControlledBookListUseCase()
-        let vm = LibraryViewModel(fetchVocabBooksUseCase: useCase)
+        var reported: [Error] = []
+        let vm = LibraryViewModel(fetchVocabBooksUseCase: useCase, reportError: { reported.append($0) })
         let appear = PublishRelay<Void>()
         let output = vm.transform(input: .init(viewWillAppear: appear.asObservable()))
         let bag = DisposeBag()
@@ -143,6 +145,7 @@ extension PersistenceViewModelTests {
         appear.accept(())
         XCTAssertEqual(keys, [book.key])
         XCTAssertEqual(failures, 1)
+        XCTAssertEqual(reported.count, 1, "읽기 실패는 한 번 보고한다")
         useCase.result = .success([])
         appear.accept(())
         XCTAssertTrue(keys.isEmpty)
@@ -155,7 +158,7 @@ extension PersistenceViewModelTests {
         try books.setActive(id: travel.id, isActive: true)
         let vm = LibraryViewModel(fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(
             vocabBookRepository: books, remoteVocabBookRepository: ControlledRemoteVocabBookRepository()
-        ))
+        ), reportError: { _ in })
         let appear = PublishRelay<Void>()
         let output = vm.transform(input: .init(viewWillAppear: appear.asObservable()))
         let bag = DisposeBag()

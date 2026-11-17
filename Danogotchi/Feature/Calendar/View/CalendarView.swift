@@ -72,6 +72,7 @@ struct CalendarView: View {
             }
         }
         .task { store.send(.appeared) }
+        .onAppear { CrashReporter.screenDidAppear("CalendarView") }
         .onDisappear { store.send(.disappeared) }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.send(.refresh) }

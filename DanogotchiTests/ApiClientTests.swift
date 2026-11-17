@@ -84,6 +84,18 @@ final class ApiClientTests: XCTestCase {
         } catch { XCTFail("Unexpected error: \(error)") }
     }
 
+    /// 오프라인 판정(CrashReportPolicy)이 transport만 보므로 request도 URLError를 그대로 감싸야 한다
+    func test_requestPreservesTransportFailure() async throws {
+        let fixture = try makeClient { _ in throw URLError(.notConnectedToInternet) }
+        defer { fixture.cleanup() }
+        do {
+            _ = try await fixture.client.request(TestEndpoint(baseURL: fixture.url.absoluteString), responseType: Payload.self)
+            XCTFail("Expected failure")
+        } catch NetworkError.transport(let error) {
+            XCTAssertEqual(error.code, .notConnectedToInternet)
+        } catch { XCTFail("Unexpected error: \(error)") }
+    }
+
     private func makeClient(handler: @escaping StubURLProtocol.Handler) throws -> (client: DefaultApiClient, url: URL, cleanup: () -> Void) {
         let host = UUID().uuidString.lowercased() + ".example.test"
         let url = try XCTUnwrap(URL(string: "https://" + host))

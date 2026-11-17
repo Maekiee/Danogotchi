@@ -30,6 +30,8 @@ final class LocalNotificationScheduler: LocalNotificationScheduling {
     }
 
     func cancel(ids: [String]) {
+        // 재예약(앱 시작·퀴즈 완료·설정 변경)은 항상 전체 취소로 시작한다 — 여기서 한 번만 남긴다
+        CrashReporter.log("reminder: reschedule")
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 }

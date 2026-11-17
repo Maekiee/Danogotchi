@@ -35,6 +35,7 @@ final class CharacterViewModelTests: XCTestCase {
         screen.becomeActive.accept(())
         XCTAssertEqual(screen.infos.count, 1)
         XCTAssertEqual(screen.toasts, [String(localized: "상태를 불러오지 못했어요. 다시 시도해주세요.")])
+        XCTAssertTrue(screen.reporter.errors.isEmpty, "정산 저장 실패는 saveOrRollback이 이미 기록한다 — 화면에서 다시 보고하지 않는다")
     }
 
     func test_careRecoversStatAndPersistsWithoutToast() throws {
@@ -149,6 +150,8 @@ final class CharacterViewModelTests: XCTestCase {
         }
         XCTAssertTrue(retried)
         XCTAssertTrue(screen.weathers.isEmpty)
+        XCTAssertEqual(screen.reporter.errors.count, 1, "날씨 실패는 한 번 보고한다 — 오프라인 거르기는 CrashReportPolicy 몫")
+        XCTAssertEqual(screen.reporter.errors.first as? URLError, URLError(.timedOut))
     }
 
     private func eventually(_ condition: @MainActor () -> Bool, timeout: TimeInterval = 2) async -> Bool {
@@ -185,12 +188,18 @@ private final class ControlledWeatherUseCase: FetchCurrentWeatherUseCase {
     }
 }
 
+private final class ErrorRecorder {
+    private(set) var errors: [Error] = []
+    func record(_ error: Error) { errors.append(error) }
+}
+
 /// 펫 유스케이스는 실제 구현을 인메모리 저장소에 올리고, 날씨만 제어 가능한 가짜로 둔다
 @MainActor
 private final class CharacterTestScreen {
     let context: FailingSaveContext
     let repository: DefaultPetRepository
     let weather = ControlledWeatherUseCase()
+    let reporter = ErrorRecorder()
     let appear = PublishRelay<Void>()
     let becomeActive = PublishRelay<Void>()
     let care = PublishRelay<PetCareStat>()
@@ -214,7 +223,8 @@ private final class CharacterTestScreen {
             levelUpPetUseCase: DefaultLevelUpPetUseCase(petRepository: repository, now: { testBase }),
             adjustPetLevelUseCase: DefaultAdjustPetLevelUseCase(petRepository: repository, now: { testBase }),
             revivePetUseCase: DefaultRevivePetUseCase(petRepository: repository, now: { testBase }),
-            fetchCurrentWeatherUseCase: weather
+            fetchCurrentWeatherUseCase: weather,
+            reportError: { [reporter] in reporter.record($0) }
         )
         let output = viewModel.transform(input: .init(
             viewWillAppear: appear.asObservable(),

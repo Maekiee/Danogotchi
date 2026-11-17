@@ -64,6 +64,7 @@ final class SettingTabViewModelTests: XCTestCase {
         XCTAssertTrue(body.contains("v 1.2.3"))
         XCTAssertTrue(body.contains("iPhone"))
         XCTAssertTrue(body.contains("26.0"))
+        XCTAssertTrue(body.contains("TEST-INSTALL-ID"), "문의 ID로 Crashlytics 콘솔에서 찾을 수 있어야 한다")
     }
 }
 
@@ -72,6 +73,7 @@ private struct TestAppEnvProvider: AppEnvProvider {
     let appVersionDisplay = "v 1.2.3"
     let deviceModel = "iPhone"
     let systemVersion = "26.0"
+    let installationID = "TEST-INSTALL-ID"
 }
 
 private final class ControlledReminderUseCase: StudyReminderUseCase {

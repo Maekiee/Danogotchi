@@ -12,7 +12,7 @@ final class LibraryViewModelTests: XCTestCase {
         remote.books = .success([RemoteVocabBook(key: travelA1, wordCount: 2, order: 0)])
         let viewModel = LibraryViewModel(fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(
             vocabBookRepository: books, remoteVocabBookRepository: remote
-        ))
+        ), reportError: { _ in })
         let appear = PublishRelay<Void>()
         let output = viewModel.transform(input: .init(viewWillAppear: appear.asObservable()))
         let bag = DisposeBag()
@@ -37,9 +37,10 @@ final class LibraryViewModelTests: XCTestCase {
         let myBook = try books.createBook(title: "my", bookType: .myBook, level: nil)
         let remote = ControlledRemoteVocabBookRepository()
         remote.books = .failure(URLError(.notConnectedToInternet))
+        var reported: [Error] = []
         let viewModel = LibraryViewModel(fetchVocabBooksUseCase: DefaultFetchVocabBooksUseCase(
             vocabBookRepository: books, remoteVocabBookRepository: remote
-        ))
+        ), reportError: { reported.append($0) })
         let appear = PublishRelay<Void>()
         let output = viewModel.transform(input: .init(viewWillAppear: appear.asObservable()))
         let bag = DisposeBag()
@@ -63,5 +64,7 @@ final class LibraryViewModelTests: XCTestCase {
         appear.accept(())
         XCTAssertEqual(remote.fetchBooksCount, 2)
         XCTAssertEqual(alerts, 0)
+        // 오프라인 거르기는 CrashReportPolicy 몫이라 화면은 실패를 그대로 넘긴다
+        XCTAssertEqual(reported.count, 1, "서버 목록 실패는 알림 없이 한 번 보고한다")
     }
 }
