@@ -26,7 +26,7 @@ struct StudyStatsWordCard: View {
                         .font(StudyStatsStyle.font(AppFont.footnote, relativeTo: .footnote))
                 }
                 Spacer(minLength: AppSpacing.space8)
-                Text(StudyStatsStyle.percent(word.correct, word.total))
+                Text("\(word.accuracyPercent)%")
                     .font(StudyStatsStyle.font(AppFont.largeDisplay, relativeTo: .largeTitle))
                     .monospacedDigit()
                     .lineLimit(1)

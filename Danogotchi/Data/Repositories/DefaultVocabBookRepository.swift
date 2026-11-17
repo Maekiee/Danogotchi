@@ -28,6 +28,8 @@ extension DefaultVocabBookRepository: VocabBookRepository {
     func readActiveBooks() throws -> [VocabBook] {
         let request = VocabBookEntity.fetchRequest()
         request.predicate = NSPredicate(format: "isActive == YES")
+        // 학습 중 단어장이 여러 권이라 단어를 한 번에 함께 읽는다
+        request.relationshipKeyPathsForPrefetching = ["vocabs"]
         request.sortDescriptors = [
             NSSortDescriptor(key: "createAt", ascending: true)
         ]
@@ -47,7 +49,7 @@ extension DefaultVocabBookRepository: VocabBookRepository {
     func importBook(key: VocabBookKey, vocabs: [Vocab], isActive: Bool) throws -> VocabBook {
         let vocabBookEntity = VocabBookEntity(context: context)
         vocabBookEntity.id = UUID()
-        // 기존 시드·설치본과 같은 주제 제목 — 레벨이 붙은 표시용 제목은 화면이 만든다
+        // 기존 시드·설치본과 같은 주제 제목
         vocabBookEntity.title = key.topic.title
         vocabBookEntity.bookType = key.topic.rawValue
         vocabBookEntity.level = key.level?.rawValue

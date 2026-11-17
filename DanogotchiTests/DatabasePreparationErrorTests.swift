@@ -10,7 +10,7 @@ final class DatabasePreparationErrorTests: XCTestCase {
             XCTAssertEqual(tagged?.stage, .seed)
             XCTAssertEqual(tagged?.underlying as? CocoaError, cause)
         }
-        XCTAssertEqual(try DatabasePreparationError.tagging(.seed) { 7 }, 7)
+        XCTAssertNoThrow(try DatabasePreparationError.tagging(.seed) {})
     }
 
     /// 스택 로드(loadStore) 안에서 preflight 클로저가 실패해도 preflight로 남아야 한다

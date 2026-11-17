@@ -42,6 +42,20 @@ final class CrashReporterTests: XCTestCase {
         XCTAssertEqual(sanitized.userInfo[NSSQLiteErrorDomain] as? Int, 13)
     }
 
+    /// DB 준비 실패는 원인 쪽에 SQLite 코드가 있다 — 원인도 허용 키만 남기고 경로는 버린다
+    func test_sanitizedKeepsAllowedKeysOfUnderlyingError() throws {
+        let storeError = NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreOpenError, userInfo: [
+            NSSQLiteErrorDomain: 11,
+            NSFilePathErrorKey: "/var/mobile/Containers/Data/Application/SECRET/Model.sqlite"
+        ])
+
+        let sanitized = CrashReporter.sanitized(DatabasePreparationError(stage: .loadStore, underlying: storeError))
+
+        let underlying = try XCTUnwrap(sanitized.userInfo[NSUnderlyingErrorKey] as? NSError)
+        XCTAssertEqual(underlying.userInfo[NSSQLiteErrorDomain] as? Int, 11)
+        XCTAssertNil(underlying.userInfo[NSFilePathErrorKey])
+    }
+
     func test_sanitizedKeepsDecodingKindAndPathWithoutValues() {
         let context = DecodingError.Context(
             codingPath: [StubKey("main"), StubKey("temp")], debugDescription: "found 'abc' instead of number"

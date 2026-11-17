@@ -69,11 +69,7 @@ final class MainDIContainer {
             return feature
         }
         #endif
-        let repository = DefaultLearningHistoryRepository(
-            context: dependencies.coreDataStack.viewContext,
-            statsContext: dependencies.coreDataStack.newBackgroundContext()
-        )
-        let useCase: FetchStudyStatsUseCase = DefaultFetchStudyStatsUseCase(repository: repository)
+        let useCase: FetchStudyStatsUseCase = DefaultFetchStudyStatsUseCase(repository: makeStatsHistoryRepository())
         return StudyStatsFeature(
             fetch: { now, calendar in
                 try await useCase.execute(now: now, calendar: calendar)
@@ -97,11 +93,7 @@ final class MainDIContainer {
             return feature
         }
         #endif
-        let repository = DefaultLearningHistoryRepository(
-            context: dependencies.coreDataStack.viewContext,
-            statsContext: dependencies.coreDataStack.newBackgroundContext()
-        )
-        let useCase: FetchCalendarUseCase = DefaultFetchCalendarUseCase(repository: repository)
+        let useCase: FetchCalendarUseCase = DefaultFetchCalendarUseCase(repository: makeStatsHistoryRepository())
         return CalendarFeature(
             fetch: { now, calendar in try await useCase.execute(now: now, calendar: calendar) },
             reportError: { [reportError = dependencies.reportError] error in
@@ -110,6 +102,14 @@ final class MainDIContainer {
             },
             onClose: onClose,
             onNavigate: onNavigate
+        )
+    }
+
+    // 캘린더·학습 통계 공용 — 화면마다 전용 읽기 context를 둔다
+    private func makeStatsHistoryRepository() -> LearningHistoryRepository {
+        return DefaultLearningHistoryRepository(
+            context: dependencies.coreDataStack.viewContext,
+            statsContext: dependencies.coreDataStack.newBackgroundContext()
         )
     }
 }

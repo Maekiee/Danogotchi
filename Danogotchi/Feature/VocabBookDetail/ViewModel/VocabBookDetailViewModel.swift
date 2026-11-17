@@ -129,10 +129,12 @@ final class VocabBookDetailViewModel: BaseViewModel {
                 let useCase = owner.setActiveBookUseCase
                 let key = owner.key
                 let isActive = !isActiveBook.value
-                // 화면에 보인 단어를 그대로 저장해 서버를 다시 읽지 않는다
-                let loaded = vocabList.value.map(\.word)
+                let pendingLoad = owner.loadTask
                 // 화면을 떠나도 받기는 끝까지 진행해 저장하므로 취소하지 않는다 — Library는 변경 신호로 갱신된다
                 Task { @MainActor in
+                    // 단어를 읽는 중이면 끝까지 기다려 화면에 보인 단어를 그대로 저장한다 — 서버를 두 번 읽지 않게
+                    await pendingLoad?.value
+                    let loaded = vocabList.value.map(\.word)
                     do {
                         try await useCase.execute(key: key, isActive: isActive, loaded: loaded)
                         isActiveBook.accept(isActive)

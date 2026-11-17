@@ -40,7 +40,8 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
         } else {
             vocabs = try await remoteVocabBookRepository.fetchVocabs(key: key)
         }
-        return try joinWithHistory(vocabs, savedSourceIDs: savedSourceIDs())
+        // 나의 단어장 단어는 저장 대상이 아니라 원본 id 집합을 읽지 않는다
+        return try joinWithHistory(vocabs, savedSourceIDs: key.topic == .myBook ? [] : savedSourceIDs())
     }
 
     func executeActive() throws -> [VocabDisplayInfo] {
@@ -60,8 +61,7 @@ final class DefaultFetchVocabsUseCase: FetchVocabsUseCase {
             VocabDisplayInfo(
                 word: vocab,
                 stats: stats[vocab.id],
-                // 저장 여부는 추천 단어에만 있다
-                isSaved: vocab.bookType != .myBook && savedSourceIDs.contains(vocab.id)
+                isSaved: vocab.isSaveable && savedSourceIDs.contains(vocab.id)
             )
         }
     }

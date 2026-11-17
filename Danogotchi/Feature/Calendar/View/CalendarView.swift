@@ -77,8 +77,14 @@ struct CalendarView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.send(.refresh) }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in store.send(.refresh) }
-        .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in store.send(.refresh) }
+        // 날짜·시간대 변경 알림은 백그라운드 스레드에서 올 수 있어 메인에서 받는다
+        .onReceive(
+            NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
+                .merge(with: NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange))
+                .receive(on: DispatchQueue.main)
+        ) { _ in
+            store.send(.refresh)
+        }
     }
 
     private func chips(_ calendar: StudyCalendar) -> some View {
@@ -181,7 +187,7 @@ struct CalendarView: View {
                     ? String(localized: "오늘은 아직 학습 기록이 없어요")
                     : String(localized: "이날은 학습 기록이 없어요"))
             }
-        } else if !calendar.days.keys.contains(where: { calendar.month(of: $0) == month }) {
+        } else if !calendar.hasRecords(inMonth: month) {
             CalendarSelection(text: String(localized: "이 달에는 학습 기록이 없어요"))
         }
     }
@@ -200,7 +206,7 @@ private struct CalendarControlStyle: ButtonStyle {
     NavigationStack {   // 툴바를 보려면 필요
         CalendarView(store: Store(initialState: CalendarFeature.State()) {
             CalendarFeature(
-                fetch: { now, calendar in try DefaultFetchCalendarUseCase.aggregate([], now: now, calendar: calendar) },
+                fetch: { now, calendar in DefaultFetchCalendarUseCase.aggregate([], now: now, calendar: calendar) },
                 reportError: { _ in }, onClose: {}, onNavigate: { _ in }
             )
         })

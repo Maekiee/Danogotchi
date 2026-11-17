@@ -30,7 +30,7 @@ final class StudyStatsAggregationTests: XCTestCase {
         let stats = aggregate(rows)
         XCTAssertEqual(stats.words.count, 3)
         XCTAssertEqual(stats.totalAnswers, 5)
-        XCTAssertEqual(stats.accuracy, 0.6)
+        XCTAssertEqual(stats.totalCorrect, 3)
         XCTAssertEqual(stats.parts.first { $0.id == "noun" }?.total, 2)
         XCTAssertEqual(stats.parts.first { $0.id == "verb" }?.total, 1)
         XCTAssertEqual(stats.parts.reduce(0) { $0 + $1.total }, stats.words.count)
@@ -78,7 +78,7 @@ final class StudyStatsAggregationTests: XCTestCase {
 
     func test_emptyHistoryHasNoAccuracyAndStartsToday() {
         let empty = aggregate([])
-        XCTAssertNil(empty.accuracy)
+        XCTAssertEqual(empty.totalAnswers, 0)
         XCTAssertTrue(empty.words.isEmpty)
         XCTAssertTrue(empty.mistakeWords.isEmpty)
         XCTAssertEqual(empty.start, calendar.startOfDay(for: now))

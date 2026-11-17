@@ -64,6 +64,14 @@ struct CalendarFeature {
                 if state.calendar == nil || state.selectedDate == state.calendar?.today {
                     state.displayedMonth = calendar.currentMonth
                     state.selectedDate = calendar.today
+                } else if let old = state.calendar?.calendar, old.timeZone != calendar.calendar.timeZone {
+                    // 시간대가 바뀌면 보던 날짜·달을 새 시간대의 같은 날로 옮긴다 — 날짜 키가 새 시간대 자정이다
+                    state.selectedDate = state.selectedDate.flatMap {
+                        calendar.calendar.date(from: old.dateComponents([.year, .month, .day], from: $0))
+                    }
+                    state.displayedMonth = state.displayedMonth.flatMap {
+                        calendar.calendar.date(from: old.dateComponents([.year, .month], from: $0))
+                    }
                 }
                 state.calendar = calendar
                 return .none
@@ -87,14 +95,11 @@ struct CalendarFeature {
                 state.displayedMonth = calendar.currentMonth
                 state.selectedDate = calendar.today
                 return .none
-            case let .dateTapped(date):
+            case let .dateTapped(date), let .heatmapTapped(date):
                 guard let calendar = state.calendar, date <= calendar.now else { return .none }
                 state.selectedDate = calendar.calendar.startOfDay(for: date)
-                return .none
-            case let .heatmapTapped(date):
-                guard let calendar = state.calendar, date <= calendar.now else { return .none }
-                state.selectedDate = calendar.calendar.startOfDay(for: date)
-                state.displayedMonth = calendar.month(of: date)
+                // 잔디는 다른 달의 날짜도 고를 수 있어 그 달로 넘긴다
+                if case .heatmapTapped = action { state.displayedMonth = calendar.month(of: date) }
                 return .none
             case let .wordTapped(id):
                 guard let date = state.selectedDate,

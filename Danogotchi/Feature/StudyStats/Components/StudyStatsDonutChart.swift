@@ -12,7 +12,8 @@ struct StudyStatsDonutChart: View {
 
     var body: some View {
         let total = categories.reduce(0) { $0 + $1.total }
-        let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 16)) : AnyLayout(HStackLayout(spacing: 16))
+        let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppSpacing.space16))
+            : AnyLayout(HStackLayout(spacing: AppSpacing.space16))
         layout {
             Chart(Array(categories.enumerated()).filter { $0.element.total > 0 }, id: \.element.id) { index, category in
                 let value = "\(count(category.total)), \(StudyStatsStyle.percent(category.total, total))"

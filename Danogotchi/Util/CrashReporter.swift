@@ -70,7 +70,8 @@ enum CrashReporter {
         let nsError = error as NSError
         var userInfo = nsError.userInfo.filter { InfoKey.allowed.contains($0.key) }
         if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
-            userInfo[NSUnderlyingErrorKey] = NSError(domain: underlying.domain, code: underlying.code)
+            // 원인 에러도 모든 깊이에서 같은 허용 키만 남긴다 — DB 준비 실패의 SQLite 코드는 원인 쪽에 있다
+            userInfo[NSUnderlyingErrorKey] = sanitized(underlying)
             userInfo[InfoKey.underlyingDomain] = underlying.domain
             userInfo[InfoKey.underlyingCode] = underlying.code
         }

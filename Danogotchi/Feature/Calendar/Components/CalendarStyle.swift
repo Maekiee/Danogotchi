@@ -11,14 +11,28 @@ enum CalendarStyle {
         denominator > 0 ? Int((Double(numerator) / Double(denominator) * 100).rounded()) : 0
     }
 
+    // 화면을 그릴 때마다 불려 템플릿·달력·시간대별로 재사용한다
+    private static let formatters = NSCache<NSString, DateFormatter>()
+
     // 로케일 순서를 따르는 템플릿 형식 (예: MMMdE → 10월 7일 (화))
     static func formatter(_ template: String, calendar: Calendar) -> DateFormatter {
+        let key = "\(template)|\(calendar.identifier)|\(calendar.timeZone.identifier)" as NSString
+        if let cached = formatters.object(forKey: key) { return cached }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "ko")
         formatter.calendar = calendar
         formatter.timeZone = calendar.timeZone
         formatter.setLocalizedDateFormatFromTemplate(template)
+        formatters.setObject(formatter, forKey: key)
         return formatter
+    }
+
+    /// 달력의 첫 요일부터 시작하는 한 글자 요일 7개, 로케일이 7개를 주지 않으면 빈 배열
+    static func weekdaySymbols(_ calendar: Calendar) -> [String] {
+        let symbols = formatter("E", calendar: calendar).veryShortStandaloneWeekdaySymbols ?? []
+        guard symbols.count == 7 else { return [] }
+        let first = calendar.firstWeekday - 1
+        return (0..<7).map { symbols[(first + $0) % 7] }
     }
 
     static func date(_ date: Date, calendar: Calendar, template: String) -> String {

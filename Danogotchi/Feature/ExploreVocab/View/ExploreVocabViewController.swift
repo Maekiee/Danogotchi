@@ -40,11 +40,7 @@ final class ExploreVocabViewController: BaseViewController {
     /// 배경 디코딩 상한(화면 세로 픽셀). 조립부가 넘긴다
     private let backgroundMaxPixelSize: Int
 
-    init(
-        viewModel: ExploreVocabViewModel,
-        backgroundMaxPixelSize: Int
-    )
-    {
+    init(viewModel: ExploreVocabViewModel, backgroundMaxPixelSize: Int) {
         self.viewModel = viewModel
         self.backgroundMaxPixelSize = backgroundMaxPixelSize
         super.init(nibName: nil, bundle: nil)
@@ -312,7 +308,7 @@ extension ExploreVocabViewController {
                 parentVC: self,
                 isSaved: item.isSaved,
                 // 나의 단어장 단어는 저장할 곳이 없다
-                showsSaveButton: item.word.bookType != .myBook
+                showsSaveButton: item.word.isSaveable
             )
 
             cell.onTouchTopIcon

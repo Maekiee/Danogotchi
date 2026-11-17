@@ -1,19 +1,6 @@
 import ComposableArchitecture
 import Foundation
 
-struct StudyStatsWordList: Equatable, Sendable {
-    let start: Date
-    let end: Date
-    let calendar: Calendar
-    let words: [VocabStats]
-}
-
-enum StudyStatsDestination: Equatable, Sendable {
-    case stats
-    case words(StudyStatsWordList)
-    case word(VocabStats, isDaily: Bool)
-}
-
 @Reducer
 struct StudyStatsFeature {
     @ObservableState

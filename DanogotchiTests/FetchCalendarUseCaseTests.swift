@@ -40,10 +40,10 @@ final class FetchCalendarUseCaseTests: XCTestCase {
         let beforeMidnight = statsDate(2026, 9, 25, 23).addingTimeInterval(3599)
         let afterMidnight = statsDate(2026, 9, 26, 0)
         let rows = [beforeMidnight, afterMidnight].map { makeQuizAnswer(word, createAt: $0).history }
-        let seoul = try aggregate(rows)
+        let seoul = aggregate(rows)
         XCTAssertEqual(Set(seoul.days.keys), [statsDate(2026, 9, 25, 0), statsDate(2026, 9, 26, 0)])
         // 서울 자정 전후가 UTC로는 같은 날
-        let utc = try DefaultFetchCalendarUseCase.aggregate(rows, now: now, calendar: statsCalendar("UTC"))
+        let utc = DefaultFetchCalendarUseCase.aggregate(rows, now: now, calendar: statsCalendar("UTC"))
         XCTAssertEqual(utc.days.count, 1)
         XCTAssertEqual(utc.days.values.first?.answerCount, 2)
     }
@@ -51,11 +51,11 @@ final class FetchCalendarUseCaseTests: XCTestCase {
     // 기록 유무와 상관없이 현재 연도 포함 최근 5개 연도의 1월
     func test_oldestMonthIsJanuaryOfFourYearsBack() throws {
         let word = makeQuizWords(1)[0]
-        let stats = try aggregate([makeQuizAnswer(word, createAt: statsDate(2026, 5, 11)).history])
+        let stats = aggregate([makeQuizAnswer(word, createAt: statsDate(2026, 5, 11)).history])
         XCTAssertEqual(stats.oldestMonth, statsDate(2022, 1, 1, 0))
         XCTAssertEqual(stats.currentMonth, statsDate(2026, 9, 1, 0))
 
-        let empty = try aggregate([])
+        let empty = aggregate([])
         XCTAssertEqual(empty.oldestMonth, statsDate(2022, 1, 1, 0))
         XCTAssertTrue(empty.days.isEmpty)
         XCTAssertEqual(empty.streak, 0)
@@ -64,7 +64,7 @@ final class FetchCalendarUseCaseTests: XCTestCase {
 
     func test_futureRecordsAreExcluded() throws {
         let word = makeQuizWords(1)[0]
-        let stats = try aggregate([makeQuizAnswer(word, createAt: now).history,
+        let stats = aggregate([makeQuizAnswer(word, createAt: now).history,
                                    makeQuizAnswer(word, createAt: now.addingTimeInterval(1)).history,
                                    makeQuizAnswer(word, createAt: statsDate(2026, 10, 1)).history])
         XCTAssertEqual(stats.studiedDayCount, 1)
@@ -75,14 +75,26 @@ final class FetchCalendarUseCaseTests: XCTestCase {
     func test_streakAllowsUnstudiedTodayAndResetsAfterMissingYesterday() throws {
         let word = makeQuizWords(1)[0]
         var rows = [24, 25].map { makeQuizAnswer(word, createAt: statsDate(2026, 9, $0)).history }
-        XCTAssertEqual(try aggregate(rows).streak, 2)
+        XCTAssertEqual(aggregate(rows).streak, 2)
         rows.removeLast()
-        XCTAssertEqual(try aggregate(rows).streak, 0)
+        XCTAssertEqual(aggregate(rows).streak, 0)
         rows.append(makeQuizAnswer(word, createAt: now).history)
-        XCTAssertEqual(try aggregate(rows).streak, 1)
+        XCTAssertEqual(aggregate(rows).streak, 1)
     }
 
-    private func aggregate(_ rows: [LearningHistory]) throws -> StudyCalendar {
-        try DefaultFetchCalendarUseCase.aggregate(rows, now: now, calendar: calendar)
+    // 산티아고는 2024-09-08 자정에 서머타임이 시작돼 그날이 01시에 시작한다
+    func test_streakContinuesAcrossDaylightSavingStartAtMidnight() {
+        let santiago = statsCalendar("America/Santiago")
+        let word = makeQuizWords(1)[0]
+        let rows = [7, 8].map { makeQuizAnswer(word, createAt: statsDate(2024, 9, $0, calendar: santiago)).history }
+
+        let result = DefaultFetchCalendarUseCase.aggregate(rows, now: statsDate(2024, 9, 8, 18, calendar: santiago),
+                                                           calendar: santiago)
+
+        XCTAssertEqual(result.streak, 2)
+    }
+
+    private func aggregate(_ rows: [LearningHistory]) -> StudyCalendar {
+        DefaultFetchCalendarUseCase.aggregate(rows, now: now, calendar: calendar)
     }
 }

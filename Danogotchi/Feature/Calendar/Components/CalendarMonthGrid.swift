@@ -72,10 +72,7 @@ struct CalendarMonthGrid: View {
 
     // 접근성 글자 크기에서도 한 글자
     private var weekdaySymbols: [String] {
-        let symbols = CalendarStyle.formatter("E", calendar: calendar.calendar).veryShortStandaloneWeekdaySymbols ?? []
-        guard symbols.count == 7 else { return [] }
-        let first = calendar.calendar.firstWeekday - 1
-        return (0..<7).map { symbols[(first + $0) % 7] }
+        CalendarStyle.weekdaySymbols(calendar.calendar)
     }
 
     @ViewBuilder

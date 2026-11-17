@@ -34,6 +34,14 @@ struct StudyCalendar: Equatable, Sendable {
         calendar.dateInterval(of: .month, for: date)?.start ?? calendar.startOfDay(for: date)
     }
 
+    /// 그 달에 기록이 있는지 — 화면을 그릴 때마다 불려 달 구간을 한 번만 계산한다
+    func hasRecords(inMonth month: Date) -> Bool {
+        guard let interval = calendar.dateInterval(of: .month, for: month) else {
+            return days.keys.contains { self.month(of: $0) == month }
+        }
+        return days.keys.contains { $0 >= interval.start && $0 < interval.end }
+    }
+
     // 이동 가능한 가장 이른 달: 현재 연도 포함 최근 5개 연도의 1월
     var oldestMonth: Date {
         let year = calendar.component(.year, from: now) - 4

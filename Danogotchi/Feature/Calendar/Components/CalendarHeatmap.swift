@@ -55,12 +55,10 @@ struct CalendarHeatmap: View {
 
     // 2·4·6번째 행만 표시, 가로 스크롤하지 않음
     private var weekdayLabels: some View {
-        let formatter = CalendarStyle.formatter("E", calendar: calendar.calendar)
-        let symbols = formatter.veryShortStandaloneWeekdaySymbols ?? []
-        let first = calendar.calendar.firstWeekday - 1
+        let symbols = CalendarStyle.weekdaySymbols(calendar.calendar)
         return VStack(alignment: .leading, spacing: Self.gap) {
             ForEach(0..<7, id: \.self) { row in
-                Text(row % 2 == 1 && symbols.count == 7 ? symbols[(first + row) % 7] : "")
+                Text(row % 2 == 1 && symbols.count == 7 ? symbols[row] : "")
                     .frame(height: Self.cell)
             }
         }

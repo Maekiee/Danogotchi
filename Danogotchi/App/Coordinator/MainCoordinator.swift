@@ -73,6 +73,8 @@ extension MainCoordinator: ExploreVocabViewControllerDelegate {
     }
 
     private func showStudyStats(_ destination: StudyStatsDestination, in nav: UINavigationController) {
+        // 전환 중이거나 무언가 떠 있을 때 온 연속 탭은 버린다 — 같은 화면이 두 번 쌓이지 않게 한다
+        guard nav.transitionCoordinator == nil, nav.presentedViewController == nil else { return }
         switch destination {
         case .stats:
             let feature = container.makeStudyStatsFeature(

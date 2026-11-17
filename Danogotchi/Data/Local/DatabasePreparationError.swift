@@ -13,9 +13,9 @@ struct DatabasePreparationError: Error {
     let underlying: Error
 
     /// 이미 단계가 붙은 에러는 그대로 넘긴다 — 바깥 단계가 안쪽 단계를 덮지 않게
-    static func tagging<T>(_ stage: Stage, _ body: () throws -> T) throws -> T {
+    static func tagging(_ stage: Stage, _ body: () throws -> Void) throws {
         do {
-            return try body()
+            try body()
         } catch let error as DatabasePreparationError {
             throw error
         } catch {

@@ -11,8 +11,9 @@ struct StudyStatsView: View {
             LazyVStack(alignment: .leading, spacing: AppSpacing.space16) {
                 if let stats = store.stats, stats.totalAnswers > 0 {
                     StudyStatsCard {
-                        let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20))
-                            : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
+                        let layout = dynamicTypeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppSpacing.space20))
+                            : AnyLayout(HStackLayout(alignment: .top, spacing: AppSpacing.space16))
                         layout {
                             Button { store.send(.wordsTapped) } label: {
                                 VStack(alignment: .leading, spacing: AppSpacing.space8) {
@@ -104,32 +105,7 @@ struct StudyStatsView: View {
                                     LazyVStack(spacing: 0) {
                                         ForEach(Array(words.enumerated()), id: \.element.id) { index, word in
                                             if index > 0 { Divider() }
-                                            Button { store.send(.wordTapped(word.id)) } label: {
-                                                VStack(alignment: .leading, spacing: AppSpacing.space4) {
-                                                    HStack(alignment: .firstTextBaseline, spacing: AppSpacing.space8) {
-                                                        Text(word.snapshot.wordSnapshot)
-                                                            .font(StudyStatsStyle.font(AppFont.bodyEmphasis))
-                                                        Spacer(minLength: 0)
-                                                        Text("오답 \(word.total - word.correct)회")
-                                                            .font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
-                                                            .monospacedDigit()
-                                                    }
-                                                    Group {
-                                                        Text(word.snapshot.meaningSnapshot)
-                                                        let percent = StudyStatsStyle.percent(word.correct, word.total)
-                                                        Text("정답률 \(percent) · 전체 \(word.total)회 풀이").monospacedDigit()
-                                                    }
-                                                    .font(StudyStatsStyle.font(AppFont.footnote, relativeTo: .footnote))
-                                                    .foregroundStyle(Color(AppColor.textSecondary))
-                                                }
-                                                .padding(.top, index == 0 ? 0 : AppSpacing.space12)
-                                                .padding(.bottom, index == words.count - 1 ? 0 : AppSpacing.space12)
-                                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                                                .contentShape(Rectangle())
-                                            }
-                                            .buttonStyle(.plain)
-                                            .accessibilityElement(children: .combine)
-                                            .accessibilityIdentifier("studyStats.mistake.\(index + 1)")
+                                            mistakeRow(word, index: index, isLast: index == words.count - 1)
                                         }
                                     }
                                 }
@@ -159,7 +135,42 @@ struct StudyStatsView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.send(.refresh) }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in store.send(.refresh) }
-        .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)) { _ in store.send(.refresh) }
+        // 날짜·시간대 변경 알림은 백그라운드 스레드에서 올 수 있어 메인에서 받는다
+        .onReceive(
+            NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
+                .merge(with: NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange))
+                .receive(on: DispatchQueue.main)
+        ) { _ in
+            store.send(.refresh)
+        }
+    }
+
+    private func mistakeRow(_ word: VocabStats, index: Int, isLast: Bool) -> some View {
+        Button { store.send(.wordTapped(word.id)) } label: {
+            VStack(alignment: .leading, spacing: AppSpacing.space4) {
+                HStack(alignment: .firstTextBaseline, spacing: AppSpacing.space8) {
+                    Text(word.snapshot.wordSnapshot)
+                        .font(StudyStatsStyle.font(AppFont.bodyEmphasis))
+                    Spacer(minLength: 0)
+                    Text("오답 \(word.total - word.correct)회")
+                        .font(StudyStatsStyle.font(AppFont.label, relativeTo: .subheadline))
+                        .monospacedDigit()
+                }
+                Group {
+                    Text(word.snapshot.meaningSnapshot)
+                    let percent = "\(word.accuracyPercent)%"
+                    Text("정답률 \(percent) · 전체 \(word.total)회 풀이").monospacedDigit()
+                }
+                .font(StudyStatsStyle.font(AppFont.footnote, relativeTo: .footnote))
+                .foregroundStyle(Color(AppColor.textSecondary))
+            }
+            .padding(.top, index == 0 ? 0 : AppSpacing.space12)
+            .padding(.bottom, isLast ? 0 : AppSpacing.space12)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("studyStats.mistake.\(index + 1)")
     }
 }

@@ -116,7 +116,7 @@ final class StudyStatsUITests: XCTestCase {
     }
 
     private func assertDetail(in app: XCUIApplication, texts: [String]) {
-        let card = app.descendants(matching: .any).matching(identifier: "studyStats.detailCard").firstMatch
+        let card = app.element("studyStats.detailCard")
         XCTAssertTrue(card.waitForExistence(timeout: 5))
         for text in texts {
             XCTAssertTrue(card.label.contains(text), "단어 카드에서 \(text) 누락: \(card.label)")
@@ -149,7 +149,6 @@ final class StudyStatsUITests: XCTestCase {
     private func dismissDetail(in app: XCUIApplication) {
         let sheet = app.scrollViews["studyStats.wordDetail"]
         sheet.swipeDown()
-        let dismissed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: sheet)
-        XCTAssertEqual(XCTWaiter.wait(for: [dismissed], timeout: 5), .completed)
+        XCTAssertTrue(sheet.waitForDisappearance())
     }
 }

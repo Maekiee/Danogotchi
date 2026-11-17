@@ -11,8 +11,8 @@ final class CoreDataStack {
 
     init(
         modelName: String,
-        willLoadStore: @escaping (URL, NSManagedObjectModel) throws -> Void = { _, _ in },
-        didLoadStore: @escaping (NSManagedObjectContext) throws -> Void = { _ in }
+        willLoadStore: @escaping (URL, NSManagedObjectModel) throws -> Void,
+        didLoadStore: @escaping (NSManagedObjectContext) throws -> Void
     ) {
         container = NSPersistentContainer(name: modelName)
         self.willLoadStore = willLoadStore

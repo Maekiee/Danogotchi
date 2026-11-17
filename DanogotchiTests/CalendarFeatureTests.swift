@@ -10,7 +10,7 @@ final class CalendarFeatureTests: XCTestCase {
     private let words = makeQuizWords(2)
 
     func test_appearedLoadsCurrentMonthAndSelectsToday() async throws {
-        let calendar = try makeCalendar()
+        let calendar = makeCalendar()
         let store = makeStore(fetch: { _, _ in calendar })
         await store.send(.appeared) { $0.loadStatus = .loading(self.firstID) }
         await store.receive(.loaded(firstID, calendar)) {
@@ -25,7 +25,7 @@ final class CalendarFeatureTests: XCTestCase {
 
     // 범위는 2022년 1월(현재 연도 포함 5개 연도)~현재 달
     func test_monthMovesStayInRangeAndClearSelection() async throws {
-        let store = makeStore(state: try loadedState())
+        let store = makeStore(state: loadedState())
         await store.send(.monthMoved(1))
         await store.send(.monthMoved(-1)) {
             $0.displayedMonth = statsDate(2026, 8, 1, 0)
@@ -39,7 +39,7 @@ final class CalendarFeatureTests: XCTestCase {
     }
 
     func test_emptyRecordsStillMoveToPastMonths() async throws {
-        let empty = try DefaultFetchCalendarUseCase.aggregate([], now: statsDate(), calendar: statsCalendar())
+        let empty = DefaultFetchCalendarUseCase.aggregate([], now: statsDate(), calendar: statsCalendar())
         let store = makeStore(state: CalendarFeature.State(calendar: empty, displayedMonth: september, selectedDate: today))
         await store.send(.monthMoved(-1)) {
             $0.displayedMonth = statsDate(2026, 8, 1, 0)
@@ -52,7 +52,7 @@ final class CalendarFeatureTests: XCTestCase {
     }
 
     func test_heatmapTapMovesMonthAndIgnoresFuture() async throws {
-        let store = makeStore(state: try loadedState())
+        let store = makeStore(state: loadedState())
         await store.send(.heatmapTapped(statsDate(2026, 7, 10, 14))) {
             $0.selectedDate = statsDate(2026, 7, 10, 0)
             $0.displayedMonth = statsDate(2026, 7, 1, 0)
@@ -66,7 +66,7 @@ final class CalendarFeatureTests: XCTestCase {
     }
 
     func test_dateTapIgnoresFutureAndTodayReturnsToCurrentMonth() async throws {
-        let store = makeStore(state: try loadedState())
+        let store = makeStore(state: loadedState())
         await store.send(.dateTapped(statsDate(2026, 9, 27, 0)))
         await store.send(.dateTapped(statsDate(2026, 9, 24))) { $0.selectedDate = statsDate(2026, 9, 24, 0) }
         await store.send(.monthMoved(-2)) {
@@ -80,8 +80,8 @@ final class CalendarFeatureTests: XCTestCase {
     }
 
     func test_dayChangeMovesTodaySelectionButKeepsOtherDates() async throws {
-        let tomorrow = try makeCalendar(now: statsDate(2026, 10, 1))
-        let store = makeStore(state: try loadedState(), fetch: { _, _ in tomorrow })
+        let tomorrow = makeCalendar(now: statsDate(2026, 10, 1))
+        let store = makeStore(state: loadedState(), fetch: { _, _ in tomorrow })
         await store.send(.refresh) { $0.loadStatus = .loading(self.firstID) }
         await store.receive(.loaded(firstID, tomorrow)) {
             $0.loadStatus = .idle
@@ -90,7 +90,7 @@ final class CalendarFeatureTests: XCTestCase {
             $0.selectedDate = statsDate(2026, 10, 1, 0)
         }
 
-        var state = try loadedState()
+        var state = loadedState()
         state.selectedDate = statsDate(2026, 9, 24, 0)
         let other = makeStore(state: state, fetch: { _, _ in tomorrow })
         await other.send(.refresh) { $0.loadStatus = .loading(self.firstID) }
@@ -100,9 +100,25 @@ final class CalendarFeatureTests: XCTestCase {
         }
     }
 
+    // 날짜 키가 새 시간대 자정이라 보던 날짜·달도 같은 날의 새 시간대 자정으로 옮긴다
+    func test_timeZoneChangeKeepsViewedDayInNewTimeZone() async throws {
+        let utc = statsCalendar("UTC")
+        let moved = DefaultFetchCalendarUseCase.aggregate([], now: statsDate(), calendar: utc)
+        var state = loadedState()
+        state.selectedDate = statsDate(2026, 9, 24, 0)
+        let store = makeStore(state: state, fetch: { _, _ in moved })
+        await store.send(.refresh) { $0.loadStatus = .loading(self.firstID) }
+        await store.receive(.loaded(firstID, moved)) {
+            $0.loadStatus = .idle
+            $0.calendar = moved
+            $0.selectedDate = statsDate(2026, 9, 24, 0, calendar: utc)
+            $0.displayedMonth = statsDate(2026, 9, 1, 0, calendar: utc)
+        }
+    }
+
     func test_refreshFailureKeepsExistingCalendar() async throws {
         let errors = LockIsolated(0)
-        let store = makeStore(state: try loadedState(), fetch: { _, _ in throw CocoaError(.fileReadUnknown) },
+        let store = makeStore(state: loadedState(), fetch: { _, _ in throw CocoaError(.fileReadUnknown) },
                               reportError: { _ in errors.withValue { $0 += 1 } })
         await store.send(.refresh) { $0.loadStatus = .loading(self.firstID) }
         await store.receive(.loadFailed(firstID)) { $0.loadStatus = .failed }
@@ -111,7 +127,7 @@ final class CalendarFeatureTests: XCTestCase {
     }
 
     func test_disappearedCancelsLoadingAndStatsButtonWorksWhileLoading() async throws {
-        let calendar = try makeCalendar()
+        let calendar = makeCalendar()
         let errors = LockIsolated(0)
         let destinations = LockIsolated<[StudyStatsDestination]>([])
         let store = makeStore(fetch: { _, _ in
@@ -130,7 +146,7 @@ final class CalendarFeatureTests: XCTestCase {
 
     func test_wordTappedOpensDailyDetailOfSelectedDate() async throws {
         let destinations = LockIsolated<[StudyStatsDestination]>([])
-        var state = try loadedState()
+        var state = loadedState()
         state.selectedDate = statsDate(2026, 9, 24, 0)
         let store = makeStore(state: state, onNavigate: { route in destinations.withValue { $0.append(route) } })
         let word = try XCTUnwrap(state.calendar?.days[statsDate(2026, 9, 24, 0)]?.words.first)
@@ -152,14 +168,14 @@ final class CalendarFeatureTests: XCTestCase {
     }
 
     // 첫 기록 7월, 9월 24일 기록, 기준 시각 9월 26일 12시
-    private func makeCalendar(now: Date = statsDate()) throws -> StudyCalendar {
+    private func makeCalendar(now: Date = statsDate()) -> StudyCalendar {
         let rows = [makeQuizAnswer(words[0], createAt: statsDate(2026, 7, 10)).history,
                     makeQuizAnswer(words[1], isCorrect: false, createAt: statsDate(2026, 9, 24)).history]
-        return try DefaultFetchCalendarUseCase.aggregate(rows, now: now, calendar: statsCalendar())
+        return DefaultFetchCalendarUseCase.aggregate(rows, now: now, calendar: statsCalendar())
     }
 
-    private func loadedState() throws -> CalendarFeature.State {
-        CalendarFeature.State(calendar: try makeCalendar(), displayedMonth: september, selectedDate: today)
+    private func loadedState() -> CalendarFeature.State {
+        CalendarFeature.State(calendar: makeCalendar(), displayedMonth: september, selectedDate: today)
     }
 
     private func makeStore(

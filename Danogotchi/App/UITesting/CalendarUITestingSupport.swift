@@ -68,7 +68,7 @@ extension UITestingSupport {
         return CalendarFeature(
             fetch: { now, calendar in
                 if scenario == "error" { throw CocoaError(.fileReadUnknown) }
-                return try DefaultFetchCalendarUseCase.aggregate(scenario == "empty" ? [] : histories,
+                return DefaultFetchCalendarUseCase.aggregate(scenario == "empty" ? [] : histories,
                                                                  now: now, calendar: calendar)
             },
             reportError: { _ in }, onClose: onClose, onNavigate: onNavigate,

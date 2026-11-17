@@ -114,11 +114,7 @@ final class CalendarUITests: XCTestCase {
     // 탐색 화면의 차트 아이콘으로 고정 기록 캘린더 진입
     private func launchCalendar(scenario: String = "normal") -> XCUIApplication {
         continueAfterFailure = false
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTestingReset", "-uiTestingMainFlow", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
-        app.launchEnvironment["CALENDAR_UI_TEST"] = scenario
-        app.launch()
-        XCUIApplication.dismissSystemAlertIfNeeded()
+        let app = XCUIApplication.launchFresh(seed: "-uiTestingMainFlow", environment: ["CALENDAR_UI_TEST": scenario])
         XCTAssertTrue(app.buttons["explore.studyStats"].waitForExistence(timeout: 10))
         app.buttons["explore.studyStats"].tap()
         XCTAssertTrue(app.navigationBars["캘린더"].waitForExistence(timeout: 10))
@@ -127,9 +123,7 @@ final class CalendarUITests: XCTestCase {
 
     // 스와이프·‹ ›는 한 틱 뒤 애니메이션과 함께 달이 바뀌어 라벨을 기다린다
     private func waitForMonth(_ text: String, in app: XCUIApplication) -> Bool {
-        let predicate = NSPredicate(format: "label CONTAINS %@", text)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: app.element("calendar.month"))
-        return XCTWaiter().wait(for: [expectation], timeout: 5) == .completed
+        app.element("calendar.month").waitForLabel(containing: text)
     }
 
     // 셀이 작아 swipeLeft/Right 거리가 짧을 수 있어 좌표로 빠르게 가로 플릭(페이징은 속도로 넘어감)

@@ -3,11 +3,12 @@ import XCTest
 /// UI 테스트들이 공유하는 실행·조회 도우미
 extension XCUIApplication {
     /// 첫 설치 상태로 실행한다. 시스템 버튼 문구(취소·닫기)를 한국어로 고정
-    static func launchFresh(seed: String? = nil) -> XCUIApplication {
+    static func launchFresh(seed: String? = nil, environment: [String: String] = [:]) -> XCUIApplication {
         let app = XCUIApplication()
         var arguments = ["-uiTestingReset", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
         if let seed { arguments.insert(seed, at: 1) }
         app.launchArguments = arguments
+        app.launchEnvironment = environment
         app.launch()
         dismissSystemAlertIfNeeded()
         return app
@@ -59,6 +60,10 @@ extension XCUIElement {
 
     func waitForLabel(_ label: String, timeout: TimeInterval = 5) -> Bool {
         wait(NSPredicate(format: "label == %@", label), timeout: timeout)
+    }
+
+    func waitForLabel(containing text: String, timeout: TimeInterval = 5) -> Bool {
+        wait(NSPredicate(format: "label CONTAINS %@", text), timeout: timeout)
     }
 
     func waitForEnabled(_ enabled: Bool, timeout: TimeInterval = 5) -> Bool {

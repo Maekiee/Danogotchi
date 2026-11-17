@@ -87,6 +87,22 @@ final class VocabBookDetailViewModelTests: XCTestCase {
         XCTAssertTrue(screen.alerts.isEmpty)
     }
 
+    func test_startLearningWhileWordsLoadReadsServerOnce() async throws {
+        let screen = try BookDetailTestScreen(key: businessA1)
+        let serverWords = makeServerVocabs(businessA1, words: ["meeting", "invoice"])
+        screen.remote.vocabs[businessA1] = serverWords
+
+        // 단어 읽기가 끝나기 전에 누른다
+        screen.appear.accept(())
+        screen.startLearning.accept(())
+        await waitUntil { screen.isLoading == false }
+
+        XCTAssertEqual(screen.isActive, true)
+        let book = try XCTUnwrap(screen.books.readBookSummary(key: businessA1))
+        XCTAssertEqual(try screen.books.fetchVocabs(inBookId: book.id).map(\.id), serverWords.map(\.id))
+        XCTAssertEqual(screen.remote.fetchedKeys, [businessA1], "읽는 중인 단어를 기다려 서버를 다시 읽지 않는다")
+    }
+
     func test_serverReadFailureAlerts() async throws {
         let screen = try BookDetailTestScreen(key: businessA1)
         screen.remote.vocabsError = URLError(.notConnectedToInternet)

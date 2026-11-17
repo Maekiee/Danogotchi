@@ -12,12 +12,18 @@ enum StudyStatsStyle {
         return "\(Int((Double(numerator) / Double(denominator) * 100).rounded()))%"
     }
 
+    // 목록을 그릴 때마다 불려 형식·달력·시간대별로 재사용한다
+    private static let formatters = NSCache<NSString, DateFormatter>()
+
     static func date(_ date: Date, calendar: Calendar, format: String) -> String {
+        let key = "\(format)|\(calendar.identifier)|\(calendar.timeZone.identifier)" as NSString
+        if let cached = formatters.object(forKey: key) { return cached.string(from: date) }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "ko")
         formatter.calendar = calendar
         formatter.timeZone = calendar.timeZone
         formatter.dateFormat = format
+        formatters.setObject(formatter, forKey: key)
         return formatter.string(from: date)
     }
 
