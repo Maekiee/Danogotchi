@@ -17,19 +17,23 @@
 |:---:|:---:|:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/cd975405-940f-4be7-83d5-fd3ebacd9b9c" width="200" alt="관심사 선택 온보딩 화면"> | <img src="https://github.com/user-attachments/assets/33212c73-f934-4c6f-b846-2b8775a741db" width="200" alt="배경 테마 선택 화면"> | <img src="https://github.com/user-attachments/assets/cc5aaf06-fcb3-4c61-95e5-70535c9cfe4a" width="200" alt="알 선택 화면"> | <img src="https://github.com/user-attachments/assets/b499d18b-52af-4c46-bb27-679fea5628e8" width="200" alt="캐릭터 관리 화면"> |
 
-| 단어 탐색 | 4지선다 퀴즈 | 학습 결과 | 학습 리포트 |
+| 단어 탐색 | 4지선다 퀴즈 | 학습 결과 | 캘린더 |
 |:---:|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="200" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="200" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="200" alt="학습 결과 화면"> | <img src="https://github.com/user-attachments/assets/7124b35c-408f-43e0-af8a-c0f70e7b174e" width="200" alt="학습 리포트 화면"> |
+| <img src="https://github.com/user-attachments/assets/dfbe3b41-ac8a-45c3-9595-dab04d990c19" width="200" alt="단어 탐색 화면"> | <img src="https://github.com/user-attachments/assets/8f297a7e-ae9b-4a54-8c68-470d5c56d940" width="200" alt="4지선다 퀴즈 학습 화면"> | <img src="https://github.com/user-attachments/assets/5ac4449f-c941-4458-a643-12e83485be15" width="200" alt="학습 결과 화면"> | <img src="https://github.com/user-attachments/assets/d4910c00-b3de-43e0-bc0f-2a3396102228" width="200" alt="캘린더 화면"> |
 
-| 추천 단어장 | 단어 추가 | 단어장 상세 | 설정 |
+| 학습 통계 | 추천 단어장 | 단어 추가 | 단어장 상세 |
 |:---:|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="200" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="200" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/48a52402-3975-4a06-b7cb-db45dd116685" width="200" alt="단어장 상세 화면"> | <img src="https://github.com/user-attachments/assets/c49ba84a-53ad-45d5-a3b0-c61d6ee875a5" width="200" alt="설정 화면"> |
+| <img src="https://github.com/user-attachments/assets/d5050dea-ef2a-487b-ab76-69338786d05b" width="200" alt="학습 통계 화면"> | <img src="https://github.com/user-attachments/assets/c38f2c08-a882-448b-a0af-c0b0a578b949" width="200" alt="추천 단어장 화면"> | <img src="https://github.com/user-attachments/assets/e1ac0708-e066-4d38-a2c6-7acf1eec94b6" width="200" alt="단어 추가 화면"> | <img src="https://github.com/user-attachments/assets/48a52402-3975-4a06-b7cb-db45dd116685" width="200" alt="단어장 상세 화면"> |
+
+| 설정 |
+|:---:|
+| <img src="https://github.com/user-attachments/assets/c49ba84a-53ad-45d5-a3b0-c61d6ee875a5" width="200" alt="설정 화면"> |
 
 <br>
 
 # 주요 기능
 
-### 온보딩 (Onboarding)
+### 온보딩
 
 * 관심 주제 선택으로 첫 학습 단어장 지정
 * Unsplash API 기반 배경 사진 검색
@@ -38,33 +42,34 @@
 * 선택한 배경 이미지 로컬 저장 (오프라인에서도 유지)
 * 알 선택 및 캐릭터 이름 입력 검증 (최대 10자)
 
-### 단어 탐색 (Explore)
+### 단어 탐색
 
 * 쇼츠 형태의 세로 페이징 무한 스크롤
 * TTS 발음 재생 (AVSpeechSynthesizer)
 * 단어별 학습 횟수 · 정답률 표시
 * SwiftUI 기반 단어 카드 UI
 
-### 4지선다 퀴즈 (Quiz)
+### 4지선다 퀴즈
 
 * 학습 횟수 기반 출제 단어 선정 (P2C 알고리즘)
 * 학습중 단어장 전체에서 오답 보기 구성
 * 진행률 표시 및 정답 · 오답 즉시 피드백
 
-### 학습 결과 (Result)
+### 학습 결과
 
 * 정답 · 오답 수와 획득 경험치 요약
 * 전 문제 정답 시 보너스 경험치
 * 틀린 문제만 다시 풀기 / 이어서 학습하기
 
-### 단어장 (Library)
+### 단어장
 
 * 여행 · 비즈니스 · 감정 · 일상 추천 단어장
+* Firestore에서 추천 단어장 목록 · 단어 불러오기, 학습중 단어장으로 지정하면 기기에 저장 (v2.4.0)
 * Core Data 기반 나만의 단어 추가 · 수정 · 삭제
 * 추천 단어 저장 토글 (`sourceWordId`로 원본 연결)
 * 학습중 단어장 전환 (앱 전체에 항상 1개)
 
-### 캐릭터 육성 (Character)
+### 캐릭터 육성
 
 * 포만감 · 갈증 · 즐거움 · 청결 4가지 돌보기
 * 돌봄 수치 기반 기분 9종 표시
@@ -73,29 +78,37 @@
 * 앱 종료 중 흐른 시간 일괄 정산
 * 스프라이트 시트 기반 픽셀 아트 애니메이션
 
-### 날씨 배경 (Weather)
+### 날씨 배경
 
 * CoreLocation 현재 위치 + OpenWeatherMap 현재 날씨 조회
 * 날씨 7종(맑음 · 구름 · 비 · 이슬비 · 눈 · 뇌우 · 안개)별 스프라이트 애니메이션
 * 위치 거부 · 네트워크 실패 시 기본 배경 유지
 * 화면 진입 · 앱 복귀 시 갱신, 중복 요청 방지
 
-### 학습 리포트 (Report)
+### 캘린더
 
-* 누적 학습 단어 · 정답률 · 연속 학습일 요약
-* Swift Charts 막대 · 선 · 원형 그래프
-* 최근 7일 / 이번 달 / 전체 기간별 분석
-* 학습량 · 회차별 정답률 · 품사 · 주제 비중 · 오답 유형
+* 최근 53주 학습 잔디, 학습한 단어 수에 따라 4단계 농도 표시 (v2.4.0)
+* 월 달력 · 스와이프 페이징 월 이동 · 월 선택 시트, 최근 5년까지 조회 (v2.4.0)
+* 날짜별 학습 단어 · 정답률 · 퀴즈 횟수 (v2.4.0)
+* 연속 학습일 · 총 학습일 요약 (v2.4.0)
 * TCA 기반 상태 관리
 
-### 설정 (Setting)
+### 학습 통계
+
+* 전체 기간 총 정답률 · 누적 학습 단어 요약 (v2.4.0)
+* Swift Charts 도넛 차트로 주제별 · 품사별 학습 비중 (v2.4.0)
+* 많이 틀린 단어: 정답률 70 · 40 · 20% 이하 필터 (v2.4.0)
+* 단어별 정답 · 오답 횟수 상세
+* TCA 기반 상태 관리
+
+### 설정
 
 * 로컬 알림 학습 리마인더 (아침 · 저녁, 미학습 알림)
 * 화면 모드 선택: 시스템 · 라이트 · 다크 (v2.3.0)
 * 배경 테마 변경 (검색 · 사진첩)
 * 메일 문의(MessageUI) · 앱스토어 리뷰 · 개인정보 처리방침(SafariServices)
 
-### 다국어 (Localization)
+### 다국어
 
 * String Catalog 기반 한국어 · 일본어 지원 (v2.3.0)
 * 앱 언어에 맞춘 일본어 뜻 추천 단어장 (v2.3.0)
@@ -115,18 +128,18 @@
 
 ```
 Danogotchi/
-├── App/           앱 진입점 · AppDIContainer + 기능별 DIContainer · Coordinator 계층 · UI 테스트 지원
+├── App/           앱 진입점 · AppDIContainer + 기능별 DIContainer · Coordinator 계층 · 크래시 보고 정책 · UI 테스트 지원
 ├── Feature/       Feature 폴더 14개 (View / ViewModel 또는 Reducer / Components / Coordinator) · Common(Base · 익스텐션)
-├── Domain/        주제별 폴더(Vocab · Quiz · Pet · StudyRecord · Theme · Weather · Setting) · Entity · Repository 프로토콜 · UseCase · Policy
-├── Data/          Repository 구현 8종 · API 라우터 · DTO · CoreData 모델 · Mapper · 추천 단어 시드 · 기기 서비스
+├── Domain/        주제별 폴더(Vocab · Quiz · Pet · StudyRecord · Theme · Weather · Setting · Common) · Entity · Repository 프로토콜 · UseCase · Policy
+├── Data/          Repository 구현 10종(Firestore 포함) · API 라우터 · DTO · CoreData 모델 · Mapper · 기기 서비스
 ├── Core/          API 클라이언트 · CoreDataStack · 이미지 파일 저장소 (앱과 무관한 기술 기반)
-├── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트 · 스프라이트
-└── Util/          AppLogger · CrashReporter · 이미지 로딩 등 범용 도구
+├── DesignSystem/  색 · 폰트 · 여백 토큰과 공통 컴포넌트 · 스프라이트 · 도메인 타입 표시용 확장
+└── Util/          AppLogger · CrashReporter · MetricKit hang 진단 · 이미지 로딩 등 범용 도구
 ```
 
 ### TCA
 
-SwiftUI 화면(사진 테마 · 학습 리포트)에만 적용, 화면 전환은 기존 Coordinator가 담당
+SwiftUI 화면(사진 테마 · 캘린더 · 학습 통계)에만 적용, 화면 전환은 기존 Coordinator가 담당
 
 #### 데이터 흐름
 
@@ -171,21 +184,22 @@ stateDiagram-v2
 * 로딩·저장 중에는 입력 비활성화
 * 저장 실패 시 선택한 사진 유지 후 재시도 가능
 
-#### 학습 리포트 상태 변경 (`StudyReportFeature`)
+#### 학습 통계 상태 변경 (`StudyStatsFeature`)
 
 ```mermaid
 stateDiagram-v2
     state "조회 중" as Loading
-    state "리포트 표시" as Loaded
+    state "통계 표시" as Loaded
     state "오류" as Failed
 
     [*] --> Loading: appeared
-    Loading --> Loading: periodChanged · 이전 요청 취소
+    Loading --> Loading: refresh · 이전 요청 취소
     Loading --> Loaded: loaded · 요청 ID 일치
     Loading --> Failed: loadFailed
-    Loaded --> Loading: periodChanged · refresh
+    Loaded --> Loading: refresh
     Failed --> Loading: refresh
-    Loaded --> Loaded: wordTapped → onNavigate
+    Loaded --> Loaded: topicSelected · partSelected · mistakeThresholdChanged
+    Loaded --> Loaded: wordTapped · wordsTapped → onNavigate
     Loaded --> [*]: closeButtonTapped → onClose
 ```
 
@@ -203,7 +217,7 @@ stateDiagram-v2
 | **아키텍처** | ![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-555555?style=flat-square) ![MVVM-C](https://img.shields.io/badge/MVVM--C-3A6FD8?style=flat-square) ![Coordinator](https://img.shields.io/badge/Coordinator-6E7681?style=flat-square) ![TCA](https://img.shields.io/badge/TCA-7952B3?style=flat-square) |
 | **반응형 · 동시성** | ![RxSwift](https://img.shields.io/badge/RxSwift-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![RxCocoa](https://img.shields.io/badge/RxCocoa-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![Combine](https://img.shields.io/badge/Combine-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Swift Concurrency](https://img.shields.io/badge/Swift%20Concurrency-F05138?style=flat-square&logo=swift&logoColor=white) |
 | **데이터 저장** | ![Core Data](https://img.shields.io/badge/Core%20Data-0D96F6?style=flat-square&logo=apple&logoColor=white) ![UserDefaults](https://img.shields.io/badge/UserDefaults-0D96F6?style=flat-square&logo=apple&logoColor=white) ![FileManager](https://img.shields.io/badge/FileManager-0D96F6?style=flat-square&logo=apple&logoColor=white) |
-| **네트워킹** | ![URLSession](https://img.shields.io/badge/URLSession-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Unsplash API](https://img.shields.io/badge/Unsplash%20API-000000?style=flat-square&logo=unsplash&logoColor=white) ![OpenWeatherMap API](https://img.shields.io/badge/OpenWeatherMap%20API-EB6E4B?style=flat-square) |
+| **네트워킹** | ![URLSession](https://img.shields.io/badge/URLSession-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Unsplash API](https://img.shields.io/badge/Unsplash%20API-000000?style=flat-square&logo=unsplash&logoColor=white) ![OpenWeatherMap API](https://img.shields.io/badge/OpenWeatherMap%20API-EB6E4B?style=flat-square) ![Cloud Firestore](https://img.shields.io/badge/Cloud%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black) |
 | **이미지 · 미디어** | ![ImageIO](https://img.shields.io/badge/ImageIO-0D96F6?style=flat-square&logo=apple&logoColor=white) ![PhotosUI](https://img.shields.io/badge/PhotosUI-0D96F6?style=flat-square&logo=apple&logoColor=white) ![AVFoundation](https://img.shields.io/badge/AVFoundation-0D96F6?style=flat-square&logo=apple&logoColor=white) |
 | **레이아웃 · UI** | ![SnapKit](https://img.shields.io/badge/SnapKit-5A3FD9?style=flat-square) ![DiffableDataSource](https://img.shields.io/badge/DiffableDataSource-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Swift Charts](https://img.shields.io/badge/Swift%20Charts-0D96F6?style=flat-square&logo=apple&logoColor=white) ![Toast-Swift](https://img.shields.io/badge/Toast--Swift-6E7681?style=flat-square) ![IQKeyboardManager](https://img.shields.io/badge/IQKeyboardManager-6E7681?style=flat-square) |
 | **애플 프레임워크** | ![CoreLocation](https://img.shields.io/badge/CoreLocation-0D96F6?style=flat-square&logo=apple&logoColor=white) ![UserNotifications](https://img.shields.io/badge/UserNotifications-0D96F6?style=flat-square&logo=apple&logoColor=white) ![MessageUI](https://img.shields.io/badge/MessageUI-0D96F6?style=flat-square&logo=apple&logoColor=white) ![SafariServices](https://img.shields.io/badge/SafariServices-0D96F6?style=flat-square&logo=apple&logoColor=white) |
@@ -571,22 +585,21 @@ sequenceDiagram
 * 권한이 미결정이면 권한 요청 후 `locationManagerDidChangeAuthorization`에서 이어서 조회
 * `nonisolated override init()`으로 DI 조립부는 메인 격리 밖에 둠
 
-### 6. 학습 리포트 — 늦게 도착한 응답 무시
+### 6. 학습 통계 — 늦게 도착한 응답 무시
 
-기간을 빠르게 바꿔도 마지막 요청 결과만 화면에 반영합니다.
+앱 복귀·날짜 변경으로 재조회가 겹쳐도 마지막 요청 결과만 화면에 반영합니다.
 
 ```swift
 private func load(_ state: inout State) -> Effect<Action> {
     let id = uuid()
-    let period = state.period
     let date = now()
     let calendar = calendar()
     state.loadStatus = .loading(id)
     return .run { send in
         do {
-            let report = try await fetch(period, date, calendar)
+            let stats = try await fetch(date, calendar)
             try Task.checkCancellation()
-            await send(.loaded(id, report))
+            await send(.loaded(id, stats))
         } catch is CancellationError {
             return
         } catch {
@@ -599,7 +612,7 @@ private func load(_ state: inout State) -> Effect<Action> {
 }
 
 // Reducer
-case let .loaded(id, report):
+case let .loaded(id, stats):
     guard state.loadStatus == .loading(id) else { return .none }
 ```
 
@@ -609,7 +622,8 @@ case let .loaded(id, report):
 * 요청마다 ID를 발급하고, 현재 상태의 ID와 다른 응답은 무시
 * 집계는 background context에서 수행해 메인 스레드 비차단
 * 답변마다 회차 ID·문제 번호·단어 스냅샷 저장, `sourceWordId` 기준 집계로 같은 추천 단어 중복 카운트 방지
-* Swift Charts(`BarMark` · `LineMark` · `SectorMark`) + 차트 선택 인터랙션
+* 캘린더(`CalendarFeature`)도 같은 방식으로 조회
+* Swift Charts `SectorMark` 도넛 차트 + `chartAngleSelection` 선택 인터랙션
 
 ### 7. Core Data ModelV2 마이그레이션
 
@@ -620,7 +634,7 @@ static func backfillIfNeeded(context: NSManagedObjectContext) throws {
     try context.performAndWait {
         guard let coordinator = context.persistentStoreCoordinator,
               let store = coordinator.persistentStores.first else {
-            throw StudyReportDataError.invalidRecord
+            throw StudyStatsDataError.invalidRecord
         }
         let version = coordinator.metadata(for: store)[backfillVersionKey] as? Int ?? 0
         guard version < backfillVersion else { return }
@@ -750,31 +764,27 @@ final class WindowAppearanceApplier: AppearanceApplying {
 UI 문구와 함께 추천 단어의 뜻도 앱 언어에 맞춰 제공합니다.
 
 ```swift
-static func seedIfNeeded(
-    context: NSManagedObjectContext,
-    language: String? = Bundle.main.preferredLocalizations.first
-) throws {
-    let request = VocabBookEntity.fetchRequest()
-    guard try context.count(for: request) == 0 else { return } // 멱등: 책이 하나라도 있으면 스킵
-
-    // 첫 실행 시 앱 언어로 뜻 선택, 이후 언어를 바꿔도 저장된 뜻은 유지
-    let isJapanese = language == "ja"
-    let seeds: [(topic: BookTopic, level: VocabLevel?, words: [(String, String, PartOfSpeech)])] = [
-        (.myBook, nil, []),
-        (.travel, .a1, isJapanese ? MockTravelWordsJa.data : MockTravelWords.data),
-        (.business, .a1, isJapanese ? MockBusinessWordsJa.data : MockBusinessWords.data),
-        (.emotion, .a1, isJapanese ? MockEmotionWordsJa.data : MockEmotionWords.data),
-        (.life, .a1, isJapanese ? MockLifeWordsJa.data : MockLifeWords.data),
-    ]
-    // ...
+/// Firestore `topicVocabs/{topic}_{level}` 문서 — 단어마다 한국어·일본어 뜻을 함께 보관
+struct TopicVocabsDTO: Decodable {
+    /// 뜻은 앱 언어가 ja면 일본어, 그 외 한국어. id가 UUID가 아니거나 뜻이 없는 단어는 건너뛴다
+    func toDomain(key: VocabBookKey, language: String?, base: Date) -> [Vocab] {
+        let meaningKey = language == "ja" ? "ja" : "ko"
+        return words.enumerated().compactMap { index, word in
+            guard let id = UUID(uuidString: word.id), let meaning = word.meaning[meaningKey] else { return nil }
+            return Vocab(id: id, word: word.word, meaning: meaning, /* ... */)
+        }
+    }
 }
+
+// FirestoreVocabBookRepository — 받을 때 앱 언어로 뜻을 고른다
+return dto.toDomain(key: key, language: Bundle.main.preferredLocalizations.first, base: Date())
 ```
 
 **핵심 포인트**
 
 * String Catalog(`Localizable.xcstrings`)로 한국어·일본어 UI 문구 관리, 일본어 앱 이름·폰트 대응
-* 첫 실행 언어로 추천 단어 뜻을 시드하고, 이후 언어를 바꿔도 저장된 뜻은 유지
-* 언어를 매개변수로 받아 `DatabaseSeederTests`에서 언어별 시드 검증
+* 추천 단어장을 받을 때 앱 언어로 뜻을 선택하고, 이후 언어를 바꿔도 저장된 뜻은 유지 (v2.4.0부터 Firestore)
+* 언어를 매개변수로 받아 `TopicVocabsDTOTests`에서 언어별 뜻 선택 검증
 * 길어진 일본어 문구에 맞춰 온보딩·테마 화면 레이아웃 대응
 
 ### 11. CI/CD 파이프라인 (v2.3.0)
@@ -785,16 +795,16 @@ static func seedIfNeeded(
 
 # 테스트
 
-* 정책·UseCase·ViewModel·Coordinator·Reducer·DI 조립·영속화·네트워크·이미지 처리 단위 테스트 **347개**
-* 온보딩·단어 탐색·퀴즈·캐릭터·단어장·설정·사진 테마·학습 리포트 흐름 XCUITest **26개**
+* 정책·UseCase·ViewModel·Coordinator·Reducer·DI 조립·영속화·네트워크·이미지 처리 단위 테스트 **433개**
+* 온보딩·단어 탐색·퀴즈·캐릭터·단어장·설정·사진 테마·캘린더·학습 통계 흐름 XCUITest **32개**
 * PR마다 GitHub Actions에서 단위 테스트 자동 실행
 
 ### 테스트 가능한 구조 설계
 
 - Repository·UseCase·`ApiClient`·`LocationProviding`을 **프로토콜로 추상화**하고 **생성자 주입**으로 연결해, 테스트에서 Controlled·Recording 더블로 대체합니다.
-- 비즈니스 규칙을 `PetStatePolicy`·`StudyReminderPolicy` 등 정책과 UseCase로 분리해 **UI 없이 로직만 단독으로 검증**합니다. ViewModel은 `transform(input:)`의 Output을, 학습 리포트 Reducer는 TCA `TestStore`로 상태 변화를 검증합니다.
+- 비즈니스 규칙을 `PetStatePolicy`·`StudyReminderPolicy` 등 정책과 UseCase로 분리해 **UI 없이 로직만 단독으로 검증**합니다. ViewModel은 `transform(input:)`의 Output을, 사진 테마·캘린더·학습 통계 Reducer는 TCA `TestStore`로 상태 변화를 검증합니다.
 - 시간·랜덤 값은 **매개변수로 주입**합니다.
-  - 정책과 리포트 집계는 `now`·`Calendar`를 받아 테스트에서 시각과 타임존을 고정합니다.
+  - 정책과 캘린더·학습 통계 집계는 `now`·`Calendar`를 받아 테스트에서 시각과 타임존을 고정합니다.
   - 퀴즈 출제(`selectByTournament`)는 `RandomNumberGenerator`를 받습니다.
 - 외부 자원은 테스트용 구현으로 교체합니다.
   - 네트워크: `URLProtocol` 스텁
@@ -805,7 +815,7 @@ static func seedIfNeeded(
 
 - 모든 코드를 테스트하기보다, **로직이 복잡하거나 사이드 이펙트의 영향 범위가 큰 부분**에 유닛 테스트를 집중했습니다.
   - 상태 전이: 펫 체력 감소·돌보기·사망·부활, 레벨·경험치 정책
-  - 데이터 계산: 퀴즈 출제·채점, 학습 리포트 기간별 집계·연속 학습일, 학습 알림 일정
+  - 데이터 계산: 퀴즈 출제·채점, 캘린더 날짜별 집계·연속 학습일, 학습 통계 주제·품사 비중·많이 틀린 단어, 학습 알림 일정
   - 이미지 처리: 크롭 영역 좌표 변환, EXIF 방향 8종, 검은 여백 합성, 업스케일 방지
   - 저장·동기화: 저장 실패 시 롤백·재시도, SQLite 재개방, Core Data 마이그레이션·백필 실패 후 재시도, 테마 이미지 교체 실패 시 기존 파일 보존
   - 비동기 흐름: 검색 응답 순서 보장·이전 요청 취소·페이지 재시도
