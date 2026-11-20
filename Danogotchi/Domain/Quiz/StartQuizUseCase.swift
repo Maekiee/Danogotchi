@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol StartQuizUseCase {
     /// 학습중 단어장 단어를 합쳐 출제 세트를 선정
     func execute() throws -> StartQuizResult

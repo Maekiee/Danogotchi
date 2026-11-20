@@ -6,7 +6,7 @@ final class DeviceLocationProvider: NSObject, LocationProviding {
     private var continuation: CheckedContinuation<Coordinate, Error>?
     
     /// 생성 시점에는 메인 격리 상태를 건드리지 않는다 — 조립부(AppDIContainer)를 nonisolated로 두기 위해서다
-    nonisolated override init() {
+    override nonisolated init() {
         super.init()
     }
     

@@ -3,7 +3,6 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-
 final class VocabTopicCardCollectionViewCell: UICollectionViewCell {
     var disposeBag = DisposeBag()
     

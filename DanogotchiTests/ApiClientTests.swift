@@ -33,8 +33,7 @@ final class ApiClientTests: XCTestCase {
         do {
             _ = try await fixture.client.request(TestEndpoint(baseURL: fixture.url.absoluteString), responseType: Payload.self)
             XCTFail("Expected decoding error")
-        } catch NetworkError.decoding { }
-        catch { XCTFail("Unexpected error: \(error)") }
+        } catch NetworkError.decoding { } catch { XCTFail("Unexpected error: \(error)") }
     }
 
     func test_nonSuccessHTTPResponsesAreNotDecodedAsSuccess() async throws {
@@ -96,7 +95,9 @@ final class ApiClientTests: XCTestCase {
         } catch { XCTFail("Unexpected error: \(error)") }
     }
 
-    private func makeClient(handler: @escaping StubURLProtocol.Handler) throws -> (client: DefaultApiClient, url: URL, cleanup: () -> Void) {
+    private func makeClient(
+        handler: @escaping StubURLProtocol.Handler
+    ) throws -> (client: DefaultApiClient, url: URL, cleanup: () -> Void) {
         let host = UUID().uuidString.lowercased() + ".example.test"
         let url = try XCTUnwrap(URL(string: "https://" + host))
         StubURLProtocol.register(host: host, handler: handler)

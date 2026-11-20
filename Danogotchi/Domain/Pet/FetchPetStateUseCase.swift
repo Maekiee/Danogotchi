@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol FetchPetStateUseCase {
     /// 현재 시각까지 정산한 뒤 저장하고 표시 정보를 돌려준다. 펫이 없으면 nil.
     func execute() throws -> PetDisplayInfo?

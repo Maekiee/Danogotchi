@@ -40,8 +40,11 @@ final class PersistenceViewModelTests: XCTestCase {
         let context = makeFailingSaveContext()
         let words = DefaultVocabRepository(context: context)
         let word = try words.createVocab(vocab: "old", meaning: "뜻")
-        let vm = AddVocabViewModel(addVocabUseCase: DefaultAddVocabUseCase(vocabBookRepository: DefaultVocabBookRepository(context: context)),
-                                  updateVocabUseCase: DefaultUpdateVocabUseCase(vocabRepository: words), editingVocab: word)
+        let vm = AddVocabViewModel(
+            addVocabUseCase: DefaultAddVocabUseCase(vocabBookRepository: DefaultVocabBookRepository(context: context)),
+            updateVocabUseCase: DefaultUpdateVocabUseCase(vocabRepository: words),
+            editingVocab: word
+        )
         let save = PublishRelay<Void>()
         let output = vm.transform(input: .init(wordTextField: .just("new"), meaningTextField: .just("뜻"),
                                                partOfSpeechSegment: .just(0), savedButtonTapped: save.asObservable()))

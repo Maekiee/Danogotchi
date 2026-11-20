@@ -3,7 +3,6 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-
 protocol AddVocabViewControllerDelegate: AnyObject {
     func addVocabDidFinishEditing()
 }
@@ -45,7 +44,7 @@ final class AddVocabViewController: BaseViewController {
             wordTextField,
             meaningTextField,
             partOfSpeechSegmentedControl,
-            saveButton,
+            saveButton
         ].forEach { view.addSubview($0) }
     }
 

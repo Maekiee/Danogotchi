@@ -15,7 +15,7 @@ final class DefaultApiClient: ApiClient {
         self.session = session
     }
     
-    func request<T>(_ endpoint: Endpoint, responseType: T.Type) async throws -> T where T : Decodable {
+    func request<T>(_ endpoint: Endpoint, responseType: T.Type) async throws -> T where T: Decodable {
         let url = try makeRequest(endpoint)
         let data: Data
         let response: URLResponse
@@ -98,5 +98,3 @@ final class DefaultApiClient: ApiClient {
         (try? JSONDecoder().decode(ErrorResponse.self, from: data))?.errors ?? []
     }
 }
-
-

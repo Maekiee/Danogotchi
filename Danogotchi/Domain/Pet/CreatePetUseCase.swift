@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol CreatePetUseCase {
     /// 온보딩에서 펫을 만든다. 이미 있으면 만들지 않고 기존 펫을 돌려준다. 저장 실패는 오류로 전달한다.
     func execute(type: PetType, name: String) throws -> Pet?

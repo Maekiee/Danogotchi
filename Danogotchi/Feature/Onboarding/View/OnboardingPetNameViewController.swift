@@ -3,7 +3,6 @@ import RxSwift
 import SnapKit
 import UIKit
 
-
 protocol OnboardingPetNameViewControllerDelegate: AnyObject {
     func onboardingPetNameDidFinish()
 }
@@ -57,7 +56,7 @@ final class OnboardingPetNameViewController: BaseViewController {
             titleLabel,
             nameTextField,
             errorLabel,
-            doneButton,
+            doneButton
         ].forEach { view.addSubview($0) }
     }
 

@@ -122,7 +122,9 @@ private extension DefaultThemeImageRepository {
                 return (data, fileExtension)
             } catch {
                 lastError = error
-                AppLogger.network.error("테마 이미지 \(format.rawValue, privacy: .public) 내려받기 실패: \(String(describing: error), privacy: .public)")
+                AppLogger.network.error(
+                    "테마 이미지 \(format.rawValue, privacy: .public) 내려받기 실패: \(String(describing: error), privacy: .public)"
+                )
             }
         }
 

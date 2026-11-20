@@ -24,7 +24,7 @@ enum UnsplashApiRouter: Endpoint {
                 URLQueryItem(name: "query", value: query),
                 URLQueryItem(name: "page", value: "\(page)"),
                 URLQueryItem(name: "per_page", value: "20"),
-                URLQueryItem(name: "order_by", value: "relevant"),
+                URLQueryItem(name: "order_by", value: "relevant")
             ]
         }
     }

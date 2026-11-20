@@ -3,7 +3,6 @@ import RxSwift
 import SnapKit
 import UIKit
 
-
 @MainActor
 protocol SearchThemeViewControllerDelegate: AnyObject {
     func didSelectTheme()
@@ -26,12 +25,12 @@ final class SearchThemeViewController: BaseViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, ThemeImageViewData>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, ThemeImageViewData>
     
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()
     /// 화면이 소유해 캐시가 화면과 함께 사라지게 한다
     private let imageLoader = RemoteImageLoader()
-
 
     private let titleText: UILabel = {
         let label = UILabel()
@@ -97,10 +96,6 @@ final class SearchThemeViewController: BaseViewController {
         bind()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-    }
-    
     override func configHierarchy() {
         [
             titleText,
@@ -108,7 +103,7 @@ final class SearchThemeViewController: BaseViewController {
             textField,
             collectionView,
             submitButton,
-            savingIndicator,
+            savingIndicator
         ].forEach { view.addSubview($0) }
     }
     
@@ -162,8 +157,6 @@ final class SearchThemeViewController: BaseViewController {
     }
 }
 
-
-
 extension SearchThemeViewController {
     private func bind() {
         let loadNextPage = PublishRelay<Void>()
@@ -199,7 +192,7 @@ extension SearchThemeViewController {
         // 스크롤 하단 체크
         collectionView.rx.contentOffset
             .map { [weak self] offset in
-                guard let self = self else { return false }
+                guard let self else { return false }
                 let contentHeight = collectionView.contentSize.height
                 let scrollViewHeight = collectionView.frame.height
                 let offsetY = offset.y
@@ -219,7 +212,6 @@ extension SearchThemeViewController {
                 let newUrl = (owner.selectedThemeUrl.value == selectedItem.themeImageUrl) ? nil : selectedItem.themeImageUrl
                 owner.selectedThemeUrl.accept(newUrl)
             }.disposed(by: disposeBag)
-        
         
         selectedThemeUrl
             .distinctUntilChanged()
@@ -270,7 +262,6 @@ extension SearchThemeViewController {
     }
 }
 
-
 // MARK: - WaterfallLayoutDelegate
 extension SearchThemeViewController: WaterfallLayoutDelegate {
     func collectionView(_ collectionView: UICollectionView, heightForItemAt indexPath: IndexPath, width: CGFloat) -> CGFloat {
@@ -280,13 +271,12 @@ extension SearchThemeViewController: WaterfallLayoutDelegate {
     }
 }
 
-
-//MARK: - 컬렉션 뷰
+// MARK: - 컬렉션 뷰
 extension SearchThemeViewController {
     private func configDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<ThemeImageCollectionViewCell, ThemeImageViewData> {
-            [weak self] cell, indexPath, item in
-            guard let self = self else { return }
+            [weak self] cell, _, item in
+            guard let self else { return }
             cell.configBind(
                 with: item,
                 isSelected: item.themeImageUrl == selectedThemeUrl.value,

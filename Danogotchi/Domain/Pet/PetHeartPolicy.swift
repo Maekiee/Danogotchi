@@ -1,6 +1,5 @@
 import Foundation
 
-
 /// 하트 한 칸의 채움 정도. HP 1 = 1칸이고 하트 하나가 4칸이다.
 enum PetHeartFill {
     case empty
@@ -9,7 +8,6 @@ enum PetHeartFill {
     case twoThirds
     case full
 }
-
 
 /// HP를 하트 표시로 옮기는 계산. 저장하지 않고 `hp` 하나에서 파생한다.
 enum PetHeartPolicy {

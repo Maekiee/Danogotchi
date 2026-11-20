@@ -3,7 +3,6 @@ import OSLog
 import RxSwift
 import RxCocoa
 
-
 final class CharacterViewModel: BaseViewModel {
 
     private let disposeBag = DisposeBag()
@@ -73,8 +72,14 @@ final class CharacterViewModel: BaseViewModel {
                     do {
                         let weather = try await owner.fetchCurrentWeatherUseCase.getWeather()
                         weatherType.accept(weather.weatherType)
-                        AppLogger.network.debug(
-                            "현재 날씨 — 도시=\(weather.cityName, privacy: .public), 종류=\(String(describing: weather.weatherType), privacy: .public), 기온=\(weather.temperature, privacy: .public)℃, 체감=\(weather.feelsLike, privacy: .public)℃, 습도=\(weather.humidity, privacy: .public)%, 상태=\(weather.description, privacy: .public)")
+                        AppLogger.network.debug("""
+                            현재 날씨 — 도시=\(weather.cityName, privacy: .public), \
+                            종류=\(String(describing: weather.weatherType), privacy: .public), \
+                            기온=\(weather.temperature, privacy: .public)℃, \
+                            체감=\(weather.feelsLike, privacy: .public)℃, \
+                            습도=\(weather.humidity, privacy: .public)%, \
+                            상태=\(weather.description, privacy: .public)
+                            """)
                     } catch {
                         AppLogger.network.error("현재 날씨 조회 실패: \(String(describing: error), privacy: .public)")
                         // 오프라인·위치 권한 거부는 CrashReportPolicy가 거른다

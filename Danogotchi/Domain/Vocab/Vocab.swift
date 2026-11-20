@@ -7,7 +7,7 @@ struct Vocab: Hashable, Identifiable {
     let bookType: BookTopic
     let level: VocabLevel?
     let partOfSpeech: PartOfSpeech?
-    let sourceWordId: UUID? 
+    let sourceWordId: UUID?
     let createAt: Date
     var originalTopic: String?
 

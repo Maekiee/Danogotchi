@@ -22,8 +22,7 @@ final class WeatherUseCaseTests: XCTestCase {
         do {
             _ = try await useCase.getWeather()
             XCTFail("Expected location error")
-        } catch LocationError.permissionDenied { }
-        catch { XCTFail("Unexpected error: \(error)") }
+        } catch LocationError.permissionDenied { } catch { XCTFail("Unexpected error: \(error)") }
         let coordinates = await repository.coordinates
         XCTAssertNil(coordinates)
     }

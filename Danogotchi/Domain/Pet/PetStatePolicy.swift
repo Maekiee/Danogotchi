@@ -1,6 +1,5 @@
 import Foundation
 
-
 enum PetCareResult {
     case success(Pet)
     /// 대상 수치가 이미 `careThreshold` 이상 — 정산 결과는 저장해야 하므로 Pet을 함께 돌려준다
@@ -9,13 +8,11 @@ enum PetCareResult {
     case dead(Pet)
 }
 
-
 enum PetReviveResult {
     case success(Pet)
     /// 살아 있어 부활할 수 없다 — 정산 결과만 저장한다
     case alive(Pet)
 }
-
 
 /// 저장된 수치와 `stateUpdatedAt` 하나로 시간 경과를 정산하고 기분·부활을 판정한다.
 /// 백그라운드 작업이나 상시 타이머 없이 화면 조회·포그라운드 복귀·돌보기·레벨업 시점에만 호출된다.
@@ -61,7 +58,6 @@ enum PetStatePolicy {
         }
     }
 }
-
 
 // MARK: - 정산
 
@@ -135,7 +131,6 @@ extension PetStatePolicy {
     }
 }
 
-
 // MARK: - 기분
 
 extension PetStatePolicy {
@@ -167,7 +162,6 @@ extension PetStatePolicy {
     }
 }
 
-
 // MARK: - 돌보기
 
 extension PetStatePolicy {
@@ -184,7 +178,6 @@ extension PetStatePolicy {
         return .success(settled)
     }
 }
-
 
 // MARK: - 부활
 

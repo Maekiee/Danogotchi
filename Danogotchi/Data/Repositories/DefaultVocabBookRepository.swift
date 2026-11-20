@@ -140,7 +140,14 @@ extension DefaultVocabBookRepository: VocabBookRepository {
     }
     
     /// 사용자가 직접 입력한 값으로 새 단어를 생성해 단어장에 추가
-    func addVocab(bookId: UUID, word: String, meaning: String, bookType: BookTopic, level: VocabLevel?, partOfSpeech: PartOfSpeech?) throws -> Vocab {
+    func addVocab(
+        bookId: UUID,
+        word: String,
+        meaning: String,
+        bookType: BookTopic,
+        level: VocabLevel?,
+        partOfSpeech: PartOfSpeech?
+    ) throws -> Vocab {
         guard let vocabBookEntity = try fetchBookEntity(id: bookId) else { throw PersistenceError.entityNotFound }
         let vocabEntity = VocabEntity(context: context)
         vocabEntity.id = UUID()

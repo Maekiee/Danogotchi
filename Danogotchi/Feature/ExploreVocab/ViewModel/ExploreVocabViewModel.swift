@@ -2,7 +2,6 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-
 final class ExploreVocabViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let fetchVocabsUseCase: FetchVocabsUseCase

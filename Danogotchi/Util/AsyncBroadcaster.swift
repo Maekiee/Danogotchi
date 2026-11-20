@@ -12,7 +12,7 @@ final class AsyncBroadcaster<Element: Sendable>: @unchecked Sendable {
         let id = UUID()
         continuation.onTermination = { [weak self] _ in
             guard let self else { return }
-            self.lock.withLock { _ = self.continuations.removeValue(forKey: id) }
+            lock.withLock { _ = self.continuations.removeValue(forKey: id) }
         }
         lock.withLock {
             if let current { continuation.yield(current()) }

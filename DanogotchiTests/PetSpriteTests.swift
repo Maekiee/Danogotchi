@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 /// 매니페스트(`pet.json`)와 시트 에셋이 어긋나면 화면에 빈 칸이 조용히 렌더된다.
 /// 그 불일치를 테스트에서 잡는 게 이 파일의 목적이다.
 final class PetSpriteTests: XCTestCase {
@@ -202,7 +201,7 @@ final class PetSpriteTests: XCTestCase {
             .bored: .sad,
             .unpleasant: .sad,
             .sad: .sad,
-            .depressed: .sick,
+            .depressed: .sick
         ]
 
         // 기분이 늘어나면 이 표도 같이 늘어나야 한다

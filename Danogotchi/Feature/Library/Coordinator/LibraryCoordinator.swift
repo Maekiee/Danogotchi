@@ -4,7 +4,7 @@ protocol LibraryCoordinatorDelegate: AnyObject {
     func libraryCoordinatorDidFinish()
 }
 
-final class LibraryCoordinator:NSObject, Coordinator {
+final class LibraryCoordinator: NSObject, Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     private let container: LibraryDIContainer
@@ -27,7 +27,6 @@ extension LibraryCoordinator {
     }
 }
 
-
 extension LibraryCoordinator: LibraryViewControllerDelegate {
     func libraryDidTapClose() {
         navigationController.dismiss(animated: true) { [weak self] in
@@ -42,7 +41,6 @@ extension LibraryCoordinator: LibraryViewControllerDelegate {
         navigationController.pushViewController(vc, animated: true)
     }
 }
-
 
 extension LibraryCoordinator: VocabBookDetailViewControllerDelegate {
     func myBookDetailDidTapBack() {

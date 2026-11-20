@@ -19,8 +19,8 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         handlers.removeValue(forKey: host)
     }
 
-    override class func canInit(with request: URLRequest) -> Bool { true }
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override static func canInit(with request: URLRequest) -> Bool { true }
+    override static func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         Self.lock.lock()
         let handler = request.url?.host.flatMap { Self.handlers[$0] }

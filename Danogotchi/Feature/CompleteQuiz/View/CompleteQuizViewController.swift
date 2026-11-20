@@ -3,7 +3,6 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-
 protocol CompleteQuizViewControllerDelegate: AnyObject {
     func completeQuizDidSelectAction(
         _ action: CompleteQuizViewModel.ActionType,

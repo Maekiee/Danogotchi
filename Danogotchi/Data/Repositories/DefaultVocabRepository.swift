@@ -28,7 +28,6 @@ extension DefaultVocabRepository: VocabRepository {
         vocabEntity.bookType = BookTopic.myBook.rawValue
         vocabEntity.createAt = Date()
         
-        
         try context.saveOrRollback()
         
         return vocabEntity.toDomain()
@@ -55,15 +54,15 @@ extension DefaultVocabRepository: VocabRepository {
     func updateVocab(id: UUID, word: String?, meaning: String?, partOfSpeech: PartOfSpeech?) throws {
         guard let vocabEntity = try fetchEntity(id: id) else { throw PersistenceError.entityNotFound }
         
-        if let word = word {
+        if let word {
             vocabEntity.word = word
         }
         
-        if let meaning = meaning {
+        if let meaning {
             vocabEntity.meaning = meaning
         }
         
-        if let partOfSpeech = partOfSpeech {
+        if let partOfSpeech {
             vocabEntity.partOfSpeech = partOfSpeech.rawValue
         }
         

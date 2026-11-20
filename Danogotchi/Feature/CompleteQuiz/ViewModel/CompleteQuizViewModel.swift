@@ -2,7 +2,6 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-
 final class CompleteQuizViewModel: BaseViewModel {
     private let disposeBag = DisposeBag()
     private let result: QuizResult

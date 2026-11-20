@@ -1,6 +1,5 @@
 import Foundation
 
-
 struct LearningStats {
     let correct: Int
     let total: Int
@@ -9,7 +8,6 @@ struct LearningStats {
         total > 0 ? Double(correct) / Double(total) : 0
     }
 }
-
 
 extension Array where Element == LearningHistory {
     func statsByVocab() -> [UUID: LearningStats] {

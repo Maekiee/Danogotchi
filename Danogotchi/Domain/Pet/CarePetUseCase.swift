@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol CarePetUseCase {
     /// 정산 후 대상 수치를 회복한다. 펫이 없으면 nil.
     func execute(stat: PetCareStat) throws -> PetActionResult?

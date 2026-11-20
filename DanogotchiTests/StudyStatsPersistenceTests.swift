@@ -21,7 +21,10 @@ final class StudyStatsPersistenceTests: XCTestCase {
         let context = makeInMemoryContext()
         let word = try DefaultVocabRepository(context: context).createVocab(vocab: "apple", meaning: "사과")
         let repository = DefaultLearningHistoryRepository(context: context)
-        let useCase = DefaultEarnExperienceUseCase(learningHistoryRepository: repository, petRepository: DefaultPetRepository(context: context))
+        let useCase = DefaultEarnExperienceUseCase(
+            learningHistoryRepository: repository,
+            petRepository: DefaultPetRepository(context: context)
+        )
         let answer = makeQuizAnswer(word)
         XCTAssertEqual(try useCase.record(answer), 20)
         XCTAssertEqual(try useCase.record(answer), 20)

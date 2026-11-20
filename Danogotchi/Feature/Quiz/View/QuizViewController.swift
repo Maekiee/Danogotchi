@@ -3,7 +3,6 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-
 protocol QuizViewControllerDelegate: AnyObject {
     func quizDidComplete(originalData: QuizData, result: QuizResult)
     func quizDidTapClose()
@@ -104,7 +103,7 @@ final class QuizViewController: BaseViewController {
         progressView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(AppSpacing.space16)
             make.horizontalEdges.equalToSuperview().inset(AppSpacing.space24)
-            make.height.equalTo(12)  
+            make.height.equalTo(12)
         }
         
         quizQuestionCard.snp.makeConstraints { make in
@@ -184,7 +183,6 @@ extension QuizViewController {
             .emit(with: self) { owner, failure in
                 owner.presentSaveFailureAlert(failure) { retrySave.accept(()) }
             }.disposed(by: disposeBag)
-        
         
         output.progress
             .drive(progressView.rx.progress)

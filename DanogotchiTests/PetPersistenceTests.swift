@@ -2,10 +2,11 @@ import XCTest
 import CoreData
 @testable import Danogotchi
 
-
 final class PetPersistenceTests: XCTestCase {
 
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var context: NSManagedObjectContext!
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var repository: DefaultPetRepository!
 
     override func setUp() {

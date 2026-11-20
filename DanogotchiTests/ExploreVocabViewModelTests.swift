@@ -194,7 +194,7 @@ extension ExploreVocabViewModelTests {
         XCTAssertEqual(screen.alerts, [
             String(localized: "학습할 단어가 없습니다."),
             String(localized: "최소 4개 이상의 단어가 필요합니다."),
-            String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요."),
+            String(localized: "학습을 시작하지 못했어요. 다시 시도해주세요.")
         ])
         XCTAssertEqual(screen.reporter.errors.count, 1, "단어 부족은 실패가 아니다 — 읽기 실패만 보고한다")
     }

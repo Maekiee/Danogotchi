@@ -3,7 +3,6 @@ import RxSwift
 import SnapKit
 import UIKit
 
-
 protocol OnboardingInterestViewControllerDelegate: AnyObject {
     func onboardingInterestDidFinish()
 }
@@ -23,6 +22,7 @@ final class OnboardingInterestViewController: BaseViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, OnboardingInterestItem>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, OnboardingInterestItem>
 
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
 
     // MARK: - UI 프로퍼티
@@ -85,7 +85,7 @@ final class OnboardingInterestViewController: BaseViewController {
             descriptionLabel,
             collectionView,
             nextButton,
-            loadingIndicator,
+            loadingIndicator
         ].forEach { view.addSubview($0) }
     }
 

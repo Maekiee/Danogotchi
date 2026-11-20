@@ -18,7 +18,7 @@ enum WeatherType: String, CaseIterable {
         case 700...781: self = .atmosphere
         case 800:       self = .clear
         case 801...804: self = .clouds
-        default:        self = .clear  
+        default:        self = .clear
         }
     }
 }

@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 final class PetStatePolicyTests: XCTestCase {
 
     // MARK: - 돌봄 수치 감소
@@ -44,7 +43,7 @@ final class PetStatePolicyTests: XCTestCase {
     func test_무돌봄_HP_곡선() {
         let expected: [(hours: Double, hp: Double)] = [
             (24, 40), (48, 40), (72, 40), (80, 40),
-            (84, 39), (96, 36), (100, 35), (400.0 / 3, 18.3333),
+            (84, 39), (96, 36), (100, 35), (400.0 / 3, 18.3333)
         ]
         for (hours, hp) in expected {
             let settled = PetStatePolicy.settle(makePet(), now: hoursLater(hours))
@@ -149,7 +148,7 @@ final class PetStatePolicyTests: XCTestCase {
             (0, .happy), (19.99, .happy), (20, .happy), (20.01, .satisfied),
             (34.99, .satisfied), (35, .thirsty),
             (43.74, .thirsty), (43.75, .sad),
-            (68.74, .sad), (68.75, .depressed),
+            (68.74, .sad), (68.75, .depressed)
         ]
         for (hours, mood) in expected {
             let settled = PetStatePolicy.settle(makePet(), now: hoursLater(hours))

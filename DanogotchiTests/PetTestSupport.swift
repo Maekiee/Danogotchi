@@ -2,7 +2,6 @@ import Foundation
 import CoreData
 @testable import Danogotchi
 
-
 /// 정책 함수가 `now`를 인자로 받으므로 고정 시각만 있으면 된다 — Clock 추상화는 만들지 않는다.
 let testBase = Date(timeIntervalSince1970: 1_700_000_000)
 

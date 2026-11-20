@@ -13,7 +13,7 @@ final class OnboardingPetNameViewModelTests: XCTestCase {
         XCTAssertEqual(screen.isDoneEnabled, false)
     }
 
-    func test_tooLongNameShowsLimitAndLocksDone() {
+    func test_tooLongNameShowsLimitAndLocksDone() throws {
         let screen = PetNameTestScreen()
         screen.name.accept(String(repeating: "가", count: PetNamePolicy.maxLength + 1))
         XCTAssertEqual(screen.errors.last, String(localized: "이름은 \(PetNamePolicy.maxLength)자까지 지을 수 있어요"))
@@ -21,7 +21,8 @@ final class OnboardingPetNameViewModelTests: XCTestCase {
 
         // 상한으로 줄이면 안내가 사라지고 버튼이 열린다
         screen.name.accept(String(repeating: "가", count: PetNamePolicy.maxLength))
-        XCTAssertNil(screen.errors.last ?? nil)
+        // errors는 [String?] — 마지막 방출이 있고 그 값이 nil인지 확인
+        XCTAssertNil(try XCTUnwrap(screen.errors.last))
         XCTAssertEqual(screen.isDoneEnabled, true)
     }
 

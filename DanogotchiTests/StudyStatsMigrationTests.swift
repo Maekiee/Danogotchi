@@ -46,7 +46,8 @@ final class StudyStatsMigrationTests: XCTestCase {
             XCTAssertNil(row.questionIndex)
             XCTAssertEqual(try DefaultVocabRepository(context: migrated.viewContext).readVocab(id: copyID)?.originalTopic, "travel")
 
-            try DefaultVocabRepository(context: migrated.viewContext).updateVocab(id: copyID, word: "changed", meaning: "새 뜻", partOfSpeech: .verb)
+            try DefaultVocabRepository(context: migrated.viewContext)
+                .updateVocab(id: copyID, word: "changed", meaning: "새 뜻", partOfSpeech: .verb)
             try StudyStatsMigration.backfill(context: migrated.viewContext)
             XCTAssertEqual(try repository.fetchAllHistory(), rows)
             try DefaultVocabRepository(context: migrated.viewContext).deleteVocab(id: copyID)
@@ -171,7 +172,8 @@ final class StudyStatsMigrationTests: XCTestCase {
             )) { XCTAssertEqual($0 as? StudyStatsDataError, .invalidIdentifiers) }
             let reopened = try open(url, model: sourceModel)
             defer { try? close(reopened) }
-            XCTAssertEqual(try reopened.viewContext.count(for: NSFetchRequest<NSFetchRequestResult>(entityName: "LearningHistoryEntity")), 2)
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "LearningHistoryEntity")
+            XCTAssertEqual(try reopened.viewContext.count(for: request), 2)
         }
     }
 

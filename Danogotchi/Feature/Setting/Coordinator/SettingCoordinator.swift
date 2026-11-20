@@ -86,7 +86,7 @@ extension SettingCoordinator: SettingTabViewControllerDelegate {
     func didTapClose() {
         navigationController.dismiss(animated: true) { [weak self] in
             guard let self else { return }
-            self.delegate?.settingCoordinatorDidFinish()
+            delegate?.settingCoordinatorDidFinish()
         }
     }
     
@@ -129,7 +129,7 @@ extension SettingCoordinator: MFMailComposeViewControllerDelegate {
             switch result {
             case .sent:
                 AlertPresenter.showNotificationAlert(
-                    on: self.navigationController,
+                    on: navigationController,
                     title: String(localized: "메일 전송 성공"),
                     message: String(localized: "메일이 성공적으로 전송 되었습니다.")
                 )

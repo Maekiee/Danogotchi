@@ -9,7 +9,6 @@ struct PetDisplayInfo {
     let hearts: [PetHeartFill]
 }
 
-
 extension PetDisplayInfo {
     init(pet: Pet) {
         self.init(

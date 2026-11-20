@@ -36,6 +36,7 @@ final class VocabBookDetailViewController: BaseViewController {
     
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
     
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
 
     // MARK: UI 프로퍼티
@@ -228,13 +229,13 @@ extension VocabBookDetailViewController {
     private func configDataSource() {
         let registration = UICollectionView.CellRegistration<
             VocabBookDetailCollectionViewCell, VocabDisplayInfo> {
-                [weak self] cell, indexPath, item in
-                guard let self = self else { return }
+                [weak self] cell, _, item in
+                guard let self else { return }
                 cell.disposeBag = DisposeBag()
                 
                 cell.binding(
                     with: item,
-                    isMyBook: self.viewModel.topic == .myBook,
+                    isMyBook: viewModel.topic == .myBook,
                     isSaved: item.isSaved
                 )
 
@@ -245,7 +246,7 @@ extension VocabBookDetailViewController {
 
                 cell.onSaveVocab
                     .map { item }
-                    .bind(to: self.saveVocabRelay)
+                    .bind(to: saveVocabRelay)
                     .disposed(by: cell.disposeBag)
         }
         

@@ -3,7 +3,6 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-
 protocol LibraryViewControllerDelegate: AnyObject {
     func libraryDidTapClose()
     func libraryDidTapMore(key: VocabBookKey)
@@ -24,7 +23,7 @@ final class LibraryViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: 컬렉션 뷰
+    // MARK: 컬렉션 뷰
     private enum Section {
         case main
     }
@@ -33,9 +32,10 @@ final class LibraryViewController: BaseViewController {
 
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabBookCardInfo>
     
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
     
-    //MARK: UI 프로퍼티
+    // MARK: UI 프로퍼티
     private let navigationTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "Vocabulary"
@@ -171,7 +171,7 @@ extension LibraryViewController {
     
     private func configDataSource() {
         let registration = UICollectionView.CellRegistration
-        <VocabTopicCardCollectionViewCell, VocabBookCardInfo> { [weak self] cell, _ ,item in
+        <VocabTopicCardCollectionViewCell, VocabBookCardInfo> { [weak self] cell, _, item in
             guard let self else { return }
             cell.binding(with: item)
 

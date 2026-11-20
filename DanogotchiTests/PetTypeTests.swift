@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 final class PetTypeTests: XCTestCase {
 
     func test_시트_이름은_모든_레벨에서_번들의_실제_이미지로_로드된다() {

@@ -2,7 +2,6 @@ import UIKit
 import OSLog
 import Toast
 
-
 class BaseViewController: UIViewController, UIConfigurationLayout, ToastPresentable {
     override func viewDidLoad() {
         super.viewDidLoad()

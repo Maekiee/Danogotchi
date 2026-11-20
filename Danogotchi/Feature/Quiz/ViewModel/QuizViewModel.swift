@@ -31,7 +31,6 @@ final class QuizViewModel: BaseViewModel {
         case ended
     }
     
-    
     struct AnswerResult {
         let isCorrect: Bool
         let selectedIndex: Int
@@ -135,7 +134,6 @@ final class QuizViewModel: BaseViewModel {
         let totalQuestionCount = quizDataRelay.asDriver()
             .map { $0.words.count }
 
-
         // 단어
         let questionWord = currentQuizData
             .compactMap { $0?.0.word }
@@ -178,7 +176,7 @@ final class QuizViewModel: BaseViewModel {
         input.retrySave
             .bind(with: self) { owner, _ in
                 switch phase {
-                case .answerFailed(let word, let result, let answer):
+                case let .answerFailed(word, result, answer):
                     saveAnswer(owner: owner, word: word, result: result, answer: answer)
                 case .commitFailed:
                     commit(owner: owner)
@@ -229,7 +227,7 @@ final class QuizViewModel: BaseViewModel {
             guard index < quizData.words.count else { return nil }
 
             let word = quizData.words[index]
-            let (choices, correctIndex) = self.generateChoices(
+            let (choices, correctIndex) = generateChoices(
                 for: word, allWords: quizData.allWord)
             return (word, choices, correctIndex)
         }.share(replay: 1, scope: .whileConnected)

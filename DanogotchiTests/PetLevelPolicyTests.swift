@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 final class PetLevelPolicyTests: XCTestCase {
 
     func test_레벨별_요구_경험치는_고정_표를_따른다() {

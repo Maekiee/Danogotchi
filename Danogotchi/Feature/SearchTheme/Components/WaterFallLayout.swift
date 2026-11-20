@@ -13,7 +13,7 @@ final class WaterfallLayout: UICollectionViewLayout {
     private var cache: [UICollectionViewLayoutAttributes] = []
     private var contentHeight: CGFloat = 0
     private var contentWidth: CGFloat {
-        guard let collectionView = collectionView else { return 0 }
+        guard let collectionView else { return 0 }
         let insets = collectionView.contentInset
         return collectionView.bounds.width - (insets.left + insets.right)
     }
@@ -23,7 +23,7 @@ final class WaterfallLayout: UICollectionViewLayout {
     }
     
     override func prepare() {
-        guard let collectionView = collectionView else { return }
+        guard let collectionView else { return }
         
         // 섹션이 없으면 early return
         guard collectionView.numberOfSections > 0 else { return }
