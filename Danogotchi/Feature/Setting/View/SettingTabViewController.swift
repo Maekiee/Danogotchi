@@ -48,6 +48,7 @@ final class SettingTabViewController: BaseViewController {
         view.bounces = true
         return view
     }()
+    // swiftlint:disable:next implicitly_unwrapped_optional
     var dataSource: UICollectionViewDiffableDataSource<Section, SettingMenu>!
     
     override func viewDidLoad() {

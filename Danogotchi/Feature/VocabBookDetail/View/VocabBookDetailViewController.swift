@@ -36,6 +36,7 @@ final class VocabBookDetailViewController: BaseViewController {
     
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabDisplayInfo>
     
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
 
     // MARK: UI 프로퍼티

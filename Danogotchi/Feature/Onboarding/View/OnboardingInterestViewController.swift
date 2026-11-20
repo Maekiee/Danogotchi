@@ -23,6 +23,7 @@ final class OnboardingInterestViewController: BaseViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, OnboardingInterestItem>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, OnboardingInterestItem>
 
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
 
     // MARK: - UI 프로퍼티

@@ -26,6 +26,7 @@ final class SearchThemeViewController: BaseViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, ThemeImageViewData>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, ThemeImageViewData>
     
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
     private var imageDataList: [ThemeImageViewData] = []
     private let waterfallLayout = WaterfallLayout()

@@ -1,39 +1,166 @@
+# Xcode가 생성하는 Core Data 코드는 검사 제외
+excluded:
+  - Danogotchi/Data/Local/*+CoreDataProperties.swift
+  - Danogotchi/Data/Local/*+CoreDataClass.swift
+
 disabled_rules:
   - todo
   - nesting
-  - trailing_whitespace      # formatter 담당
   - function_parameter_count
+  - closure_parameter_position   # DiffableDataSource 클로저 매개변수를 줄마다 나누는 스타일 유지
 
 opt_in_rules:
   # 안전성
   - force_unwrapping
   - implicitly_unwrapped_optional
   - fatal_error_message
-  # UIKit 생명주기
+  - discouraged_assert
+  - unhandled_throwing_task
+  - untyped_error_in_catch
+  - identical_operands
+  - yoda_condition
+  - fallthrough
+  # 메모리·동시성
+  - weak_delegate
+  - unowned_variable_capture
+  - discarded_notification_center_observer
+  - incompatible_concurrency_annotation
+  - unneeded_escaping
+  # UIKit·SwiftUI
   - overridden_super_call
   - prohibited_super_call
+  - prohibited_interface_builder
+  - private_action
+  - private_outlet
+  - private_subject
+  - private_swiftui_state
+  - legacy_uigraphics_function
+  # 접근 제어·선언
+  - lower_acl_than_parent
+  - override_in_extension
+  - redundant_final
+  - static_operator
+  - convenience_type
+  - modifier_order
+  - enum_case_associated_values_count
+  - raw_value_for_camel_cased_codable_enum
+  - discouraged_none_name
   # 관용 표현
   - empty_count
   - empty_string
+  - empty_collection_literal
   - first_where
   - last_where
   - contains_over_first_not_nil
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_range_nil_comparison
+  - flatmap_over_map_reduce
+  - reduce_into
+  - sorted_first_last
   - toggle_bool
   - redundant_nil_coalescing
-  # 설계
-  - convenience_type
+  - redundant_type_annotation
+  - array_init
+  - joined_default_parameter
+  - explicit_init
+  - prefer_zero_over_explicit_init
+  - discouraged_object_literal
+  - shorthand_optional_binding
+  - self_binding
+  - redundant_self
+  - prefer_self_in_static_references
+  - optional_enum_case_matching
+  - pattern_matching_keywords
+  - shorthand_argument
+  # 형식
+  - closure_spacing
+  - operator_usage_whitespace
+  - period_spacing
+  - comma_inheritance
+  - literal_expression_end_indentation
+  - unneeded_parentheses_in_closure_argument
+  - local_doc_comment
+  - file_name_no_space
+  # 테스트
+  - final_test_case
+  - single_test_class
+  - test_case_accessibility
+  - empty_xctest_method
 
-# CI를 실패시킬 규칙은 error로
+# 빌드를 실패시킬 안전 규칙
 force_cast: error
 force_try: error
 force_unwrapping: error
+implicitly_unwrapped_optional: error
 
-# 끄지 않고 기준만 완화
+# 기준 조정
 line_length:
   warning: 140
   ignores_comments: true
   ignores_urls: true
 function_body_length: [60, 120]
 type_body_length: [400, 600]
+large_tuple: [3, 4]              # 이름 붙인 3요소 튜플 허용
 identifier_name:
-  excluded: [id, x, y, i, to, at]
+  excluded: [id, x, y, i, to, at, vc, vm, hp, ui, a1, a2, b1, b2, c1, c2]
+colon:
+  flexible_right_spacing: true   # 토큰 값 정렬 허용
+trailing_whitespace:
+  ignores_empty_lines: true      # Xcode가 남기는 빈 줄 들여쓰기 허용
+
+# 레이어 의존 방향 (AGENTS.md) — 위반 시 빌드 실패
+custom_rules:
+  domain_framework_import:
+    included: '/Danogotchi/Domain/'
+    regex: '^import\s+(?!Foundation\b|CoreGraphics\b)\w+'
+    message: "Domain은 Foundation·CoreGraphics만 import한다"
+    severity: error
+  ui_framework_in_domain_core:
+    included: '/Danogotchi/(Domain|Core)/'
+    regex: '^import\s+(UIKit|SwiftUI|SnapKit|ComposableArchitecture)\b'
+    message: "Domain·Core는 UI 프레임워크를 모른다"
+    severity: error
+  rx_below_presentation:
+    included: '/Danogotchi/(Domain|Data|Core|Util)/'
+    regex: '^import\s+(RxSwift|RxCocoa|RxRelay)\b'
+    message: "RxSwift는 Feature·DesignSystem에서만 — Domain·Data는 async로 노출한다"
+    severity: error
+  presentation_persistence_import:
+    included: '/Danogotchi/(Feature|DesignSystem)/'
+    regex: '^import\s+(CoreData|Firebase\w*)\b'
+    message: "Feature·DesignSystem은 CoreData·Firebase를 import하지 않는다"
+    severity: error
+  presentation_lib_below:
+    included: '/Danogotchi/(Data|Util)/'
+    regex: '^import\s+(SwiftUI|SnapKit|ComposableArchitecture|Toast)\b'
+    message: "Data·Util은 화면 라이브러리를 import하지 않는다"
+    severity: error
+  data_types_outside_data:
+    included: '/Danogotchi/(Feature|DesignSystem|Domain|Core|Util)/'
+    regex: '\b(Default\w+Repository|Firestore\w+Repository|\w+DTO|\w+ApiRouter|APIConfig)\b'
+    match_kinds: [identifier, typeidentifier]
+    message: "Data 구현 타입은 Data·App에서만 — 프로토콜로 주입한다"
+    severity: error
+  core_types_in_presentation:
+    included: '/Danogotchi/(Feature|DesignSystem|Domain|Util)/'
+    regex: '\b(CoreDataStack|ApiClient|DefaultApiClient|ImageFileStorage|NSManagedObjectContext|NSManagedObject)\b'
+    match_kinds: [identifier, typeidentifier]
+    message: "Core 타입은 Data·App에서만 쓴다"
+    severity: error
+  presentation_types_below:
+    included: '/Danogotchi/(Domain|Data|Core|Util)/'
+    regex: '\b(?!NSPersistentStore)[A-Z]\w*(ViewModel|ViewController|Coordinator|DIContainer|Reducer)\b|\bAppDependencies\b'
+    match_kinds: [identifier, typeidentifier]
+    message: "Domain·Data·Core·Util은 화면·조립 타입을 모른다"
+    severity: error
+  design_tokens_below:
+    included: '/Danogotchi/(Domain|Data|Core|Util)/'
+    regex: '\bApp(Color|Font|Spacing|Radius|Border)\b'
+    match_kinds: [identifier, typeidentifier]
+    message: "DesignSystem 토큰은 Feature·DesignSystem에서만 쓴다"
+    severity: error
+  hosting_controller_subclass:
+    regex: '\bclass\s+\w+[^{\n]*:[^{\n]*\bUIHostingController\b'
+    message: "UIHostingController 서브클래스 금지 — Coordinator가 rootView로 감싼다"
+    severity: error

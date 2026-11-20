@@ -23,6 +23,7 @@ final class EggSelectionViewController: BaseViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, EggItem>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, EggItem>
 
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
 
     // MARK: - UI 프로퍼티

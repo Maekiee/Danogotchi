@@ -33,6 +33,7 @@ final class LibraryViewController: BaseViewController {
 
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabBookCardInfo>
     
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
     
     //MARK: UI 프로퍼티

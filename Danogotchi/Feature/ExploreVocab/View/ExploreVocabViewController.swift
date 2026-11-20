@@ -29,6 +29,7 @@ final class ExploreVocabViewController: BaseViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, LoopItem>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, LoopItem>
 
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var dataSource: DataSource!
     
     private static let loopCopyCount = 3
