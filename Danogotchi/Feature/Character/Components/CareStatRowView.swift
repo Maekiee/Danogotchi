@@ -1,7 +1,6 @@
 import UIKit
 import SnapKit
 
-
 /// `[포만감] [====게이지====] [82]` 한 줄. 네 수치가 같은 구조를 쓴다.
 final class CareStatRowView: UIView {
 
@@ -37,7 +36,7 @@ final class CareStatRowView: UIView {
         [
             titleLabel,
             gaugeView,
-            valueLabel,
+            valueLabel
         ].forEach { addSubview($0) }
     }
 

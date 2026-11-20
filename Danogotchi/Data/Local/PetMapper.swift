@@ -2,12 +2,12 @@ import Foundation
 
 extension PetEntity {
     func toDomain() -> Pet {
-        guard let id = id,
-              let name = name,
+        guard let id,
+              let name,
               let typeRawValue = type,
               let type = PetType(rawValue: typeRawValue),
-              let stateUpdatedAt = stateUpdatedAt,
-              let createAt = createAt else {
+              let stateUpdatedAt,
+              let createAt else {
             preconditionFailure("PetEntity required property is nil")
         }
 

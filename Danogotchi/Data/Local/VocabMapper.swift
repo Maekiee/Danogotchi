@@ -2,12 +2,12 @@ import Foundation
 
 extension VocabEntity {
     func toDomain() -> Vocab {
-        guard let id = id,
-              let word = word,
-              let meaning = meaning,
+        guard let id,
+              let word,
+              let meaning,
               let bookTypeRawValue = bookType,
               let bookType = BookTopic(rawValue: bookTypeRawValue),
-              let createAt = createAt else { preconditionFailure("VocabEntity required property is nil") }
+              let createAt else { preconditionFailure("VocabEntity required property is nil") }
         return Vocab(
             id: id,
             word: word,

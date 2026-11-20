@@ -14,14 +14,14 @@ enum AlertPresenter {
             preferredStyle: .actionSheet
         )
         
-        if let editAction = editAction {
+        if let editAction {
             let edit = UIAlertAction(title: String(localized: "수정하기"), style: .default) { _ in
                 editAction()
             }
             alert.addAction(edit)
         }
         
-        if let deleteAction = deleteAction {
+        if let deleteAction {
             let delete = UIAlertAction(title: String(localized: "지우기"), style: .destructive) { _ in
                 deleteAction()
             }
@@ -75,4 +75,3 @@ enum AlertPresenter {
         viewController.present(alert, animated: true)
     }
 }
-

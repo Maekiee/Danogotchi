@@ -149,7 +149,7 @@ final class ExploreVocabViewController: BaseViewController {
             settingTabButton,
             calendarButton,
             startLearningButton,
-            openCharacterButton,
+            openCharacterButton
             
         ].forEach { view.addSubview($0) }
     }
@@ -215,7 +215,7 @@ extension ExploreVocabViewController {
             guard !Task.isCancelled, let self, let image else { return }
 
             UIView.transition(
-                with: self.themeBackgroundImage,
+                with: themeBackgroundImage,
                 duration: 0.3,
                 options: .transitionCrossDissolve
             ) {
@@ -300,7 +300,7 @@ extension ExploreVocabViewController {
         let cellRegistration = UICollectionView.CellRegistration<
             MainWordCardCollectionViewCell, LoopItem
         > { [weak self] cell, _, loopItem in
-            guard let self = self else { return }
+            guard let self else { return }
             let item = loopItem.info
             cell.disposeBag = DisposeBag()
 
@@ -314,16 +314,16 @@ extension ExploreVocabViewController {
 
             cell.onTouchTopIcon
                 .map { item.cardTitle }
-                .bind(to: self.speakTappedRelay)
+                .bind(to: speakTappedRelay)
                 .disposed(by: cell.disposeBag)
 
             cell.onSaveVocab
                 .map { item }
-                .bind(to: self.saveVocabRelay)
+                .bind(to: saveVocabRelay)
                 .disposed(by: cell.disposeBag)
 
             // 발음 중인 단어의 카드만 아이콘 색을 바꾼다
-            self.speakingTextRelay
+            speakingTextRelay
                 .map { $0 == item.cardTitle }
                 .distinctUntilChanged()
                 .bind(with: cell) { cell, isSpeaking in

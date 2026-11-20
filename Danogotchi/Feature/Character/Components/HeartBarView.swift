@@ -81,7 +81,6 @@ final class HeartBarView: UIView {
     }
 }
 
-
 private extension PetHeartFill {
     var widthRatio: CGFloat {
         switch self {

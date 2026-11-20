@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol RevivePetUseCase {
     /// 사망 상태에서만 HP·돌봄 수치를 복구하고 경험치 페널티를 매긴다. 펫이 없으면 nil.
     func execute() throws -> PetActionResult?

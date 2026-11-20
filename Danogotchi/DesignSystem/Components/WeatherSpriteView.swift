@@ -1,7 +1,6 @@
 import UIKit
 import OSLog
 
-
 struct WeatherSpriteSheet: Decodable {
 
     struct Clip: Decodable {
@@ -16,10 +15,10 @@ struct WeatherSpriteSheet: Decodable {
     let frameHeight: Int
     let clips: [Clip]
 
-    static let manifest: WeatherSpriteSheet? = {
+    static let manifest: Self? = {
         guard let url = Bundle.main.url(forResource: "weather", withExtension: "json"),
               let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(WeatherSpriteSheet.self, from: data)
+        return try? JSONDecoder().decode(Self.self, from: data)
     }()
 
     func clip(_ type: WeatherType) -> Clip? {

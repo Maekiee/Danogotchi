@@ -375,7 +375,8 @@ final class ThemeImagePersistenceTests: XCTestCase {
         let fixture = try Fixture(responses: [])
         defer { fixture.cleanup() }
 
-        try await fixture.repository.replace(imageData: data, crop: XCTUnwrap(PhotoThemeCrop(CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8))))
+        let crop = try XCTUnwrap(PhotoThemeCrop(CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8)))
+        try await fixture.repository.replace(imageData: data, crop: crop)
 
         let file = try XCTUnwrap(fixture.repository.storedImageFileURL())
         let stored = try Data(contentsOf: file)

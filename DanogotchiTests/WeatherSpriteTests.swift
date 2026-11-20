@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 /// 매니페스트(`weather.json`)와 시트 에셋이 어긋나면 화면에 빈 칸이 조용히 렌더된다.
 /// 실제로 한 번 어긋나 있었다 — 그 불일치를 테스트에서 잡는 게 이 파일의 목적이다.
 final class WeatherSpriteTests: XCTestCase {

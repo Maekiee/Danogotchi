@@ -117,7 +117,7 @@ final class CharacterViewController: BaseViewController {
             dangerLabel,
             makeCareButtonGrid(),
             levelUpButton,
-            reviveButton,
+            reviveButton
         ].forEach { contentStackView.addArrangedSubview($0) }
 
         #if DEBUG
@@ -196,7 +196,7 @@ final class CharacterViewController: BaseViewController {
 // MARK: - 섹션 조립
 extension CharacterViewController {
     private func makeStatusRow() -> UIView {
-        let row = UIStackView(arrangedSubviews: [heartBarView,moodLabel])
+        let row = UIStackView(arrangedSubviews: [heartBarView, moodLabel])
         row.axis = .horizontal
         row.alignment = .center
         row.distribution = .equalSpacing
@@ -334,7 +334,6 @@ extension CharacterViewController {
     private func render(_ info: PetDisplayInfo) {
         let pet = info.pet
 
-        
         petSpriteView.render(
             sheetName: pet.type.sheetName(level: pet.level),
             clip: PetSpriteClip(mood: info.mood, isDead: pet.isDead)

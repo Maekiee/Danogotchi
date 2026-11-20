@@ -21,7 +21,7 @@ enum WeatherApiRouter: Endpoint {
                 URLQueryItem(name: "lon", value: "\(lon)"),
                 URLQueryItem(name: "appid", value: APIConfig.Weather.apiKey),
                 URLQueryItem(name: "units", value: "metric"),
-                URLQueryItem(name: "lang", value: "kr"),
+                URLQueryItem(name: "lang", value: "kr")
             ]
         }
     }

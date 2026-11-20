@@ -21,11 +21,10 @@ enum AppFont {
     static var headline: UIFont { font(.semibold, size: 17) }
     static var body: UIFont { font(.regular, size: 16) }
     static var bodyEmphasis: UIFont { font(.semibold, size: 16) }
-    static var label: UIFont { font(.medium,   size: 14) }
-    static var footnote: UIFont { font(.regular,  size: 14) }
-    static var caption: UIFont { font(.regular,  size: 10) }
+    static var label: UIFont { font(.medium, size: 14) }
+    static var footnote: UIFont { font(.regular, size: 14) }
+    static var caption: UIFont { font(.regular, size: 10) }
 }
-
 
 private extension AppFont.Weight {
     var systemFallback: UIFont.Weight {

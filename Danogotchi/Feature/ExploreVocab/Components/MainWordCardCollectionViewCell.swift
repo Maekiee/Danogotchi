@@ -74,11 +74,11 @@ final class MainWordCardCollectionViewCell: UICollectionViewCell {
             isSaved: isSaved,
             showsSaveButton: showsSaveButton,
             onSpeakerTap: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 onSpeakerTapRelay.accept(())
             },
             onSaveTap: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 onSaveTapRelay.accept(())
             }
         )
@@ -91,4 +91,3 @@ final class MainWordCardCollectionViewCell: UICollectionViewCell {
         hostingController?.rootView.isSpeaking = isSpeaking
     }
 }
-

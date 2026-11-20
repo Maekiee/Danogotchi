@@ -1,7 +1,6 @@
 import UIKit
 import OSLog
 
-
 struct PetSpriteSheet: Decodable {
 
     struct Clip: Decodable {
@@ -27,10 +26,10 @@ struct PetSpriteSheet: Decodable {
     let frameHeight: Int
     let clips: [Clip]
 
-    static let manifest: PetSpriteSheet? = {
+    static let manifest: Self? = {
         guard let url = Bundle.main.url(forResource: "pet", withExtension: "json"),
               let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(PetSpriteSheet.self, from: data)
+        return try? JSONDecoder().decode(Self.self, from: data)
     }()
 
     func clip(_ clip: PetSpriteClip) -> Clip? {

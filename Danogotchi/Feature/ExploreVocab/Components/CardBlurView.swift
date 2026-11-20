@@ -94,7 +94,6 @@ struct CardBlurView: View {
     }
 }
 
-
 // MARK: 투평도 조절
 struct TransparentBlurView: UIViewRepresentable {
     var removeAllFilters: Bool = false
@@ -119,7 +118,6 @@ struct TransparentBlurView: UIViewRepresentable {
         }
     }
 }
-
 
 // MARK: - Preview
 #if DEBUG

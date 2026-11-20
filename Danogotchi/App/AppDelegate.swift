@@ -4,14 +4,13 @@ import FirebaseCore
 import FirebaseMessaging
 import IQKeyboardManagerSwift
 
-
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
-    
-    
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         
         FirebaseApp.configure()
         CrashReporter.setUserID(DefaultInstallationIDRepository().installationID)
@@ -37,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // 토큰 원문은 남기지 않는다 — 로그로 유출되면 임의 기기에 푸시를 보낼 수 있다
         Messaging.messaging().token { token, error in
-            if let error = error {
+            if let error {
                 AppLogger.push.error("FCM 토큰 조회 실패: \(String(describing: error), privacy: .public)")
                 CrashReporter.record(error)
             } else if token != nil {
@@ -45,19 +44,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        
         return true
     }
     
     // MARK: UISceneSession Lifecycle
     
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
     
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
     }
-    
     
 }
 

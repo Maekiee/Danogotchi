@@ -38,7 +38,7 @@ final class CurrentWeatherDTOTests: XCTestCase {
             (500, .rain), (531, .rain), (532, .clear),
             (600, .snow), (622, .snow), (623, .clear),
             (700, .atmosphere), (781, .atmosphere), (782, .clear),
-            (800, .clear), (801, .clouds), (804, .clouds), (805, .clear),
+            (800, .clear), (801, .clouds), (804, .clouds), (805, .clear)
         ]
         for (id, type) in expectations {
             XCTAssertEqual(WeatherType(id: id), type, "id \(id)")

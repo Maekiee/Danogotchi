@@ -6,7 +6,7 @@ import MetricKit
 final class HangDiagnosticsReporter: NSObject, MXMetricManagerSubscriber {
     static let shared = HangDiagnosticsReporter()
 
-    private override init() {
+    override private init() {
         super.init()
     }
 

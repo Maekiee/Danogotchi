@@ -1,6 +1,5 @@
 import Foundation
 
-
 /// 레벨 요구량은 표로 고정돼 있고 Lv.7이 마지막이다.
 /// 레벨업은 자동으로 처리하지 않으므로 여기서는 조건 판정까지만 한다.
 enum PetLevelPolicy {

@@ -7,7 +7,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private var studyStatsTestCoordinator: MainCoordinator?
     #endif
     
-    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
         #if DEBUG
@@ -49,4 +48,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         CrashReporter.log("scene: background")
     }
 }
-

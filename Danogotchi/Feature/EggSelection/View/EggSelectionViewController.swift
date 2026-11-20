@@ -3,7 +3,6 @@ import RxSwift
 import SnapKit
 import UIKit
 
-
 protocol EggSelectionViewControllerDelegate: AnyObject {
     func eggSelectionDidFinish(type: PetType)
 }
@@ -70,7 +69,7 @@ final class EggSelectionViewController: BaseViewController {
         [
             titleLabel,
             collectionView,
-            nextButton,
+            nextButton
         ].forEach { view.addSubview($0) }
     }
 

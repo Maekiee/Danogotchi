@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol AdjustPetLevelUseCase {
     /// 요구 경험치를 무시하고 레벨만 옮긴다. 펫이 없으면 nil.
     func execute(delta: Int) throws -> PetActionResult?

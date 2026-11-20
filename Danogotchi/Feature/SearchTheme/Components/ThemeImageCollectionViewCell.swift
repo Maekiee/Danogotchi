@@ -64,7 +64,7 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         thumbnailTask = Task { @MainActor [weak self] in
             let image = await loader.load(url: url)
             guard !Task.isCancelled, let self, let image else { return }
-            self.thumbnail.image = image
+            thumbnail.image = image
         }
     }
     
@@ -72,7 +72,7 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         [
             thumbnail,
             selectionOverlay,
-            checkmarkIcon,
+            checkmarkIcon
         ].forEach { contentView.addSubview($0) }
     }
     
@@ -100,7 +100,6 @@ final class ThemeImageCollectionViewCell: UICollectionViewCell {
         contentView.clipsToBounds = true //
 
     }
-    
     
     func setSelected(_ selected: Bool) {
         contentView.layer.borderWidth = selected ? AppBorder.thick : 0

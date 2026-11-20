@@ -1,6 +1,5 @@
 import Foundation
 
-
 struct ThemeImageViewData: Hashable {
     let id: String
     let thumbnailUrl: String
@@ -18,7 +17,7 @@ struct ThemeImageViewData: Hashable {
         hasher.combine(id)
     }
     
-    static func == (lhs: ThemeImageViewData, rhs: ThemeImageViewData) -> Bool {
+    static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
 }

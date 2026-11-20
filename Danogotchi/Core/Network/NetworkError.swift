@@ -70,7 +70,7 @@ extension NetworkError: CustomNSError {
         switch error {
         case .typeMismatch(_, let context): return ("typeMismatch", context.codingPath)
         case .valueNotFound(_, let context): return ("valueNotFound", context.codingPath)
-        case .keyNotFound(let key, let context): return ("keyNotFound", context.codingPath + [key])
+        case let .keyNotFound(key, context): return ("keyNotFound", context.codingPath + [key])
         case .dataCorrupted(let context): return ("dataCorrupted", context.codingPath)
         @unknown default: return ("unknown", [])
         }

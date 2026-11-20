@@ -1,6 +1,5 @@
 import Foundation
 
-
 /// 이름 입력의 세 가지 상태. 화면이 "아직 안 썼다"와 "너무 길다"를 구분해야
 /// 입력 전부터 빨간 문구를 띄우는 일이 없다.
 enum PetNameValidation: Equatable {

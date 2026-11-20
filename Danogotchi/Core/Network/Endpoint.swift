@@ -18,7 +18,7 @@ protocol Endpoint: Sendable {
 }
 
 extension Endpoint {
-    var headers: [String:String] { APIHeader.dict([.applicationJSON]) }
+    var headers: [String: String] { APIHeader.dict([.applicationJSON]) }
     var body: Data? { nil }
     var queryItems: [URLQueryItem]? { nil }
 }

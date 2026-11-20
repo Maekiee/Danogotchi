@@ -21,7 +21,6 @@ enum ExperiencePolicy {
     }
 }
 
-
 protocol EarnExperienceUseCase {
     func record(_ answer: QuizAnswer) throws -> Int
     func commit(earned: Int, correct: Int, total: Int) throws -> ExperienceGain

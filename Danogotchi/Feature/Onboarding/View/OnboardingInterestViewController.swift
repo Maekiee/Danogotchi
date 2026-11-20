@@ -3,7 +3,6 @@ import RxSwift
 import SnapKit
 import UIKit
 
-
 protocol OnboardingInterestViewControllerDelegate: AnyObject {
     func onboardingInterestDidFinish()
 }
@@ -86,7 +85,7 @@ final class OnboardingInterestViewController: BaseViewController {
             descriptionLabel,
             collectionView,
             nextButton,
-            loadingIndicator,
+            loadingIndicator
         ].forEach { view.addSubview($0) }
     }
 

@@ -68,13 +68,13 @@ final class SettingTabViewController: BaseViewController {
         
         if let indexPath = self.collectionView.indexPathsForSelectedItems?.first {
             if let coordinator = self.transitionCoordinator {
-                coordinator.animate(alongsideTransition: { context in
+                coordinator.animate(alongsideTransition: { _ in
                     self.collectionView.deselectItem(at: indexPath, animated: true)
-                }) { (context) in
+                }, completion: { context in
                     if context.isCancelled {
                         self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
                     }
-                }
+                })
             } else {
                 self.collectionView.deselectItem(at: indexPath, animated: animated)
             }
@@ -122,9 +122,8 @@ final class SettingTabViewController: BaseViewController {
 // MARK: DiffableDataSource
 extension SettingTabViewController {
     private func configureDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SettingMenu>
-        { [weak self] cell, indexPath, setting in
-            guard let self = self else { return }
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SettingMenu> { [weak self] cell, _, setting in
+            guard let self else { return }
             
             var contentConfiguration = UIListContentConfiguration.valueCell()
             contentConfiguration.text = "\(setting.icon)   \(setting.title)"
@@ -165,9 +164,9 @@ extension SettingTabViewController {
         }
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<CustomHeaderView>(
-            elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (headerView, elementKind, indexPath) in
-                guard let self = self else { return }
-                let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
+            elementKind: UICollectionView.elementKindSectionHeader) { [weak self] headerView, _, indexPath in
+                guard let self else { return }
+                let section = dataSource.snapshot().sectionIdentifiers[indexPath.section]
                 headerView.configure(with: section.description)
             }
         
@@ -180,7 +179,7 @@ extension SettingTabViewController {
             )
         }
         
-        dataSource.supplementaryViewProvider = { (collectionView, elementKind, indexPath) -> UICollectionReusableView? in
+        dataSource.supplementaryViewProvider = { collectionView, elementKind, indexPath -> UICollectionReusableView? in
             if elementKind == UICollectionView.elementKindSectionHeader {
                 return collectionView.dequeueConfiguredReusableSupplementary(
                     using: headerRegistration, for: indexPath)
@@ -190,8 +189,7 @@ extension SettingTabViewController {
     }
 }
 
-
-//MARK: - viewModel biding
+// MARK: - viewModel biding
 extension SettingTabViewController {
     private func bind() {
         let input = SettingTabViewModel.Input(

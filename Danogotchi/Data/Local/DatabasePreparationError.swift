@@ -16,10 +16,10 @@ struct DatabasePreparationError: Error {
     static func tagging(_ stage: Stage, _ body: () throws -> Void) throws {
         do {
             try body()
-        } catch let error as DatabasePreparationError {
+        } catch let error as Self {
             throw error
         } catch {
-            throw DatabasePreparationError(stage: stage, underlying: error)
+            throw Self(stage: stage, underlying: error)
         }
     }
 }

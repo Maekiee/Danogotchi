@@ -13,7 +13,6 @@ final class CustomProgressView: UIView {
     }()
     private let progressFillView = UIView()
     
-    
     private var progressWidthConstraint: Constraint?
     private var currentProgress: Float = 0.0
 

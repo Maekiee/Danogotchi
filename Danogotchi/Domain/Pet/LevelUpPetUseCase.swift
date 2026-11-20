@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol LevelUpPetUseCase {
     /// 정산 후 요구 경험치를 재검사하고 통과 시에만 레벨을 올린다. 펫이 없으면 nil.
     func execute() throws -> PetActionResult?

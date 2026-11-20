@@ -2,9 +2,9 @@ import Foundation
 
 extension LearningHistoryEntity {
     func toDomain() throws -> LearningHistory {
-        guard let id = id,
-              let vocabId = vocabId,
-              let createAt = createAt,
+        guard let id,
+              let vocabId,
+              let createAt,
               let wordSnapshot, let meaningSnapshot else {
             throw StudyStatsDataError.invalidRecord
         }

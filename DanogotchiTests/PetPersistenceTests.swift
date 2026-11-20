@@ -2,7 +2,6 @@ import XCTest
 import CoreData
 @testable import Danogotchi
 
-
 final class PetPersistenceTests: XCTestCase {
 
     // swiftlint:disable:next implicitly_unwrapped_optional

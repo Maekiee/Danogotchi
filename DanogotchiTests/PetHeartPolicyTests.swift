@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 final class PetHeartPolicyTests: XCTestCase {
 
     private func hearts(_ hp: Double) -> [PetHeartFill] {

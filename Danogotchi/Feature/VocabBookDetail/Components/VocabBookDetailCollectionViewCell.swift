@@ -70,7 +70,6 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
@@ -95,7 +94,7 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
             saveVocabButton,
             correctRateLabel,
             vocabTypeTag,
-            learningCountLabel,
+            learningCountLabel
         ].forEach { contentView.addSubview($0) }
     }
     
@@ -145,7 +144,6 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         layer.cornerRadius = AppRadius.radius20
     }
     
-    
     func binding(with item: CardDisplayable, isMyBook: Bool, isSaved: Bool = false) {
         moreIconButton.isHidden = !isMyBook
         saveVocabButton.isHidden = isMyBook
@@ -192,4 +190,3 @@ final class VocabBookDetailCollectionViewCell: UICollectionViewCell {
         }
     }
 }
-

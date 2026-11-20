@@ -16,4 +16,3 @@ extension Coordinator {
         childCoordinators.removeAll { $0 === coordinator }
     }
 }
-

@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 final class StudyReminderPolicyTests: XCTestCase {
 
     private let calendar = Calendar(identifier: .gregorian)

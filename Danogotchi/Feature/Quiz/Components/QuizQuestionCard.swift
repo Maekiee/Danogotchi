@@ -54,7 +54,6 @@ final class QuisQuestionCard: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     // MARK: - Setup
     private func setupHierarchy() {
         addSubview(containerView)

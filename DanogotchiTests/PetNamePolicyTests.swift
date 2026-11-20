@@ -1,7 +1,6 @@
 import XCTest
 @testable import Danogotchi
 
-
 final class PetNamePolicyTests: XCTestCase {
 
     func test_앞뒤_공백과_줄바꿈을_제거한다() {

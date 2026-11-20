@@ -9,7 +9,7 @@ extension UIView {
         if let radius {
             layer.cornerRadius = radius
         }
-        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: UIView, _: UITraitCollection) in
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: Self, _: UITraitCollection) in
             view.layer.borderColor = color.resolvedColor(with: view.traitCollection).cgColor
         }
     }

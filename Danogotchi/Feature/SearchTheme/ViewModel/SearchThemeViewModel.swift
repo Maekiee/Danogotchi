@@ -59,7 +59,6 @@ final class SearchThemeViewModel: BaseViewModel {
         let themeSavedRelay = PublishRelay<Void>()
         let isSaving = BehaviorRelay<Bool>(value: false)
 
-
         // 초기 조회, 검색, 페이지 요청을 하나의 Task로 관리한다.
         func loadPhotos(owner: SearchThemeViewModel, query: String, page: Int) {
             owner.searchTask?.cancel()
@@ -127,7 +126,7 @@ final class SearchThemeViewModel: BaseViewModel {
             }.disposed(by: disposeBag)
 
         input.selectedTheme
-            .bind(with: self) { owner, selectedThemeUrl in
+            .bind(with: self) { _, selectedThemeUrl in
                 if selectedThemeUrl != nil {
                     submitButtonIsHidden.accept(false)
                 } else {
